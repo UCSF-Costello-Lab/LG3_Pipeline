@@ -1,0 +1,31 @@
+#!/bin/bash
+### Usage: qsub -N Job_Name -v FASTQ1=/path/to/read1.fastq,FASTQ2=/path/to/read2.fastq,PREFIX=Output_Prefix_ID_Number /path/to/Align_fastq.pbs
+### Output files
+#PBS -e _Align_${PREFIX}.err
+#PBS -o _Align_${PREFIX}.out
+#PBS -l nodes=1:bigmem:ppn=12,vmem=100gb
+#PBS -m ae
+U=$(whoami)
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+echo "Started $PROG on $DATE as $U"
+echo "Using node(s): $NODES"
+TMP=/scratch/jocostello
+
+mkdir -p $TMP/${PREFIX} || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }
+
+cd $TMP/${PREFIX}
+cp $FASTQ1 $FASTQ2 .
+FQ1=$(basename $FASTQ1)
+FQ2=$(basename $FASTQ2)
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Align_fastq.sh $FQ1 $FQ2 $PREFIX
+rm $FQ1 $FQ2
+
+cd $TMP
+
+cp -r -p  $TMP/${PREFIX} /costellolab/jocostello/LG3/exomes/
+rm -rf $TMP/${PREFIX}
+
+echo "End of script!"
+date

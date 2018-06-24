@@ -1,0 +1,44 @@
+#!/bin/bash
+#PBS -e _trim_${PREFIX}.err
+#PBS -o _trim_${PREFIX}.out
+#PBS -l nodes=1:ppn=1,vmem=4gb
+#PBS -m ae
+PROG=trim_galore
+NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+echo "Started $PROG on $DATE"
+echo "Using node(s): $NODES"
+
+SCRATCH=/scratch/$USER/${PREFIX}-trim
+DIROUT=$(dirname $FASTQ1)
+FQ1=$(basename $FASTQ1)
+FQ2=$(basename $FASTQ2)
+
+mkdir -p $SCRATCH
+cd $SCRATCH
+
+cp $FASTQ1 .
+cp $FASTQ2 .
+
+/home/jocostello/shared/LG3_Pipeline/scripts/trim_galore.sh -quality=$QTY $FASTQ1 $FASTQ2 || { echo "ERROR: trim_galore FAILED"; exit 1; }
+
+rm $FQ1 $FQ2
+
+if [ $QTY -eq 20 ]; then
+	QTY=""
+fi
+
+mv ${PREFIX}_R1_val_1.fq.gz ${PREFIX}-trim${QTY}_R1.fastq.gz
+mv ${PREFIX}_R2_val_2.fq.gz ${PREFIX}-trim${QTY}_R2.fastq.gz
+mv ${PREFIX}_R1.fastq.gz_trimming_report.txt ${PREFIX}-trim${QTY}_R1.trimming_report.txt
+mv ${PREFIX}_R2.fastq.gz_trimming_report.txt ${PREFIX}-trim${QTY}_R2.trimming_report.txt
+
+cd ..
+
+cp -r -p  $SCRATCH $DIROUT
+rm -rf $SCRATCH
+
+ls -s $DIROUT/${PREFIX}-trim
+
+echo "End of PBS script!"
+date

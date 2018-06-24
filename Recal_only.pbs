@@ -1,0 +1,22 @@
+#!/bin/bash
+
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
+### Output files
+#PBS -e _Recal_${PATIENT}.err
+#PBS -o _Recal_${PATIENT}.out
+#PBS -l nodes=1:bigmem:ppn=6
+#PBS -m ae
+
+U=$(whoami)
+date
+mkdir -p /scratch/$U/${PATIENT}
+cd /scratch/$U/${PATIENT}
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh $BAMS $PATIENT $ILIST
+
+cd /scratch/$U
+cp -r -p  /scratch/$U/${PATIENT} /costellolab/jocostello/LG3/exomes_recal/
+rm /scratch/$U/${PATIENT}
+
+echo -n "End of script! "
+date

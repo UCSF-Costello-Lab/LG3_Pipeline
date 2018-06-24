@@ -1,0 +1,35 @@
+#!/bin/bash
+
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal_pass2.pbs
+### Output files
+#PBS -e _Rec2_${PATIENT}.err
+#PBS -o _Rec2_${PATIENT}.out
+#PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
+#PBS -m ae
+
+##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
+
+U=$(whoami)
+date
+mkdir -p /scratch/$U/${PATIENT}
+cd /scratch/$U/${PATIENT}
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_pass2.sh $BAMS $PATIENT $ILIST
+
+cd /scratch/$U
+
+mkdir -p /data/jocostello/LG3/exomes/${PATIENT}
+cp -p /scratch/$U/${PATIENT}/* /costellolab/jocostello/LG3/exomes_recal/${PATIENT}
+rm -rf /scratch/$U/${PATIENT}
+
+mkdir -p /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline
+cd /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
+      /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam \
+      ${PATIENT} $ILIST
+
+###/home/jocostello/shared/LG3_Pipeline/resources/All_exome_targets.extended_200bp.interval_list
+
+echo "End of script!"
+date

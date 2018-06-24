@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#PBS -e __HybSel_${PREF}.err
+#PBS -o __HybSel_${PREF}.out
+#PBS -l nodes=1:bigmem:ppn=6,vmem=16g
+#PBS -m ae
+
+/home/jocostello/shared/LG3_Pipeline/scripts/HybridSelect.sh $BAM $ILIST $PATIENT
+
+echo "End of script!"

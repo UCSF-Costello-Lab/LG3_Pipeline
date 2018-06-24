@@ -1,0 +1,31 @@
+#!/bin/bash
+#PBS -e _RecalW_${Z}.err
+#PBS -o _RecalW_${Z}.out
+#PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
+#PBS -m ea -M ivan.smirnov@ucsf.edu
+
+### Updated by Ivan
+
+U=$(whoami)
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+echo "Started $PROG on $DATE"
+echo "Using node(s): $NODES"
+
+BN=$(basename $BAMS .bam)
+Z=${BN%%.*}
+
+mkdir -p /scratch/$U/${Z}
+
+cd /scratch/$U/${Z}
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_WGS.sh $BAMS $ILIST
+
+cd /scratch/$U
+
+mkdir -p /costellolab/jocostello/LG3/exomes_recal/${Z}
+cp -p /scratch/$U/${Z}/* /costellolab/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
+rm -rf /scratch/$U/${Z}
+
+echo -n "End of PBS script! "
+date

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+### Usage: qsub -v NORMAL=LibraryName,TUMOR=LibraryName,TYPE=TUM_or_REC1,PATIENT=XX,CONFIG=/path/to/mutationconfig.cfg,INTERVAL=/path/to/Interval_List /home/jocostello/shared/LG3_Pipeline/MutDet.pbs
+### Use Config: /home/jocostello/shared/LG3_Pipeline/FilterMutations/mutationConfig.cfg
+### Use Interval: /home/jocostello/shared/LG3_Pipeline/resources/All_exome_targets.extended_200bp.interval_list 
+### Output files
+#PBS -e MutDet.${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.err
+#PBS -o MutDet.${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.out
+#PBS -N MutDet
+#PBS -l nodes=1:ppn=4,vmem=42g
+#PBS -m ae
+
+BAMDIR=/data/jocostello/LG3/exomes
+mkdir -p $WORKDIR
+cd $WORKDIR
+echo "*** Working directory: $WORKDIR"
+
+### For Recal
+BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
+BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
+
+### For Recal2
+#BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam
+#BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.bam
+
+if [ ! -f $BAMN -o ! -f $BAMT ]; then
+	echo "ERROR: BAM file(s) not found"
+	echo "Expected Normal: $BAMN"
+	echo "Expected Tumor: $BAMT"
+	exit 1
+fi
+echo -n "Starting MutDet job on "
+date
+echo "Patient = $PATIENT"
+echo "Normal = $BAMN"
+echo "Tumor = $BAMT"
+echo "Tum. Type = $TYPE"
+echo "Config = $CONFIG"
+echo "Interval = $INTERVAL"
+echo "Java Memory = $XMX"
+echo "WORKDIR=$WORKDIR"
+
+/home/jocostello/shared/LG3_Pipeline/scripts/MutDet.sh \
+	$BAMN \
+	$BAMT \
+	NOR-${NORMAL}__${TYPE}-${TUMOR} \
+	${PATIENT} \
+	${CONFIG} \
+	${INTERVAL} \
+	$XMX
+
+echo "End of PBS script!"
+date
+

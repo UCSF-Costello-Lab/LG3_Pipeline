@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#PBS -e _FQC_${PREF}.err
+#PBS -o _FQC_${PREF}.out
+#PBS -l nodes=1:bigmem:ppn=12,vmem=8gb
+#PBS -m ae
+
+if [ ! -r $FASTQ ]; then
+	echo "ERROR: can't open $FASTQ"
+	exit 1
+fi
+
+FQC=/home/ismirnov/install/fastqc/FastQC_v0.11.5/fastqc
+D=$(dirname $FASTQ)
+B=$(basename $FASTQ .fastq.gz)
+LOC=$(basename $FASTQ)
+
+SCRATCH=/scratch/$USER/$B
+mkdir -p $SCRATCH
+cd $SCRATCH
+cp $FASTQ .
+
+time $FQC -t 10 $LOC
+fastqc-summary *.zip
+
+rm -f $LOC
+cp * $D 
+rm *
+rmdir $SCRATCH
+
+#cp2 -a=gb -p=www/fastqc Z00419_R?_fastqc*
+echo "Output in $D"
+echo "End of script!"
+date
+exit 0

@@ -1,0 +1,21 @@
+#!/bin/csh
+
+### Usage: qsub -N Job_Name -v FASTQ1=/path/to/read1.fastq,FASTQ2=/path/to/read2.fastq,PREFIX=Output_Prefix_ID_Number /path/to/Align_fastq.pbs
+### Output files
+#PBS -e _Align_${PREFIX}.err
+#PBS -o _Align_${PREFIX}.out
+#PBS -l nodes=1:bigmem:ppn=12
+#PBS -m ae
+
+mkdir -p /scratch/jocostello/${PREFIX}
+
+cd /scratch/jocostello/${PREFIX}
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Align_fastq_vir.sh $FASTQ1 $FASTQ2 $PREFIX
+
+cd /scratch/jocostello
+
+cp -r -p /scratch/jocostello/${PREFIX} /costellolab/jocostello/LG3/exomes/ || { echo "ERROR copying from scratch" ;  exit 1 ; }
+rm -rf /scratch/jocostello/${PREFIX}
+
+echo "End of script!"

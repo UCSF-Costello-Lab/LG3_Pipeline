@@ -1,0 +1,20 @@
+#!/bin/csh
+
+### Usage: qsub -N Job_Name -v BAM=/path/to/data.bam,PREFIX=Output_Prefix_ID_Number /path/to/Align_bam.pbs
+### Output files
+#PBS -e Align_${PREFIX}.err
+#PBS -o Align_${PREFIX}.out
+#PBS -l nodes=1:bigmem:ppn=12
+#PBS -m ae
+
+mkdir /scratch/${PREFIX}
+
+cd /scratch/${PREFIX}
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Align_bam.sh $BAM $PREFIX
+
+cd /scratch
+
+mv /scratch/${PREFIX} /costellolab/jocostello/LG3/exomes/
+
+echo "End of script!"

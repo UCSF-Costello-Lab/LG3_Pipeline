@@ -1,0 +1,13 @@
+#!/bin/bash
+PATIENT=Patient450
+PROJ=LG3
+
+CONV=/costellolab/mazort/LG3/exome/patient_ID_conversions.txt
+PBS=/home/jocostello/shared/LG3_Pipeline/post_mutect_pindel.pbs
+
+/home/jocostello/shared/LG3_Pipeline/scripts/chk_pindel.sh $PATIENT
+/home/jocostello/shared/LG3_Pipeline/scripts/chk_mutdet.sh $PATIENT
+
+
+
+qsub -M ivan.smirnov@ucsf.edu -N ${PATIENT}_comb -v PATIENT=$PATIENT,PROJ=$PROJ,CONV=$CONV $PBS

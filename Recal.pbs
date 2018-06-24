@@ -1,0 +1,37 @@
+#!/bin/bash
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
+### Output files
+#PBS -e _Recal_${PATIENT}.err
+#PBS -o _Recal_${PATIENT}.out
+#PBS -l nodes=1:bigmem:ppn=12
+#PBS -l pmem=16gb
+#PBS -m ea -M ivan.smirnov@ucsf.edu
+
+### Updated by Ivan
+### New location of recalibrated files and germline analysis output
+
+U=$(whoami)
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+echo "Started $PROG on $DATE"
+echo "Using node(s): $NODES"
+mkdir -p /scratch/$U/${PATIENT}
+
+cd /scratch/$U/${PATIENT}
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal.sh $BAMS $PATIENT $ILIST
+
+cd /scratch/$U
+
+mkdir -p /costellolab/jocostello/LG3/exomes_recal/${PATIENT}
+cp -p /scratch/$U/${PATIENT}/* /costellolab/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
+
+mkdir -p /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline
+cd /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline
+
+/home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
+      /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
+      ${PATIENT} $ILIST
+
+echo -n "End of script! "
+date

@@ -1,0 +1,39 @@
+#!/bin/bash
+D=/costellolab/jocostello/LG3/exomes
+
+PATIENT=Patient137
+NORMAL=Z00362
+
+B1=$D/$NORMAL/$NORMAL.trim.bwa.sorted.bam
+B2=$D/Z00329/Z00329.trim.bwa.sorted.bam
+B3=$D/Z00330/Z00330.trim.bwa.sorted.bam
+B4=$D/Z00331/Z00331.trim.bwa.sorted.bam
+B5=$D/Z00332/Z00332.trim.bwa.sorted.bam
+B6=$D/Z00333/Z00333.trim.bwa.sorted.bam
+#B7=$D/Z00477/Z00477.trim.bwa.sorted.bam Low cov!
+B7=$D/Z00478/Z00478.trim.bwa.sorted.bam
+B8=$D/Z00479/Z00479.trim.bwa.sorted.bam
+B9=$D/Z00480/Z00480.trim.bwa.sorted.bam
+B10=$D/Z00481/Z00481.trim.bwa.sorted.bam
+B11=$D/Z00709/Z00709.trim.bwa.sorted.bam
+B12=$D/Z00710/Z00710.trim.bwa.sorted.bam
+B13=$D/Z00711/Z00711.trim.bwa.sorted.bam
+B14=$D/Z00712/Z00712.trim.bwa.sorted.bam
+B15=$D/Z00713/Z00713.trim.bwa.sorted.bam
+
+for B in $B1 $B2 $B3 $B4 $B5 $B6 $B7 $B8 $B9 $B10 $B11 $B12 $B13 $B14 $B15
+do
+	if [ ! -f $B ]; then
+		echo "ABORT: Can't open $B !"
+		exit 1
+	fi
+	echo "Found $B"
+	BAMS=$BAMS:$B
+done
+BAMS=${BAMS:1}
+
+MERGE=/data/jocostello/tmp/$PATIENT
+ILIST=/home/jocostello/shared/LG3_Pipeline/resources/SeqCap_EZ_Exome_v3_capture.interval_list
+PBS=/home/jocostello/shared/LG3_Pipeline/Recal_merge.pbs
+
+qsub -N Recal_$PATIENT -M ivan.smirnov@ucsf.edu -v MERGE=$MERGE,BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST $PBS

@@ -1,0 +1,80 @@
+#!/usr/bin/python
+
+####
+#This script parses a vcf file and compares tumor(s) to normal in a region
+#and looks for evidence of LOH
+####
+import sys
+
+
+def usage():
+	print "Usage:"
+	print "vcf_MAF.py vcfFile normalName"
+	sys.exit()
+
+
+def parsing(vcfFile, normalName):
+	"""This script parses a vcf file"""
+	#parsed lists
+	header = []
+	snps = []
+	hetSNPs = []
+	
+	vcf = open(vcfFile)
+	for line in vcf:
+		line = line.rstrip("\n")
+		line = line.split("\t")
+		#save the column header list
+		if (line[0][0] == "#"):
+			if (line[0] == "#CHROM"):
+				header = line
+			continue
+		snps.append(line)
+	vcf.close()
+	
+	#find column numbers
+	normal = header.index(normalName)
+	CHROM = header.index("#CHROM")
+	POS = header.index("POS")
+	ID = header.index("ID")
+	FILTER = header.index("FILTER")
+	FORMAT = header.index("FORMAT")
+
+	hetSNPs.append(["chromosome","position","MAF"])
+	for line in snps:
+		#parse the format column
+		snpformat = line[FORMAT].split(":")
+		GT = snpformat.index("GT")
+		AD = snpformat.index("AD")
+		#parse the data columns
+		normalData = line[normal].split(":")
+		#***BEGIN FILTERS***
+		if (normalData[GT] != "0/1"):
+			continue
+		if (line[FILTER] != "PASS"):
+			continue
+		if (line[ID][0:2] != "rs"):
+			continue
+		#***END FILTERS***
+		nRef = normalData[AD].split(",")[0]
+		nAlt = normalData[AD].split(",")[1]
+		nTotal = int(nAlt) + int(nRef)
+		if (nTotal < 10):
+			continue
+		if (int(nAlt) <= int(nRef)):
+			nMAF = 100 * float(int(nAlt)) / nTotal
+		else:
+			nMAF = 100 * float(int(nRef)) / nTotal
+		hetSNPs.append([line[CHROM], line[POS], str(nMAF)])
+
+	#print the output
+	for line in hetSNPs:
+		print "\t".join(line)
+	return()
+
+
+if (len(sys.argv) != 3):
+	usage()
+else:
+	parsing(sys.argv[1], sys.argv[2])
+
