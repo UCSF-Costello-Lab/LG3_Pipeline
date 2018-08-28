@@ -4,7 +4,7 @@ patient=$1
 conv=$2
 project=$3
 XMX=Xmx32g
-WORKDIR=/costellolab/jocostello/${project}/mutations/${patient}_mutect_wgs
+WORKDIR=/costellolab/data1/jocostello/${project}/mutations/${patient}_mutect_wgs
 
 if [ $# -ne 3 ]; then
 	echo "ERROR: please specify patient, conversion file and project!"

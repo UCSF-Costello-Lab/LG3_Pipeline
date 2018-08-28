@@ -15,7 +15,7 @@ echo -e "Checking Pindel output for project ${project}"
 
 for patient in $@
 do
-	WORKDIR=/costellolab/jocostello/${project}/pindel/${patient}_pindel
+	WORKDIR=/costellolab/data1/jocostello/${project}/pindel/${patient}_pindel
 	## Expected output:
 	OUT=$WORKDIR/${patient}.indels.filtered.anno.txt
 	if [ -s "$OUT" ]; then

@@ -3,7 +3,7 @@
 PATIENT=Patient450
 PROJ=LG3
 
-CONV=/costellolab/mazort/LG3/exome/patient_ID_conversions.txt
+CONV=/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt
 
 echo -n "Submitting jobs for $PATIENT "
 date

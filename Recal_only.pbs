@@ -15,7 +15,7 @@ cd /scratch/$U/${PATIENT}
 /home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh $BAMS $PATIENT $ILIST
 
 cd /scratch/$U
-cp -r -p  /scratch/$U/${PATIENT} /costellolab/jocostello/LG3/exomes_recal/
+cp -r -p  /scratch/$U/${PATIENT} /costellolab/data1/jocostello/LG3/exomes_recal/
 rm /scratch/$U/${PATIENT}
 
 echo -n "End of script! "

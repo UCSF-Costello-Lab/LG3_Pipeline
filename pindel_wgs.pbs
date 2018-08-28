@@ -13,7 +13,7 @@ echo "Project: " ${PROJ}
 echo "Conversion File: " ${CONV}
 echo "----------------------------------"
 
-WDIR=/costellolab/jocostello/${PROJ}/pindel
+WDIR=/costellolab/data1/jocostello/${PROJ}/pindel
 BIN=/home/jocostello/shared/LG3_Pipeline/scripts
 
 PINDEL=/home/jocostello/shared/LG3_Pipeline/tools/pindel024t/pindel

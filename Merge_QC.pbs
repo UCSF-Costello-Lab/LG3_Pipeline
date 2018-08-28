@@ -15,8 +15,8 @@ cd /scratch/$U/${PREFIX}
 /home/jocostello/shared/LG3_Pipeline/scripts/Merge_QC.sh $BAMS $PREFIX $ILIST
 
 cd /scratch/$U
-mkdir -p /costellolab/jocostello/LG3/exomes/${PREFIX}
-cp -p /scratch/$U/${PREFIX}/* /costellolab/jocostello/LG3/exomes/${PREFIX}
+mkdir -p /costellolab/data1/jocostello/LG3/exomes/${PREFIX}
+cp -p /scratch/$U/${PREFIX}/* /costellolab/data1/jocostello/LG3/exomes/${PREFIX}
 rm -rf /scratch/$U/${PREFIX}
 
 echo "End of script!"

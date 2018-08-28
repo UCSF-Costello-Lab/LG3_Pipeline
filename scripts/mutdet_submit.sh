@@ -3,7 +3,7 @@
 patient=$1
 conv=$2
 project=$3
-WORKDIR=/costellolab/jocostello/${project}/mutations/${patient}_mutect
+WORKDIR=/costellolab/data1/jocostello/${project}/mutations/${patient}_mutect
 XMX=Xmx8g
 
 if [ $# -ne 3 ]; then

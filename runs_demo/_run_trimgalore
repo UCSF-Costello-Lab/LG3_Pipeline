@@ -1,24 +1,12 @@
 #!/bin/bash
 ## Location of links to FASTQ.gz files
-RAW=/costellolab/ismirnov/tmp
+RAW=/costellolab/data1/ismirnov/tmp
 PBS=/home/jocostello/shared/LG3_Pipeline/trim_galore.pbs
 
 echo "ETA ~4h"
 
 QTY=20
 
-### Batch17 515 - 562
-### Batch18 563 - 598; 388 - 396
-### Batch19 599 - 653
-### Batch20 654 - 666
-### Batch21 667 - 713
-
-#for N in `seq 704 708`
-#for N in `seq 709 713`
-#for N in `seq 667 670`
-#for N in 329 330 331 332 333 362 478 479 480 481
-#for N in `seq 671 680`
-#for N in `seq 681 690`
 for N in `seq 701 713`
 do
    Z=Z00${N}

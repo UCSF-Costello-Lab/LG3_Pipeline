@@ -5,7 +5,7 @@ NORMAL=Z00316
 ILIST=/home/jocostello/shared/LG3_Pipeline/resources/SeqCap_EZ_Exome_v3_capture.interval_list
 PBS=/home/jocostello/shared/LG3_Pipeline/Germline.pbs
 
-BAM=/costellolab/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
+BAM=/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
 if [ ! -f $BAM ]; then
 	echo "ERROR: Can't open $BAM !"
 	exit 1

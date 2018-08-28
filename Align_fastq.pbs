@@ -24,7 +24,7 @@ rm $FQ1 $FQ2
 
 cd $TMP
 
-cp -r -p  $TMP/${PREFIX} /costellolab/jocostello/LG3/exomes/
+cp -r -p  $TMP/${PREFIX} /costellolab/data1/jocostello/LG3/exomes/
 rm -rf $TMP/${PREFIX}
 
 echo "End of script!"

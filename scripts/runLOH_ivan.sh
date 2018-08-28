@@ -15,7 +15,7 @@ project=$2
 conversionfile=$3
 echo "WARNING! Using conversion file $conversionfile !!!"
 
-MAF=/costellolab/jocostello/${project}/MAF
+MAF=/costellolab/data1/jocostello/${project}/MAF
 BIN=/home/jocostello/shared/LG3_Pipeline/scripts
 
 mkdir -p $MAF/${patient}_MAF

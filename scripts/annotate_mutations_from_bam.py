@@ -23,7 +23,7 @@ def get_samples_from_patient(mutfile, conversionfile, patient_ID, projectname):
     patient_ID_folder = patient_ID.split("norm")[0]
   else:
     patient_ID_folder = patient_ID
-  fullpath = "/costellolab/jocostello/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
+  fullpath = "/costellolab/data1/jocostello/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
   #fileheader = ".bwa.realigned.rmDups"
   fileheader = ".bwa.realigned.rmDups.recal"
   if not os.path.isfile(fullpath + testID + fileheader + ".bam"):

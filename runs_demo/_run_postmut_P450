@@ -2,7 +2,7 @@
 PATIENT=Patient450
 PROJ=LG3
 
-CONV=/costellolab/mazort/LG3/exome/patient_ID_conversions.txt
+CONV=/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt
 PBS=/home/jocostello/shared/LG3_Pipeline/post_mutect_pindel.pbs
 
 /home/jocostello/shared/LG3_Pipeline/scripts/chk_pindel.sh $PATIENT

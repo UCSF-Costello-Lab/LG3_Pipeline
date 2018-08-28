@@ -2,7 +2,7 @@
 ILIST=/home/jocostello/shared/LG3_Pipeline/resources/SeqCap_EZ_Exome_v3_capture.interval_list
 PBS=/home/jocostello/shared/LG3_Pipeline/Recal_bigmem.pbs
 
-D=/costellolab/jocostello/LG3/exomes
+D=/costellolab/data1/jocostello/LG3/exomes
 
 PATIENT=Patient450
 NORMAL=Z00667

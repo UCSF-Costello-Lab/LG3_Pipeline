@@ -15,6 +15,6 @@ cd /scratch/${PREFIX}
 
 cd /scratch
 
-mv /scratch/${PREFIX} /costellolab/jocostello/LG3/exomes/
+mv /scratch/${PREFIX} /costellolab/data1/jocostello/LG3/exomes/
 
 echo "End of script!"

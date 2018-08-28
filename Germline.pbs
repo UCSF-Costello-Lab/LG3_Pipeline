@@ -11,15 +11,15 @@ NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output
 
-mkdir -p /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline 
-cd /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline
+mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline 
+cd /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
+      /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
       ${PATIENT} \
       $ILIST
 

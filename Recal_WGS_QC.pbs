@@ -23,8 +23,8 @@ echo "Using node(s): $NODES"
 
 #cd /scratch/$U
 
-#mkdir -p /costellolab/jocostello/LG3/exomes_recal/${Z}
-#cp -p /scratch/$U/${Z}/* /costellolab/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
+#mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${Z}
+#cp -p /scratch/$U/${Z}/* /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
 #rm -rf /scratch/$U/${Z}
 
 echo -n "End of PBS script! "

@@ -15,7 +15,7 @@ cd /scratch/jocostello/${PREFIX}
 
 cd /scratch/jocostello
 
-cp -r -p /scratch/jocostello/${PREFIX} /costellolab/jocostello/LG3/exomes/ || { echo "ERROR copying from scratch" ;  exit 1 ; }
+cp -r -p /scratch/jocostello/${PREFIX} /costellolab/data1/jocostello/LG3/exomes/ || { echo "ERROR copying from scratch" ;  exit 1 ; }
 rm -rf /scratch/jocostello/${PREFIX}
 
 echo "End of script!"

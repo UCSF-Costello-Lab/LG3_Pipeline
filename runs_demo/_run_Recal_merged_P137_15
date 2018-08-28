@@ -1,5 +1,5 @@
 #!/bin/bash
-D=/costellolab/jocostello/LG3/exomes
+D=/costellolab/data1/jocostello/LG3/exomes
 
 PATIENT=Patient137
 NORMAL=Z00362

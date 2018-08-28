@@ -16,7 +16,7 @@ def runMAF(patient_ID, projectname, conversionfile):
   tumors = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID and x.strip().split('\t')[col_st] != "Normal", data)
   normal = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID and x.strip().split('\t')[col_st] == "Normal", data)
   
-  UGfile = "/costellolab/jocostello/LG3/exomes_recal/" + patient_ID + "/germline/" + patient_ID + ".UG.snps.vcf"
+  UGfile = "/costellolab/data1/jocostello/LG3/exomes_recal/" + patient_ID + "/germline/" + patient_ID + ".UG.snps.vcf"
 
   ## generate MAF file for normal
   if len(normal) != 0:

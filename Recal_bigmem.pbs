@@ -25,14 +25,14 @@ cd /scratch/$U/${PATIENT}
 
 cd /scratch/$U
 
-mkdir -p /costellolab/jocostello/LG3/exomes_recal/${PATIENT}
-cp -p /scratch/$U/${PATIENT}/* /costellolab/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
+mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}
+cp -p /scratch/$U/${PATIENT}/* /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
 
-mkdir -p /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline
-cd /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/germline
+mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
+cd /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      /costellolab/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
+      /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
       ${PATIENT} $ILIST
 
 echo -n "End of script! "

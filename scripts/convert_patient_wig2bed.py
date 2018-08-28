@@ -21,7 +21,7 @@ def convert_patient_wig2bed(patient_ID, projectname, conversionfile):
   normalA0 = normal[0].strip().split('\t')[col_lib]
 
   ## find all mutation files for this patient
-  loc = "/costellolab/jocostello/" + projectname + "/mutations/" + patient_ID + "_mutect/"
+  loc = "/costellolab/data1/jocostello/" + projectname + "/mutations/" + patient_ID + "_mutect/"
   print loc
   #loc = "/home/jocostello/" + projectname + "/exomes/Mutations2/"
   allnot = glob.glob(loc + "NOR-" + normalA0 + "__*.snvs.coverage.mutect.wig")

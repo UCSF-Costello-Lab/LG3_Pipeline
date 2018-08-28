@@ -22,7 +22,7 @@ def combine_snvs(patient_ID, projectname, conversionfile, outfile):
   #normalA0="NA"
 
   ## find all mutation files for this patient
-  loc = "/costellolab/jocostello/" + projectname + "/mutations/" + patient_ID + "_mutect/"
+  loc = "/costellolab/data1/jocostello/" + projectname + "/mutations/" + patient_ID + "_mutect/"
   allRNA = glob.glob(loc + patient_ID + ".NOR-" + normalA0 + "__*.annotated.withRNA.mutations")
   print allRNA
   allnot = glob.glob(loc + patient_ID + ".NOR-" + normalA0 + "__*.annotated.mutations")

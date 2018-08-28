@@ -3,8 +3,7 @@ pat <- args[1]
 proj <- args[2]
 conv <- args[3]
 
-setwd(paste0("/costellolab/jocostello/",proj,"/MAF/"))
-#setwd("/costellolab/jocostello/LG3/MAF/")
+setwd(paste0("/costellolab/data1/jocostello/",proj,"/MAF/"))
 
 source("/home/jocostello/shared/LG3_Pipeline/scripts/MAFplot_version3.R")
 

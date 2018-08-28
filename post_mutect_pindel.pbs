@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=/costellolab/jocostello/LG3/exome/patient_ID_conversions.txt /path/to/pindel_all.pbs
+### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=/costellolab/data1/jocostello/LG3/exome/patient_ID_conversions.txt /path/to/pindel_all.pbs
 #PBS -N ${PATIENT}.comb
 #PBS -e ${PATIENT}.muts.err
 #PBS -o ${PATIENT}.muts.out
@@ -21,8 +21,8 @@ echo "----------------------------------"
 
 BIN=/home/jocostello/shared/LG3_Pipeline/scripts
 
-mkdir -p /costellolab/jocostello/${PROJ}/MutInDel
-cd /costellolab/jocostello/${PROJ}/MutInDel || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+mkdir -p /costellolab/data1/jocostello/${PROJ}/MutInDel
+cd /costellolab/data1/jocostello/${PROJ}/MutInDel || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 
 echo -e "\n************ Cat all SNV files per patient"
 $BIN/combine_snvs.sh ${PATIENT} ${PROJ} ${CONV} || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
@@ -41,7 +41,7 @@ echo -e "\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mu
 OK $LINENO
 
 echo -e "\n************ Combine indels and snvs into one file"
-/opt/R/R-latest/bin/Rscript $BIN/combine_snvs_pindel.R ${PATIENT}.snvs.anno.pat.filt.txt /costellolab/jocostello/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt ${PATIENT}.snvs.indels.filtered.txt || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+/opt/R/R-latest/bin/Rscript $BIN/combine_snvs_pindel.R ${PATIENT}.snvs.anno.pat.filt.txt /costellolab/data1/jocostello/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt ${PATIENT}.snvs.indels.filtered.txt || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK $LINENO
 
 echo -e "\n************ Calculate mutation overlaps"

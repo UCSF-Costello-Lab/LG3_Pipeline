@@ -5,9 +5,9 @@ YEL='\033[0;33m'
 NOC='\033[0m'
 
 patient=$1
-conv=/costellolab/mazort/LG3/exome/patient_ID_conversions.txt
+conv=/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt
 project=LG3
-WORKDIR=/costellolab/jocostello/${project}/mutations/${patient}_mutect
+WORKDIR=/costellolab/data1/jocostello/${project}/mutations/${patient}_mutect
 
 if [ $# -eq 0 ]; then
 	echo "ERROR: please specify patient!"

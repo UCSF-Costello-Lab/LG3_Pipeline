@@ -12,7 +12,7 @@
 ### https://broadinstitute.github.io/picard/picard-metric-definitions.html#HsMetrics
 
 source /home/jocostello/.bashrc
-DIR=/costellolab/jocostello/LG3/exomes_recal
+DIR=/costellolab/data1/jocostello/LG3/exomes_recal
 
 JAVA=/home/jocostello/shared/LG3_Pipeline/tools/java/jre1.6.0_27/bin/java
 #Input variables
