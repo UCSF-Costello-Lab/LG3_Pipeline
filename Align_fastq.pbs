@@ -7,7 +7,7 @@
 #PBS -m ae
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE as $U"
 echo "Using node(s): $NODES"
 TMP=/scratch/jocostello

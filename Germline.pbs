@@ -6,7 +6,7 @@
 #PBS -o _Germline_${PATIENT}.out
 #PBS -l nodes=1:bigmem:ppn=8,vmem=200gb
 #PBS -m ae
-NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output

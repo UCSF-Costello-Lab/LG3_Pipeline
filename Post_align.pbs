@@ -5,7 +5,7 @@
 #PBS -m ae
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started Post Alignment on $DATE as $U"
 echo -e "Steps: \n\tverify mate; \n\tsort and enforce read group; \n\tconvert to BAM; \n\tindex; \n\tcalculate flag stats"
 echo "Using node(s): $NODES"

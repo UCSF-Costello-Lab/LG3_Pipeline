@@ -4,7 +4,7 @@
 #PBS -l nodes=1:ppn=1,vmem=4gb
 #PBS -m ae
 PROG=trim_galore
-NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"

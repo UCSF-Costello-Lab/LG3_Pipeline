@@ -14,7 +14,7 @@ Rscript --version
 
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 mkdir -p "/scratch/$U/${PATIENT}"
