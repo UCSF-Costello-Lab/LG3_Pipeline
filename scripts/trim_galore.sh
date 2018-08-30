@@ -15,9 +15,9 @@ fi
 #### Parse optional args
 while [ -n "$1" ]; do
 case $1 in
-    -q*=*) QTY=`echo "$1" | sed -e 's/^[^=]*=//'`;shift 1;;
-    -l*=*) LENGTH=`echo "$1" | sed -e 's/^[^=]*=//'`;shift 1;;
-    -s*=*) STRINGENCY=`echo "$1" | sed -e 's/^[^=]*=//'`;shift 1;;
+    -q*=*) QTY=${1#*=};shift 1;;
+    -l*=*) LEN=${1#*=};shift 1;;
+    -s*=*) STRINGENCY=${1#*=};shift 1;;
     -*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -26,13 +26,13 @@ done
 FQ1=$1
 FQ2=$2
 
-if [ ! -r $FQ1 -o ! -r $FQ2 ]; then
+if [ ! -r "$FQ1" ] || [ ! -r "$FQ2" ]; then
 	echo "[trim_galore] ERROR: Can't open $FQ1 or $FQ2 !"
 	exit 1
 fi
 
 ### Default: --length 20 --quality 20 --stringency 1
 ### --fastqc
-time $TG --paired --quality $QTY --length 20 --stringency 1 --path_to_cutadapt $CUTADAPT --illumina $FQ1 $FQ2 || { echo "[trim_galore] ERROR: trim_galore FAILED"; exit 1; }
+time $TG --paired --quality "$QTY" --length "$LEN" --stringency 1 --path_to_cutadapt $CUTADAPT --illumina "$FQ1" "$FQ2" || { echo "[trim_galore] ERROR: trim_galore FAILED"; exit 1; }
 
 exit 0
