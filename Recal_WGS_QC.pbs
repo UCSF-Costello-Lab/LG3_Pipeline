@@ -8,7 +8,7 @@
 
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
@@ -19,7 +19,7 @@ echo "Using node(s): $NODES"
 
 #cd /scratch/$U/${Z}
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_WGS_QC.sh $BAMS $ILIST
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_WGS_QC.sh "$BAMS" "$ILIST"
 
 #cd /scratch/$U
 

@@ -6,22 +6,22 @@
 #PBS -o _Germline_${PATIENT}.out
 #PBS -l nodes=1:bigmem:ppn=8,vmem=200gb
 #PBS -m ae
-NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
 
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output
 
-mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline 
-cd /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
+cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
-      ${PATIENT} \
-      $ILIST
+      "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      "${PATIENT}" \
+      "$ILIST"
 
 echo -n "End of script! "
 date

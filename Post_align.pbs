@@ -5,33 +5,33 @@
 #PBS -m ae
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
 echo "Started Post Alignment on $DATE as $U"
 echo -e "Steps: \n\tverify mate; \n\tsort and enforce read group; \n\tconvert to BAM; \n\tindex; \n\tcalculate flag stats"
 echo "Using node(s): $NODES"
 TMP=/scratch/jocostello
 
-if [ ! -f $SAM ]; then
+if [ ! -f "$SAM" ]; then
    echo "ERROR: Can't open $SAM! STOP"
    exit 1
 fi
-B=$(basename $SAM .sam)
+B=$(basename "$SAM" .sam)
 if [ "$PREFIX" != "${B%%.*}" ]; then
 	echo "ERROR: Prefix mismatch!"
 	exit 1;
 fi
 
-mkdir -p $TMP/${PREFIX} || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }
+mkdir -p "$TMP/${PREFIX}" || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }
 
-cd $TMP/${PREFIX}
-cp $SAM ./${PREFIX}.bwa.sam
+cd "$TMP/${PREFIX}"
+cp "$SAM" "./${PREFIX}.bwa.sam"
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Post_align.sh $PREFIX
+/home/jocostello/shared/LG3_Pipeline/scripts/Post_align.sh "$PREFIX"
 
-cd $TMP
+cd "$TMP"
 
-cp -r -p  $TMP/${PREFIX} /costellolab/data1/jocostello/LG3/exomes/ || { echo "Can't copy directory $TMP/${PREFIX}"; exit 1; }
-rm -rf $TMP/${PREFIX}
+cp -r -p  "$TMP/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/ || { echo "Can't copy directory $TMP/${PREFIX}"; exit 1; }
+rm -rf "$TMP/${PREFIX}"
 
 echo "End of script!"
 date

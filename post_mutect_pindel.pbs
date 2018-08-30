@@ -7,54 +7,54 @@
 #PBS -l nodes=1:ppn=1,vmem=32gb
 #PBS -m ae
 
-PROG=$(basename $0)
+PROG=$(basename "$0")
 OK() {
         echo "OK: line $1 in $PROG"
 }
 
 echo -n "Mutation filtering & combining "
 date
-echo "Patient: " ${PATIENT}
-echo "Project: " ${PROJ}
-echo "Conversion file: " ${CONV}
+echo "Patient: ${PATIENT}"
+echo "Project: ${PROJ}"
+echo "Conversion file: ${CONV}"
 echo "----------------------------------"
 
 BIN=/home/jocostello/shared/LG3_Pipeline/scripts
 
-mkdir -p /costellolab/data1/jocostello/${PROJ}/MutInDel
-cd /costellolab/data1/jocostello/${PROJ}/MutInDel || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+mkdir -p "/costellolab/data1/jocostello/${PROJ}/MutInDel"
+cd "/costellolab/data1/jocostello/${PROJ}/MutInDel" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 
 echo -e "\n************ Cat all SNV files per patient"
-$BIN/combine_snvs.sh ${PATIENT} ${PROJ} ${CONV} || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+$BIN/combine_snvs.sh "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -e "\n************ Annotate mutations from aligned bam files"
-$BIN/annotate_mutations_from_bam.sh ${CONV} ${PATIENT} ${PROJ} || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+$BIN/annotate_mutations_from_bam.sh "${CONV}" "${PATIENT}" "${PROJ}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -e "\n************ Convert library IDs to patient IDs"
-$BIN/libID_to_patientID.sh ${CONV} ${PATIENT} ${PATIENT}.snvs.anno.txt  ${PATIENT}.snvs.anno.pat.txt || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+$BIN/libID_to_patientID.sh "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -e "\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
-/opt/R/R-latest/bin/Rscript $BIN/MutDet_filter.R ${PATIENT}.snvs.anno.pat.txt ${PATIENT}.snvs.anno.pat.filt.txt || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+/opt/R/R-latest/bin/Rscript "$BIN/MutDet_filter.R" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -e "\n************ Combine indels and snvs into one file"
-/opt/R/R-latest/bin/Rscript $BIN/combine_snvs_pindel.R ${PATIENT}.snvs.anno.pat.filt.txt /costellolab/data1/jocostello/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt ${PATIENT}.snvs.indels.filtered.txt || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+/opt/R/R-latest/bin/Rscript "$BIN/combine_snvs_pindel.R" "${PATIENT}.snvs.anno.pat.filt.txt" "/costellolab/data1/jocostello/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -e "\n************ Calculate mutation overlaps"
-$BIN/mutation_overlaps.sh ${PATIENT}.snvs.indels.filtered.txt ${PATIENT} ${PATIENT}.snvs.indels.filtered.overlaps.txt || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+$BIN/mutation_overlaps.sh "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT} ${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -e "\n************ Annotate with shared coverage"
-$BIN/mutect_coverage_intersection_mutations.sh ${PATIENT} ${PROJ} ${CONV} || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+$BIN/mutect_coverage_intersection_mutations.sh "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -e "\n************ Generate MAF files & LOH plots"
-$BIN/runLOH_ivan.sh ${PATIENT} ${PROJ} ${CONV} || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
-OK $LINENO
+$BIN/runLOH_ivan.sh "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+OK "$LINENO"
 
 echo -ne "\n************ End of script "
 date

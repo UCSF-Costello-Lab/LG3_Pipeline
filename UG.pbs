@@ -5,7 +5,7 @@
 #PBS -o _UG_${PAT}.out
 #PBS -l nodes=1:bigmem:ppn=12
 #PBS -m ae
-NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
@@ -14,9 +14,9 @@ echo "BAMS=$BAMS"
 echo "OUT=$OUT"
 
 /home/jocostello/shared/LG3_Pipeline/scripts/UG.sh \
-      -bams=$BAMS \
-      -out=${OUT} \
-      -list=$ILIST
+      -bams="$BAMS" \
+      -out="${OUT}" \
+      -list="$ILIST"
 
 echo -n "End of script! "
 date

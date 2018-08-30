@@ -10,9 +10,9 @@
 #module load CBC cbc-shared
 
 echo "PINDEL"
-echo "Patient: " ${SAMPLE}
-echo "Project: " ${PROJ}
-echo "Conversion File: " ${CONV}
+echo "Patient: ${SAMPLE}"
+echo "Project: ${PROJ}"
+echo "Conversion File: ${CONV}"
 echo "----------------------------------"
 
 WDIR=/costellolab/data1/jocostello/${PROJ}/pindel
@@ -27,42 +27,42 @@ TARGET=/home/jocostello/shared/LG3_Pipeline/resources/All_exome_targets.extended
 ## setup pindel cfg file
 date
 echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
-cd $WDIR
-$BIN/pindel_setup.sh ${SAMPLE} ${PROJ} ${CONV}  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+cd "$WDIR"
+$BIN/pindel_setup.sh "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
 SCRATCH=/scratch/$USER/${SAMPLE}_pindel
-mkdir -p $SCRATCH
-cd $SCRATCH
+mkdir -p "$SCRATCH"
+cd "$SCRATCH"
 
 ## run pindel
 echo -e "\n========= [Pindel] Run pindel"
-$PINDEL -f $REF -i ${WDIR}/${SAMPLE}.pindel.cfg -c ALL -o ${SAMPLE}.pindel -r FALSE -t FALSE -l FALSE -k FALSE -T 6  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T 6  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## move from scratch to project folder
-cd $WDIR
-cp -r $SCRATCH ./
-rm -rf $SCRATCH
+cd "$WDIR"
+cp -r "$SCRATCH" ./
+rm -rf "$SCRATCH"
 
 ## convert to vcf
 echo -e "\n========= [Pindel] Convert pindel to vcf"
-$PINDEL2VCF -P ${SAMPLE}_pindel/${SAMPLE}.pindel -r $REF -R hg19 -d 20121031 -v ${SAMPLE}_pindel/${SAMPLE}.pindel.vcf -G  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$PINDEL2VCF -P "${SAMPLE}_pindel/${SAMPLE}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf" -G  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## convert to tdt
 echo -e "\n========= [Pindel] Convert vcf to tdt"
-$BIN/vcf2tdt.py ${SAMPLE}_pindel/${SAMPLE}.pindel.vcf  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$BIN/vcf2tdt.py "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
-cd ${SAMPLE}_pindel
-mv ${SAMPLE}.pindel.vcf.tdt ${SAMPLE}.indels
+cd "${SAMPLE}_pindel"
+mv "${SAMPLE}.pindel.vcf.tdt ${SAMPLE}.indels"
 
 ## filter pindel data
 echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
-$BIN/pindel_filter.sh ${SAMPLE}.indels ${PROJ} $TARGET  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$BIN/pindel_filter.sh "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
-$BIN/pindel_annotate.sh ${SAMPLE}.indels ${PROJ}  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$BIN/pindel_annotate.sh "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 echo -ne "\nEnd of script $0 on "
 date

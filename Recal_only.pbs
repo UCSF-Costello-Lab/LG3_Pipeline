@@ -9,14 +9,14 @@
 
 U=$(whoami)
 date
-mkdir -p /scratch/$U/${PATIENT}
-cd /scratch/$U/${PATIENT}
+mkdir -p "/scratch/$U/${PATIENT}"
+cd "/scratch/$U/${PATIENT}"
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh $BAMS $PATIENT $ILIST
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh "$BAMS" "$PATIENT" "$ILIST"
 
-cd /scratch/$U
-cp -r -p  /scratch/$U/${PATIENT} /costellolab/data1/jocostello/LG3/exomes_recal/
-rm /scratch/$U/${PATIENT}
+cd "/scratch/$U"
+cp -r -p  "/scratch/$U/${PATIENT}" /costellolab/data1/jocostello/LG3/exomes_recal/
+rm "/scratch/$U/${PATIENT}"
 
 echo -n "End of script! "
 date

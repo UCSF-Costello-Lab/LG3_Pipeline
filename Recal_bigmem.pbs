@@ -14,26 +14,26 @@ Rscript --version
 
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
-mkdir -p /scratch/$U/${PATIENT}
+mkdir -p "/scratch/$U/${PATIENT}"
 
-cd /scratch/$U/${PATIENT}
+cd "/scratch/$U/${PATIENT}"
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh $BAMS $PATIENT $ILIST
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh "$BAMS" "$PATIENT" "$ILIST"
 
-cd /scratch/$U
+cd "/scratch/$U"
 
-mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}
-cp -p /scratch/$U/${PATIENT}/* /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
+cp -p "/scratch/$U/${PATIENT}"/* "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}" || { echo "ERROR cp!" ; exit 1 ; }
 
-mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
-cd /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
+cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
-      ${PATIENT} $ILIST
+      "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      "${PATIENT}" "$ILIST"
 
 echo -n "End of script! "
 date
