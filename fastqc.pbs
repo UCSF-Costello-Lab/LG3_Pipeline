@@ -21,11 +21,11 @@ cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; 
 cp "$FASTQ" .
 
 time "$FQC" -t 10 "$LOC"
-fastqc-summary *.zip
+fastqc-summary ./*.zip
 
 rm -f "$LOC"
-cp * "$D"
-rm *
+cp -- * "$D"
+rm -- *
 rmdir "$SCRATCH"
 
 #cp2 -a=gb -p=www/fastqc Z00419_R?_fastqc*
