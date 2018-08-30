@@ -27,20 +27,20 @@ TARGET=/home/jocostello/shared/LG3_Pipeline/resources/All_exome_targets.extended
 ## setup pindel cfg file
 date
 echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
-cd "$WDIR"
+cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 $BIN/pindel_setup.sh "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
 SCRATCH=/scratch/$USER/${SAMPLE}_pindel
 mkdir -p "$SCRATCH"
-cd "$SCRATCH"
+cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
 ## run pindel
 echo -e "\n========= [Pindel] Run pindel"
 $PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T 6  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## move from scratch to project folder
-cd "$WDIR"
+cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 cp -r "$SCRATCH" ./
 rm -rf "$SCRATCH"
 
@@ -53,7 +53,7 @@ echo -e "\n========= [Pindel] Convert vcf to tdt"
 $BIN/vcf2tdt.py "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
-cd "${SAMPLE}_pindel"
+cd "${SAMPLE}_pindel" || { echo "ERROR: Failed to set working directory to ${SAMPLE}_pindel"; exit 1; }
 mv "${SAMPLE}.pindel.vcf.tdt ${SAMPLE}.indels"
 
 ## filter pindel data

@@ -10,11 +10,11 @@
 U=$(whoami)
 date
 mkdir -p "/scratch/$U/${PATIENT}"
-cd "/scratch/$U/${PATIENT}"
+cd "/scratch/$U/${PATIENT}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${PATIENT}"; exit 1; }
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh "$BAMS" "$PATIENT" "$ILIST"
 
-cd "/scratch/$U"
+cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
 cp -r -p  "/scratch/$U/${PATIENT}" /costellolab/data1/jocostello/LG3/exomes_recal/
 rm "/scratch/$U/${PATIENT}"
 

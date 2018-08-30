@@ -12,7 +12,7 @@
 
 BAMDIR=/data/jocostello/LG3/exomes
 mkdir -p "$WORKDIR"
-cd "$WORKDIR"
+cd "$WORKDIR" || { echo "ERROR: Failed to set working directory to ${WORKDIR}"; exit 1; }
 echo "*** Working directory: $WORKDIR"
 
 ### For Recal

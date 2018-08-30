@@ -10,11 +10,11 @@
 U=$(whoami)
 date
 mkdir -p "/scratch/$U/${PREFIX}"
-cd "/scratch/$U/${PREFIX}"
+cd "/scratch/$U/${PREFIX}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${PREFIX}"; exit 1; }
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Merge_QC.sh "$BAMS" "$PREFIX" "$ILIST"
 
-cd "/scratch/$U"
+cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
 mkdir -p "/costellolab/data1/jocostello/LG3/exomes/${PREFIX}"
 cp -p "/scratch/$U/${PREFIX}"/* "/costellolab/data1/jocostello/LG3/exomes/${PREFIX}"
 rm -rf "/scratch/$U/${PREFIX}"

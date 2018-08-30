@@ -23,12 +23,12 @@ fi
 
 mkdir -p "$TMP/${PREFIX}" || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }
 
-cd "$TMP/${PREFIX}"
+cd "$TMP/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${TMP}/${PREFIX}"; exit 1; }
 cp "$SAM" "./${PREFIX}.bwa.sam"
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Post_align.sh "$PREFIX"
 
-cd "$TMP"
+cd "$TMP" || { echo "ERROR: Failed to set working directory to ${TMP}"; exit 1; }
 
 cp -r -p  "$TMP/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/ || { echo "Can't copy directory $TMP/${PREFIX}"; exit 1; }
 rm -rf "$TMP/${PREFIX}"

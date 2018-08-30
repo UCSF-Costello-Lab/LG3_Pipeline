@@ -17,7 +17,7 @@ LOC=$(basename "$FASTQ")
 
 SCRATCH="/scratch/$USER/$B"
 mkdir -p "$SCRATCH"
-cd "$SCRATCH"
+cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 cp "$FASTQ" .
 
 time "$FQC" -t 10 "$LOC"

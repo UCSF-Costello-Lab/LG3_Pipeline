@@ -9,11 +9,11 @@
 
 mkdir -p /scratch/jocostello/${PREFIX}
 
-cd /scratch/jocostello/${PREFIX}
+cd /scratch/jocostello/${PREFIX} || { echo "ERROR: Failed to set working directory to /scratch/jocostello/${PREFIX}"; exit 1; }
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Align_fastq_vir.sh $FASTQ1 $FASTQ2 $PREFIX
 
-cd /scratch/jocostello
+cd /scratch/jocostello || { echo "ERROR: Failed to set working directory to /scratch/jocostello"; exit 1; }
 
 cp -r -p /scratch/jocostello/${PREFIX} /costellolab/data1/jocostello/LG3/exomes/ || { echo "ERROR copying from scratch" ;  exit 1 ; }
 rm -rf /scratch/jocostello/${PREFIX}

@@ -14,7 +14,7 @@ TMP=/scratch/jocostello
 
 mkdir -p "$TMP/${PREFIX}" || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }
 
-cd "$TMP/${PREFIX}"
+cd "$TMP/${PREFIX}" || { echo "ERROR: Failed to set working directory to $TMP/${PREFIX}"; exit 1; }
 cp "$FASTQ1" "$FASTQ2" .
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
@@ -22,7 +22,7 @@ FQ2=$(basename "$FASTQ2")
 /home/jocostello/shared/LG3_Pipeline/scripts/Align_fastq_mm9.sh "$FQ1" "$FQ2" "$PREFIX"
 rm "$FQ1" "$FQ2"
 
-cd "$TMP"
+cd "$TMP" || { echo "ERROR: Failed to set working directory to $TMP"; exit 1; }
 
 cp -r -p  "$TMP/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/
 rm -rf "$TMP/${PREFIX}"

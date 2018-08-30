@@ -15,7 +15,7 @@ FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
 mkdir -p "$SCRATCH"
-cd "$SCRATCH"
+cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
 cp "$FASTQ1" .
 cp "$FASTQ2" .
@@ -33,7 +33,7 @@ mv "${PREFIX}_R2_val_2.fq.gz" "${PREFIX}-trim${QTY}_R2.fastq.gz"
 mv "${PREFIX}_R1.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R1.trimming_report.txt"
 mv "${PREFIX}_R2.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R2.trimming_report.txt"
 
-cd ..
+cd .. || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 
 cp -r -p  "$SCRATCH" "$DIROUT"
 rm -rf "$SCRATCH"

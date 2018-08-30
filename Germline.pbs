@@ -12,7 +12,7 @@ NODES=$(cat "$PBS_NODEFILE" | tr '\n' ' ')
 ### New location of recalibrated files and germline analysis output
 
 mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
-cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
+cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
