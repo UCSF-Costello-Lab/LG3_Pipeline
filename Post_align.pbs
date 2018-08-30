@@ -31,7 +31,7 @@ cp "$SAM" "./${PREFIX}.bwa.sam"
 cd "$TMP" || { echo "ERROR: Failed to set working directory to ${TMP}"; exit 1; }
 
 cp -r -p  "$TMP/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/ || { echo "Can't copy directory $TMP/${PREFIX}"; exit 1; }
-rm -rf "$TMP/${PREFIX}"
+rm -rf "${TMP:?}/${PREFIX}"
 
 echo "End of script!"
 date
