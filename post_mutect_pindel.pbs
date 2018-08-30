@@ -15,6 +15,7 @@ OK() {
 echo -n "Mutation filtering & combining "
 date
 echo "Patient: ${PATIENT}"
+# shellcheck disable=SC2153
 echo "Project: ${PROJ}"
 echo "Conversion file: ${CONV}"
 echo "----------------------------------"
