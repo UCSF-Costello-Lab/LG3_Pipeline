@@ -23,7 +23,7 @@ BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
 #BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam
 #BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.bam
 
-if [ ! -f "$BAMN" -o ! -f "$BAMT" ]; then
+if [ ! -f "$BAMN" ] || [ ! -f "$BAMT" ]; then
 	echo "ERROR: BAM file(s) not found"
 	echo "Expected Normal: $BAMN"
 	echo "Expected Tumor: $BAMT"
