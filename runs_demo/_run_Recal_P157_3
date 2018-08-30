@@ -4,16 +4,16 @@ PBS=/home/jocostello/shared/LG3_Pipeline/Recal_bigmem.pbs
 
 D=/costellolab/data1/jocostello/LG3/exomes
 
-PATIENT=Patient450
-NORMAL=Z00667
+PATIENT=Patient157
+NORMAL=Z00599
 SUFF=trim.bwa.sorted.bam
 
 CNT=0
-for N in `seq 667 680`
+for N in $(seq 599 601)
 do
-	let CNT++
+	((CNT++))
 	B=$D/Z00$N/Z00$N.$SUFF
- 	if [ ! -f $B ]; then
+ 	if [ ! -f "$B" ]; then
       echo "ABORT: Can't open $B !"
       exit 1
    fi
@@ -21,8 +21,8 @@ do
    BAMS=${BAMS}:$B
 done
 ## Clip first char (:)
-BAMS=$(echo $BAMS | cut -c2-)
+BAMS=$(echo "$BAMS" | cut -c2-)
 echo "Total BAMS: $CNT"
 echo "$BAMS"
 
-qsub -N Recal_$PATIENT -v BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST $PBS
+qsub -N Recal_$PATIENT -v "BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST" $PBS
