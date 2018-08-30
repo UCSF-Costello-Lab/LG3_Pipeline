@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/bash
 
 ### Usage: qsub -v NORMAL=AXXXXX,TUMOR=AXXXXX,RNA=AXXXXX,TYPE=TUM_or_REC1,PATIENT=XX /path/to/Annotate_RNA.pbs
 ### Job Name
@@ -12,11 +12,12 @@
 #PBS -M brett.johnson@ucsf.edu
 #PBS -m e
 
-cd /home/jocostello/LG3/exomes/Mutations/
+cd /home/jocostello/LG3/exomes/Mutations/ || { echo "ERROR: Failed to set working directory to /home/jocostello/LG3/exomes/Mutations/"; exit 1; }
+
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Annotate_RNA.sh \
-	/home/jocostello/LG3/exomes/Mutations/Patient${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.annotated.mutations \
-	/home/jocostello/LG3/rna/${RNA}.accepted_hits.bam \
-	Patient${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}
+	"/home/jocostello/LG3/exomes/Mutations/Patient${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.annotated.mutations" \
+	"/home/jocostello/LG3/rna/${RNA}.accepted_hits.bam" \
+	"Patient${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}"
 
 echo "End of script!"
