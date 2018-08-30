@@ -18,7 +18,7 @@ if [ $# -ne 3 ]; then
 fi
 
 TMP="/scratch/jocostello/$prefix/tmp"
-mkdir -p $TMP
+mkdir -p "$TMP"
 
 JAVA=/home/jocostello/shared/LG3_Pipeline/tools/java/jre1.6.0_27/bin/java
 PICARD=/home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64
@@ -37,22 +37,21 @@ echo "Java: $JAVA"
 echo "Picard: $PICARD"
 echo "Samtools: $SAMTOOLS"
 echo "-------------------------------------------------"
-echo "[FixReadGroups] BAM input:" $bamin
-echo "[FixReadGroups] BAM output:" $bamout
-echo "[FixReadGroups] New Group Name:" $prefix
+echo "[FixReadGroups] BAM input: $bamin"
+echo "[FixReadGroups] BAM output: $bamout"
+echo "[FixReadGroups] New Group Name: $prefix"
 echo "-------------------------------------------------"
 
-if [ ! -f $bamout ]; then
-#$JAVA -Xmx4g -Djava.io.tmpdir=${TMP} \
+if [ ! -f "$bamout" ]; then
 $JAVA -Xmx4g -jar $PICARD/AddOrReplaceReadGroups.jar \
-	INPUT=${bamin} \
-	OUTPUT=${bamout} \
+	INPUT="${bamin}" \
+	OUTPUT="${bamout}" \
 	SORT_ORDER=coordinate \
-	RGID=$prefix \
-	RGLB=$prefix \
+	RGID="$prefix" \
+	RGLB="$prefix" \
 	RGPL=$pl \
 	RGPU=$pu \
-	RGSM=$prefix \
+	RGSM="$prefix" \
 	VERBOSITY=WARNING \
 	QUIET=true \
 	VALIDATION_STRINGENCY=LENIENT || { echo "ERROR: job failed!"; exit 1; }
@@ -61,7 +60,7 @@ else
 fi
 
 echo "[FixReadGroups] Indexing BAM file..."
-$SAMTOOLS index ${bamout} || { echo "BAM indexing failed"; exit 1; }
+$SAMTOOLS index "${bamout}" || { echo "BAM indexing failed"; exit 1; }
 
 echo "[FixReadGroups] All Done!"
 exit 0

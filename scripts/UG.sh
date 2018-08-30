@@ -4,7 +4,7 @@
 #$ -S /bin/bash
 #$ -cwd
 #$ -j y
-PROG=$(basename $0)
+PROG=$(basename "$0")
 JAVA=/home/jocostello/shared/LG3_Pipeline/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
 GATK=/home/jocostello/shared/LG3_Pipeline/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
@@ -39,10 +39,10 @@ fi
 #### Parse args
 while [ -n "$1" ]; do
 case $1 in
-   -h) help $0;shift 1;;
-   -b*=*) BAMS=`echo "$1" | sed -e 's/^[^=]*=//'`;shift 1;;
-   -o*=*) OUT=`echo "$1" | sed -e 's/^[^=]*=//'`;shift 1;;
-   -l*=*) LIST=`echo "$1" | sed -e 's/^[^=]*=//'`;shift 1;;
+   -h) help "$0";shift 1;;
+   -b*=*) BAMS=${1#*=};shift 1;;
+   -o*=*) OUT=${1#*=};shift 1;;
+   -l*=*) LIST=${1#*=};shift 1;;
    -*) echo "[$PROG] ERROR: no such option $1. Try -h for help";exit 1;;
    *)  break;;
 esac
@@ -53,7 +53,7 @@ if [[ -z $BAMS ]] || [[ -z $OUT ]] || [[ -z $LIST ]]; then
      exit 1
 fi
 
-if [ -e ${OUT}.UG.snps.vcf ]; then
+if [ -e "${OUT}.UG.snps.vcf" ]; then
 	echo "[$PORG] ERROR: Output file exists: ${OUT}.UG.snps.vcf"
 	exit 1
 fi
@@ -61,12 +61,12 @@ fi
 echo "-------------------------------------------------"
 echo "[$PROG] OPTIONS set:"
 echo "-------------------------------------------------"
-echo "[$PROG] Input BAM files :" $BAMS
-echo "[$PROG] Output VCF prefix :" $OUT
-echo "[$PROG] Target interval list :" $LIST
+echo "[$PROG] Input BAM files : $BAMS"
+echo "[$PROG] Output VCF prefix : $OUT"
+echo "[$PROG] Target interval list : $LIST"
 echo "-------------------------------------------------"
 
-INPUTS=$(echo $BAMS | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "-I "$i" "}')
+INPUTS=$(echo "$BAMS" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "-I "$i" "}')
 echo "[$PROG] Inputs = $INPUTS"
 
 	echo "[$PROG] Running Unified Genotyper SNP calling ..."
@@ -76,29 +76,29 @@ echo "[$PROG] Inputs = $INPUTS"
 		-nct 3 -nt 8 \
 		--genotype_likelihoods_model SNP \
 		--genotyping_mode DISCOVERY \
-		$INPUTS \
+		"$INPUTS" \
 		--reference_sequence $REF \
 		--dbsnp $DBSNP \
 		--logging_level WARN \
-		--intervals $ILIST \
+		--intervals "$LIST" \
 		-baq CALCULATE_AS_NECESSARY \
 		--noSLOD \
 		--standard_min_confidence_threshold_for_calling 30.0 \
 		--standard_min_confidence_threshold_for_emitting 10.0 \
 		--min_base_quality_score 20 \
 		--output_mode EMIT_VARIANTS_ONLY \
-		--out ${OUT}.UG.snps.raw.vcf || { echo "FAILED!"; exit 1; }
+		--out "${OUT}.UG.snps.raw.vcf" || { echo "FAILED!"; exit 1; }
 
 	echo "[$PROG] Annotating Unified Genotyper SNPs..."
 	$JAVA -Xmx8g \
 		-jar $GATK \
 		--analysis_type VariantAnnotator \
-		$INPUTS \
-		--reference_sequence $REF \
+		"$INPUTS" \
+		--reference_sequence "{$REF}" \
 		--dbsnp $DBSNP \
 		--logging_level WARN \
-		--intervals ${OUT}.UG.snps.raw.vcf \
-		--variant ${OUT}.UG.snps.raw.vcf \
+		--intervals "${OUT}.UG.snps.raw.vcf" \
+		--variant "${OUT}.UG.snps.raw.vcf" \
 		-baq CALCULATE_AS_NECESSARY \
 		--annotation QualByDepth \
 		--annotation RMSMappingQuality \
@@ -109,10 +109,10 @@ echo "[$PROG] Inputs = $INPUTS"
 		--annotation HaplotypeScore \
 		--annotation ReadPosRankSumTest \
 		--annotation DepthOfCoverage \
-		--out ${OUT}.UG.snps.annotated.vcf || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
+		--out "${OUT}.UG.snps.annotated.vcf" || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
 
-	rm -f ${OUT}.UG.snps.raw.vcf
-	rm -f ${OUT}.UG.snps.raw.vcf.idx
+	rm -f "${OUT}.UG.snps.raw.vcf"
+	rm -f "${OUT}.UG.snps.raw.vcf.idx"
 
 	echo "[$PROG] Filtering Unified Genotyper SNPs..."
 	$JAVA -Xmx8g \
@@ -120,7 +120,7 @@ echo "[$PROG] Inputs = $INPUTS"
 		--analysis_type VariantFiltration \
 		--reference_sequence $REF \
 		--logging_level WARN \
-		--variant ${OUT}.UG.snps.annotated.vcf \
+		--variant "${OUT}.UG.snps.annotated.vcf" \
 		-baq CALCULATE_AS_NECESSARY \
 		--clusterSize 3 \
 		--clusterWindowSize 10 \
@@ -136,10 +136,10 @@ echo "[$PROG] Inputs = $INPUTS"
 		--filterName MQRankSumFilter \
 		--filterExpression "ReadPosRankSum < -8.0" \
 		--filterName ReadPosFilter	\
-		--out ${OUT}.UG.snps.vcf || { echo "FAILED!"; exit 1; }
+		--out "${OUT}.UG.snps.vcf" || { echo "FAILED!"; exit 1; }
 
-	rm -f ${OUT}.UG.snps.annotated.vcf
-	rm -f ${OUT}.UG.snps.annotated.vcf.idx
+	rm -f "${OUT}.UG.snps.annotated.vcf"
+	rm -f "${OUT}.UG.snps.annotated.vcf.idx"
 
 echo "[$PROG] Finished!"
 echo "-------------------------------------------------"
