@@ -6,7 +6,6 @@
 
 ### Updated by Ivan
 
-U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
