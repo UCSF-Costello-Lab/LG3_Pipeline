@@ -22,11 +22,11 @@ DBSNP="/home/jocostello/shared/LG3_Pipeline/resources/dbsnp_132.hg19.sorted.vcf"
 
 #Input variables
 bamfile=$1
-PREF=$(basename $bamfile .bam)
+PREF=$(basename "$bamfile" .bam)
 Z=${PREF%%.*}
 ilist=$2
 TMP="/scratch/jocostello/${Z}_tmp"
-mkdir -p $TMP
+mkdir -p "$TMP"
 #ilist2=/home/jocostello/shared/LG3_Pipeline/resources/SeqCap_EZ_Exome_v3_capture.interval_list
 
 echo "------------------------------------------------------"
@@ -35,64 +35,64 @@ date
 echo "------------------------------------------------------"
 
 echo "[Recal] Create intervals for indel detection..."
-$JAVA -Xmx8g -Djava.io.tmpdir=${TMP} \
+$JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
 	-jar $GATK \
 	--analysis_type RealignerTargetCreator \
 	--reference_sequence $REF \
 	--known $THOUSAND \
 	--num_threads 8 \
 	--logging_level WARN \
-	--input_file $bamfile \
-	--out ${PREF}.intervals || { echo "Interval creation failed"; exit 1; }
+	--input_file "$bamfile" \
+	--out "${PREF}.intervals" || { echo "Interval creation failed"; exit 1; }
 
 echo "[Recal] Indel realignment..."
-$JAVA -Xmx16g -Djava.io.tmpdir=${TMP} \
+$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
 	-jar $GATK \
 	--analysis_type IndelRealigner \
 	--reference_sequence $REF \
 	--knownAlleles $THOUSAND \
 	--logging_level WARN \
 	--consensusDeterminationModel USE_READS \
-	--input_file $bamfile \
-	--targetIntervals ${PREF}.intervals \
-	--out ${PREF}.realigned.bam || { echo "Indel realignment failed"; exit 1; }
+	--input_file "$bamfile" \
+	--targetIntervals "${PREF}.intervals" \
+	--out "${PREF}.realigned.bam" || { echo "Indel realignment failed"; exit 1; }
 
-rm -f ${PREF}.intervals
+rm -f "${PREF}.intervals"
 
 echo "[Recal] Fix mate information..."
-$JAVA -Xmx16g -Djava.io.tmpdir=${TMP} \
+$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
 	-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/FixMateInformation.jar \
-	INPUT=${PREF}.realigned.bam \
-	OUTPUT=${PREF}.realigned.mateFixed.bam \
+	INPUT="${PREF}.realigned.bam" \
+	OUTPUT="${PREF}.realigned.mateFixed.bam" \
 	SORT_ORDER=coordinate \
-	TMP_DIR=${TMP} \
+	TMP_DIR="${TMP}" \
 	VERBOSITY=WARNING \
 	QUIET=true \
 	VALIDATION_STRINGENCY=SILENT || { echo "Verify mate information failed"; exit 1; } 
 
-rm -f ${PREF}.realigned.bam
-rm -f ${PREF}.realigned.bai
+rm -f "${PREF}.realigned.bam"
+rm -f "${PREF}.realigned.bai"
 
 echo "[Recal] Mark duplicates..."
-$JAVA -Xmx16g -Djava.io.tmpdir=${TMP} \
+$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
 	-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/MarkDuplicates.jar \
-	INPUT=${PREF}.realigned.mateFixed.bam \
-	OUTPUT=${PREF}.realigned.rmDups.bam \
-	METRICS_FILE=${PREF}.realigned.mateFixed.metrics \
+	INPUT="${PREF}.realigned.mateFixed.bam" \
+	OUTPUT="${PREF}.realigned.rmDups.bam" \
+	METRICS_FILE="${PREF}.realigned.mateFixed.metrics" \
 	REMOVE_DUPLICATES=TRUE \
-	TMP_DIR=${TMP} \
+	TMP_DIR="${TMP}" \
 	VERBOSITY=WARNING \
 	QUIET=true \
 	VALIDATION_STRINGENCY=LENIENT || { echo "Mark duplicates failed"; exit 1; }
 
-rm -f ${PREF}.realigned.mateFixed.bam
+rm -f "${PREF}.realigned.mateFixed.bam"
 
 echo "[Recal] Index BAM file..."
-$SAMTOOLS index ${PREF}.realigned.rmDups.bam || { echo "Indexing failed"; exit 1; } 
+$SAMTOOLS index "${PREF}.realigned.rmDups.bam" || { echo "Indexing failed"; exit 1; } 
 
 ### Job crushed at -Xmx8g, increase!
 echo "[Recal] Base-quality recalibration: Count covariates..."
-$JAVA -Xmx128g -Djava.io.tmpdir=${TMP} -jar $GATK \
+$JAVA -Xmx128g -Djava.io.tmpdir="${TMP}" -jar $GATK \
 	--analysis_type CountCovariates \
 	--reference_sequence $REF \
 	--knownSites $DBSNP \
@@ -104,27 +104,27 @@ $JAVA -Xmx128g -Djava.io.tmpdir=${TMP} -jar $GATK \
 	--covariate DinucCovariate \
 	--covariate MappingQualityCovariate \
 	--standard_covs \
-	--input_file ${PREF}.realigned.rmDups.bam \
-	--recal_file ${PREF}.realigned.rmDups.csv || { echo "CountCovariates failed"; exit 1; }
+	--input_file "${PREF}.realigned.rmDups.bam" \
+	--recal_file "${PREF}.realigned.rmDups.csv" || { echo "CountCovariates failed"; exit 1; }
 
 echo "[Recal] Base-quality recalibration: Table Recalibration..."
-$JAVA -Xmx16g -Djava.io.tmpdir=${TMP} -jar $GATK \
+$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar $GATK \
 	--analysis_type TableRecalibration \
 	--reference_sequence $REF \
 	--logging_level WARN \
 	--baq RECALCULATE \
-	--recal_file ${PREF}.realigned.rmDups.csv \
-	--input_file ${PREF}.realigned.rmDups.bam \
-	--out ${PREF}.realigned.rmDups.recal.bam || { echo "TableRecalibration failed"; exit 1; }
+	--recal_file "${PREF}.realigned.rmDups.csv" \
+	--input_file "${PREF}.realigned.rmDups.bam" \
+	--out "${PREF}.realigned.rmDups.recal.bam" || { echo "TableRecalibration failed"; exit 1; }
 
-rm -f ${PREF}.realigned.rmDups.bam
-rm -f ${PREF}.realigned.rmDups.bam.bai
-rm -f ${PREF}.realigned.rmDups.csv
+rm -f "${PREF}.realigned.rmDups.bam"
+rm -f "${PREF}.realigned.rmDups.bam.bai"
+rm -f "${PREF}.realigned.rmDups.csv"
 
 echo "[Recal] Sort BAM file..."
-$SAMTOOLS sort ${PREF}.realigned.rmDups.recal.bam || { echo "Sorting failed"; exit 1; } 
+$SAMTOOLS sort "${PREF}.realigned.rmDups.recal.bam" || { echo "Sorting failed"; exit 1; } 
 echo "[Recal] Index BAM file..."
-$SAMTOOLS index ${PREF}.realigned.rmDups.recal.bam || { echo "Indexing failed"; exit 1; } 
+$SAMTOOLS index "${PREF}.realigned.rmDups.recal.bam" || { echo "Indexing failed"; exit 1; } 
 
 echo "------------------------------------------------------"
 echo -n "[Recal] Finished! "
@@ -136,30 +136,30 @@ i=${PREF}.realigned.rmDups.recal.bam
 
 
 	echo "------------------------------------------------------"
-	echo "[QC]" $i
+	echo "[QC] $i"
 
 	echo "[QC] Calculate flag statistics..."
-	$SAMTOOLS flagstat $i > ${Z}.bwa.realigned.rmDups.recal.flagstat 2>&1
+	$SAMTOOLS flagstat "$i" > "${Z}.bwa.realigned.rmDups.recal.flagstat" 2>&1
 
 	echo "[QC] Calculate hybrid selection metrics..."
-	$JAVA -Xmx16g -Djava.io.tmpdir=${TMP} \
+	$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
 		-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/CalculateHsMetrics.jar \
-		BAIT_INTERVALS=${ilist} \
-		TARGET_INTERVALS=${ilist} \
-		INPUT=$i \
-		OUTPUT=${Z}.bwa.realigned.rmDups.recal.hybrid_selection_metrics \
-		TMP_DIR=${TMP} \
+		BAIT_INTERVALS="${ilist}" \
+		TARGET_INTERVALS="${ilist}" \
+		INPUT="$i" \
+		OUTPUT="${Z}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" \
+		TMP_DIR="${TMP}" \
 		VERBOSITY=WARNING \
 		QUIET=true \
 		VALIDATION_STRINGENCY=SILENT || { echo "Calculate hybrid selection metrics failed"; exit 1; }
 
 	echo "[QC] Collect multiple QC metrics..."
-	$JAVA -Xmx16g -Djava.io.tmpdir=${TMP} \
+	$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
 		-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/CollectMultipleMetrics.jar \
-		INPUT=$i \
-		OUTPUT=${Z}.bwa.realigned.rmDups.recal \
+		INPUT="$i" \
+		OUTPUT="${Z}.bwa.realigned.rmDups.recal" \
 		REFERENCE_SEQUENCE=${REF} \
-		TMP_DIR=${TMP} \
+		TMP_DIR="${TMP}" \
 		VERBOSITY=WARNING \
 		QUIET=true \
 		VALIDATION_STRINGENCY=SILENT || { echo "Collect multiple QC metrics failed"; exit 1; }
