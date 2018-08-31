@@ -8,4 +8,4 @@ check_pbs:
 	shellcheck *.pbs
 
 check_sh:
-	shellcheck -x scripts/*.sh
+	shellcheck -x --exclude=SC1091 scripts/*.sh
