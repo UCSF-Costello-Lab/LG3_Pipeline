@@ -43,12 +43,14 @@ echo "$INPUTS"
 	### -nct 3 -nt 8 \
 if [ ! -e "${patientID}.UG.snps.raw.vcf" ]; then
 	echo "[Germline] Running Unified Genotyper..."
+	# shellcheck disable=SC2086
+	# Comment: Because how INPUTS is created and used below
 	$JAVA -Xmx64g \
 		-jar $GATK \
 		--analysis_type UnifiedGenotyper \
 		--genotype_likelihoods_model SNP \
 		--genotyping_mode DISCOVERY \
-		"$INPUTS" \
+	        $INPUTS \
 		--reference_sequence $REF \
 		--dbsnp $DBSNP \
 		--logging_level WARN \
@@ -67,10 +69,12 @@ fi
 
 if [ ! -e "${patientID}.UG.snps.annotated.vcf" ]; then
 	echo "[Germline] Annotating Unified Genotyper SNPs..."
+	# shellcheck disable=SC2086
+	# Comment: Because how INPUTS is created and used below
 	$JAVA -Xmx64g \
 		-jar $GATK \
 		--analysis_type VariantAnnotator \
-		"$INPUTS" \
+		$INPUTS \
 		--reference_sequence $REF \
 		--dbsnp $DBSNP \
 		--logging_level WARN \
