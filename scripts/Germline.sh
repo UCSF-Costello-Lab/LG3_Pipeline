@@ -33,6 +33,7 @@ echo "[Germline] Bam file directory: $bamdir"
 echo "[Germline] Normal Sample: $normalname"
 echo "-------------------------------------------------"
 
+## Construct string with one or more '-I <bam>' elements
 INPUTS=$(for i in ${bamdir}/*.bam
 do
 	echo -n "-I $i "
