@@ -37,12 +37,15 @@ echo "[Recal] Recalibration Group: $patientID"
 echo "$bamfiles" | awk -F ":" '{for (i=1; i<=NF; i++) print "[Recal] Exome:"$i}'
 echo "------------------------------------------------------"
 
+## Construct string with one or more '-I <bam>' elements
 inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 
 echo "[Recal] Merge BAM files..."
+# shellcheck disable=SC2086
+# Comment: Because how 'inputs' is created and used below
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
 	-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/MergeSamFiles.jar \
-	"${inputs}" \
+	${inputs} \
 	OUTPUT="${patientID}.merged.bam" \
 	SORT_ORDER=coordinate \
 	TMP_DIR="${TMP}" \

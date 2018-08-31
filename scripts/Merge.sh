@@ -31,12 +31,15 @@ echo "[Merge] Merge Group: $prefix"
 echo "$bamfiles" | awk -F ":" '{for (i=1; i<=NF; i++) print "[Merge] Exome:"$i}'
 echo "------------------------------------------------------"
 
+## Construct string with one or more '-I <bam>' elements
 inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 
 echo "[Merge] Merge BAM files..."
+# shellcheck disable=SC2086
+# Comment: Because how 'inputs' is created and used below
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
 	-jar $PICARD/MergeSamFiles.jar \
-	"${inputs}" \
+	${inputs} \
 	OUTPUT="${prefix}.merged.bam" \
 	SORT_ORDER=coordinate \
 	TMP_DIR="${TMP}" \
