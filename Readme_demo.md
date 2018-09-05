@@ -10,11 +10,13 @@ cd /home/jocostello/shared/LG3_Pipeline
 
 Create symbolic link to resource directory: /home/jocostello/shared/LG3_Pipeline_HIDE/resources
 Create symbolic link to tools directory: /home/jocostello/shared/LG3_Pipeline_HIDE/tools
+Create symbolic link to AnnoVar directory: /home/jocostello/shared/LG3_Pipeline_HIDE/AnnoVar
 Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/runs_demo/patient_ID_conversions.demo
 
 	```
 	ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/resources resources
 	ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/tools tools
+	ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/AnnoVar AnnoVar
 	ln -s runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
 	```
 
