@@ -64,5 +64,5 @@ $BIN/pindel_filter.sh "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: 
 echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
 $BIN/pindel_annotate.sh "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
-echo -ne "\nEnd of script $0 on "
+echo -ne "\nEnd of script on "
 date
