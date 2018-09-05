@@ -1,0 +1,20 @@
+#!/bin/bash
+## Location of links to FASTQ.gz files
+RAW=/costellolab/data1/ismirnov/tmp
+PBS=/home/jocostello/shared/LG3_Pipeline/trim_galore.pbs
+
+echo "ETA ~4h"
+
+QTY=20
+
+for N in 599 600 601
+do
+   Z=Z00${N}
+   if [ ! -r $RAW/${Z}_R1.fastq.gz ] || [ ! -r $RAW/${Z}_R1.fastq.gz ]; then
+      echo "ERROR: Can't open $Z in $RAW"
+   else
+      echo "Submitting $Z: quality $QTY ..."
+      qsub -N trim${QTY}_$Z -M ivan.smirnov@ucsf.edu -v FASTQ1=$RAW/${Z}_R1.fastq.gz,FASTQ2=$RAW/${Z}_R2.fastq.gz,PREFIX=$Z,QTY=$QTY $PBS
+   fi
+done
+
