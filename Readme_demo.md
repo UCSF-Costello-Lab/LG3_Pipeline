@@ -1,12 +1,12 @@
 Steps to run test job on CCC
 
-###Quick start
+### Quick start
 
-####1 Change directory to the root of the pipeline repository, e.g.
+#### 1 Change directory to the root of the pipeline repository, e.g.
 ```
 cd /home/jocostello/shared/LG3_Pipeline
 ```
-####2 Preparations (do once)
+#### 2 Preparations (do once)
 
 Create symbolic link to resource directory: /home/jocostello/shared/LG3_Pipeline_HIDE/resources
 
@@ -23,14 +23,14 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
    ln -s runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
 ```
 
-####3 Copy _run_Trim_P157 script to the main directory and run it (~4-5h)
+#### 3 Copy _run_Trim_P157 script to the main directory and run it (~4-5h)
 
 ```
    cp runs_demo/_run_Trim_P157 .
 
    _run_Trim_P157
 ```
-####4 Copy _run_Align_gz_P157 script to the main directory and run it (~10-16h)
+#### 4 Copy _run_Align_gz_P157 script to the main directory and run it (~10-16h)
 
 ```
    cp runs_demo/_run_Align_gz_P157 .
@@ -38,7 +38,7 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
    _run_Align_gz_P157
 ```
 
-####5 Copy _run_Recal_P157_3 script to the main directory and run it (~85h)
+#### 5 Copy _run_Recal_P157_3 script to the main directory and run it (~85h)
 
 ```
    cp runs_demo/_run_Recal_P157_3 .
@@ -46,7 +46,7 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
    _run_Recal_P157_3
 ```
 
-####6a Copy _run_Pindel_157 script to the main directory and run it (~4h)
+#### 6a Copy _run_Pindel_157 script to the main directory and run it (~4h)
 
 ```
    cp runs_demo/_run_Pindel_157 .
@@ -54,7 +54,7 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
    _run_Pindel_157
 ```
 
-####6b Copy _run_MutDet_P157 script to the main directory and run it
+#### 6b Copy _run_MutDet_P157 script to the main directory and run it
 
 ```
 
@@ -64,7 +64,7 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
 ```
    
    
-####7 Copy _run_PostMut_P157 script to the main directory and run it
+#### 7 Copy _run_PostMut_P157 script to the main directory and run it
 
 ```
 
