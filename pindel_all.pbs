@@ -54,7 +54,7 @@ $BIN/vcf2tdt.py "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error
 
 ## rename file
 cd "${SAMPLE}_pindel" || { echo "ERROR: Failed to set working directory to ${SAMPLE}_pindel"; exit 1; }
-mv "${SAMPLE}.pindel.vcf.tdt ${SAMPLE}.indels"
+mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
 echo -e "\n========= [Filter] Filter pindel output using target $TARGET"

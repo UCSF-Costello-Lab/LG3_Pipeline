@@ -10,7 +10,7 @@
 #PBS -l nodes=1:ppn=4,vmem=42g
 #PBS -m ae
 
-BAMDIR=/data/jocostello/LG3/exomes
+BAMDIR=/costellolab/data1/jocostello/LG3/exomes_recal
 mkdir -p "$WORKDIR"
 cd "$WORKDIR" || { echo "ERROR: Failed to set working directory to ${WORKDIR}"; exit 1; }
 echo "*** Working directory: $WORKDIR"
