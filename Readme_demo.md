@@ -14,12 +14,15 @@ Create symbolic link to tools directory: /home/jocostello/shared/LG3_Pipeline_HI
 
 Create symbolic link to AnnoVar directory: /home/jocostello/shared/LG3_Pipeline_HIDE/AnnoVar
 
+Create symbolic link to pykent directory: /home/jocostello/shared/LG3_Pipeline_HIDE/pykent
+
 Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/runs_demo/patient_ID_conversions.demo
 
 ```
    ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/resources resources
    ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/tools tools
    ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/AnnoVar AnnoVar
+   ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/pykent pykent
    ln -s runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
 ```
 
@@ -54,7 +57,7 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
    _run_Pindel_157
 ```
 
-#### 6b Copy _run_MutDet_P157 script to the main directory and run it
+#### 6b Copy _run_MutDet_P157 script to the main directory and run it (~20-21h)
 
 ```
 
