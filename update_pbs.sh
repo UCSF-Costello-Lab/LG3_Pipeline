@@ -21,15 +21,6 @@ sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-/costello
 ## Inject SCRATCHDIR in the Configuration section
 sed -i -e '/^LG3_PROJECT_DIR/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' *.pbs
 
-
-## Manual: Expand /home/jocostello/LG3/ -> /costellolab/data1/jocostello/LG3/exomes2/
-#sed -i -E "s|([^-])/home/jocostello/LG3/|\1/costellolab/data1/jocostello/LG3/exomes2/|g" *.pbs
-#make check_pbs || { echo "ERROR: 'make check_pbs' failed after expanding /home/jocostello/LG3/"; exit 1; }
-
-## Manual: Expand /data/jocostello/LG3/ -> /costellolab/data1/jocostello/LG3/
-sed -i -E "s|([^-])/data/jocostello/LG3/|\1/costellolab/data1/jocostello/LG3/|g" *.pbs
-make check_pbs || { echo "ERROR: 'make check_pbs' failed after replacing /data/jocostello/LG3/"; exit 1; }
-
 ## Inject quoted usages of ${LG3_HOME}
 sed -i 's|/home/jocostello/shared/LG3_Pipeline/|${LG3_HOME}/|g' *.pbs
 sed -i -E 's|^[$][{]LG3_HOME[}]/([^ ]*)|"${LG3_HOME}/\1"|g' *.pbs
