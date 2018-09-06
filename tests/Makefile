@@ -3,21 +3,27 @@
 SHELL:=/bin/bash
 
 LG3_HOME:=$(shell dirname $(CURDIR))
-LG3_OUTPUT_DIR:=output
+LG3_OUTPUT_ROOT:=output
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
+
 
 .PHONY: test
 
 debug:
 	@echo "LG3_HOME: $$LG3_HOME (hardcoded to parent directory)"
+	@echo "LG3_OUTPUT_ROOT: $$LG3_OUTPUT_ROOT (hardcoded)"
 	@echo "EMAIL: $$EMAIL"
-	@echo "LG3_OUTPUT_DIR: $$LG3_OUTPUT_DIR (hardcoded)"
-	@echo "LG3_PROJECT_DIR: $$LG3_PROJECT_DIR"
 
 setup: setup-P157
 
-setup-annotation:
+setup-assert:
+ifeq ($(wildcard output/.),)
+	@echo "ERROR: Directory output/ is missing"
+	@exit 1
+endif
+
+setup-annotation: setup-assert
 	ln -fs $(LG3_HOME_HIDE)/resources .
 	ln -fs $(LG3_HOME_HIDE)/tools .
 	ln -fs $(LG3_HOME_HIDE)/AnnoVar .
