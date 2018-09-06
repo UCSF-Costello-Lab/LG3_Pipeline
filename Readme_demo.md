@@ -16,6 +16,8 @@ Create symbolic link to AnnoVar directory: /home/jocostello/shared/LG3_Pipeline_
 
 Create symbolic link to pykent directory: /home/jocostello/shared/LG3_Pipeline_HIDE/pykent
 
+Create symbolic link to rawdata directory: /costellolab/data1/ismirnov/tmp
+
 Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/runs_demo/patient_ID_conversions.demo
 
 ```
@@ -23,6 +25,7 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
    ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/tools tools
    ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/AnnoVar AnnoVar
    ln -s /home/jocostello/shared/LG3_Pipeline_HIDE/pykent pykent
+   ln -s /costellolab/data1/ismirnov/tmp rawdata
    ln -s runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
 ```
 
