@@ -3,6 +3,13 @@
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 
+QSUB_OPTS=
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
 PATIENT=Patient157
 PROJ=LG3
 
@@ -12,4 +19,5 @@ PBS=${LG3_HOME}/post_mutect_pindel.pbs
 "${LG3_HOME}/scripts/chk_pindel.sh" $PATIENT
 "${LG3_HOME}/scripts/chk_mutdet.sh" $PATIENT
 
-qsub -M "${EMAIL}" -N ${PATIENT}_comb -v PATIENT=$PATIENT,PROJ=$PROJ,CONV=$CONV "$PBS"
+# shellcheck disable=SC2086
+qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v PATIENT=$PATIENT,PROJ=$PROJ,CONV=$CONV "$PBS"

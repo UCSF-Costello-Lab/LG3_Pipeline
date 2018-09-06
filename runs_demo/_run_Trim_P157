@@ -4,6 +4,13 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_TEST_DATA_DIR=/costellolab/data1/ismirnov/tmp
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 
+QSUB_OPTS=
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
 ## Location of links to FASTQ.gz files
 RAW=${LG3_TEST_DATA_DIR}
 PBS=${LG3_HOME}/trim_galore.pbs
@@ -19,7 +26,7 @@ do
       echo "ERROR: Can't open $Z in $RAW"
    else
       echo "Submitting $Z: quality $QTY ..."
-      qsub -N trim${QTY}_$Z -M "${EMAIL}" -v FASTQ1=$RAW/${Z}_R1.fastq.gz,FASTQ2=$RAW/${Z}_R2.fastq.gz,PREFIX=$Z,QTY=$QTY "$PBS"
+      # shellcheck disable=SC2086
+      qsub ${QSUB_OPTS} -N trim${QTY}_$Z -v FASTQ1=$RAW/${Z}_R1.fastq.gz,FASTQ2=$RAW/${Z}_R2.fastq.gz,PREFIX=$Z,QTY=$QTY "$PBS"
    fi
 done
-

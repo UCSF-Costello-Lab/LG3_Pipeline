@@ -4,6 +4,13 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-/costellolab/data1/jocostello/LG3}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 
+QSUB_OPTS=
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
 ILIST=resources/SeqCap_EZ_Exome_v3_capture.interval_list
 PBS=${LG3_HOME}/Recal_bigmem.pbs
 
@@ -30,4 +37,5 @@ BAMS=$(echo "$BAMS" | cut -c2-)
 echo "Total BAMS: $CNT"
 echo "$BAMS"
 
-qsub -N Recal_$PATIENT -v "BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST" "$PBS"
+# shellcheck disable=SC2086
+qsub ${QSUB_OPTS} -N Recal_$PATIENT -v "BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST" "$PBS"

@@ -5,6 +5,13 @@ LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-/costellolab/data1/jocostello/LG3}
 LG3_TEST_DATA_DIR=/costellolab/data1/ismirnov/tmp
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 
+QSUB_OPTS=
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
 ## Location of FASTQ.gz files
 RAW=${LG3_TEST_DATA_DIR}
 ## Location of output: aligned BAMs
@@ -23,8 +30,9 @@ do
 			echo "WARNING: already aligned: $ALIGN/${Z}.trim.bwa.sorted.bam"
 			echo "Skipping $Z ..."
 		else
-			echo "Submitting $Z ..."
-			qsub -N Align_$Z -M "${EMAIL}" -v FASTQ1=$FQ1,FASTQ2=$FQ2,PREFIX=$Z "${LG3_HOME}/Align_fastq.pbs"
+		        echo "Submitting $Z ..."
+		        # shellcheck disable=SC2086
+			qsub ${QSUB_OPTS} -N Align_$Z -v FASTQ1=$FQ1,FASTQ2=$FQ2,PREFIX=$Z "${LG3_HOME}/Align_fastq.pbs"
 		fi
 	fi
 done
