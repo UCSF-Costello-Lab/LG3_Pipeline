@@ -18,7 +18,7 @@ cd "/scratch/$U/${PATIENT}" || { echo "ERROR: Failed to set working directory to
 
 cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
 
-mkdir -p "/data/jocostello/LG3/exomes/${PATIENT}"
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
 cp -p "/scratch/$U/${PATIENT}"/* "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
 rm -rf "/scratch/$U/${PATIENT}"
 
