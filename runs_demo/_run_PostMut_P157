@@ -1,13 +1,15 @@
 #!/bin/bash
+
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+
 PATIENT=Patient157
 PROJ=LG3
 
-CONV=/home/jocostello/shared/LG3_Pipeline/patient_ID_conversions.txt
-PBS=/home/jocostello/shared/LG3_Pipeline/post_mutect_pindel.pbs
+CONV=patient_ID_conversions.txt
+PBS=${LG3_HOME}/post_mutect_pindel.pbs
 
-/home/jocostello/shared/LG3_Pipeline/scripts/chk_pindel.sh $PATIENT
-/home/jocostello/shared/LG3_Pipeline/scripts/chk_mutdet.sh $PATIENT
+"${LG3_HOME}/scripts/chk_pindel.sh" $PATIENT
+"${LG3_HOME}/scripts/chk_mutdet.sh" $PATIENT
 
-
-
-qsub -M ivan.smirnov@ucsf.edu -N ${PATIENT}_comb -v PATIENT=$PATIENT,PROJ=$PROJ,CONV=$CONV $PBS
+qsub -M "${EMAIL}" -N ${PATIENT}_comb -v PATIENT=$PATIENT,PROJ=$PROJ,CONV=$CONV "$PBS"

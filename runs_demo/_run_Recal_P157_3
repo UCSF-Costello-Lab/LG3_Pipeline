@@ -1,8 +1,13 @@
 #!/bin/bash
-ILIST=/home/jocostello/shared/LG3_Pipeline/resources/SeqCap_EZ_Exome_v3_capture.interval_list
-PBS=/home/jocostello/shared/LG3_Pipeline/Recal_bigmem.pbs
 
-D=/costellolab/data1/jocostello/LG3/exomes
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-/costellolab/data1/jocostello/LG3}
+EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+
+ILIST=resources/SeqCap_EZ_Exome_v3_capture.interval_list
+PBS=${LG3_HOME}/Recal_bigmem.pbs
+
+D=${LG3_OUTPUT_DIR}/exomes
 
 PATIENT=Patient157
 NORMAL=Z00599
@@ -25,4 +30,4 @@ BAMS=$(echo "$BAMS" | cut -c2-)
 echo "Total BAMS: $CNT"
 echo "$BAMS"
 
-qsub -N Recal_$PATIENT -v "BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST" $PBS
+qsub -N Recal_$PATIENT -v "BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST" "$PBS"

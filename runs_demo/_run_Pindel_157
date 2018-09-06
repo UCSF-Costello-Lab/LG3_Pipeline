@@ -1,11 +1,14 @@
 #!/bin/bash
 ### Time 8h , 6 CPUs , vmem >= 2GB
 
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+
 PATIENT=Patient157
 PROJ=LG3
 
-CONV=/home/jocostello/shared/LG3_Pipeline/patient_ID_conversions.txt
-PBS=/home/jocostello/shared/LG3_Pipeline/pindel_all.pbs
+CONV=patient_ID_conversions.txt
+PBS=${LG3_HOME}/pindel_all.pbs
 
-qsub -N ${PATIENT}.pindel -M ivan.smirnov@ucsf.edu -v SAMPLE=$PATIENT,PROJ=$PROJ,CONV=$CONV $PBS
+qsub -N ${PATIENT}.pindel -M "${EMAIL}" -v SAMPLE=$PATIENT,PROJ=$PROJ,CONV=$CONV "$PBS"
 

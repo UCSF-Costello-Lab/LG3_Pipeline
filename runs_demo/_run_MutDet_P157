@@ -1,10 +1,12 @@
 #!/bin/bash
 
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+
 PATIENT=Patient157
 PROJ=LG3
 
-CONV=/home/jocostello/shared/LG3_Pipeline/patient_ID_conversions.txt
+CONV=patient_ID_conversions.txt
 
 echo -n "Submitting jobs for $PATIENT "
 date
-/home/jocostello/shared/LG3_Pipeline/scripts/mutdet_submit.sh $PATIENT $CONV $PROJ
+"${LG3_HOME}/scripts/mutdet_submit.sh" $PATIENT $CONV $PROJ
