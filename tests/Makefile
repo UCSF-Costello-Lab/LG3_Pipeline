@@ -1,9 +1,19 @@
+.EXPORT_ALL_VARIABLES:
+
 SHELL:=/bin/bash
 
+LG3_HOME:=$(shell dirname $(CURDIR))
+LG3_OUTPUT_DIR:=output
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
 
 .PHONY: test
+
+debug:
+	@echo "LG3_HOME: $$LG3_HOME (hardcoded to parent directory)"
+	@echo "EMAIL: $$EMAIL"
+	@echo "LG3_OUTPUT_DIR: $$LG3_OUTPUT_DIR (hardcoded)"
+	@echo "LG3_PROJECT_DIR: $$LG3_PROJECT_DIR"
 
 setup: setup-P157
 
