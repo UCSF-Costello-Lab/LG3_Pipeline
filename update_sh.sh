@@ -2,16 +2,18 @@
 
 ## Background: https://github.com/UCSF-Costello-Lab/LG3_Pipeline/issues/3
 
+DEBUG=false
+
 ## Make sure to work with the original files
 git checkout -- scripts/*.sh
 
-make check_sh || { echo "ERROR: 'make check_sh' failed on fresh files"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed on fresh files"; exit 1; }
 
 ## Inject 'Configuration' section on top of each script
 ## directly after the shebang
 sed -i -e '/#![/]/a\' -e '\n### Configuration\n' scripts/*.sh
 
-make check_sh || { echo "ERROR: 'make check_sh' failed on fresh files"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed on fresh files"; exit 1; }
 
 ## Inject LG3_HOME in the Configuration section
 sed -i -e '/### Configuration/a\' -e 'LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}' scripts/*.sh
@@ -69,23 +71,23 @@ sed -i -E 's| [$]THOUSAND | "$THOUSAND" |g' scripts/*.sh
 sed -i -e '/source "${LG3_HOME}[/]FilterMutations[/]filter.profile.sh"/i \        # shellcheck source=FilterMutations/filter.profile.sh' scripts/MutDet.sh
 sed -i -e '/source "${LG3_HOME}[/]FilterMutations[/]filter.profile.sh"/i \        # shellcheck source=FilterMutations/filter.profile.sh' scripts/Rob-MutDet-hg18.sh
 
-make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_HOME"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_HOME"; exit 1; }
 
 ## Inject quoted usages of ${LG3_PROJECT_DIR}
 sed -i 's|/costellolab/data1/jocostello/${project}/|${LG3_PROJECT_DIR}/|g' scripts/*.sh
 
-make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_PROJECT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_PROJECT_DIR"; exit 1; }
 
 ## Inject quoted usages of ${LG3_OUTPUT_DIR}
 sed -i 's|/costellolab/data1/jocostello/LG3/|${LG3_OUTPUT_DIR}/|g' scripts/*.sh
 sed -i -E 's|([^o]) [$][{]LG3_OUTPUT_DIR[}]/([^ ]*)|\1 "${LG3_OUTPUT_DIR}/\2"|g' scripts/*.sh
 
-make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_OUTPUT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_OUTPUT_DIR"; exit 1; }
 
 ## Manual: Drop unused code; use $USER instead of $U
 sed -i '/U=$(whoami)/d' scripts/*.sh
 
-make check_sh || { echo "ERROR: 'make check_sh' failed after U -> USER"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after U -> USER"; exit 1; }
 
 ## Inject quoted usages of ${SCRATCHDIR}
 sed -i -E 's|([^-])/scratch/jocostello|\1${SCRATCHDIR}|g' scripts/*.sh
@@ -94,7 +96,7 @@ sed -i -E 's|([^-])/scratch/[$]U/|\1${SCRATCHDIR}/|g' scripts/*.sh
 sed -i -E 's|^TMP="/scratch"|TMP=${SCRATCHDIR}|g' scripts/*.sh
 sed -i -E 's|([^"])[$][{]TMP[}]|\1"${TMP}"|g' scripts/*.sh
 
-make check_sh || { echo "ERROR: 'make check_sh' failed after SCRATCHDIR"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after SCRATCHDIR"; exit 1; }
 
 ## Manual source /home/jocostello/.bashrc -> source "${LG3_HOME}/.bashrc"
 sed -i -E 's|^source /home/jocostello/.bashrc|source "${LG3_HOME}/.bashrc"|g' scripts/*.sh
@@ -130,3 +132,7 @@ echo "$res"
 
 ## REMAINING: Remaining hardcoded paths
 grep -E "[^-]/home" scripts/*.sh
+
+
+## FINAL CHECK
+make check_sh || { echo "ERROR: Final 'make check_sh' failed"; exit 1; }

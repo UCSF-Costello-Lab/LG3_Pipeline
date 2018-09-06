@@ -2,6 +2,8 @@
 
 ## Background: https://github.com/UCSF-Costello-Lab/LG3_Pipeline/issues/3
 
+DEBUG=false
+
 ## Make sure to work with the original files
 git checkout -- *.pbs
 
@@ -27,24 +29,24 @@ sed -i -E 's|^[$][{]LG3_HOME[}]/([^ ]*)|"${LG3_HOME}/\1"|g' *.pbs
 ## Quote usages of variables that now depend on LG3_HOME
 sed -i -E 's|^[$]BIN/([^ ]+)|"$BIN/\1"|g' *.pbs
 
-make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_HOME"; exit 1; }
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_HOME"; exit 1; }
 
 ## Inject quoted usages of ${LG3_OUTPUT_DIR}
 sed -i 's|/costellolab/data1/jocostello/LG3/|${LG3_OUTPUT_DIR}/|g' *.pbs
 sed -i -E 's|([^o]) [$][{]LG3_OUTPUT_DIR[}]/([^ ]*)|\1 "${LG3_OUTPUT_DIR}/\2"|g' *.pbs
 
-make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_OUTPUT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_OUTPUT_DIR"; exit 1; }
 
 ## Inject quoted usages of ${LG3_PROJECT_DIR}
 sed -i 's|/costellolab/data1/jocostello/${PROJ}/|${LG3_PROJECT_DIR}/|g' *.pbs
 
-make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_PROJECT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_PROJECT_DIR"; exit 1; }
 
 ## Manual: Drop unused code; use $USER instead of $U
 sed -i '/U=$(whoami)/d' *.pbs
 sed -i -E 's/[$]U([^S])/$USER\1/g' *.pbs
 
-make check_pbs || { echo "ERROR: 'make check_pbs' failed after U -> USER"; exit 1; }
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after U -> USER"; exit 1; }
 
 ## Inject quoted usages of ${SCRATCHDIR}
 sed -i -E 's|([^-])/scratch/jocostello|\1${SCRATCHDIR}|g' *.pbs
@@ -63,7 +65,7 @@ sed -i '/cd "[/]scratch" ||/d' Align_bam.pbs
 ## Manual: Tweak message
 sed -i 's|Cleaning /scratch ...|Cleaning ${SCRATCHDIR} ...|' Recal_bigmem.pbs
 
-make check_pbs || { echo "ERROR: 'make check_pbs' failed after SCRATCHDIR"; exit 1; }
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after SCRATCHDIR"; exit 1; }
 
 
 ## VALIDATION: Should be empty
@@ -88,3 +90,6 @@ echo "$res"
 
 ## REMAINING: Remaining hardcoded paths
 grep -E "[^-]/home" *.pbs
+
+## FINAL CHECK
+make check_pbs || { echo "ERROR: Final 'make check_pbs' failed"; exit 1; }
