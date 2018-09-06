@@ -98,6 +98,7 @@ make check_sh || { echo "ERROR: 'make check_sh' failed after SCRATCHDIR"; exit 1
 
 ## Manual source /home/jocostello/.bashrc -> source "${LG3_HOME}/.bashrc"
 sed -i -E 's|^source /home/jocostello/.bashrc|source "${LG3_HOME}/.bashrc"|g' scripts/*.sh
+sed -i -e '/source "${LG3_HOME}[/].bashrc"/i # shellcheck source=.bashrc' scripts/*.sh
 
 ## VALIDATION: Should be empty
 res=$(grep -E '[$]U[^S]' scripts/*.sh)
