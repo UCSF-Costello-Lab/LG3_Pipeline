@@ -96,6 +96,9 @@ sed -i -E 's|([^"])[$][{]TMP[}]|\1"${TMP}"|g' scripts/*.sh
 
 make check_sh || { echo "ERROR: 'make check_sh' failed after SCRATCHDIR"; exit 1; }
 
+## Manual source /home/jocostello/.bashrc -> source "${LG3_HOME}/.bashrc"
+sed -i -E 's|^source /home/jocostello/.bashrc|source "${LG3_HOME}/.bashrc"|g' scripts/*.sh
+
 ## VALIDATION: Should be empty
 res=$(grep -E '[$]U[^S]' scripts/*.sh)
 echo "$res"
@@ -111,7 +114,18 @@ res=$(grep -E "[^-]/scratch" scripts/*.sh)
 echo "$res"
 [[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
 
+## Manual: Assume 'patient_ID_conversions.txt' in working directory
+sed -i 's|conv=/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt|conv=patient_ID_conversions.txt|g' scripts/chk_mutdet.sh
+
 ## VALIDATION: Should be empty
 res=$(grep -E "[^-]/costellolab" scripts/*.sh)
 echo "$res"
 [[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
+
+## VALIDATION: Should be empty
+res=$(grep -E "[^-]/home/jocostello" scripts/*.sh)
+echo "$res"
+[[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
+
+## REMAINING: Remaining hardcoded paths
+grep -E "[^-]/home" scripts/*.sh

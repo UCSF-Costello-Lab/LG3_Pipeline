@@ -81,4 +81,10 @@ res=$(grep -E '[$]U[^S]' *.pbs)
 echo "$res"
 [[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
 
+## VALIDATION: Should be empty
+res=$(grep -E "[^-]/home/jocostello" *.pbs)
+echo "$res"
+[[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
 
+## REMAINING: Remaining hardcoded paths
+grep -E "[^-]/home" *.pbs
