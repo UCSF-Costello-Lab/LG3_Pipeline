@@ -18,8 +18,11 @@ sed -i -e '/#![/]/a\' -e '\n### Configuration\n' scripts/*.sh
 ## Inject LG3_HOME in the Configuration section
 sed -i -e '/### Configuration/a\' -e 'LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}' scripts/*.sh
 
+## Inject LG3_OUTPUT_ROOT in the Configuration section
+sed -i -e '/^LG3_HOME/a\' -e 'LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}' scripts/*.sh
+
 ## Inject LG3_OUTPUT_DIR in the Configuration section
-sed -i -e '/^LG3_HOME/a\' -e 'LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-/costellolab/data1/jocostello/LG3}' scripts/*.sh
+sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-${LG3_OUTPUT_ROOT}/LG3}' scripts/*.sh
 
 ## Inject SCRATCHDIR in the Configuration section
 sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' scripts/*.sh
@@ -32,7 +35,7 @@ sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'project=LG3' scripts/*.sh
 
 ## Inject LG3_PROJECT_DIR in the Configuration section or after
 ## the last occurance of 'project='
-for ff in scripts/*.sh; do gawk -i inplace 'FNR==NR{ if (/project=/) p=NR; next} 1; FNR==p{ print "LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-/costellolab/data1/jocostello/${project:?}}" }' $ff $ff; done
+for ff in scripts/*.sh; do gawk -i inplace 'FNR==NR{ if (/project=/) p=NR; next} 1; FNR==p{ print "LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-${LG3_OUTPUT_ROOT}/${project:?}}" }' $ff $ff; done
 
 ## TAB -> 8 spaces
 sed -i -E 's|\t|        |g' scripts/*.sh

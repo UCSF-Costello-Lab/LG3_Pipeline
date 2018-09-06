@@ -14,11 +14,14 @@ for ff in *.pbs; do gawk -i inplace 'FNR==NR{ if (/#PBS/) p=NR; next} 1; FNR==p{
 ## Inject LG3_HOME in the Configuration section
 sed -i -e '/### Configuration/a\' -e 'LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}' *.pbs
 
+## Inject LG3_OUTPUT_ROOT in the Configuration section
+sed -i -e '/^LG3_HOME/a\' -e 'LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}' *.pbs
+
 ## Inject LG3_OUTPUT_DIR in the Configuration section
-sed -i -e '/^LG3_HOME/a\' -e 'LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-/costellolab/data1/jocostello/LG3}' *.pbs
+sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-${LG3_OUTPUT_ROOT}/LG3}' *.pbs
 
 ## Inject LG3_PROJECT_DIR in the Configuration section
-sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-/costellolab/data1/jocostello/${PROJ:?}}' *.pbs
+sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-${LG3_OUTPUT_ROOT}/${PROJ:?}}' *.pbs
 
 ## Inject SCRATCHDIR in the Configuration section
 sed -i -e '/^LG3_PROJECT_DIR/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' *.pbs
