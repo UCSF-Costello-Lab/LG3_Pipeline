@@ -1,6 +1,7 @@
 SHELL:=/bin/bash
 
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
+LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
 
 .PHONY: test
 
@@ -10,6 +11,9 @@ setup-annotation:
 	ln -fs $(LG3_HOME_HIDE)/resources .
 	ln -fs $(LG3_HOME_HIDE)/tools .
 	ln -fs $(LG3_HOME_HIDE)/AnnoVar .
+	ln -fs $(LG3_HOME_HIDE)/pykent .
+	## Location of links to FASTQ.gz files
+	ln -fs $(LG3_TEST_DATA_DIR) rawdata
 	ln -fs ../runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
 
 setup-P157: setup-annotation

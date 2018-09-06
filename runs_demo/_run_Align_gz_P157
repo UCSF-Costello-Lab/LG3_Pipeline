@@ -2,7 +2,6 @@
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-/costellolab/data1/jocostello/LG3}
-LG3_TEST_DATA_DIR=/costellolab/data1/ismirnov/tmp
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 
 QSUB_OPTS=
@@ -12,19 +11,17 @@ if [[ -n ${EMAIL} ]]; then
   QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
 fi
 
-## Location of FASTQ.gz files
-RAW=${LG3_TEST_DATA_DIR}
 ## Location of output: aligned BAMs
 ALIGN=${LG3_OUTPUT_DIR}/exomes
 
 for N in 599 600 601
 do
 	Z=Z00${N}
-	FQ1=$RAW/${Z}-trim/${Z}-trim_R1.fastq.gz
-	FQ2=$RAW/${Z}-trim/${Z}-trim_R2.fastq.gz
+	FQ1=rawdata/${Z}-trim/${Z}-trim_R1.fastq.gz
+	FQ2=rawdata/${Z}-trim/${Z}-trim_R2.fastq.gz
 
 	if [ ! -r $FQ1 ] || [ ! -r $FQ2 ]; then
-		echo "ERROR: Can't open $Z in $RAW" 
+		echo "ERROR: Can't open $Z from rawdata/"
 	else
 		if [ -f "${ALIGN}/${Z}.trim.bwa.sorted.bam" ]; then
 			echo "WARNING: already aligned: $ALIGN/${Z}.trim.bwa.sorted.bam"
