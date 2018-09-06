@@ -1,6 +1,7 @@
 #!/bin/bash
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-/costellolab/data1/jocostello/LG3}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 
 QSUB_OPTS=
