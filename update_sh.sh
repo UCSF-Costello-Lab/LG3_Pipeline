@@ -87,16 +87,22 @@ sed -i '/U=$(whoami)/d' scripts/*.sh
 
 make check_sh || { echo "ERROR: 'make check_sh' failed after U -> USER"; exit 1; }
 
-exit 0
 ## Inject quoted usages of ${SCRATCHDIR}
 sed -i -E 's|([^-])/scratch/jocostello|\1${SCRATCHDIR}|g' scripts/*.sh
 sed -i -E 's|([^-])/scratch/[$]USER|\1${SCRATCHDIR}|g' scripts/*.sh
 sed -i -E 's|([^-])/scratch/[$]U/|\1${SCRATCHDIR}/|g' scripts/*.sh
+sed -i -E 's|^TMP="/scratch"|TMP=${SCRATCHDIR}|g' scripts/*.sh
+sed -i -E 's|([^"])[$][{]TMP[}]|\1"${TMP}"|g' scripts/*.sh
 
 make check_sh || { echo "ERROR: 'make check_sh' failed after SCRATCHDIR"; exit 1; }
 
 ## VALIDATION: Should be empty
-res=$(grep -E "[^-]/costellolab" scripts/*.sh)
+res=$(grep -E '[$]U[^S]' scripts/*.sh)
+echo "$res"
+[[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
+
+## VALIDATION: Should be empty
+res=$(grep -F '${project]' scripts/*.sh)
 echo "$res"
 [[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
 
@@ -106,11 +112,6 @@ echo "$res"
 [[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
 
 ## VALIDATION: Should be empty
-res=$(grep -E '[$]U[^S]' scripts/*.sh)
-echo "$res"
-[[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
-
-## VALIDATION: Should be empty
-res=$(grep -F '${project]' scripts/*.sh)
+res=$(grep -E "[^-]/costellolab" scripts/*.sh)
 echo "$res"
 [[ -z "$res" ]] || { echo "ERROR: Hardcoded paths still found"; exit 1; }
