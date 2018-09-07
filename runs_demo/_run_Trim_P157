@@ -8,7 +8,7 @@ echo "LG3_HOME=${LG3_HOME}"
 echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
 echo "EMAIL=${EMAIL}"
 
-QSUB_OPTS=-d $(pwd)
+QSUB_OPTS="-d $(pwd)"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
