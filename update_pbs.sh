@@ -20,6 +20,11 @@ sed -i -e '/^LG3_HOME/a\' -e 'LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/da
 ## Inject SCRATCHDIR in the Configuration section
 sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' *.pbs
 
+## Inject LG3_DEBUG in the Configuration section
+sed -i -e '/^SCRATCHDIR/a\' -e 'LG3_DEBUG=${LG3_DEBUG:-true}' *.pbs
+
+sed -i -e '/^LG3_DEBUG/a\' -e '\n### Debug\nif [[ $LG3_DEBUG ]]; then\n  echo "LG3_HOME=$LG3_HOME"\n  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"\n  echo "SCRATCHDIR=$SCRATCHDIR"\n  echo "PWD=$PWD"\n  echo "USER=$USER"\nfi\n' *.pbs
+
 ## Inject quoted usages of ${LG3_HOME}
 sed -i 's|/home/jocostello/shared/LG3_Pipeline/|${LG3_HOME}/|g' *.pbs
 sed -i -E 's|^[$][{]LG3_HOME[}]/([^ ]*)|"${LG3_HOME}/\1"|g' *.pbs

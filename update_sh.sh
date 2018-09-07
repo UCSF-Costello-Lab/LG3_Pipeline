@@ -27,7 +27,7 @@ sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}
 ## Inject LG3_DEBUG in the Configuration section
 sed -i -e '/^SCRATCHDIR/a\' -e 'LG3_DEBUG=${LG3_DEBUG:-true}' scripts/*.sh
 
-sed -i -e '/^LG3_DEBUG/a\' -e '\n### Debug\nif [[ $LG3_DEBUG ]]; then\n  echo "LG3_HOME=$LG3_HOME"\n  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"\n  echo "SCRATCHDIR=$SCRATCHDIR"\n  echo "PWD=$(pwd)"\n  echo "USER=$USER"\nfi\n' scripts/*.sh
+sed -i -e '/^LG3_DEBUG/a\' -e '\n### Debug\nif [[ $LG3_DEBUG ]]; then\n  echo "LG3_HOME=$LG3_HOME"\n  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"\n  echo "SCRATCHDIR=$SCRATCHDIR"\n  echo "PWD=$PWD"\n  echo "USER=$USER"\nfi\n' scripts/*.sh
 
 ## TAB -> 8 spaces
 sed -i -E 's|\t|        |g' scripts/*.sh
