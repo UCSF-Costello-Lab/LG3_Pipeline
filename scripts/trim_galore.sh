@@ -66,7 +66,7 @@ fi
 
 ### Default: --length 20 --quality 20 --stringency 1
 ### --fastqc
-time $TG --paired --quality "$QTY" --length "$LEN" --stringency 1 --path_to_cutadapt $CUTADAPT --illumina "$FQ1" "$FQ2" || { echo "[trim_galore] ERROR: trim_galore FAILED"; exit 1; }
+time $TG --paired --quality "$QTY" --length "$LEN" --stringency 1 --path_to_cutadapt "$CUTADAPT" --illumina "$FQ1" "$FQ2" || { echo "[trim_galore] ERROR: trim_galore FAILED"; exit 1; }
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
 
