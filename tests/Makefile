@@ -6,13 +6,14 @@ LG3_HOME:=$(shell dirname $(CURDIR))
 LG3_OUTPUT_ROOT:=output
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
-
+PROJ:=LG3
 
 .PHONY: test
 
 debug:
 	@echo "LG3_HOME: $$LG3_HOME (hardcoded to parent directory)"
 	@echo "LG3_OUTPUT_ROOT: $$LG3_OUTPUT_ROOT (hardcoded)"
+	@echo "PROJ: $$PROJ (hardcoded; FIXME: Should not be needed)"
 	@echo "EMAIL: $$EMAIL"
 
 setup: setup-P157
@@ -22,6 +23,10 @@ ifeq ($(wildcard output/.),)
 	@echo "ERROR: Directory output/ is missing"
 	@exit 1
 endif
+
+clean: 
+	rm -f resources tools AnnoVar pykent rawdata patient_ID_conversions.txt
+	rm -f _run_*
 
 setup-annotation: setup-assert
 	ln -fs $(LG3_HOME_HIDE)/resources .

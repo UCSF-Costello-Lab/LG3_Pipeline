@@ -8,12 +8,14 @@ echo "LG3_HOME=${LG3_HOME}"
 echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
 echo "EMAIL=${EMAIL}"
 
-QSUB_OPTS="-d $(pwd)"
+QSUB_OPTS="-d ${PWD:?} -v LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
   QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
 fi
+
+echo "QSUB_OPTS=${QSUB_OPTS}"
 
 PBS=${LG3_HOME}/trim_galore.pbs
 
