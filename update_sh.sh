@@ -21,26 +21,13 @@ sed -i -e '/### Configuration/a\' -e 'LG3_HOME=${LG3_HOME:-/home/jocostello/shar
 ## Inject LG3_OUTPUT_ROOT in the Configuration section
 sed -i -e '/^LG3_HOME/a\' -e 'LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}' scripts/*.sh
 
-## Inject LG3_OUTPUT_DIR in the Configuration section
-sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-${LG3_OUTPUT_ROOT}/LG3}' scripts/*.sh
-
 ## Inject SCRATCHDIR in the Configuration section
-sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' scripts/*.sh
-
-## Drop project=LG3
-sed -i '/project=LG3/d' scripts/*.sh
-
-## Inject 'project' in the Configuration section
-sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'project=LG3' scripts/*.sh
-
-## Inject LG3_PROJECT_DIR in the Configuration section or after
-## the last occurance of 'project='
-for ff in scripts/*.sh; do gawk -i inplace 'FNR==NR{ if (/project=/) p=NR; next} 1; FNR==p{ print "LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-${LG3_OUTPUT_ROOT}/${project:?}}" }' $ff $ff; done
+sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' scripts/*.sh
 
 ## Inject LG3_DEBUG in the Configuration section
 sed -i -e '/^SCRATCHDIR/a\' -e 'LG3_DEBUG=${LG3_DEBUG:-true}' scripts/*.sh
 
-sed -i -e '/^LG3_DEBUG/a\' -e '\n### Debug\nif [[ $LG3_DEBUG ]]; then\n  echo "LG3_HOME=$LG3_HOME"\n  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"\n  echo "LG3_OUTPUT_DIR=$LG3_OUTPUT_DIR"\n  echo "LG3_PROJECT_DIR=$LG3_PROJECT_DIR"\n  echo "SCRATCHDIR=$SCRATCHDIR"\n  echo "PWD=$(pwd)"\n  echo "USER=$USER"\nfi\n' scripts/*.sh
+sed -i -e '/^LG3_DEBUG/a\' -e '\n### Debug\nif [[ $LG3_DEBUG ]]; then\n  echo "LG3_HOME=$LG3_HOME"\n  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"\n  echo "SCRATCHDIR=$SCRATCHDIR"\n  echo "PWD=$(pwd)"\n  echo "USER=$USER"\nfi\n' scripts/*.sh
 
 ## TAB -> 8 spaces
 sed -i -E 's|\t|        |g' scripts/*.sh
@@ -81,16 +68,16 @@ sed -i -e '/source "${LG3_HOME}[/]FilterMutations[/]filter.profile.sh"/i \      
 
 [[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_HOME"; exit 1; }
 
-## Inject quoted usages of ${LG3_PROJECT_DIR}
-sed -i 's|/costellolab/data1/jocostello/${project}/|${LG3_PROJECT_DIR}/|g' scripts/*.sh
+## Inject quoted usages of ${LG3_OUTPUT_ROOT}/${project:?}
+sed -i 's|/costellolab/data1/jocostello/${project}/|${LG3_OUTPUT_ROOT}/${project:?}/|g' scripts/*.sh
 
-[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_PROJECT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_OUTPUT_ROOT/project"; exit 1; }
 
-## Inject quoted usages of ${LG3_OUTPUT_DIR}
-sed -i 's|/costellolab/data1/jocostello/LG3/|${LG3_OUTPUT_DIR}/|g' scripts/*.sh
-sed -i -E 's|([^o]) [$][{]LG3_OUTPUT_DIR[}]/([^ ]*)|\1 "${LG3_OUTPUT_DIR}/\2"|g' scripts/*.sh
+## Inject quoted usages of ${LG3_OUTPUT_ROOT}/LG3
+sed -i 's|/costellolab/data1/jocostello/LG3/|${LG3_OUTPUT_ROOT}/LG3/|g' scripts/*.sh
+sed -i -E 's|([^o]) [$][{]LG3_OUTPUT_ROOT[}]/([^ ]*)|\1 "${LG3_OUTPUT_ROOT}/\2"|g' scripts/*.sh
 
-[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_OUTPUT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_sh || { echo "ERROR: 'make check_sh' failed after LG3_OUTPUT_ROOT/LG3"; exit 1; }
 
 ## Manual: Drop unused code; use $USER instead of $U
 sed -i '/U=$(whoami)/d' scripts/*.sh

@@ -17,14 +17,8 @@ sed -i -e '/### Configuration/a\' -e 'LG3_HOME=${LG3_HOME:-/home/jocostello/shar
 ## Inject LG3_OUTPUT_ROOT in the Configuration section
 sed -i -e '/^LG3_HOME/a\' -e 'LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}' *.pbs
 
-## Inject LG3_OUTPUT_DIR in the Configuration section
-sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'LG3_OUTPUT_DIR=${LG3_OUTPUT_DIR:-${LG3_OUTPUT_ROOT}/LG3}' *.pbs
-
-## Inject LG3_PROJECT_DIR in the Configuration section
-sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-${LG3_OUTPUT_ROOT}/${PROJ:?}}' *.pbs
-
 ## Inject SCRATCHDIR in the Configuration section
-sed -i -e '/^LG3_PROJECT_DIR/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' *.pbs
+sed -i -e '/^LG3_OUTPUT_ROOT/a\' -e 'SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}' *.pbs
 
 ## Inject quoted usages of ${LG3_HOME}
 sed -i 's|/home/jocostello/shared/LG3_Pipeline/|${LG3_HOME}/|g' *.pbs
@@ -34,16 +28,19 @@ sed -i -E 's|^[$]BIN/([^ ]+)|"$BIN/\1"|g' *.pbs
 
 [[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_HOME"; exit 1; }
 
-## Inject quoted usages of ${LG3_OUTPUT_DIR}
-sed -i 's|/costellolab/data1/jocostello/LG3/|${LG3_OUTPUT_DIR}/|g' *.pbs
-sed -i -E 's|([^o]) [$][{]LG3_OUTPUT_DIR[}]/([^ ]*)|\1 "${LG3_OUTPUT_DIR}/\2"|g' *.pbs
+## Inject quoted usages of ${LG3_OUTPUT_ROOT}/LG3
+sed -i 's|/costellolab/data1/jocostello/LG3/|${LG3_OUTPUT_ROOT}/LG3/|g' *.pbs
 
-[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_OUTPUT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_OUTPUT_DIR/LG3"; exit 1; }
 
-## Inject quoted usages of ${LG3_PROJECT_DIR}
-sed -i 's|/costellolab/data1/jocostello/${PROJ}/|${LG3_PROJECT_DIR}/|g' *.pbs
+## Inject quoted usages of ${LG3_OUTPUT_ROOT}/${PROJ}
+sed -i 's|/costellolab/data1/jocostello/${PROJ}/|${LG3_OUTPUT_ROOT}/${PROJ}/|g' *.pbs
 
-[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_PROJECT_DIR"; exit 1; }
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after LG3_OUTPUT_ROOT/PROJ"; exit 1; }
+
+sed -i -E 's|([^o]) [$][{]LG3_OUTPUT_ROOT[}]/([^ ]*)|\1 "${LG3_OUTPUT_ROOT}/\2"|g' *.pbs
+
+[[ $DEBUG ]] || make check_pbs || { echo "ERROR: 'make check_pbs' failed after quoting LG3_OUTPUT_ROOT"; exit 1; }
 
 ## Manual: Drop unused code; use $USER instead of $U
 sed -i '/U=$(whoami)/d' *.pbs
