@@ -8,7 +8,8 @@ echo "LG3_HOME=${LG3_HOME}"
 echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
 echo "EMAIL=${EMAIL}"
 
-QSUB_OPTS="-d ${PWD:?} -v LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
@@ -21,10 +22,14 @@ PATIENT=Patient157
 PROJ=LG3
 
 CONV=patient_ID_conversions.txt
+
+## Requires absolute path 
+#TODO# CONV=$(readlink -e "$CONV")
+
 PBS=${LG3_HOME}/post_mutect_pindel.pbs
 
 "${LG3_HOME}/scripts/chk_pindel.sh" $PATIENT
 "${LG3_HOME}/scripts/chk_mutdet.sh" $PATIENT
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v PATIENT=$PATIENT,PROJ=$PROJ,CONV=$CONV "$PBS"
+qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJ=${PROJ},CONV=${CONV}" "$PBS"

@@ -6,9 +6,11 @@ EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 
 echo "LG3_HOME=${LG3_HOME}"
 echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+echo "LG3_RAW_DIR=${LG3_RAW_DIR}"
 echo "EMAIL=${EMAIL}"
 
-QSUB_OPTS="-d ${PWD:?} -v LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
@@ -22,20 +24,24 @@ ALIGN=${LG3_OUTPUT_DIR}/exomes
 
 for N in 599 600 601
 do
-	Z=Z00${N}
-	FQ1=rawdata/${Z}-trim/${Z}-trim_R1.fastq.gz
-	FQ2=rawdata/${Z}-trim/${Z}-trim_R2.fastq.gz
+	PREFIX=Z00${N}
+	FASTQ1=rawdata/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
+	FASTQ2=rawdata/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
 
-	if [ ! -r $FQ1 ] || [ ! -r $FQ2 ]; then
-		echo "ERROR: Can't open $Z from rawdata/"
+        ## Requires absolute path 
+        FASTQ1=$(readlink -e "$FASTQ1")
+        FASTQ2=$(readlink -e "$FASTQ2")
+	
+	if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2"} ]; then
+		echo "ERROR: Can't open $PREFIX from rawdata/"
 	else
-		if [ -f "${ALIGN}/${Z}.trim.bwa.sorted.bam" ]; then
-			echo "WARNING: already aligned: $ALIGN/${Z}.trim.bwa.sorted.bam"
-			echo "Skipping $Z ..."
+		if [ -f "${ALIGN}/${PREFIX}.trim.bwa.sorted.bam" ]; then
+			echo "WARNING: already aligned: $ALIGN/${PREFIX}.trim.bwa.sorted.bam"
+			echo "Skipping $PREFIX ..."
 		else
-		        echo "Submitting $Z ..."
+		        echo "Submitting $PREFIX ..."
 		        # shellcheck disable=SC2086
-			qsub ${QSUB_OPTS} -N Align_$Z -v FASTQ1=$FQ1,FASTQ2=$FQ2,PREFIX=$Z "${LG3_HOME}/Align_fastq.pbs"
+			qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX}" "${LG3_HOME}/Align_fastq.pbs"
 		fi
 	fi
 done

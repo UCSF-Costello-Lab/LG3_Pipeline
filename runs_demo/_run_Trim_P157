@@ -8,7 +8,8 @@ echo "LG3_HOME=${LG3_HOME}"
 echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
 echo "EMAIL=${EMAIL}"
 
-QSUB_OPTS="-d ${PWD:?} -v LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
@@ -25,12 +26,19 @@ QTY=20
 
 for N in 599 600 601
 do
-   Z=Z00${N}
-   if [ ! -r rawdata/${Z}_R1.fastq.gz ] || [ ! -r rawdata/${Z}_R1.fastq.gz ]; then
-      echo "ERROR: Can't open $Z from rawdata/"
+   PREFIX=Z00${N}
+   FASTQ1=rawdata/${PREFIX}_R1.fastq.gz
+   FASTQ2=rawdata/${PREFIX}_R2.fastq.gz
+
+   ## Requires absolute path 
+   FASTQ1=$(readlink -e "$FASTQ1")
+   FASTQ2=$(readlink -e "$FASTQ2")
+   
+   if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
+      echo "ERROR: Can't open $PREFIX from rawdata/"
    else
-      echo "Submitting $Z: quality $QTY ..."
+      echo "Submitting $PREFIX: quality $QTY ..."
       # shellcheck disable=SC2086
-      qsub ${QSUB_OPTS} -N trim${QTY}_$Z -v FASTQ1=rawdata/${Z}_R1.fastq.gz,FASTQ2=rawdata/${Z}_R2.fastq.gz,PREFIX=$Z,QTY=$QTY "$PBS"
+      qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY}" "$PBS"
    fi
 done

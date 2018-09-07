@@ -8,7 +8,8 @@ echo "LG3_HOME=${LG3_HOME}"
 echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
 echo "EMAIL=${EMAIL}"
 
-QSUB_OPTS="-d ${PWD:?} -v LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
@@ -18,9 +19,14 @@ fi
 echo "QSUB_OPTS=${QSUB_OPTS}"
 
 ILIST=resources/SeqCap_EZ_Exome_v3_capture.interval_list
+
 PBS=${LG3_HOME}/Recal_bigmem.pbs
 
 D=${LG3_OUTPUT_DIR}/exomes
+
+## Requires absolute path 
+#TODO# D=$(readlink -e "$D")
+#TODO# ILIST=$(readlink -e "$ILIST")
 
 PATIENT=Patient157
 NORMAL=Z00599
@@ -44,4 +50,4 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N Recal_$PATIENT -v "BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST" "$PBS"
+qsub ${QSUB_OPTS} -N Recal_$PATIENT -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST}" "$PBS"
