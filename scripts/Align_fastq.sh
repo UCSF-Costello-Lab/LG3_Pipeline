@@ -1,5 +1,11 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
@@ -8,11 +14,12 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=${LG3_HOME:?}"
+  echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
 fi
 
 
@@ -33,6 +40,7 @@ BWA_INDEX=${LG3_HOME}/resources/bwa_indices/hg19.bwa
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 PYTHON=/usr/bin/python
+unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 pl="Illumina"
 pu="Exome"
 
@@ -42,12 +50,12 @@ prefix=$3
 
 ### Input
 echo "Input:"
-echo "fastq1=${fastq1:?}"
-echo "fastq2=${fastq2:?}"
-echo "prefix=${prefix:?}"
+echo "- fastq1=${fastq1:?}"
+echo "- fastq2=${fastq2:?}"
+echo "- prefix=${prefix:?}"
 
 TMP="${SCRATCHDIR}/$prefix/tmp"
-mkdir -p "$TMP"
+mkdir -p "${TMP}" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
 
 echo "-------------------------------------------------"
 echo "[Align] BWA alignment!"
@@ -125,3 +133,5 @@ $SAMTOOLS flagstat "${prefix}.trim.bwa.sorted.bam" > "${prefix}.trim.bwa.sorted.
 echo "[QC] Finished!"
 echo "-------------------------------------------------"
 rm -rf "$TMP"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
