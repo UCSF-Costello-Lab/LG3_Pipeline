@@ -1,5 +1,10 @@
 #!/bin/bash
 
+PROGRAM=$BASH_SOURCE
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
@@ -8,11 +13,16 @@ EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
-echo "LG3_HOME=${LG3_HOME}"
-echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
-echo "EMAIL=${EMAIL}"
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+echo "- DIROUT=${DIROUT}"
+echo "- EMAIL=${EMAIL}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+if [[ -n ${DIROUT} ]]; then
+  QSUB_ENVVARS="${QSUB_ENVVARS},DIROUT=${DIROUT}"
+fi
 QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
@@ -21,6 +31,7 @@ if [[ -n ${EMAIL} ]]; then
 fi
 
 echo "QSUB_OPTS=${QSUB_OPTS}"
+echo "QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/trim_galore.pbs
 
@@ -46,3 +57,5 @@ do
       qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY}" "$PBS"
    fi
 done
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

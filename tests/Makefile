@@ -7,20 +7,20 @@ LG3_OUTPUT_ROOT:=output
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
 PROJ:=LG3
+DIROUT:=$(LG3_OUTPUT_ROOT)  ## Needed by trim_galore.pbs
 
 .PHONY: test
 
 debug:
 	@echo "LG3_HOME: $$LG3_HOME (hardcoded to parent directory)"
 	@echo "LG3_OUTPUT_ROOT: $$LG3_OUTPUT_ROOT (hardcoded)"
+	@echo "DIROUT: $$DIROUT (== LG3_OUTPUT_ROOT; hardcoded)"
 	@echo "PROJ: $$PROJ (hardcoded; FIXME: Should not be needed)"
 	@echo "EMAIL: $$EMAIL"
 
-setup: setup-P157
-
 setup-assert:
-ifeq ($(wildcard output/.),)
-	@echo "ERROR: Directory output/ is missing"
+ifeq ($(wildcard $(LG3_OUTPUT_ROOT)/.),)
+	@echo "ERROR: Directory $(LG3_OUTPUT_ROOT)/ is missing"
 	@exit 1
 endif
 
@@ -45,8 +45,10 @@ setup-P157: setup-annotation
 	cp ../runs_demo/_run_MutDet_P157 .
 	cp ../runs_demo/_run_PostMut_P157 .
 
-step3-P157: setup-P157
+setup: setup-P157
+
+step3: setup
 	./_run_Trim_P157
 
-step4-P157: setup-P157
+step4: setup
 	./_run_Align_gz_P157

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+PROGRAM=$BASH_SOURCE
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
@@ -8,11 +13,12 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
 fi
 
 
@@ -60,4 +66,5 @@ fi
 ### --fastqc
 time $TG --paired --quality "$QTY" --length "$LEN" --stringency 1 --path_to_cutadapt $CUTADAPT --illumina "$FQ1" "$FQ2" || { echo "[trim_galore] ERROR: trim_galore FAILED"; exit 1; }
 
-exit 0
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
+

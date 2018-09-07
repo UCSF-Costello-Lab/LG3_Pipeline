@@ -4,43 +4,56 @@
 #PBS -l nodes=1:ppn=1,vmem=4gb
 #PBS -m ae
 
+PROGRAM=$BASH_SOURCE
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
-### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
-fi
+## AD HOC: Make it possible to override DIROUT
+DIROUT=${DIROUT:-$(dirname "$FASTQ1")}
 
 ### Input
-FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
-FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
 echo "Input:"
-echo "FASTQ1=${FASTQ1:?}"
-echo "FASTQ2=${FASTQ2:?}"
-echo "PREFIX=${PREFIX:?}"
-echo "QTY=${QTY:?}"
+echo "- FASTQ1=${FASTQ1:?}"
+echo "- FASTQ2=${FASTQ2:?}"
+echo "- PREFIX=${PREFIX:?}"
+echo "- QTY=${QTY:?}"
+echo "- DIROUT=${DIROUT}"
 
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+fi
+
+## Requires absolute paths
+FASTQ1=$(readlink -e "${FASTQ1:?}")
+FASTQ2=$(readlink -e "${FASTQ2:?}")
+echo "FASTQ1=${FASTQ1:?} (expanded)"
+echo "FASTQ2=${FASTQ2:?} (expanded)"
+
+OPWD=${PWD:?}
 PROG=trim_galore
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
-OPWD=${PWD:?}
-WDIR=${SCRATCHDIR}/${PREFIX}-trim
-DIROUT=$(dirname "$FASTQ1")
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
-echo "DIROUT=${DIROUT}"
 
+WDIR=${SCRATCHDIR}/${PREFIX}-trim
+echo "WDIR=${WDIR}"
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 echo "Current working directory: ${PWD}"
@@ -65,9 +78,13 @@ cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
 
 cp -r -p "${WDIR}" "${DIROUT}"
+
+echo "Removing directory (recursively): ${WDIR}"
 rm -rf "${WDIR}"
 
 ls -s "${DIROUT}/${PREFIX}-trim"
 
 echo "End of PBS script!"
 date
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
