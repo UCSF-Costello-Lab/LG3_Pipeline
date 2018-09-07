@@ -42,6 +42,9 @@ NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE as $USER"
 echo "Using node(s): $NODES"
 
+DEST="${LG3_OUTPUT_ROOT}/LG3/exomes"
+mkdir -p "${DEST}" || { echo "Can't create destination directory ${DEST}"; exit 1; }
+
 WDIR=${SCRATCHDIR}/${PREFIX}
 
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
@@ -58,7 +61,7 @@ rm "$FQ1" "$FQ2"
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
 
-cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/LG3/exomes/"
+cp -r -p "${WDIR}" "${DEST}/"
 rm -rf "${WDIR:?}"
 
 echo "End of script!"

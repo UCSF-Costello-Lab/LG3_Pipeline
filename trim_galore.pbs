@@ -54,6 +54,8 @@ echo "Using node(s): $NODES"
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
+mkdir -p "${DIROUT}" || { echo "Can't create destination directory ${DIROUT}"; exit 1; }
+
 WDIR=${SCRATCHDIR}/${PREFIX}-trim
 echo "WDIR=${WDIR}"
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
