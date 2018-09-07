@@ -59,6 +59,11 @@ echo "LEN=${LEN:?}"
 echo "QTY=${QTY:?}"
 echo "STRINGENCY=${STRINGENCY:?} (not used; always using 1)"
 
+echo "Software:"
+echo "- TG=${TG:?}"
+echo "- CUTADAPT=${CUTADAPT:?}"
+[[ -x "$TG" ]] || { echo "Not an executable: ${TG}"; exit 1; }
+
 if [ ! -r "$FQ1" ] || [ ! -r "$FQ2" ]; then
         echo "[trim_galore] ERROR: Can't open $FQ1 or $FQ2 !"
         exit 1

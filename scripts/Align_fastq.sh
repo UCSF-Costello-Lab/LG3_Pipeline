@@ -41,6 +41,17 @@ JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 PYTHON=/usr/bin/python
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
+
+echo "Software:"
+echo "- JAVA=${JAVA:?}"
+echo "- PYTHON=${PYTHON:?}"
+echo "- BWA=${BWA:?}"
+echo "- SAMTOOLS=${SAMTOOLS:?}"
+[[ -x "$JAVA" ]]     || { echo "Not an executable: ${JAVA}"; exit 1; }
+[[ -x "$PYTHON" ]]   || { echo "Not an executable: ${PYTHON}"; exit 1; }
+[[ -x "$BWA" ]]      || { echo "Not an executable: ${BWA}"; exit 1; }
+[[ -x "$SAMTOOLS" ]] || { echo "Not an executable: ${SAMTOOLS}"; exit 1; }
+
 pl="Illumina"
 pu="Exome"
 
