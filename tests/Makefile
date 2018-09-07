@@ -46,6 +46,7 @@ step3: setup
 	LG3_INPUT_ROOT=rawdata \
 	LG3_OUTPUT_ROOT=output \
 	DIROUT=output \
+	TG=/home/shared/cbc/software_frozen/20180907-LG3_Pipeline/TrimGalore-0.4.4/trim_galore \
 	./_run_Trim_P157
 
 step4: setup
