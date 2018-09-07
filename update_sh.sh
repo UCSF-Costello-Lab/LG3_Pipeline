@@ -37,6 +37,11 @@ sed -i -e '/^LG3_OUTPUT_DIR/a\' -e 'project=LG3' scripts/*.sh
 ## the last occurance of 'project='
 for ff in scripts/*.sh; do gawk -i inplace 'FNR==NR{ if (/project=/) p=NR; next} 1; FNR==p{ print "LG3_PROJECT_DIR=${LG3_PROJECT_DIR:-${LG3_OUTPUT_ROOT}/${project:?}}" }' $ff $ff; done
 
+## Inject LG3_DEBUG in the Configuration section
+sed -i -e '/^LG3_PROJECT_DIR/a\' -e 'LG3_DEBUG=${LG3_DEBUG:-true}' scripts/*.sh
+
+sed -i -e '/^LG3_DEBUG_DIR/a\' -e '\n### Debug\nif [[ $LG3_DEBUG ]]; then\n  echo "LG3_HOME=$LG3_HOME"\n  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"\n  echo "LG3_PROJECT_DIR=$LG3_PROJECT_DIR"\n  echo "SCRATCHDIR=$SCRATCHDIR"\n  echo "PWD=$(pwd)"\n  echo "USER=$USER"\nfi\n' scripts/*.sh
+
 ## TAB -> 8 spaces
 sed -i -E 's|\t|        |g' scripts/*.sh
 
