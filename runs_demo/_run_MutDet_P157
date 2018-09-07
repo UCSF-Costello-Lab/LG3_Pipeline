@@ -1,5 +1,11 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
@@ -8,9 +14,10 @@ EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
-echo "LG3_HOME=${LG3_HOME}"
-echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
-echo "EMAIL=${EMAIL}"
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+echo "- EMAIL=${EMAIL}"
 
 PATIENT=Patient157
 PROJ=LG3
@@ -23,3 +30,5 @@ CONV=patient_ID_conversions.txt
 echo -n "Submitting jobs for $PATIENT "
 date
 "${LG3_HOME}/scripts/mutdet_submit.sh" $PATIENT $CONV $PROJ
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

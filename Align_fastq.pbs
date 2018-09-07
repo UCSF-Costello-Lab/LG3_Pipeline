@@ -6,6 +6,12 @@
 #PBS -l nodes=1:bigmem:ppn=12,vmem=100gb
 #PBS -m ae
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
@@ -14,20 +20,21 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
 fi
 
 ### Input
 FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
 FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
 echo "Input:"
-echo "FASTQ1=${FASTQ1:?}"
-echo "FASTQ2=${FASTQ2:?}"
-echo "PREFIX=${PREFIX:?}"
+echo "- FASTQ1=${FASTQ1:?}"
+echo "- FASTQ2=${FASTQ2:?}"
+echo "- PREFIX=${PREFIX:?}"
 
 OPWD=${PWD:?}
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
@@ -56,3 +63,5 @@ rm -rf "${WDIR:?}"
 
 echo "End of script!"
 date
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

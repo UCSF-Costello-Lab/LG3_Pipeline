@@ -1,6 +1,12 @@
 #!/bin/bash
 ### Time 8h , 6 CPUs , vmem >= 2GB
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_RAW_DIR=${LG3_RAW_DIR:-$(readlink -e rawdata)}
@@ -10,9 +16,10 @@ EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
-echo "LG3_HOME=${LG3_HOME}"
-echo "LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
-echo "EMAIL=${EMAIL}"
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+echo "- EMAIL=${EMAIL}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="-d ${PWD:?}"
@@ -22,7 +29,9 @@ if [[ -n ${EMAIL} ]]; then
   QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
 fi
 
-echo "QSUB_OPTS=${QSUB_OPTS}"
+echo "Qsub extras:"
+echo "- QSUB_OPTS=${QSUB_OPTS}"
+echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PATIENT=Patient157
 PROJ=LG3
@@ -38,3 +47,4 @@ PBS=${LG3_HOME}/pindel_all.pbs
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},SAMPLE=${PATIENT},PROJ=${PROJ},CONV=${CONV}" "$PBS"
 
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

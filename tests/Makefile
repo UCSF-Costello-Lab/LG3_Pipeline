@@ -3,18 +3,13 @@
 SHELL:=/bin/bash
 
 LG3_HOME:=$(shell dirname $(CURDIR))
-LG3_OUTPUT_ROOT:=output
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
-PROJ:=LG3
-DIROUT:=$(LG3_OUTPUT_ROOT)  ## Needed by trim_galore.pbs
 
 .PHONY: test
 
 debug:
 	@echo "LG3_HOME: $$LG3_HOME (hardcoded to parent directory)"
-	@echo "LG3_OUTPUT_ROOT: $$LG3_OUTPUT_ROOT (hardcoded)"
-	@echo "DIROUT: $$DIROUT (== LG3_OUTPUT_ROOT; hardcoded)"
 	@echo "PROJ: $$PROJ (hardcoded; FIXME: Should not be needed)"
 	@echo "EMAIL: $$EMAIL"
 
@@ -48,7 +43,12 @@ setup-P157: setup-annotation
 setup: setup-P157
 
 step3: setup
+	LG3_INPUT_ROOT=rawdata \
+	LG3_OUTPUT_ROOT=output \
+	DIROUT=output \
 	./_run_Trim_P157
 
 step4: setup
+	LG3_INPUT_ROOT=output \
+	LG3_OUTPUT_ROOT=output \
 	./_run_Align_gz_P157
