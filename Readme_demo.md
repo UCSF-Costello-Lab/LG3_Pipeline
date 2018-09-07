@@ -67,7 +67,7 @@ Create symbolic link to test sample table: /home/jocostello/shared/LG3_Pipeline/
 ```
    
    
-#### 7 Copy _run_PostMut_P157 script to the main directory and run it
+#### 7 Copy _run_PostMut_P157 script to the main directory and run it (~1h)
 
 ```
 
