@@ -32,7 +32,7 @@ do
         FASTQ1=$(readlink -e "$FASTQ1")
         FASTQ2=$(readlink -e "$FASTQ2")
 	
-	if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2"} ]; then
+	if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
 		echo "ERROR: Can't open $PREFIX from rawdata/"
 	else
 		if [ -f "${ALIGN}/${PREFIX}.trim.bwa.sorted.bam" ]; then
