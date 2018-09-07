@@ -1,4 +1,21 @@
 #!/bin/bash
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 #
 ## Merge BAM files and enforce read group assignments
 #
@@ -9,16 +26,17 @@
 #$ -cwd
 #$ -j y
 #
-source /home/jocostello/.bashrc
+# shellcheck source=.bashrc
+source "${LG3_HOME}/.bashrc"
 PATH=/opt/R/R-latest/bin/R:$PATH
 
 #Define resources and tools
-TMP="/scratch"
+TMP=${SCRATCHDIR}
 pl="Illumina"
 pu="Exome"
-JAVA=/home/jocostello/shared/LG3_Pipeline/tools/java/jre1.6.0_27/bin/java
-PICARD=/home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64
-SAMTOOLS=/home/jocostello/shared/LG3_Pipeline/tools/samtools-0.1.18/samtools
+JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
+PICARD=${LG3_HOME}/tools/picard-tools-1.64
+SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 
 #Input variables
 bamfiles=$1
@@ -38,14 +56,14 @@ echo "[Merge] Merge BAM files..."
 # shellcheck disable=SC2086
 # Comment: Because how 'inputs' is created and used below
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
-	-jar $PICARD/MergeSamFiles.jar \
-	${inputs} \
-	OUTPUT="${prefix}.merged.bam" \
-	SORT_ORDER=coordinate \
-	TMP_DIR="${TMP}" \
-	VERBOSITY=WARNING \
-	QUIET=true \
-	VALIDATION_STRINGENCY=SILENT || { echo "Merge BAM files failed"; exit 1; }
+        -jar "$PICARD/MergeSamFiles.jar" \
+        ${inputs} \
+        OUTPUT="${prefix}.merged.bam" \
+        SORT_ORDER=coordinate \
+        TMP_DIR="${TMP}" \
+        VERBOSITY=WARNING \
+        QUIET=true \
+        VALIDATION_STRINGENCY=SILENT || { echo "Merge BAM files failed"; exit 1; }
 
 echo "[Merge] Index new BAM file..."
 $SAMTOOLS index "${prefix}.merged.bam" || { echo "First indexing failed"; exit 1; }
@@ -53,19 +71,19 @@ $SAMTOOLS index "${prefix}.merged.bam" || { echo "First indexing failed"; exit 1
 
 echo "[Merge] Coordinate-sort and enforce read group assignments..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
-	-jar $PICARD/AddOrReplaceReadGroups.jar \
-	INPUT="${prefix}.merged.bam" \
-	OUTPUT="${prefix}.merged.sorted.sam" \
-	SORT_ORDER=coordinate \
-	RGID="$prefix" \
-	RGLB="$prefix" \
-	RGPL=$pl \
-	RGPU=$pu \
-	RGSM="$prefix" \
-	TMP_DIR="${TMP}" \
-	VERBOSITY=WARNING \
-	QUIET=true \
-	VALIDATION_STRINGENCY=LENIENT || { echo "Sort failed"; exit 1; }
+        -jar "$PICARD/AddOrReplaceReadGroups.jar" \
+        INPUT="${prefix}.merged.bam" \
+        OUTPUT="${prefix}.merged.sorted.sam" \
+        SORT_ORDER=coordinate \
+        RGID="$prefix" \
+        RGLB="$prefix" \
+        RGPL=$pl \
+        RGPU=$pu \
+        RGSM="$prefix" \
+        TMP_DIR="${TMP}" \
+        VERBOSITY=WARNING \
+        QUIET=true \
+        VALIDATION_STRINGENCY=LENIENT || { echo "Sort failed"; exit 1; }
 
 rm -f "${prefix}.merged.bam"
 rm -f "${prefix}.merged.bam.bai"

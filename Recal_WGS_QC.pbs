@@ -4,6 +4,23 @@
 #PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
 #PBS -m ea -M ivan.smirnov@ucsf.edu
 
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
+
 ### Updated by Ivan
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
@@ -14,17 +31,17 @@ echo "Using node(s): $NODES"
 #BN=$(basename $BAMS .bam)
 #Z=${BN%%.*}
 
-#mkdir -p /scratch/$U/${Z}
+#mkdir -p ${SCRATCHDIR}/${Z}
 
-#cd /scratch/$U/${Z}
+#cd ${SCRATCHDIR}/${Z}
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_WGS_QC.sh "$BAMS" "$ILIST"
+"${LG3_HOME}/scripts/Recal_WGS_QC.sh" "$BAMS" "$ILIST"
 
-#cd /scratch/$U
+#cd ${SCRATCHDIR}
 
-#mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${Z}
-#cp -p /scratch/$U/${Z}/* /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
-#rm -rf /scratch/$U/${Z}
+#mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${Z}"
+#cp -p ${SCRATCHDIR}/${Z}/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}" || { echo "ERROR cp!" ; exit 1 ; }
+#rm -rf ${SCRATCHDIR}/${Z}
 
 echo -n "End of PBS script! "
 date

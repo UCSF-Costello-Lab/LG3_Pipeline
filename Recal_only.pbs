@@ -7,16 +7,32 @@
 #PBS -l nodes=1:bigmem:ppn=6
 #PBS -m ae
 
-U=$(whoami)
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
+
 date
-mkdir -p "/scratch/$U/${PATIENT}"
-cd "/scratch/$U/${PATIENT}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${PATIENT}"; exit 1; }
+mkdir -p "${SCRATCHDIR}/${PATIENT}"
+cd "${SCRATCHDIR}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}/${PATIENT}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh "$BAMS" "$PATIENT" "$ILIST"
+"${LG3_HOME}/scripts/Recal_bigmem.sh" "$BAMS" "$PATIENT" "$ILIST"
 
-cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
-cp -r -p  "/scratch/$U/${PATIENT}" /costellolab/data1/jocostello/LG3/exomes_recal/
-rm "/scratch/$U/${PATIENT}"
+cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
+cp -r -p  "${SCRATCHDIR}/${PATIENT}" "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/"
+rm "${SCRATCHDIR}/${PATIENT}"
 
 echo -n "End of script! "
 date

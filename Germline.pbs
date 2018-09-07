@@ -6,20 +6,37 @@
 #PBS -o _Germline_${PATIENT}.out
 #PBS -l nodes=1:bigmem:ppn=8,vmem=200gb
 #PBS -m ae
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output
 
-mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
-cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"
+cd "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+"${LG3_HOME}/scripts/Germline.sh" \
+      "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
       "${PATIENT}" \
       "$ILIST"
 

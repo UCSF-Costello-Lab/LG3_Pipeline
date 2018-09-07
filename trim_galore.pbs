@@ -3,29 +3,60 @@
 #PBS -o _trim_${PREFIX}.out
 #PBS -l nodes=1:ppn=1,vmem=4gb
 #PBS -m ae
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+### Input
+FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
+FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
+echo "Input:"
+echo "FASTQ1=${FASTQ1:?}"
+echo "FASTQ2=${FASTQ2:?}"
+echo "PREFIX=${PREFIX:?}"
+echo "QTY=${QTY:?}"
+
 PROG=trim_galore
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
-SCRATCH=/scratch/$USER/${PREFIX}-trim
+OPWD=${PWD:?}
+SCRATCH=${SCRATCHDIR}/${PREFIX}-trim
 DIROUT=$(dirname "$FASTQ1")
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
+echo "SCRATCH: ${SCRATCH}"
+echo "DIROUT: ${DIROUT}"
+
 mkdir -p "$SCRATCH"
 cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
+
+echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" .
 cp "$FASTQ2" .
 
-/home/jocostello/shared/LG3_Pipeline/scripts/trim_galore.sh -quality="$QTY" "$FASTQ1" "$FASTQ2" || { echo "ERROR: trim_galore FAILED"; exit 1; }
+"${LG3_HOME}/scripts/trim_galore.sh" -quality="$QTY" "$FASTQ1" "$FASTQ2" || { echo "ERROR: trim_galore FAILED"; exit 1; }
 
 rm "$FQ1" "$FQ2"
 
 if [ "$QTY" -eq 20 ]; then
-	QTY=""
+  QTY=""
 fi
 
 mv "${PREFIX}_R1_val_1.fq.gz" "${PREFIX}-trim${QTY}_R1.fastq.gz"
@@ -33,9 +64,11 @@ mv "${PREFIX}_R2_val_2.fq.gz" "${PREFIX}-trim${QTY}_R2.fastq.gz"
 mv "${PREFIX}_R1.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R1.trimming_report.txt"
 mv "${PREFIX}_R2.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R2.trimming_report.txt"
 
-cd .. || { echo "ERROR: Failed to set working directory to .."; exit 1; }
+cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 
-cp -r -p  "$SCRATCH" "$DIROUT"
+echo "Current working directory: ${PWD}"
+
+cp -r -p "$SCRATCH" "$DIROUT"
 rm -rf "$SCRATCH"
 
 ls -s "$DIROUT/${PREFIX}-trim"

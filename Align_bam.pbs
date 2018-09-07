@@ -7,14 +7,30 @@
 #PBS -l nodes=1:bigmem:ppn=12
 #PBS -m ae
 
-mkdir "/scratch/${PREFIX}"
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
 
-cd "/scratch/${PREFIX}" || { echo "ERROR: Failed to set working directory to /scratch/${PREFIX}"; exit 1; }
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Align_bam.sh "$BAM" "$PREFIX"
 
-cd "/scratch" || { echo "ERROR: Failed to set working directory to /scratch"; exit 1; }
 
-mv "/scratch/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/
+mkdir "${SCRATCHDIR}/${PREFIX}"
+
+cd "${SCRATCHDIR}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}/${PREFIX}"; exit 1; }
+
+"${LG3_HOME}/scripts/Align_bam.sh" "$BAM" "$PREFIX"
+
+
+mv "${SCRATCHDIR}/${PREFIX}" "${LG3_OUTPUT_ROOT}/LG3/exomes/"
 
 echo "End of script!"

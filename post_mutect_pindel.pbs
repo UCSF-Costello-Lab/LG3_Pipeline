@@ -1,11 +1,28 @@
 #!/bin/bash
 
-### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=/costellolab/data1/jocostello/LG3/exome/patient_ID_conversions.txt /path/to/pindel_all.pbs
+### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt /path/to/pindel_all.pbs
 #PBS -N ${PATIENT}.comb
 #PBS -e ${PATIENT}.muts.err
 #PBS -o ${PATIENT}.muts.out
 #PBS -l nodes=1:ppn=1,vmem=32gb
 #PBS -m ae
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 
 PROG=$(basename "$0")
 OK() {
@@ -20,21 +37,21 @@ echo "Project: ${PROJ}"
 echo "Conversion file: ${CONV}"
 echo "----------------------------------"
 
-BIN=/home/jocostello/shared/LG3_Pipeline/scripts
+BIN=${LG3_HOME}/scripts
 
-mkdir -p "/costellolab/data1/jocostello/${PROJ}/MutInDel"
-cd "/costellolab/data1/jocostello/${PROJ}/MutInDel" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}/${PROJ}/MutInDel"
+cd "${LG3_OUTPUT_ROOT}/${PROJ}/MutInDel" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 
 echo -e "\n************ Cat all SNV files per patient"
-$BIN/combine_snvs.sh "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"$BIN/combine_snvs.sh" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Annotate mutations from aligned bam files"
-$BIN/annotate_mutations_from_bam.sh "${CONV}" "${PATIENT}" "${PROJ}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"$BIN/annotate_mutations_from_bam.sh" "${CONV}" "${PATIENT}" "${PROJ}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Convert library IDs to patient IDs"
-$BIN/libID_to_patientID.sh "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"$BIN/libID_to_patientID.sh" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
@@ -42,19 +59,19 @@ echo -e "\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mu
 OK "$LINENO"
 
 echo -e "\n************ Combine indels and snvs into one file"
-/opt/R/R-latest/bin/Rscript "$BIN/combine_snvs_pindel.R" "${PATIENT}.snvs.anno.pat.filt.txt" "/costellolab/data1/jocostello/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+/opt/R/R-latest/bin/Rscript "$BIN/combine_snvs_pindel.R" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Calculate mutation overlaps"
-$BIN/mutation_overlaps.sh "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT} ${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"$BIN/mutation_overlaps.sh" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT} ${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Annotate with shared coverage"
-$BIN/mutect_coverage_intersection_mutations.sh "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"$BIN/mutect_coverage_intersection_mutations.sh" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Generate MAF files & LOH plots"
-$BIN/runLOH_ivan.sh "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"$BIN/runLOH_ivan.sh" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -ne "\n************ End of script "
