@@ -11,21 +11,22 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+TG=${TG:-/home/ismirnov/install/trim_galore/v0.4.4/trim_galore}
+#CUTADAPT=/opt/Python/Python-2.7.9/bin/cutadapt ### Problem !
+CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
-  echo "- LG3_HOME=$LG3_HOME"
-  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- LG3_HOME=${LG3_HOME:?}"
+  echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
+  echo "- TG=${TG:?}"
+  echo "- CUTADAPT=${CUTADAPT:?}"
 fi
 
-
-TG=/home/ismirnov/install/trim_galore/v0.4.4/trim_galore
-#CUTADAPT=/opt/Python/Python-2.7.9/bin/cutadapt ### Problem !
-CUTADAPT=/opt/Python/Python-2.7.3/bin/cutadapt
 QTY=20
 LEN=20
 STRINGENCY=1

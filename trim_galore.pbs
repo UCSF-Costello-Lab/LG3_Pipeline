@@ -26,6 +26,7 @@ echo "- FASTQ2=${FASTQ2:?}"
 echo "- PREFIX=${PREFIX:?}"
 echo "- QTY=${QTY:?}"
 echo "- DIROUT=${DIROUT}"
+echo "- TG=${TG}"
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
