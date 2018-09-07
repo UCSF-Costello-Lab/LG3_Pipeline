@@ -45,5 +45,8 @@ setup-P157: setup-annotation
 	cp ../runs_demo/_run_MutDet_P157 .
 	cp ../runs_demo/_run_PostMut_P157 .
 
-step1-P157: setup-P157
+step3-P157: setup-P157
 	./_run_Trim_P157
+
+step4-P157: setup-P157
+	./_run_Align_gz_P157

@@ -21,16 +21,26 @@ if [[ $LG3_DEBUG ]]; then
   echo "USER=$USER"
 fi
 
+### Input
+FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
+FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
+echo "Input:"
+echo "FASTQ1=${FASTQ1:?}"
+echo "FASTQ2=${FASTQ2:?}"
+echo "PREFIX=${PREFIX:?}"
 
+OPWD=${PWD:?}
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE as $USER"
 echo "Using node(s): $NODES"
-TMP=${SCRATCHDIR}
 
-mkdir -p "$TMP/${PREFIX}" || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }
+WDIR=${SCRATCHDIR}/${PREFIX}
 
-cd "$TMP/${PREFIX}" || { echo "ERROR: Failed to set working directory to $TMP/${PREFIX}"; exit 1; }
+mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
+cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+echo "Current working directory: ${PWD}"
+
 cp "$FASTQ1" "$FASTQ2" .
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
@@ -38,10 +48,11 @@ FQ2=$(basename "$FASTQ2")
 "${LG3_HOME}/scripts/Align_fastq.sh" "$FQ1" "$FQ2" "$PREFIX"
 rm "$FQ1" "$FQ2"
 
-cd "$TMP" || { echo "ERROR: Failed to set working directory to $TMP"; exit 1; }
+cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
+echo "Current working directory: ${PWD}"
 
-cp -r -p  "$TMP/${PREFIX}" "${LG3_OUTPUT_ROOT}/LG3/exomes/"
-rm -rf "${TMP:?}/${PREFIX}"
+cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/LG3/exomes/"
+rm -rf "${WDIR:?}"
 
 echo "End of script!"
 date

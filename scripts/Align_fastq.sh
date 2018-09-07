@@ -29,7 +29,7 @@ fi
 #
 
 BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
-BWA_INDEX="${LG3_HOME}/resources/bwa_indices/hg19.bwa"
+BWA_INDEX=${LG3_HOME}/resources/bwa_indices/hg19.bwa
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 PYTHON=/usr/bin/python
@@ -39,6 +39,13 @@ pu="Exome"
 fastq1=$1
 fastq2=$2
 prefix=$3
+
+### Input
+echo "Input:"
+echo "fastq1=${fastq1:?}"
+echo "fastq2=${fastq2:?}"
+echo "prefix=${prefix:?}"
+
 TMP="${SCRATCHDIR}/$prefix/tmp"
 mkdir -p "$TMP"
 

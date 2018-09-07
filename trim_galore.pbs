@@ -35,17 +35,14 @@ echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 OPWD=${PWD:?}
-SCRATCH=${SCRATCHDIR}/${PREFIX}-trim
+WDIR=${SCRATCHDIR}/${PREFIX}-trim
 DIROUT=$(dirname "$FASTQ1")
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
+echo "DIROUT=${DIROUT}"
 
-echo "SCRATCH: ${SCRATCH}"
-echo "DIROUT: ${DIROUT}"
-
-mkdir -p "$SCRATCH"
-cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
-
+mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
+cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" .
@@ -65,13 +62,12 @@ mv "${PREFIX}_R1.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R1.trimming
 mv "${PREFIX}_R2.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R2.trimming_report.txt"
 
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
-
 echo "Current working directory: ${PWD}"
 
-cp -r -p "$SCRATCH" "$DIROUT"
-rm -rf "$SCRATCH"
+cp -r -p "${WDIR}" "${DIROUT}"
+rm -rf "${WDIR}"
 
-ls -s "$DIROUT/${PREFIX}-trim"
+ls -s "${DIROUT}/${PREFIX}-trim"
 
 echo "End of PBS script!"
 date
