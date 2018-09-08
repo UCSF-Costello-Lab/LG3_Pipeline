@@ -15,8 +15,8 @@ LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
-echo "- LG3_HOME=${LG3_HOME}"
-echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
@@ -35,14 +35,22 @@ PATIENT=Patient157
 PROJ=LG3
 
 CONV=patient_ID_conversions.txt
+[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
 
 ## Requires absolute path 
 #TODO# CONV=$(readlink -e "$CONV")
 
 PBS=${LG3_HOME}/post_mutect_pindel.pbs
+[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
-"${LG3_HOME}/scripts/chk_pindel.sh" $PATIENT
-"${LG3_HOME}/scripts/chk_mutdet.sh" $PATIENT
+SCRIPT_A=${LG3_HOME}/scripts/chk_pindel.sh
+[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
+
+SCRIPT_B=${LG3_HOME}/scripts/chk_mutdet.sh
+[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
+
+"${SCRIPT_A}" $PATIENT
+"${SCRIPT_B}" $PATIENT
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJ=${PROJ},CONV=${CONV}" "$PBS"

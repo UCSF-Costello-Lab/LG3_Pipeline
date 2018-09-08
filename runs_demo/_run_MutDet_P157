@@ -15,20 +15,24 @@ LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
-echo "- LG3_HOME=${LG3_HOME}"
-echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 
 PATIENT=Patient157
 PROJ=LG3
 
 CONV=patient_ID_conversions.txt
+[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
 
 ## Requires absolute path 
 #TODO# CONV=$(readlink -e "$CONV")
 
+SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
+[[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
+
 echo -n "Submitting jobs for $PATIENT "
 date
-"${LG3_HOME}/scripts/mutdet_submit.sh" $PATIENT $CONV $PROJ
+"${SCRIPT}" $PATIENT $CONV $PROJ
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

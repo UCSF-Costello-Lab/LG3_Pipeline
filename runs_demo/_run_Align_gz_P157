@@ -33,6 +33,9 @@ echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
+PBS=${LG3_HOME}/Align_fastq.pbs
+[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+
 ## Location of output: aligned BAMs
 ALIGN=${LG3_OUTPUT_DIR}/exomes
 
@@ -55,7 +58,7 @@ do
 		else
 		        echo "Submitting $PREFIX ..."
 		        # shellcheck disable=SC2086
-			qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX}" "${LG3_HOME}/Align_fastq.pbs"
+			qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX}" "${PBS}"
 		fi
 	fi
 done

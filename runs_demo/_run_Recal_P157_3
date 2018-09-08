@@ -15,8 +15,8 @@ LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
-echo "- LG3_HOME=${LG3_HOME}"
-echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
@@ -32,10 +32,13 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 ILIST=resources/SeqCap_EZ_Exome_v3_capture.interval_list
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 PBS=${LG3_HOME}/Recal_bigmem.pbs
+[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
 D=${LG3_OUTPUT_DIR}/exomes
+[[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
 
 ## Requires absolute path 
 #TODO# D=$(readlink -e "$D")
@@ -48,9 +51,9 @@ SUFF=trim.bwa.sorted.bam
 CNT=0
 for N in $(seq 599 601)
 do
-	((CNT++))
-	B=$D/Z00$N/Z00$N.$SUFF
- 	if [ ! -f "$B" ]; then
+   ((CNT++))
+   B=$D/Z00$N/Z00$N.$SUFF
+   if [ ! -f "$B" ]; then
       echo "ABORT: Can't open $B !"
       exit 1
    fi
