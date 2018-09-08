@@ -50,6 +50,7 @@ step3: setup
 	./_run_Trim_P157
 
 step4: setup
+	ln -fs $${PWD}/tools $${LG3_HOME}/  ## FIXME: AD HOC
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	./_run_Align_gz_P157
