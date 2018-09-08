@@ -2,19 +2,16 @@
 
 ## Location of FASTQ.gz files
 RAW=/costellolab/data1/ismirnov/tmp
-## Location of aligned BAMs
+## Location of output: aligned BAMs
 ALIGN=/costellolab/data1/jocostello/LG3/exomes
 
-### Batch21 667 - 713
-
-#for N in `seq 704 708`
-for N in 695
+for N in 599 600 601
 do
 	Z=Z00${N}
 	FQ1=$RAW/${Z}-trim/${Z}-trim_R1.fastq.gz
 	FQ2=$RAW/${Z}-trim/${Z}-trim_R2.fastq.gz
 
-	if [ ! -r $FQ1 -o ! -r $FQ2 ]; then
+	if [ ! -r $FQ1 ] || [ ! -r $FQ2 ]; then
 		echo "ERROR: Can't open $Z in $RAW" 
 	else
 		if [ -f $ALIGN/${Z}.trim.bwa.sorted.bam ]; then

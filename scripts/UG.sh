@@ -66,17 +66,20 @@ echo "[$PROG] Output VCF prefix : $OUT"
 echo "[$PROG] Target interval list : $LIST"
 echo "-------------------------------------------------"
 
+## Construct string with one or more '-I <bam>' elements
 INPUTS=$(echo "$BAMS" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "-I "$i" "}')
 echo "[$PROG] Inputs = $INPUTS"
 
 	echo "[$PROG] Running Unified Genotyper SNP calling ..."
+	# shellcheck disable=SC2086
+	# Comment: Because how INPUTS is created and used below
 	$JAVA -Xmx8g \
 		-jar $GATK \
 		--analysis_type UnifiedGenotyper \
 		-nct 3 -nt 8 \
 		--genotype_likelihoods_model SNP \
 		--genotyping_mode DISCOVERY \
-		"$INPUTS" \
+		$INPUTS \
 		--reference_sequence $REF \
 		--dbsnp $DBSNP \
 		--logging_level WARN \

@@ -11,23 +11,23 @@
 
 U=$(whoami)
 date
-mkdir -p /scratch/$U/${PATIENT}
-cd /scratch/$U/${PATIENT}
+mkdir -p "/scratch/$U/${PATIENT}"
+cd "/scratch/$U/${PATIENT}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${PATIENT}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_pass2.sh $BAMS $PATIENT $ILIST
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_pass2.sh "$BAMS" "$PATIENT" "$ILIST"
 
-cd /scratch/$U
+cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
 
-mkdir -p /data/jocostello/LG3/exomes/${PATIENT}
-cp -p /scratch/$U/${PATIENT}/* /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}
-rm -rf /scratch/$U/${PATIENT}
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
+cp -p "/scratch/$U/${PATIENT}"/* "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
+rm -rf "/scratch/$U/${PATIENT}"
 
-mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
-cd /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
+cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam \
-      ${PATIENT} $ILIST
+      "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam" \
+      "${PATIENT}" "$ILIST"
 
 ###/home/jocostello/shared/LG3_Pipeline/resources/All_exome_targets.extended_200bp.interval_list
 

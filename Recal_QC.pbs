@@ -14,27 +14,28 @@ Rscript --version
 
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
-mkdir -p /scratch/$U/${PATIENT}
+mkdir -p "/scratch/$U/${PATIENT}"
 
-cd /scratch/$U/${PATIENT}
-cp -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/*.bam* .
+cd "/scratch/$U/${PATIENT}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${PATIENT}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_QC.sh $BAMS $PATIENT $ILIST
+cp -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"/*.bam* .
 
-cd /scratch/$U
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_QC.sh "$BAMS" "$PATIENT" "$ILIST"
 
-mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}
-cp -p /scratch/$U/${PATIENT}/* /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
+cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
 
-mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
-cd /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
+cp -p "/scratch/$U/${PATIENT}"/* "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}" || { echo "ERROR cp!" ; exit 1 ; }
+
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
+cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
 
 /home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam \
-      ${PATIENT} $ILIST
+      "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      "${PATIENT}" "$ILIST"
 
 echo -n "End of script! "
 date

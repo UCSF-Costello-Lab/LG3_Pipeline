@@ -1,9 +1,9 @@
 #!/bin/bash
 
-PATIENT=Patient450
+PATIENT=Patient157
 PROJ=LG3
 
-CONV=/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt
+CONV=/home/jocostello/shared/LG3_Pipeline/patient_ID_conversions.txt
 
 echo -n "Submitting jobs for $PATIENT "
 date

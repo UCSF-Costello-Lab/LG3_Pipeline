@@ -12,12 +12,12 @@
 #
 
 datafile=$1
-proj=$2
+#proj=$2
 interval=$3
 
 ### filter indels
-python /home/jocostello/shared/LG3_Pipeline/scripts/pindel_filter.py ${datafile}
+python /home/jocostello/shared/LG3_Pipeline/scripts/pindel_filter.py "${datafile}"
 
 ### intersect with target sequence
-/opt/BEDTools/BEDTools-2.16.2/bin/bedtools intersect -a ${datafile}.filter -b ${interval} -wa > ${datafile}.filter.intersect
+/opt/BEDTools/BEDTools-2.16.2/bin/bedtools intersect -a "${datafile}.filter" -b "${interval}" -wa > "${datafile}.filter.intersect"
 

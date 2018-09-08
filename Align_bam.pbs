@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/bash
 
 ### Usage: qsub -N Job_Name -v BAM=/path/to/data.bam,PREFIX=Output_Prefix_ID_Number /path/to/Align_bam.pbs
 ### Output files
@@ -7,14 +7,14 @@
 #PBS -l nodes=1:bigmem:ppn=12
 #PBS -m ae
 
-mkdir /scratch/${PREFIX}
+mkdir "/scratch/${PREFIX}"
 
-cd /scratch/${PREFIX}
+cd "/scratch/${PREFIX}" || { echo "ERROR: Failed to set working directory to /scratch/${PREFIX}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Align_bam.sh $BAM $PREFIX
+/home/jocostello/shared/LG3_Pipeline/scripts/Align_bam.sh "$BAM" "$PREFIX"
 
-cd /scratch
+cd "/scratch" || { echo "ERROR: Failed to set working directory to /scratch"; exit 1; }
 
-mv /scratch/${PREFIX} /costellolab/data1/jocostello/LG3/exomes/
+mv "/scratch/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/
 
 echo "End of script!"

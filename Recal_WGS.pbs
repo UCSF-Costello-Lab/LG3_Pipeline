@@ -8,24 +8,24 @@
 
 U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(cat $PBS_NODEFILE | tr '\n' ' ')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
-BN=$(basename $BAMS .bam)
+BN=$(basename "$BAMS" .bam)
 Z=${BN%%.*}
 
-mkdir -p /scratch/$U/${Z}
+mkdir -p "/scratch/$U/${Z}"
 
-cd /scratch/$U/${Z}
+cd "/scratch/$U/${Z}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${Z}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_WGS.sh $BAMS $ILIST
+/home/jocostello/shared/LG3_Pipeline/scripts/Recal_WGS.sh "$BAMS" "$ILIST"
 
-cd /scratch/$U
+cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
 
-mkdir -p /costellolab/data1/jocostello/LG3/exomes_recal/${Z}
-cp -p /scratch/$U/${Z}/* /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT} || { echo "ERROR cp!" ; exit 1 ; }
-rm -rf /scratch/$U/${Z}
+mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${Z}"
+cp -p "/scratch/$U/${Z}"/* "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}" || { echo "ERROR cp!" ; exit 1 ; }
+rm -rf "/scratch/$U/${Z}"
 
 echo -n "End of PBS script! "
 date

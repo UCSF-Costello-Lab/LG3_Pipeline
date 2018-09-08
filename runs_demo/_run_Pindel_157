@@ -1,10 +1,10 @@
 #!/bin/bash
 ### Time 8h , 6 CPUs , vmem >= 2GB
 
-PATIENT=Patient450
+PATIENT=Patient157
 PROJ=LG3
 
-CONV=/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt
+CONV=/home/jocostello/shared/LG3_Pipeline/patient_ID_conversions.txt
 PBS=/home/jocostello/shared/LG3_Pipeline/pindel_all.pbs
 
 qsub -N ${PATIENT}.pindel -M ivan.smirnov@ucsf.edu -v SAMPLE=$PATIENT,PROJ=$PROJ,CONV=$CONV $PBS

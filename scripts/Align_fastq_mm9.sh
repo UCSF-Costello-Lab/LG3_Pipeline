@@ -23,81 +23,81 @@ fastq1=$1
 fastq2=$2
 prefix=$3
 TMP="/scratch/jocostello/$prefix/tmp"
-mkdir -p $TMP
+mkdir -p "$TMP"
 
 echo "-------------------------------------------------"
 echo "[Align] BWA alignment to MM9!"
 echo "-------------------------------------------------"
-echo "[Align] Fastq file #1:" $fastq1
-echo "[Align] Fastq file #2:" $fastq2
-echo "[Align] Prefix:" $prefix
-echo "[Align] BWA index:" $BWA_INDEX
+echo "[Align] Fastq file #1: $fastq1"
+echo "[Align] Fastq file #2: $fastq2"
+echo "[Align] Prefix: $prefix"
+echo "[Align] BWA index: $BWA_INDEX"
 echo "-------------------------------------------------"
 
 echo "[Align] Removing chastity filtered first-in-pair reads..."
-$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py $fastq1 \
-	> ${prefix}.read1.QC.fastq || { echo "Chastity filtering read1 failed"; exit 1; }
+$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py "$fastq1" \
+	> "${prefix}.read1.QC.fastq" || { echo "Chastity filtering read1 failed"; exit 1; }
 
 echo "[Align] Removing chastity filtered second-in-pair reads..."
-$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py $fastq2 \
-	> ${prefix}.read2.QC.fastq || { echo "Chastity filtering read2 failed"; exit 1; }
+$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py "$fastq2" \
+	> "${prefix}.read2.QC.fastq" || { echo "Chastity filtering read2 failed"; exit 1; }
 
 echo "[Align] Align first-in-pair reads..."
-$BWA aln -t 12 $BWA_INDEX ${prefix}.read1.QC.fastq \
-  > ${prefix}.read1.sai 2> __${prefix}_read1.log || { echo "BWA alignment failed"; exit 1; }
+$BWA aln -t 12 $BWA_INDEX "${prefix}.read1.QC.fastq" \
+  > "${prefix}.read1.sai" 2> "__${prefix}_read1.log" || { echo "BWA alignment failed"; exit 1; }
 
 echo "[Align] Align second-in-pair reads..."
-$BWA aln -t 12 $BWA_INDEX ${prefix}.read2.QC.fastq \
-  > ${prefix}.read2.sai 2> __${prefix}_read2.log || { echo "BWA alignment failed"; exit 1; }
+$BWA aln -t 12 $BWA_INDEX "${prefix}.read2.QC.fastq" \
+  > "${prefix}.read2.sai" 2> "__${prefix}_read2.log" || { echo "BWA alignment failed"; exit 1; }
 
 echo "[Align] Pair aligned reads..."
-$BWA sampe $BWA_INDEX ${prefix}.read1.sai ${prefix}.read2.sai \
-  ${prefix}.read1.QC.fastq ${prefix}.read2.QC.fastq > ${prefix}.mm9.sam 2>> __${prefix}.sampe.log || { echo "BWA sampe failed"; exit 1; }
+$BWA sampe $BWA_INDEX "${prefix}.read1.sai" "${prefix}.read2.sai" \
+  "${prefix}.read1.QC.fastq" "${prefix}.read2.QC.fastq" > "${prefix}.mm9.sam" 2>> "__${prefix}.sampe.log" || { echo "BWA sampe failed"; exit 1; }
 
-rm -f ${prefix}.read1.QC.fastq
-rm -f ${prefix}.read2.QC.fastq
+rm -f "${prefix}.read1.QC.fastq"
+rm -f "${prefix}.read2.QC.fastq"
 
 echo "[Align] Verify mate information..."
-$JAVA -Xmx2g -Djava.io.tmpdir=${TMP} \
+$JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
 	-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/FixMateInformation.jar \
-	INPUT=${prefix}.mm9.sam \
-	OUTPUT=${prefix}.mm9.mateFixed.sam \
-	TMP_DIR=${TMP} \
+	INPUT="${prefix}.mm9.sam" \
+	OUTPUT="${prefix}.mm9.mateFixed.sam" \
+	TMP_DIR="${TMP}" \
 	VERBOSITY=WARNING \
 	QUIET=true \
 	VALIDATION_STRINGENCY=SILENT || { echo "Verify mate information failed"; exit 1; } 
 
 echo "[Align] Coordinate-sort and enforce read group assignments..."
-$JAVA -Xmx2g -Djava.io.tmpdir=${TMP} \
+$JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
 	-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/AddOrReplaceReadGroups.jar \
-	INPUT=${prefix}.mm9.mateFixed.sam \
-	OUTPUT=${prefix}.mm9.sorted.sam \
+	INPUT="${prefix}.mm9.mateFixed.sam" \
+	OUTPUT="${prefix}.mm9.sorted.sam" \
 	SORT_ORDER=coordinate \
-	RGID=$prefix \
-	RGLB=$prefix \
+	RGID="$prefix" \
+	RGLB="$prefix" \
 	RGPL=$pl \
 	RGPU=$pu \
-	RGSM=$prefix \
-	TMP_DIR=${TMP} \
+	RGSM="$prefix" \
+	TMP_DIR="${TMP}" \
 	VERBOSITY=WARNING \
 	QUIET=true \
 	VALIDATION_STRINGENCY=LENIENT || { echo "Sort failed"; exit 1; }
 
 echo "[Align] Convert SAM to BAM..."
-$SAMTOOLS view -bS ${prefix}.mm9.sorted.sam > ${prefix}.trim.mm9.sorted.bam || { echo "BAM conversion failed"; exit 1; }
+$SAMTOOLS view -bS "${prefix}.mm9.sorted.sam" > "${prefix}.trim.mm9.sorted.bam" || { echo "BAM conversion failed"; exit 1; }
 
 echo "[Align] Index the BAM file..."
-$SAMTOOLS index ${prefix}.trim.mm9.sorted.bam || { echo "BAM indexing failed"; exit 1; }
+$SAMTOOLS index "${prefix}.trim.mm9.sorted.bam" || { echo "BAM indexing failed"; exit 1; }
 
 echo "[Align] Clean up..."
-rm -f __${prefix}*.log
-rm -f ${prefix}*.sai
-rm -f ${prefix}*.sam
+rm -f "__${prefix}*.log"
+rm -f "${prefix}*.sai"
+rm -f "${prefix}*.sam"
 echo "[Align] Finished!"
 
 echo "-------------------------------------------------"
 echo "[QC] Calculate flag statistics..."
-$SAMTOOLS flagstat ${prefix}.trim.mm9.sorted.bam > ${prefix}.trim.mm9.sorted.flagstat 2>&1
+$SAMTOOLS flagstat "${prefix}.trim.mm9.sorted.bam" > "${prefix}.trim.mm9.sorted.flagstat" 2>&1
 echo "[QC] Finished!"
 echo "-------------------------------------------------"
-rm -rf $TMP
+rm -rf "$TMP"

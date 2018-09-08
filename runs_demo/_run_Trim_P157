@@ -7,10 +7,10 @@ echo "ETA ~4h"
 
 QTY=20
 
-for N in `seq 701 713`
+for N in 599 600 601
 do
    Z=Z00${N}
-   if [ ! -r $RAW/${Z}_R1.fastq.gz -o ! -r $RAW/${Z}_R1.fastq.gz ]; then
+   if [ ! -r $RAW/${Z}_R1.fastq.gz ] || [ ! -r $RAW/${Z}_R1.fastq.gz ]; then
       echo "ERROR: Can't open $Z in $RAW"
    else
       echo "Submitting $Z: quality $QTY ..."

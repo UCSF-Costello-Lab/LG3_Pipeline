@@ -27,53 +27,56 @@ prefix=$2
 echo "------------------------------------------------------"
 echo "[Merge] Merge technical replicates"
 echo "------------------------------------------------------"
-echo "[Merge] Merge Group:" $prefix
-echo $bamfiles | awk -F ":" '{for (i=1; i<=NF; i++) print "[Merge] Exome:"$i}'
+echo "[Merge] Merge Group: $prefix"
+echo "$bamfiles" | awk -F ":" '{for (i=1; i<=NF; i++) print "[Merge] Exome:"$i}'
 echo "------------------------------------------------------"
 
-inputs=$(echo $bamfiles | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
+## Construct string with one or more '-I <bam>' elements
+inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 
 echo "[Merge] Merge BAM files..."
-$JAVA -Xmx8g -Djava.io.tmpdir=${TMP} \
+# shellcheck disable=SC2086
+# Comment: Because how 'inputs' is created and used below
+$JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
 	-jar $PICARD/MergeSamFiles.jar \
 	${inputs} \
-	OUTPUT=${prefix}.merged.bam \
+	OUTPUT="${prefix}.merged.bam" \
 	SORT_ORDER=coordinate \
-	TMP_DIR=${TMP} \
+	TMP_DIR="${TMP}" \
 	VERBOSITY=WARNING \
 	QUIET=true \
 	VALIDATION_STRINGENCY=SILENT || { echo "Merge BAM files failed"; exit 1; }
 
 echo "[Merge] Index new BAM file..."
-$SAMTOOLS index ${prefix}.merged.bam || { echo "First indexing failed"; exit 1; }
+$SAMTOOLS index "${prefix}.merged.bam" || { echo "First indexing failed"; exit 1; }
 
 
 echo "[Merge] Coordinate-sort and enforce read group assignments..."
-$JAVA -Xmx2g -Djava.io.tmpdir=${TMP} \
+$JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
 	-jar $PICARD/AddOrReplaceReadGroups.jar \
-	INPUT=${prefix}.merged.bam \
-	OUTPUT=${prefix}.merged.sorted.sam \
+	INPUT="${prefix}.merged.bam" \
+	OUTPUT="${prefix}.merged.sorted.sam" \
 	SORT_ORDER=coordinate \
-	RGID=$prefix \
-	RGLB=$prefix \
+	RGID="$prefix" \
+	RGLB="$prefix" \
 	RGPL=$pl \
 	RGPU=$pu \
-	RGSM=$prefix \
-	TMP_DIR=${TMP} \
+	RGSM="$prefix" \
+	TMP_DIR="${TMP}" \
 	VERBOSITY=WARNING \
 	QUIET=true \
 	VALIDATION_STRINGENCY=LENIENT || { echo "Sort failed"; exit 1; }
 
-rm -f ${prefix}.merged.bam
-rm -f ${prefix}.merged.bam.bai
+rm -f "${prefix}.merged.bam"
+rm -f "${prefix}.merged.bam.bai"
 
 echo "[Merge] Convert SAM to BAM..."
-$SAMTOOLS view -bS ${prefix}.merged.sorted.sam > ${prefix}.merged.sorted.bam || { echo "BAM conversion failed"; exit 1; }
+$SAMTOOLS view -bS "${prefix}.merged.sorted.sam" > "${prefix}.merged.sorted.bam" || { echo "BAM conversion failed"; exit 1; }
 
-rm -f ${prefix}.merged.sorted.sam
+rm -f "${prefix}.merged.sorted.sam"
 
 echo "[Merge] Index the BAM file..."
-$SAMTOOLS index ${prefix}.merged.sorted.bam || { echo "BAM indexing failed"; exit 1; }
+$SAMTOOLS index "${prefix}.merged.sorted.bam" || { echo "BAM indexing failed"; exit 1; }
 
 
 echo "[Merge] Finished!"

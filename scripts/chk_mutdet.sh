@@ -18,42 +18,40 @@ echo -e "Checking MuTect output for ${YEL}${patient}${NOC}, project ${project}"
 echo "conversion ${conv}"
 
 ## Pull out patient specific conversion info
-grep -w ${patient} ${conv} > ${patient}.temp.conversions.txt
+grep -w "${patient}" "${conv}" > "${patient}.temp.conversions.txt"
 
 ## Get normal ID
-while IFS=$'\t' read ID SF PAT SAMP
+while IFS=$'\t' read -r ID _ _ SAMP
 do
-	if [ $SAMP = "Normal" ]; then
+	if [ "$SAMP" = "Normal" ]; then
 		normid=${ID}
 		break
 	fi
-done < ${patient}.temp.conversions.txt
+done < "${patient}.temp.conversions.txt"
 
 ## Cycle through tumors and submit MUTECT jobs
-while IFS=$'\t' read ID SF PAT SAMP
+while IFS=$'\t' read -r ID _ _ SAMP
 do
-	if [ $SAMP = "Normal" ]; then
+	if [ "$SAMP" = "Normal" ]; then
 		continue
-	elif [ ${SAMP:0:2} = "ML" ]; then
+	elif [ "${SAMP:0:2}" = "ML" ]; then
 		samp_label="ML"
-	elif [ ${SAMP:0:3} = "GBM" ]; then
+	elif [ "${SAMP:0:3}" = "GBM" ]; then
 		samp_label="GBM"
-	elif [ ${SAMP:0:3} = "Pri" ]; then
+	elif [ "${SAMP:0:3}" = "Pri" ]; then
 		samp_label="TUM"
-	elif [ ${SAMP:0:3} = "Tum" ]; then
+	elif [ "${SAMP:0:3}" = "Tum" ]; then
 		samp_label="TUM"
-	elif [ ${SAMP:0:11} = "Recurrence1" ]; then
+	elif [ "${SAMP:0:11}" = "Recurrence1" ]; then
 		samp_label="REC1"
-	elif [ ${SAMP:0:11} = "Recurrence2" ]; then
+	elif [ "${SAMP:0:11}" = "Recurrence2" ]; then
 		samp_label="REC2"
-	elif [ ${SAMP:0:11} = "Recurrence3" ]; then
+	elif [ "${SAMP:0:11}" = "Recurrence3" ]; then
 		samp_label="REC3"
-        elif [ ${SAMP:0:5} == "tumor" ]; then
+        elif [ "${SAMP:0:5}" == "tumor" ]; then
                 samp_label="unkTUM"
 	else
 		samp_label="TUM"
-		#echo "unknown sample type: ${SAMP}"
-		#break
 	fi
 
 	## Expected output:
@@ -61,13 +59,13 @@ do
 OK="$GRN OK$NOC"
 ERR="$RED missing$NOC"
 	if [ -s "$OUT" ]; then
-		echo -e $ID $OK
+		echo -e "$ID $OK"
 	else
-		echo -e $ID $ERR
+		echo -e "$ID $ERR"
 	fi
 
-done <${patient}.temp.conversions.txt
+done < "${patient}.temp.conversions.txt"
 
 ## Delete patient specific conversion file
-rm ${patient}.temp.conversions.txt
+rm "${patient}.temp.conversions.txt"
 
