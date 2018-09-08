@@ -3,6 +3,13 @@
 [![Build Status](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline.svg?branch=develop)](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline)
 
 
+## What's new?
+
+See [NEWS](NEWS.md) for the changlog.
+
+
+
+
 ## Steps to run test job on TIPCC
 
 ### 1 Change directory to the root of the pipeline repository, e.g.
