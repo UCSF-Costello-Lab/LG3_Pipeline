@@ -51,6 +51,25 @@ step3: setup
 
 step4: setup
 	ln -fs $${PWD}/tools $${LG3_HOME}/  ## FIXME: AD HOC
+	ln -fs $${PWD}/resources $${LG3_HOME}/  ## FIXME: AD HOC
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	./_run_Align_gz_P157
+
+step5: setup
+	LG3_INPUT_ROOT=output \
+	LG3_OUTPUT_ROOT=output \
+        _run_Recal_P157_3
+
+step6a: setup
+	## FIXME FIRST: ${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt
+	ln -fs $${PWD}/AnnoVar $${LG3_HOME}/  ## FIXME: AD HOC
+	LG3_INPUT_ROOT=output \
+	LG3_OUTPUT_ROOT=output \
+	./_run_Pindel_gz_P157
+
+step6b: setup
+	ln -fs $${PWD}/pykent $${LG3_HOME}/  ## FIXME: AD HOC (correct?)
+	LG3_INPUT_ROOT=output \
+	LG3_OUTPUT_ROOT=output \
+	./_run_MutDet_gz_P157
