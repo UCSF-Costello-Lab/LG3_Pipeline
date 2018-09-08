@@ -63,7 +63,7 @@ echo -e "\n************ Combine indels and snvs into one file"
 OK "$LINENO"
 
 echo -e "\n************ Calculate mutation overlaps"
-"$BIN/mutation_overlaps.sh" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT} ${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"$BIN/mutation_overlaps.sh" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Annotate with shared coverage"
