@@ -11,17 +11,19 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
-  echo "- LG3_HOME=${LG3_HOME:?}"
-  echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- ncores=$ncores"
 fi
-
 
 #
 ##
@@ -107,11 +109,11 @@ $PYTHON "${PYTHON_SCRIPT}" "$fastq2" \
         > "${prefix}.read2.QC.fastq" || { echo "Chastity filtering read2 failed"; exit 1; }
 
 echo "[Align] Align first-in-pair reads..."
-$BWA aln -t 12 "$BWA_INDEX" "${prefix}.read1.QC.fastq" \
+$BWA aln -t "${ncores}" "$BWA_INDEX" "${prefix}.read1.QC.fastq" \
   > "${prefix}.read1.sai" 2> "__${prefix}_read1.log" || { echo "BWA alignment failed"; exit 1; }
 
 echo "[Align] Align second-in-pair reads..."
-$BWA aln -t 12 "$BWA_INDEX" "${prefix}.read2.QC.fastq" \
+$BWA aln -t "${ncores}" "$BWA_INDEX" "${prefix}.read2.QC.fastq" \
   > "${prefix}.read2.sai" 2> "__${prefix}_read2.log" || { echo "BWA alignment failed"; exit 1; }
 
 echo "[Align] Pair aligned reads..."

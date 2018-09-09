@@ -37,7 +37,7 @@ ILIST=resources/SeqCap_EZ_Exome_v3_capture.interval_list
 PBS=${LG3_HOME}/Recal_bigmem.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
-D=${LG3_OUTPUT_DIR}/exomes
+D=${LG3_OUTPUT_ROOT}/LG3/exomes
 [[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
 
 ## Requires absolute path 

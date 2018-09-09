@@ -23,6 +23,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- TG=${TG:?}"
   echo "- CUTADAPT=${CUTADAPT:?}"
 fi
