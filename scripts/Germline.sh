@@ -1,5 +1,11 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
@@ -27,20 +33,48 @@ fi
 #$ -j y
 #
 
+## Input
 nbamfile=$1
 patientID=$2
 ILIST=$3
+echo "Input:"
+echo "- nbamfile=${nbamfile:?}"
+echo "- patientID=${patientID:?}"
+echo "- ILIST=${ILIST:?}"
+
+## Assert existance of input files
+[[ -f "$nbamfile" ]] || { echo "File not found: ${nbamfile}"; exit 1; }
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 normalname=${nbamfile##*/}
 normalname=${normalname%%.bwa*}
 bamdir=${nbamfile%/*}
 
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
+## References
+REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
+DBSNP=${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf
+echo "References:"
+echo "- REF=${REF:?}"
+echo "- DBSNP=${DBSNP:?}"
+[[ -f "$REF" ]]      || { echo "File not found: ${REF}"; exit 1; }
+[[ -f "$DBSNP" ]]    || { echo "File not found: ${DBSNP}"; exit 1; }
 
+## Software
+JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
-GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
-REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
-DBSNP="${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf"
+GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
+PYTHON_SCRIPT_A=${LG3_HOME}/scripts/vcf_germline.py
+echo "Software:"
+echo "- JAVA=${JAVA:?}"
+echo "- PYTHON=${PYTHON:?}"
+echo "- GATK=${GATK:?}"
+
+## Assert existance of software
+[[ -x "$JAVA" ]]            || { echo "Not an executable: ${JAVA}"; exit 1; }
+[[ -x "$PYTHON" ]]          || { echo "Not an executable: ${PYTHON}"; exit 1; }
+[[ -f "$GATK" ]]            || { echo "File not found: ${GATK}"; exit 1; }
+[[ -f "$PYTHON_SCRIPT_A" ]] || { echo "File not found: ${PYTHON_SCRIPT_A}"; exit 1; }
+
 
 echo "-------------------------------------------------"
 echo "[Germline] Germline SNPs and relatedness"
@@ -53,6 +87,7 @@ echo "-------------------------------------------------"
 ## Construct string with one or more '-I <bam>' elements
 INPUTS=$(for i in ${bamdir}/*.bam
 do
+        [[ -f "$i" ]] || { echo "File not found: ${i}"; exit 1; }
         echo -n "-I $i "
 done)
 echo "$INPUTS"
@@ -155,7 +190,7 @@ do
 
         if [ ! -e "${prefix}.germline" ]; then
                 echo "[Germline] Checking germline SNPs for sample relatedness: $tumorname vs $normalname"
-                $PYTHON "${LG3_HOME}/scripts/vcf_germline.py" \
+                $PYTHON "${PYTHON_SCRIPT_A}" \
                         "${patientID}.UG.snps.vcf" \
                         "$normalname" \
                         "$tumorname" \
@@ -172,3 +207,5 @@ fi
 
 echo "[Germline] Finished!"
 echo "-------------------------------------------------"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

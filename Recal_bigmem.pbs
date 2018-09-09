@@ -21,6 +21,14 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
+### Input
+echo "Input:"
+echo "- BAMS=${BAMS:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- ILIST=${ILIST:?}"
+
+## Assert existance of input files
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output
@@ -33,11 +41,19 @@ DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
+
+## Assert existance of software
+SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
+[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
+
+SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
+[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
+
 mkdir -p "${SCRATCHDIR}/${PATIENT}"
 
 cd "${SCRATCHDIR}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}/${PATIENT}"; exit 1; }
 
-"${LG3_HOME}/scripts/Recal_bigmem.sh" "$BAMS" "$PATIENT" "$ILIST"
+"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST"
 
 cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
 
@@ -50,7 +66,7 @@ rm -rf "${SCRATCHDIR:?}/${PATIENT}"
 mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"
 cd "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
 
-"${LG3_HOME}/scripts/Germline.sh" \
+"${SCRIPT_B}" \
       "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
       "${PATIENT}" "$ILIST"
 

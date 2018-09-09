@@ -1,5 +1,11 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
@@ -33,20 +39,62 @@ fi
 source "${LG3_HOME}/.bashrc"
 PATH=/opt/R/R-latest/bin/R:$PATH
 
-#Define resources and tools
+## References
+REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
+THOUSAND=${LG3_HOME}/resources/1000G_biallelic.indels.hg19.sorted.vcf
+DBSNP=${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf
+echo "References:"
+echo "- REF=${REF:?}"
+echo "- THOUSAND=${THOUSAND:?}"
+echo "- DBSNP=${DBSNP:?}"
+[[ -f "$REF" ]]      || { echo "File not found: ${REF}"; exit 1; }
+[[ -f "$THOUSAND" ]] || { echo "File not found: ${THOUSAND}"; exit 1; }
+[[ -f "$DBSNP" ]]    || { echo "File not found: ${DBSNP}"; exit 1; }
+
+## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
-REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
-THOUSAND="${LG3_HOME}/resources/1000G_biallelic.indels.hg19.sorted.vcf"
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
-DBSNP="${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf"
+PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
+PICARD_SCRIPT_A=${PICARD_HOME}/MergeSamFiles.jar
+PICARD_SCRIPT_B=${PICARD_HOME}/FixMateInformation.jar
+PICARD_SCRIPT_C=${PICARD_HOME}/MarkDuplicates.jar
+PICARD_SCRIPT_D=${PICARD_HOME}/CalculateHsMetrics.jar
+PICARD_SCRIPT_E=${PICARD_HOME}/CollectMultipleMetrics.jar
 
-#Input variables
+echo "Software:"
+echo "- JAVA=${JAVA:?}"
+echo "- SAMTOOLS=${SAMTOOLS:?}"
+echo "- GATK=${GATK:?}"
+echo "- PICARD_HOME=${PICARD_HOME:?}"
+
+## Assert existance of software
+[[ -x "$JAVA" ]]            || { echo "Not an executable: ${JAVA}"; exit 1; }
+[[ -x "$SAMTOOLS" ]]        || { echo "Not an executable: ${SAMTOOLS}"; exit 1; }
+[[ -f "$GATK" ]]            || { echo "File not found: ${GATK}"; exit 1; }
+[[ -d "$PICARD_HOME" ]]     || { echo "File not found: ${PICARD_HOME}"; exit 1; }
+[[ -f "$PICARD_SCRIPT_A" ]] || { echo "File not found: ${PICARD_SCRIPT_A}"; exit 1; }
+[[ -f "$PICARD_SCRIPT_B" ]] || { echo "File not found: ${PICARD_SCRIPT_B}"; exit 1; }
+[[ -f "$PICARD_SCRIPT_C" ]] || { echo "File not found: ${PICARD_SCRIPT_C}"; exit 1; }
+[[ -f "$PICARD_SCRIPT_D" ]] || { echo "File not found: ${PICARD_SCRIPT_D}"; exit 1; }
+[[ -f "$PICARD_SCRIPT_E" ]] || { echo "File not found: ${PICARD_SCRIPT_E}"; exit 1; }
+
+
+## Input
 bamfiles=$1
 patientID=$2
 ilist=$3
+echo "Input:"
+echo "- bamfiles=${bamfiles:?}"
+echo "- patientID=${patientID:?}"
+echo "- ilist=${ilist:?}"
+
+## Assert existance of input files
+[[ -f "$ilist" ]] || { echo "File not found: ${ilist}"; exit 1; }
+
+
 TMP="${SCRATCHDIR}/${patientID}_tmp"
-mkdir -p "$TMP"
+mkdir -p "${TMP}" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
 
 echo "------------------------------------------------------"
 echo "[Recal] Base quality recalibration (bigmem version)"
@@ -61,9 +109,10 @@ inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf 
 
 echo "[Recal] Merge BAM files..."
 # shellcheck disable=SC2086
+
 # Comment: Because how 'inputs' is created and used below
 $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-        -jar "${LG3_HOME}/tools/picard-tools-1.64/MergeSamFiles.jar" \
+        -jar "${PICARD_SCRIPT_A}" \
         ${inputs} \
         OUTPUT="${patientID}.merged.bam" \
         SORT_ORDER=coordinate \
@@ -104,7 +153,7 @@ rm -f "${patientID}.merged.intervals"
 
 echo "[Recal] Fix mate information..."
 $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-        -jar "${LG3_HOME}/tools/picard-tools-1.64/FixMateInformation.jar" \
+        -jar "${PICARD_SCRIPT_B}" \
         INPUT="${patientID}.merged.realigned.bam" \
         OUTPUT="${patientID}.merged.realigned.mateFixed.bam" \
         SORT_ORDER=coordinate \
@@ -118,7 +167,7 @@ rm -f "${patientID}.merged.realigned.bai"
 
 echo "[Recal] Mark duplicates..."
 $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-        -jar "${LG3_HOME}/tools/picard-tools-1.64/MarkDuplicates.jar" \
+        -jar "${PICARD_SCRIPT_C}" \
         INPUT="${patientID}.merged.realigned.mateFixed.bam" \
         OUTPUT="${patientID}.merged.realigned.rmDups.bam" \
         METRICS_FILE="${patientID}.merged.realigned.mateFixed.metrics" \
@@ -206,7 +255,7 @@ do
 
         echo "[QC] Calculate hybrid selection metrics..."
         $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-                -jar "${LG3_HOME}/tools/picard-tools-1.64/CalculateHsMetrics.jar" \
+                -jar "${PICARD_SCRIPT_D}" \
                 BAIT_INTERVALS="${ilist}" \
                 TARGET_INTERVALS="${ilist}" \
                 INPUT="$i" \
@@ -218,7 +267,7 @@ do
 
         echo "[QC] Collect multiple QC metrics..."
         $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-                -jar "${LG3_HOME}/tools/picard-tools-1.64/CollectMultipleMetrics.jar" \
+                -jar "${PICARD_SCRIPT_E}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups.recal" \
                 REFERENCE_SEQUENCE="${REF}" \
@@ -233,3 +282,4 @@ echo -n "[QC] Finished! "
 date
 echo "-------------------------------------------------"
 
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

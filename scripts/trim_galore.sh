@@ -57,7 +57,11 @@ echo "FQ1=${FQ1:?}"
 echo "FQ2=${FQ2:?}"
 echo "LEN=${LEN:?}"
 echo "QTY=${QTY:?}"
-echo "STRINGENCY=${STRINGENCY:?} (not used; always using 1)"
+echo "STRINGENCY=${STRINGENCY:?} (ignored; always STRINGENCY=1)"
+
+## Assert existance of input files
+[[ -f "$FQ1" ]] || { echo "File not found: ${FQ1}"; exit 1; }
+[[ -f "$FQ2" ]] || { echo "File not found: ${FQ2}"; exit 1; }
 
 echo "Software:"
 echo "- TG=${TG:?}"

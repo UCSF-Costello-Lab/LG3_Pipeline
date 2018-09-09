@@ -29,12 +29,17 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 ### Input
-FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
-FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
 echo "Input:"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PREFIX=${PREFIX:?}"
+
+## Assert existance of input files
+[[ -f "$FASTQ1" ]] || { echo "File not found: ${FASTQ1}"; exit 1; }
+[[ -f "$FASTQ2" ]] || { echo "File not found: ${FASTQ2}"; exit 1; }
+
+FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
+FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
 
 OPWD=${PWD:?}
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
@@ -42,20 +47,25 @@ NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE as $USER"
 echo "Using node(s): $NODES"
 
+## Assert existance of software
+SCRIPT=${LG3_HOME}/scripts/Align_fastq.sh
+[[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
+
 DEST="${LG3_OUTPUT_ROOT}/LG3/exomes"
 mkdir -p "${DEST}" || { echo "Can't create destination directory ${DEST}"; exit 1; }
 
 WDIR=${SCRATCHDIR}/${PREFIX}
-
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" "$FASTQ2" .
+
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
-"${LG3_HOME}/scripts/Align_fastq.sh" "$FQ1" "$FQ2" "$PREFIX"
+"${SCRIPT}" "$FQ1" "$FQ2" "$PREFIX"
+
 rm "$FQ1" "$FQ2"
 
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
