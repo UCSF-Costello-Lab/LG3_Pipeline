@@ -14,8 +14,8 @@ debug:
 	@echo "EMAIL: $$EMAIL"
 
 setup-assert:
-ifeq ($(wildcard $(LG3_OUTPUT_ROOT)/.),)
-	@echo "ERROR: Directory $(LG3_OUTPUT_ROOT)/ is missing"
+ifeq ($(wildcard output/.),)
+	@echo "ERROR: Directory output/ is missing"
 	@exit 1
 endif
 
