@@ -41,7 +41,8 @@ fi
 BWA_INDEX=${LG3_HOME}/resources/bwa_indices/hg19.bwa
 echo "References:"
 echo "- BWA_INDEX=${BWA_INDEX:?}"
-[[ -f "$BWA_INDEX" ]] || { echo "File not found: ${BWA_INDEX}"; exit 1; }
+BWA_INDEX_HOME=$(dirname "${BWA_INDEX}")
+[[ -d "$BWA_INDEX_HOME" ]] || { echo "Folder not found: ${BWA_INDEX_HOME}"; exit 1; }
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
