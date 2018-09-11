@@ -52,9 +52,11 @@ step3: setup
 step3-validate:
 	Rscript ./validate_trim.R
 
-step4: setup step3-validate
+step4-setup: setup
 	ln -fs $${PWD}/tools $${LG3_HOME}/  ## FIXME: AD HOC
 	ln -fs $${PWD}/resources $${LG3_HOME}/  ## FIXME: AD HOC
+
+step4: setup step4-setup step3-validate
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	./_run_Align_gz_P157
@@ -62,27 +64,34 @@ step4: setup step3-validate
 step4-validate:
 	Rscript ./validate_align.R
 
-step5: setup step4-validate
+step5-setup: setup
 	ln -fs $${PWD}/AnnoVar $${LG3_HOME}/  ## FIXME: AD HOC
 	ln -fs $${PWD}/pykent $${LG3_HOME}/  ## FIXME: AD HOC (needed here?)
+
+step5: setup step5-setup step4-validate
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
         ./_run_Recal_P157_3
 
 step5-validate:
+	Rscript ./validate_recal.R
 
-step6a: setup step5-validate
-	## FIXME FIRST: ${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt
+step6a-setup: setup
 	ln -fs $${PWD}/AnnoVar $${LG3_HOME}/  ## FIXME: AD HOC
 	ln -fs $${PWD}/pykent $${LG3_HOME}/  ## FIXME: AD HOC (needed here?)
+
+step6a: setup step6a-setup step5-validate
+	## FIXME FIRST: ${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	./_run_Pindel_gz_P157
 
 step6a-validate:
 
-step6b: setup
+step6a-setup: setup
 	ln -fs $${PWD}/pykent $${LG3_HOME}/  ## FIXME: AD HOC (correct?)
+
+step6b: setup step6a-setup
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	./_run_MutDet_gz_P157
