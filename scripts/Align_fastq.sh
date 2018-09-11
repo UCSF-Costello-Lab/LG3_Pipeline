@@ -34,13 +34,16 @@ echo "[Align] Prefix: $prefix"
 echo "[Align] BWA index: $BWA_INDEX"
 echo "-------------------------------------------------"
 
-echo "[Align] Removing chastity filtered first-in-pair reads..."
-$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py "$fastq1" \
-	> "${prefix}.read1.QC.fastq" || { echo "Chastity filtering read1 failed"; exit 1; }
+#echo "[Align] Removing chastity filtered first-in-pair reads..."
+#$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py "$fastq1" \
+	#> "${prefix}.read1.QC.fastq" || { echo "Chastity filtering read1 failed"; exit 1; }
+#
+#echo "[Align] Removing chastity filtered second-in-pair reads..."
+#$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py "$fastq2" \
+	#> "${prefix}.read2.QC.fastq" || { echo "Chastity filtering read2 failed"; exit 1; }
 
-echo "[Align] Removing chastity filtered second-in-pair reads..."
-$PYTHON /home/jocostello/shared/LG3_Pipeline/scripts/removeQCgz.py "$fastq2" \
-	> "${prefix}.read2.QC.fastq" || { echo "Chastity filtering read2 failed"; exit 1; }
+zcat "$fastq1" > "${prefix}.read1.QC.fastq"
+zcat "$fastq2" > "${prefix}.read2.QC.fastq"
 
 echo "[Align] Align first-in-pair reads..."
 $BWA aln -t 12 $BWA_INDEX "${prefix}.read1.QC.fastq" \
