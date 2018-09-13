@@ -9,13 +9,28 @@ source("/home/jocostello/shared/LG3_Pipeline/scripts/MAFplot_version3.R")
 
 dd <- loadMAF(pat)
 
-#png(paste0(pat,"_plots/",pat,".LOH.png"), width=1000, height=400)
-png(paste0(pat,"_plots/",pat,".LOH.png"), width=10, height=4, units="in", res=300)
-plotMAF(dd,conv,pat)
-dev.off()
+##### modified by Ivan
+chrs=unique(dd[[pat]]$chromosome)
+chrs.num=length(chrs)
+   ## standardize chromosome notation (1-24, no "chr")
+   chrs=gsub("chr","",chrs)
+   chrs[chrs=="X"]=23
+   chrs[chrs=="Y"]=24
+   chrs=as.numeric(as.vector(chrs))
+cat("Found ",chrs.num,"chromosomes\n")
+print(chrs)
 
-chrs <- 1:24
+if(chrs.num > 22) {
+	cat("Whole genome LOH plot\n")
+	png(paste0(pat,"_plots/",pat,".LOH.png"), width=10, height=4, units="in", res=300)
+	plotMAF(dd,conv,pat)
+	dev.off()
+} else {
+	cat("Only ",chrs.num,"chromosomes available, skiping whole genome plot\n")
+}
+
 for(c in chrs) {
+  cat("LOH plot for chr",c,"\n")
   pdf(paste0(pat,"_plots/",pat,".LOH.chr",c,".pdf"), width=10, height=4)
   plotMAF(dd,conv,pat,ch=c)
   dev.off()
@@ -24,11 +39,10 @@ for(c in chrs) {
 if(length(unique(dd[[pat]]$samp)) > 2) {
   source("/home/jocostello/shared/LG3_Pipeline/scripts/MAFplot_version3_grid.R")
   dd <- loadMAF(pat)
-  chrs <- 1:24
   for(c in chrs) {
+	cat("Grid plot for chr",c,"\n")
     pdf(paste0(pat,"_plots/",pat,".LOH.grid.chr",c,".pdf"), width=12, height=6)
     plotMAF(dd,pat,ch=c, grid=TRUE)
     dev.off()
   }
 }
-

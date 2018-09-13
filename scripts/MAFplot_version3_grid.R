@@ -28,7 +28,7 @@ plotMAF=function(dd,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
 	}
 	
 	## read in samples associated with a particular patient
-	conv <- read.table("/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt", header=TRUE, sep="\t", as.is=TRUE)
+	conv <- read.table("/home/jocostello/shared/LG3_Pipeline/patient_ID_conversions.txt", header=TRUE, sep="\t", as.is=TRUE)
 	types <- conv$sample_type[which(conv$patient_ID == samp)]   ### ie normal, primary, etc
 	count <- length(types)
 	
