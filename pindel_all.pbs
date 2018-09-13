@@ -61,6 +61,8 @@ SCRIPT_A=${LG3_HOME}/scripts/pindel_setup.sh
 SCRIPT_B=${LG3_HOME}/scripts/pindel_filter.sh
 SCRIPT_C=${LG3_HOME}/scripts/pindel_annotate.sh
 PYTHON_SCRIPT_A=${LG3_HOME}/scripts/vcf2tdt.py
+unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-13
+
 echo "Software:"
 echo "- PINDEL=${PINDEL:?}"
 echo "- PINDEL2VCF=${PINDEL2VCF:?}"

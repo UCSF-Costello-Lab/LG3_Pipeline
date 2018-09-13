@@ -69,6 +69,7 @@ tumorname=${tumorname%%.bwa*}
 ### Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
+unset PYTHONPATH  ## ADHOC: In case it is set by user /HB 2018-09-13
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
 MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
 FILTER=${LG3_HOME}/FilterMutations/Filter.py
