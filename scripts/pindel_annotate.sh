@@ -1,5 +1,11 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
@@ -8,13 +14,13 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
 fi
-
 
 #
 ##
@@ -34,13 +40,35 @@ OK() {
 
 datafile=$1
 proj=$2
+echo "Input:"
+echo "- datafile=${datafile:?}"
+echo "- proj=${proj:?}"
+
+[[ -f "$datafile" ]] || { echo "File not found: ${datafile}"; exit 1; }
+
 BIN=${LG3_HOME}/scripts
 ANNOVAR=${LG3_HOME}/AnnoVar
-ANNDB=${LG3_HOME}/AnnoVar/hg19db/
+[[ -d "$BIN" ]] || { echo "Directory not found: ${BIN}"; exit 1; }
+[[ -d "$ANNOVAR" ]] || { echo "Directory not found: ${ANNOVAR}"; exit 1; }
+
 KINASEDATA="${LG3_HOME}/resources/all_human_kinases.txt"
 COSMICDATA="${LG3_HOME}/resources/CosmicMutantExport_v58_150312.tsv"
 CANCERDATA="${LG3_HOME}/resources/SangerCancerGeneCensus_2012-03-15.txt"
 CONVERT="${LG3_HOME}/resources/RefSeq.Entrez.txt"
+ANNDB=${LG3_HOME}/AnnoVar/hg19db/
+
+echo "References:"
+echo "- KINASEDATA=${KINASEDATA:?}"
+echo "- COSMICDATA=${COSMICDATA:?}"
+echo "- CANCERDATA=${CANCERDATA:?}"
+echo "- CONVERT=${CONVERT:?}"
+echo "- ANNDB=${ANNDB:?}"
+
+[[ -f "$KINASEDATA" ]] || { echo "File not found: ${KINASEDATA}"; exit 1; }
+[[ -f "$COSMICDATA" ]] || { echo "File not found: ${COSMICDATA}"; exit 1; }
+[[ -f "$CANCERDATA" ]] || { echo "File not found: ${CANCERDATA}"; exit 1; }
+[[ -f "$CONVERT" ]] || { echo "File not found: ${CONVERT}"; exit 1; }
+[[ -d "$ANNDB" ]] || { echo "Directory not found: ${ANNDB}"; exit 1; }
 
 echo -n "Started $PROG on "
 date
@@ -102,3 +130,5 @@ rm -f "${datafile}.tmp"*
 
 echo -n "$PROG is done on "
 date
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

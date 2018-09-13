@@ -6,6 +6,12 @@
 #PBS -l nodes=1:ppn=6,vmem=12gb
 #PBS -m ae
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
@@ -14,14 +20,19 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
 fi
 
-
+### Input
+echo "Input:"
+echo "- SAMPLE=${SAMPLE}"
+echo "- PROJ=${PROJ}"
+echo "- CONV=${CONV}"
 
 ### Include in .bashrc!!!
 #module load CBC cbc-shared
@@ -32,25 +43,45 @@ echo "Project: ${PROJ}"
 echo "Conversion File: ${CONV}"
 echo "----------------------------------"
 
-WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/pindel
-BIN=${LG3_HOME}/scripts
-
 PINDEL=${LG3_HOME}/tools/pindel024t/pindel
 PINDEL2VCF=${LG3_HOME}/tools/pindel024t/pindel2vcf
+SCRIPT_A=${LG3_HOME}/scripts/pindel_setup.sh
+SCRIPT_B=${LG3_HOME}/scripts/pindel_filter.sh
+SCRIPT_C=${LG3_HOME}/scripts/pindel_annotate.sh
+PYTHON_SCRIPT_A=${LG3_HOME}/scripts/vcf2tdt.py
+echo "Software:"
+echo "- PINDEL=${PINDEL:?}"
+echo "- PINDEL2VCF=${PINDEL2VCF:?}"
+[[ -x "$PINDEL" ]] || { echo "File not found or not an executable: ${PINDEL}"; exit 1; }
+[[ -x "$PINDEL2VCF" ]] || { echo "File not found or not an executable: ${PINDEL2VCF}"; exit 1; }
+[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
+[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
+[[ -x "$SCRIPT_C" ]] || { echo "File not found or not an executable: ${SCRIPT_C}"; exit 1; }
+[[ -x "$PYTHON_SCRIPT_A" ]] || { echo "File not found or not an executable: ${PYTHON_SCRIPT_A}"; exit 1; }
 
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 TARGET=${LG3_HOME}/resources/All_exome_targets.extended_200bp.bed
+echo "References:"
+echo "- REF=${REF:?}"
+echo "- TARGET=${TARGET:?}"
+[[ -f "$REF" ]]    || { echo "File not found: ${REF}"; exit 1; }
+[[ -f "$TARGET" ]] || { echo "File not found: ${TARGET}"; exit 1; }
+
+SCRATCH=${SCRATCHDIR}/${SAMPLE}_pindel
+mkdir -p "${SCRATCH}" || { echo "Can't create destination directory ${SCRATCH}"; exit 1; }
+
+WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/pindel
+mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
 
 ## setup pindel cfg file
 date
 echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
-cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
-"$BIN/pindel_setup.sh" "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+
+"${SCRIPT_A}" "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
-SCRATCH=${SCRATCHDIR}/${SAMPLE}_pindel
-mkdir -p "$SCRATCH"
-cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
+cd "${SCRATCH}" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
 ## run pindel
 echo -e "\n========= [Pindel] Run pindel"
@@ -67,7 +98,7 @@ $PINDEL2VCF -P "${SAMPLE}_pindel/${SAMPLE}.pindel" -r "$REF" -R hg19 -d 20121031
 
 ## convert to tdt
 echo -e "\n========= [Pindel] Convert vcf to tdt"
-"$BIN/vcf2tdt.py" "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${PYTHON_SCRIPT_A}" "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
 cd "${SAMPLE}_pindel" || { echo "ERROR: Failed to set working directory to ${SAMPLE}_pindel"; exit 1; }
@@ -75,11 +106,13 @@ mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
 echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
-"$BIN/pindel_filter.sh" "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_B}" "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
-"$BIN/pindel_annotate.sh" "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_C}" "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 echo -ne "\nEnd of script on "
 date
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
