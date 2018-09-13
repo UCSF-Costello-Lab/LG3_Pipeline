@@ -1,0 +1,28 @@
+#!/bin/bash
+ILIST=/home/jocostello/shared/LG3_Pipeline/resources/SeqCap_EZ_Exome_v3_capture.interval_list
+PBS=/home/jocostello/shared/LG3_Pipeline/Recal_bigmem.pbs
+
+D=/costellolab/data1/jocostello/LG3/exomes
+
+PATIENT=Patient157t
+NORMAL=Z00599t
+SUFF=trim.bwa.sorted.bam
+
+CNT=0
+for N in $(seq 599 601)
+do
+	((CNT++))
+	B=$D/Z00${N}t/Z00${N}t.$SUFF
+ 	if [ ! -f "$B" ]; then
+      echo "ABORT: Can't open $B !"
+      exit 1
+   fi
+   echo "Found $B"
+   BAMS=${BAMS}:$B
+done
+## Clip first char (:)
+BAMS=$(echo "$BAMS" | cut -c2-)
+echo "Total BAMS: $CNT"
+echo "$BAMS"
+
+qsub -N Rec_$PATIENT -v "BAMS=$BAMS,NORMAL=$NORMAL,PATIENT=$PATIENT,ILIST=$ILIST" $PBS
