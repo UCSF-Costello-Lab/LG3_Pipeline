@@ -10,26 +10,57 @@
 #PBS -l nodes=1:ppn=4,vmem=42g
 #PBS -m ae
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
+[[ -d "$LG3_INPUT_ROOT" ]] || { echo "Folder not found: ${LG3_INPUT_ROOT}"; exit 1; }
+LG3_INPUT_ROOT=$(readlink -e "${LG3_INPUT_ROOT:?}") ## Absolute path
 
+### Input
+echo "Input:"
+echo "- PATIENT=${PATIENT:?}"
+echo "- TUMOR=${TUMOR:?}"
+echo "- NORMAL=${NORMAL:?}"
+echo "- TYPE=${TYPE:?}"
+echo "- CONFIG=${CONFIG:?}"
+echo "- INTERVAL=${INTERVAL:?}"
+echo "- XMX=${XMX:?}"
+echo "- WORKDIR=${WORKDIR:?}"
+BAMDIR=${LG3_INPUT_ROOT}/LG3/exomes_recal
+[[ -d "$BAMDIR" ]] || { echo "Folder not found: ${BAMDIR}"; exit 1; }
+[[ -f "$CONFIG" ]] || { echo "File not found: ${CONFIG}"; exit 1; }
+[[ -f "$INTERVAL" ]] || { echo "File not found: ${INTERVAL}"; exit 1; }
+CONFIG=$(readlink -e "${CONFIG:?}") ## Absolute path
+INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 
-BAMDIR=${LG3_OUTPUT_ROOT}/LG3/exomes_recal
-mkdir -p "$WORKDIR"
-cd "$WORKDIR" || { echo "ERROR: Failed to set working directory to ${WORKDIR}"; exit 1; }
+### Software
+SCRIPT=${LG3_HOME}/scripts/MutDet.sh
+[[ -x "$SCRIPT" ]] || { echo "File not found or not executable: ${SCRIPT}"; exit 1; }
+
+mkdir -p "${WORKDIR}" || { echo "Can't create scratch directory ${WORKDIR}"; exit 1; }
+cd "${WORKDIR}" || { echo "ERROR: Failed to set working directory to ${WORKDIR}"; exit 1; }
 echo "*** Working directory: $WORKDIR"
 
 ### For Recal
@@ -57,7 +88,7 @@ echo "Interval = $INTERVAL"
 echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
 
-"${LG3_HOME}/scripts/MutDet.sh" \
+"${SCRIPT}" \
 	"$BAMN" \
 	"$BAMT" \
 	"NOR-${NORMAL}__${TYPE}-${TUMOR}" \
@@ -69,3 +100,4 @@ echo "WORKDIR=$WORKDIR"
 echo "End of PBS script!"
 date
 
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

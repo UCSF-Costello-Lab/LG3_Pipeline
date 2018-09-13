@@ -1,20 +1,29 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- ncores=$ncores"
 fi
-
 
 #
 ## Mutation detection with muTect, Somatic Indel Detector, and Unified Genotyper
@@ -27,6 +36,8 @@ fi
 #$ -j y
 #
 
+
+### Input
 nbamfile=$1
 tbamfile=$2
 prefix=$3
@@ -35,27 +46,77 @@ CONFIG=$5
 ILIST=$6
 XMX=$7 ### Xmx8g
 
+echo "Input:"
+echo "- nbamfile=${nbamfile:?}"
+echo "- tbamfile=${tbamfile:?}"
+echo "- prefix=${prefix:?}"
+echo "- patientID=${patientID:?}"
+echo "- CONFIG=${CONFIG:?}"
+echo "- ILIST=${ILIST:?}"
+echo "- XMX=${XMX:?}"
 
-
+## Assert existance of input files
+[[ -f "$nbamfile" ]] || { echo "File not found: ${nbamfile}"; exit 1; }
+[[ -f "$tbamfile" ]] || { echo "File not found: ${tbamfile}"; exit 1; }
+[[ -f "$CONFIG" ]] || { echo "File not found: ${CONFIG}"; exit 1; }
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 normalname=${nbamfile##*/}
 normalname=${normalname%%.bwa*}
 tumorname=${tbamfile##*/}
 tumorname=${tumorname%%.bwa*}
 
+### Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
-TMP="${SCRATCHDIR}"
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
 MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
+FILTER=${LG3_HOME}/FilterMutations/Filter.py
+REORDER="${LG3_HOME}/scripts/vcf_reorder.py"
+
+echo "Software:"
+echo "- JAVA=${JAVA:?}"
+echo "- PYTHON=${PYTHON:?}"
+echo "- MUTECT=${MUTECT:?}"
+echo "- FILTER=${FILTER:?}"
+echo "- REORDER=${REORDER:?}"
+
+## Assert existance of software
+[[ -x "$JAVA" ]]   || { echo "Not an executable: ${JAVA}"; exit 1; }
+[[ -x "$PYTHON" ]] || { echo "Not an executable: ${PYTHON}"; exit 1; }
+[[ -f "$GATK" ]]   || { echo "File not found: ${GATK}"; exit 1; }
+[[ -f "$MUTECT" ]] || { echo "File not found: ${MUTECT}"; exit 1; }
+[[ -f "$FILTER" ]] || { echo "File not found: ${FILTER}"; exit 1; }
+[[ -f "$REORDER" ]] || { echo "File not found: ${REORDER}"; exit 1; }
+
+### References
 REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
 DBSNP="${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf"
-REORDER="${LG3_HOME}/scripts/vcf_reorder.py"
-FILTER=${LG3_HOME}/FilterMutations/Filter.py
 CONVERT="${LG3_HOME}/resources/RefSeq.Entrez.txt"
 KINASEDATA="${LG3_HOME}/resources/all_human_kinases.txt"
 COSMICDATA="${LG3_HOME}/resources/CosmicMutantExport_v58_150312.tsv"
 CANCERDATA="${LG3_HOME}/resources/SangerCancerGeneCensus_2012-03-15.txt"
+
+echo "References:"
+echo "- REF=${REF}"
+echo "- DBSNP=${DBSNP}"
+echo "- REORDER=${REORDER}"
+echo "- CONVERT=${CONVERT}"
+echo "- KINASEDATA=${KINASEDATA}"
+echo "- COSMICDATA=${COSMICDATA}"
+echo "- CANCERDATA=${CANCERDATA}"
+
+## Assert existance of files
+[[ -f "${REF}" ]]        || { echo "File not found: ${REF}"; exit 1; }
+[[ -f "${DBSNP}" ]]      || { echo "File not found: ${DBSNP}"; exit 1; }
+[[ -f "${REORDER}" ]]    || { echo "File not found: ${REORDER}"; exit 1; }
+[[ -f "${CONVERT}" ]]    || { echo "File not found: ${CONVERT}"; exit 1; }
+[[ -f "${KINASEDATA}" ]] || { echo "File not found: ${KINASEDATA}"; exit 1; }
+[[ -f "${COSMICDATA}" ]] || { echo "File not found: ${COSMICDATA}"; exit 1; }
+[[ -f "${CANCERDATA}" ]] || { echo "File not found: ${CANCERDATA}"; exit 1; }
+
+
+TMP="${SCRATCHDIR}"
 
 echo "-------------------------------------------------"
 echo -n "[MutDet] Mutation detection "
@@ -297,3 +358,5 @@ fi
 echo "-------------------------------------------------"
 echo -n "All done! "
 date
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
