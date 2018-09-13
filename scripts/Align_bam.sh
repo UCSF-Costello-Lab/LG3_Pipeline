@@ -1,18 +1,28 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- ncores=$ncores"
 fi
 
 
@@ -62,11 +72,11 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" -jar "${LG3_HOME}/tools/picard-tools-1.64
         VALIDATION_STRINGENCY=SILENT || { echo "Sort by query name failed"; exit 1; }
 
 echo "[Align] Align first-in-pair reads..."
-$BWA aln -t 12 -b1 "$BWA_INDEX" "${prefix}.QCfiltered.sorted.bam" \
+$BWA aln -t "${ncores}" -b1 "$BWA_INDEX" "${prefix}.QCfiltered.sorted.bam" \
          > "${prefix}.read1.sai" 2> "__${prefix}_read1.log" || { echo "BWA alignment failed"; exit 1; }
 
 echo "[Align] Align second-in-pair reads..."
-$BWA aln -t 12 -b2 "$BWA_INDEX" "${prefix}.QCfiltered.sorted.bam" \
+$BWA aln -t "${ncores}" -b2 "$BWA_INDEX" "${prefix}.QCfiltered.sorted.bam" \
         > "${prefix}.read2.sai" 2> "__${prefix}_read2.log" || { echo "BWA alignment failed"; exit 1; }
 
 echo "[Align] Pair aligned reads..."
@@ -120,3 +130,5 @@ $SAMTOOLS flagstat "${prefix}".bwa.sorted.bam > "${prefix}".bwa.sorted.flagstat 
 echo "[QC] Finished!"
 echo "-------------------------------------------------"
 rm -rf "$TMP"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

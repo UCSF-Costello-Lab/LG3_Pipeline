@@ -1,18 +1,28 @@
 #!/bin/bash
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- ncores=$ncores"
 fi
 
 
@@ -58,7 +68,7 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         --analysis_type RealignerTargetCreator \
         --reference_sequence "$REF" \
         --known "$THOUSAND" \
-        --num_threads 8 \
+        --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "$bamfile" \
         --out "${PREF}.intervals" || { echo "Interval creation failed"; exit 1; }
@@ -114,7 +124,7 @@ $JAVA -Xmx128g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type CountCovariates \
         --reference_sequence "$REF" \
         --knownSites "$DBSNP" \
-        --num_threads 8 \
+        --num_threads "${ncores}" \
         --logging_level WARN \
         --covariate ReadGroupCovariate \
         --covariate QualityScoreCovariate \
@@ -188,3 +198,4 @@ echo -n "[QC] $Z Finished! "
 date
 echo "-------------------------------------------------"
 
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
