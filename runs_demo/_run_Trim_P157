@@ -10,6 +10,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+SAMPLES=${SAMPLES:-Z00599 Z00600 Z00601}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -19,9 +20,10 @@ echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
-echo "- EMAIL=${EMAIL}"    ## optional
-echo "- DIROUT=${DIROUT}"  ## optional
-echo "- TG=${TG}"          ## optional
+echo "- EMAIL=${EMAIL}"       ## optional
+echo "- DIROUT=${DIROUT}"     ## optional
+echo "- TG=${TG}"             ## optional
+echo "- SAMPLES=${SAMPLES:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 if [[ -n ${DIROUT} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},DIROUT=${DIROUT}"; fi
@@ -44,9 +46,8 @@ echo "ETA ~4h"
 
 QTY=20
 
-for N in 599 600 601
+for PREFIX in ${SAMPLES}
 do
-   PREFIX=Z00${N}
    FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}_R1.fastq.gz
    FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}_R2.fastq.gz
 

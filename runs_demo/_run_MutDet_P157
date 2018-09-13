@@ -9,6 +9,9 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+PATIENT=${PATIENT:-Patient157}
+PROJ=${PROJ:-LG3}
+CONV=${CONV:-patient_ID_conversions.txt}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -18,11 +21,10 @@ echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJ=${PROJ:?}"
+echo "- CONV=${CONV:?}"
 
-PATIENT=Patient157
-PROJ=LG3
-
-CONV=patient_ID_conversions.txt
 [[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
 
 ## Requires absolute path 
@@ -33,6 +35,6 @@ SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
 
 echo -n "Submitting jobs for $PATIENT "
 date
-"${SCRIPT}" $PATIENT $CONV $PROJ
+"${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJ}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

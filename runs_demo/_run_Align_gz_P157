@@ -10,6 +10,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+SAMPLES=${SAMPLES:-Z00599 Z00600 Z00601}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -20,6 +21,7 @@ echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
+echo "- SAMPLES=${SAMPLES:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="-d ${PWD:?}"
@@ -39,9 +41,8 @@ PBS=${LG3_HOME}/Align_fastq.pbs
 ## Location of output: aligned BAMs
 ALIGN=${LG3_OUTPUT_DIR}/exomes
 
-for N in 599 600 601
+for PREFIX in ${SAMPLES}
 do
-	PREFIX=Z00${N}
 	FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
 	FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
 

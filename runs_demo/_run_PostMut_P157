@@ -9,6 +9,9 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+PATIENT=${PATIENT:-Patient157}
+PROJ=${PROJ:-LG3}
+CONV=${CONV:-patient_ID_conversions.txt}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -18,6 +21,9 @@ echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJ=${PROJ:?}"
+echo "- CONV=${CONV:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="-d ${PWD:?}"
@@ -31,10 +37,6 @@ echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
-PATIENT=Patient157
-PROJ=LG3
-
-CONV=patient_ID_conversions.txt
 [[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
 
 ## Requires absolute path 
@@ -49,8 +51,8 @@ SCRIPT_A=${LG3_HOME}/scripts/chk_pindel.sh
 SCRIPT_B=${LG3_HOME}/scripts/chk_mutdet.sh
 [[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
 
-"${SCRIPT_A}" $PATIENT
-"${SCRIPT_B}" $PATIENT
+"${SCRIPT_A}" "${PATIENT}"
+"${SCRIPT_B}" "${PATIENT}"
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJ=${PROJ},CONV=${CONV}" "$PBS"
