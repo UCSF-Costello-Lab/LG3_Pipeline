@@ -18,6 +18,7 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -28,6 +29,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- ncores=$ncores"
 fi
 
 [[ -d "$LG3_INPUT_ROOT" ]]    || { echo "Folder not found: ${LG3_INPUT_ROOT}"; exit 1; }
@@ -94,7 +97,7 @@ cd "${SCRATCH}" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"
 
 ## run pindel
 echo -e "\n========= [Pindel] Run pindel"
-$PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T 6  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## move from scratch to project folder
 cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
