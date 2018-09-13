@@ -1,20 +1,25 @@
 path <- Sys.getenv("LG3_OUTPUT_PATH", "output")
 stopifnot(file_test("-d", path))
 
-truth <- list(
-  "Z00599-trim/Z00599-trim_R1.fastq.gz"            = list(size = 4541591250),
-  "Z00599-trim/Z00599-trim_R2.fastq.gz"            = list(size = 4787364118),
-  "Z00599-trim/Z00599-trim_R1.trimming_report.txt" = list(size = 3809 + c(-1, 1)*10),
-  "Z00599-trim/Z00599-trim_R2.trimming_report.txt" = list(size = 4011 + c(-1, 1)*10),
-  "Z00600-trim/Z00600-trim_R1.fastq.gz"            = list(size = 4860153452),
-  "Z00600-trim/Z00600-trim_R2.fastq.gz"            = list(size = 5029394683),
-  "Z00600-trim/Z00600-trim_R1.trimming_report.txt" = list(size = 3832 + c(-1, 1)*10),
-  "Z00600-trim/Z00600-trim_R2.trimming_report.txt" = list(size = 4044 + c(-1, 1)*10),
-  "Z00601-trim/Z00601-trim_R1.fastq.gz"            = list(size = 6021054501),
-  "Z00601-trim/Z00601-trim_R2.fastq.gz"            = list(size = 6312584266),
-  "Z00601-trim/Z00601-trim_R1.trimming_report.txt" = list(size = 3853 + c(-1, 1)*10),
-  "Z00601-trim/Z00601-trim_R2.trimming_report.txt" = list(size = 4047 + c(-1, 1)*10)
-)
+truth <- list()
+
+samples <- unlist(strsplit(Sys.getenv("SAMPLES"), split = "[ ]+"))
+if (all(c("Z00599", "Z00600", "Z00601") %in% samples)) {
+  truth <- list(
+    "Z00599-trim/Z00599-trim_R1.fastq.gz"            = list(size = 4541591250),
+    "Z00599-trim/Z00599-trim_R2.fastq.gz"            = list(size = 4787364118),
+    "Z00599-trim/Z00599-trim_R1.trimming_report.txt" = list(size = 3809 + c(-1, 1)*10),
+    "Z00599-trim/Z00599-trim_R2.trimming_report.txt" = list(size = 4011 + c(-1, 1)*10),
+    "Z00600-trim/Z00600-trim_R1.fastq.gz"            = list(size = 4860153452),
+    "Z00600-trim/Z00600-trim_R2.fastq.gz"            = list(size = 5029394683),
+    "Z00600-trim/Z00600-trim_R1.trimming_report.txt" = list(size = 3832 + c(-1, 1)*10),
+    "Z00600-trim/Z00600-trim_R2.trimming_report.txt" = list(size = 4044 + c(-1, 1)*10),
+    "Z00601-trim/Z00601-trim_R1.fastq.gz"            = list(size = 6021054501),
+    "Z00601-trim/Z00601-trim_R2.fastq.gz"            = list(size = 6312584266),
+    "Z00601-trim/Z00601-trim_R1.trimming_report.txt" = list(size = 3853 + c(-1, 1)*10),
+    "Z00601-trim/Z00601-trim_R2.trimming_report.txt" = list(size = 4047 + c(-1, 1)*10)
+  )
+}
 
 for (kk in seq_along(truth)) {
   file <- names(truth)[kk]

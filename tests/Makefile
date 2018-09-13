@@ -33,12 +33,12 @@ setup-annotation: setup-assert
 	ln -fs ../runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
 
 setup-P157: setup-annotation
-	cp ../runs_demo/_run_Trim_P157 .
-	cp ../runs_demo/_run_Align_gz_P157 .
-	cp ../runs_demo/_run_Recal_P157_3 .
-	cp ../runs_demo/_run_Pindel_157 .
-	cp ../runs_demo/_run_MutDet_P157 .
-	cp ../runs_demo/_run_PostMut_P157 .
+	cp ../runs_demo/_run_Trim .
+	cp ../runs_demo/_run_Align_gz .
+	cp ../runs_demo/_run_Recal .
+	cp ../runs_demo/_run_Pindel .
+	cp ../runs_demo/_run_MutDet .
+	cp ../runs_demo/_run_PostMut .
 
 setup: setup-P157
 
@@ -47,9 +47,11 @@ step3: setup
 	LG3_OUTPUT_ROOT=output \
 	DIROUT=output \
 	TG=/home/shared/cbc/software_frozen/20180907-LG3_Pipeline/TrimGalore-0.4.4/trim_galore \
-	./_run_Trim_P157
+	SAMPLES="Z00599 Z00600 Z00601" \
+	./_run_Trim
 
 step3-validate:
+	SAMPLES="Z00599 Z00600 Z00601" \
 	Rscript ./validate_trim.R
 
 step4-setup: setup
@@ -59,9 +61,11 @@ step4-setup: setup
 step4: setup step4-setup step3-validate
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
-	./_run_Align_gz_P157
+	SAMPLES="Z00599 Z00600 Z00601" \
+	./_run_Align_gz
 
 step4-validate:
+	SAMPLES="Z00599 Z00600 Z00601" \
 	Rscript ./validate_align.R
 
 step5-setup: setup
@@ -71,9 +75,14 @@ step5-setup: setup
 step5: setup step5-setup step4-validate
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
-        ./_run_Recal_P157_3
+	SAMPLES="Z00599 Z00600 Z00601" \
+	NORMAL=Z00599 \
+	PATIENT=Patient157 \
+	ILIST=resources/SeqCap_EZ_Exome_v3_capture.interval_list \
+        ./_run_Recal
 
 step5-validate:
+	PATIENT=Patient157 \
 	Rscript ./validate_recal.R
 
 step6a-setup: setup
@@ -84,7 +93,10 @@ step6a: setup step6a-setup step5-validate
 	## FIXME FIRST: ${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
-	./_run_Pindel_157
+	PATIENT=Patient157 \
+	PROJ=LG3 \
+	CONV=patient_ID_conversions.txt \
+	./_run_Pindel
 
 step6a-validate:
 
@@ -94,6 +106,9 @@ step6b-setup: setup
 step6b: setup step6a-setup
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
-	./_run_MutDet_P157
+	PATIENT=Patient157 \
+	PROJ=LG3 \
+	CONV=patient_ID_conversions.txt \
+	./_run_MutDet
 
 step6b-validate:

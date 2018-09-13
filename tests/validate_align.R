@@ -4,17 +4,22 @@ stopifnot(file_test("-d", path))
 path <- file.path(path, "LG3", "exomes")
 stopifnot(file_test("-d", path))
 
-truth <- list(
-  "Z00599/Z00599.trim.bwa.sorted.bam"      = list(size = 6416408982),
-  "Z00599/Z00599.trim.bwa.sorted.bam.bai"  = list(size = 6050968),
-  "Z00599/Z00599.trim.bwa.sorted.flagstat" = list(size = 412),
-  "Z00600/Z00600.trim.bwa.sorted.bam"      = list(size = 6793610227),
-  "Z00600/Z00600.trim.bwa.sorted.bam.bai"  = list(size = 6204640),
-  "Z00600/Z00600.trim.bwa.sorted.flagstat" = list(size = 412),
-  "Z00601/Z00601.trim.bwa.sorted.bam"      = list(size = 8345393162),
-  "Z00601/Z00601.trim.bwa.sorted.bam.bai"  = list(size = 6248072),
-  "Z00601/Z00601.trim.bwa.sorted.flagstat" = list(size = 414)
-)
+truth <- list()
+
+samples <- unlist(strsplit(Sys.getenv("SAMPLES"), split = "[ ]+"))
+if (all(c("Z00599", "Z00600", "Z00601") %in% samples)) {
+  truth <- list(
+    "Z00599/Z00599.trim.bwa.sorted.bam"      = list(size = 6416408982),
+    "Z00599/Z00599.trim.bwa.sorted.bam.bai"  = list(size = 6050968),
+    "Z00599/Z00599.trim.bwa.sorted.flagstat" = list(size = 412),
+    "Z00600/Z00600.trim.bwa.sorted.bam"      = list(size = 6793610227),
+    "Z00600/Z00600.trim.bwa.sorted.bam.bai"  = list(size = 6204640),
+    "Z00600/Z00600.trim.bwa.sorted.flagstat" = list(size = 412),
+    "Z00601/Z00601.trim.bwa.sorted.bam"      = list(size = 8345393162),
+    "Z00601/Z00601.trim.bwa.sorted.bam.bai"  = list(size = 6248072),
+    "Z00601/Z00601.trim.bwa.sorted.flagstat" = list(size = 414)
+  )
+}
 
 for (kk in seq_along(truth)) {
   file <- names(truth)[kk]
