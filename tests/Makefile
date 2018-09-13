@@ -84,16 +84,16 @@ step6a: setup step6a-setup step5-validate
 	## FIXME FIRST: ${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
-	./_run_Pindel_gz_P157
+	./_run_Pindel_157
 
 step6a-validate:
 
-step6a-setup: setup
+step6b-setup: setup
 	ln -fs $${PWD}/pykent $${LG3_HOME}/  ## FIXME: AD HOC (correct?)
 
 step6b: setup step6a-setup
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
-	./_run_MutDet_gz_P157
+	./_run_MutDet_P157
 
 step6b-validate:

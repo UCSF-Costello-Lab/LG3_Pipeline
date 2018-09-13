@@ -8,6 +8,7 @@ echo "Arguments: $*"
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -16,6 +17,7 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
@@ -44,6 +46,7 @@ echo "Input:"
 echo "- patient_ID=${patient_ID:?}"
 echo "- proj=${proj:?}"
 echo "- patIDs=${patIDs:?}"
+[[ -f "$patIDs" ]] || { echo "File not found: ${patIDs}"; exit 1; }
 
 python "${PYTHON_SCRIPT_A}" "${patient_ID}" "${proj}" "${patIDs}"
 
