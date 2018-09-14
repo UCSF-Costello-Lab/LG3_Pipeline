@@ -1,18 +1,26 @@
 #!/bin/bash
 
-### Configuration
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
 
@@ -24,15 +32,24 @@ fi
 #$ -j y
 #
 PROG=$(basename "$0")
+unset PYTHONPATH  ## ADHOC: In case it is set by user
+
 conversionfile=$1
 patient=$2
 mutfile=$3
 outfile=$4
+echo "Input:"
+echo "- conversionfile=${conversionfile:?}"
+echo "- patient=${patient:?}"
+echo "- mutfile=${mutfile:?}"
+echo "- outfile=${outfile:?}"
+[[ -f "$mutfile" ]] || { echo "File not found: ${mutfile}"; exit 1; }
+[[ -f "$conversionfile" ]] || { echo "File not found: ${conversionfile}"; exit 1; }
 
 echo "Warning ! Using Conversion file $conversionfile !!!"
 
-BIN=${LG3_HOME}/scripts
-
-python "$BIN/libID_to_patientID.py" "${mutfile}" "${patient}" "${outfile}" "${conversionfile}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/libID_to_patientID.py" "${mutfile}" "${patient}" "${outfile}" "${conversionfile}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 
 echo "$PROG Finished"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

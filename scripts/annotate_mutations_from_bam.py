@@ -23,7 +23,7 @@ def get_samples_from_patient(mutfile, conversionfile, patient_ID, projectname):
     patient_ID_folder = patient_ID.split("norm")[0]
   else:
     patient_ID_folder = patient_ID
-  fullpath = "/costellolab/data1/jocostello/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
+  fullpath = os.environ["LG3_INPUT_ROOT"] + "/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
   #fileheader = ".bwa.realigned.rmDups"
   fileheader = ".bwa.realigned.rmDups.recal"
   if not os.path.isfile(fullpath + testID + fileheader + ".bam"):
@@ -103,7 +103,7 @@ def annotate_mutations_from_bam(mutfile, bamfile, sample, sn):
   ## generate mpileup for this patient
   mpilefile = tmp_file_header + '.pileup'
   print '  making pileup ' + mpilefile
-  command = ['/home/jocostello/tools/samtools-0.1.12a/samtools', 'pileup', '-l', bedfile, bamfile]
+  command = [os.environ["LG3_HOME"] + '/tools/samtools-0.1.12a/samtools', 'pileup', '-l', bedfile, bamfile]
   task=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (stdout,stderr)=task.communicate()
   outfile = open(mpilefile, 'w')

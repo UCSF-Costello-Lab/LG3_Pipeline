@@ -4,7 +4,9 @@ library(RColorBrewer)
 # Function to load MAF files for a particular patient
 ###
 loadMAF=function(pat) {
+  message("loadMAF() ...")
   files=dir(paste0(pat,"_MAF"),full.names=T,pattern="[.]txt")
+  message("Files: ", paste(sQuote(files), collapse = ", "))
   dd=list()
   for(ff in files) {
     d=read.table(ff,header=T,as.is=T,sep="\t")  ## read in a file: data.frame with columns "chromosome" "position" "MAF"
@@ -14,6 +16,7 @@ loadMAF=function(pat) {
     d$samp=samp
     dd[[ptnt]]=rbind(dd[[ptnt]],d)  ## add this data to the full list, to the dataframe for the correct patient
   }
+  message("loadMAF() ... done")
   return(dd)
 }
 
@@ -22,12 +25,16 @@ loadMAF=function(pat) {
 ######################################################################
 
 plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA) {
+        ## FIXME: Constants used
+        pathnameFAI <- file.path(Sys.getenv("LG3_HOME", "/home/jocostello/shared/LG3_Pipeline"), "resources/UCSC_HG19_Feb_2009/hg19.fa.fai")
+
+        message("plotMAF() ...")
 	if(is.na(samp) | is.null(dd[[samp]])) {
-		cat("Please provide a sample label (or one that exists in the data)!")
-		return()
+		stop("Please provide a sample label (or one that exists in the data)!")
 	}
-	
+
 	## read in samples associated with a particular patient
+        message("Reading patient information: ", sQuote(convFILE))
 	conv <- read.table(convFILE, header=TRUE, sep="\t", as.is=TRUE)
 	types <- conv$sample_type[which(conv$patient_ID == samp)]
 	count <- length(types)
@@ -36,6 +43,8 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA) {
 	
 	## pull data for the sample of interest
 	d=dd[[samp]]
+        message(sprintf("Data for sample %s:", sQuote(samp)))
+        str(d)
 	
 	## standardize chromosome notation (1-24, no "chr")
 	d$chromosome=gsub("chr","",d$chromosome)
@@ -48,37 +57,41 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA) {
 		ch=ifelse(ch=="X",23,ch)
 		ch=ifelse(ch=="Y",24,ch)
 	}
+        message("Parsed:")
+        str(d)
 	
 	## define some stuff
 	isGenome=FALSE
 
 	## plot the whole genome
 	if(is.na(ch)) {; # Plot the whole genome
+                message("- Plotting whole genome")
 		idx <- list()
 		for(i in 1:count) { idx[[i]] = which(d$samp == types[i]) }
 		isGenome=TRUE
-		if(!file.exists("/home/jocostello/shared/LG3_Pipeline/resources/UCSC_HG19_Feb_2009/hg19.fa.fai")) {
-			cat("Full genome data requires an indexed FASTA (faidx) file for the genome in question")
-			return()
+                message("- Reading FASTA index file: ", sQuote(pathnameFAI))
+		if(!file.exists(pathnameFAI)) {
+			stop("Full genome data requires an indexed FASTA (faidx) file for the genome in question")
 		}
 		### haven't gone through the code below this...
-		hg=read.table("/home/jocostello/shared/LG3_Pipeline/resources/UCSC_HG19_Feb_2009/hg19.fa.fai",header=F,as.is=T)[,1:2]
+		hg=read.table(pathnameFAI,header=F,as.is=T)[,1:2]
 		hg=cbind(hg,cumsum(hg[,2]/pad))
 		colnames(hg)=c("chrom","pos","absPos")
 		hg=hg[unique(d$chromosome),]
 		incr=c(rep(0,sum(d$chromosome==1)),hg$absPos[d$chromosome[d$chromosome>1]-1])
 		d$absPos=(d$position/pad)+incr
-		
+                str(d)		
 	## plot a single chromosome
 	} else {
+                message("- Plotting single chromosome: ", sQuote(ch))
 		if(sum(d$chromosome==ch)==0) {
-			cat("No data on your chromosome of interest!")
-			return()
+			stop("No data on your chromosome of interest!")
 		}
 		
 		idx <- list()
 		for(i in 1:count) {	idx[[i]] = which(d$chromosome==ch & d$samp == types[i]) }
 		d$absPos=d$position/pad   ## convert to megabase positions (rather than bp)
+                str(d)		
 	}
 	
 	## graphing - set up the plot
@@ -124,4 +137,5 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA) {
 		xs=seq(xlim[1],xlim[2],length=6)
 		axis(1,at=xs,cex.axis=0.8)
 	}
+        message("plotMAF() ... done")
 }

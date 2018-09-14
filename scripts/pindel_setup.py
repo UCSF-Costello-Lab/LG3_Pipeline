@@ -54,7 +54,7 @@ def pindel_setup(patient_ID, projectname, patIDs):
     #if len(l) > col_file and l[col_file] != "":
      # fileheader = l[col_file]
     #elif patient_ID == "Patient126" and  sample_type != "Normal":
-     # fullpath = "/costellolab/data1/jocostello/LG3/exomes/" + lib_ID + "/"
+     # fullpath = os.environ["LG3_INPUT_ROOT"] + "/exomes/" + lib_ID + "/"
       #fileheader = ".merged"
     #else:
      # fileheader = ".bwa.realigned.rmDups.recal"

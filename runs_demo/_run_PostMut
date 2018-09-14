@@ -7,6 +7,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 PATIENT=${PATIENT:-Patient157}
@@ -19,13 +20,14 @@ LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- PROJ=${PROJ:?}"
 echo "- CONV=${CONV:?}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
@@ -38,9 +40,6 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 [[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
-
-## Requires absolute path 
-#TODO# CONV=$(readlink -e "$CONV")
 
 PBS=${LG3_HOME}/post_mutect_pindel.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }

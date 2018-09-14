@@ -7,21 +7,43 @@
 #PBS -l nodes=1:ppn=1,vmem=32gb
 #PBS -m ae
 
-### Configuration
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+PATIENT=${PATIENT:-Patient157}
+PROJ=${PROJ:-LG3}
+CONV=${CONV:-patient_ID_conversions.txt}
+
+## Requires absolute path 
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_INPUT_ROOT=$(readlink -e "$LG3_INPUT_ROOT")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- PATIENT=${PATIENT:?}"
+  echo "- PROJ=${PROJ:?}"
+  echo "- CONV=${CONV:?}"
 fi
 
+[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
+CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
 
 PROG=$(basename "$0")
@@ -31,49 +53,72 @@ OK() {
 
 echo -n "Mutation filtering & combining "
 date
-echo "Patient: ${PATIENT}"
+echo "Patient: ${PATIENT:?}"
 # shellcheck disable=SC2153
-echo "Project: ${PROJ}"
-echo "Conversion file: ${CONV}"
+echo "Project: ${PROJ:?}"
+echo "Conversion file: ${CONV:?}"
 echo "----------------------------------"
 
-BIN=${LG3_HOME}/scripts
 
-mkdir -p "${LG3_OUTPUT_ROOT}/${PROJ}/MutInDel"
-cd "${LG3_OUTPUT_ROOT}/${PROJ}/MutInDel" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+### Software
+RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
+RSCRIPT_A=${LG3_HOME}/scripts/MutDet_filter.R
+RSCRIPT_B=${LG3_HOME}/scripts/combine_snvs_pindel.R
+SCRIPT_A=${LG3_HOME}/scripts/combine_snvs.sh
+SCRIPT_B=${LG3_HOME}/scripts/annotate_mutations_from_bam.sh
+SCRIPT_C=${LG3_HOME}/scripts/libID_to_patientID.sh
+SCRIPT_D=${LG3_HOME}/scripts/mutation_overlaps.sh
+SCRIPT_E=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh
+SCRIPT_F=${LG3_HOME}/scripts/runLOH_ivan.sh
+
+[[ -x "$RSCRIPT_BIN" ]] || { echo "File not found or not an executable: ${RSCRIPT_BIN}"; exit 1; }
+[[ -f "$RSCRIPT_A" ]] || { echo "File not found: ${RSCRIPT_A}"; exit 1; }
+[[ -f "$RSCRIPT_B" ]] || { echo "File not found: ${RSCRIPT_B}"; exit 1; }
+[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
+[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
+[[ -x "$SCRIPT_C" ]] || { echo "File not found or not an executable: ${SCRIPT_C}"; exit 1; }
+[[ -x "$SCRIPT_D" ]] || { echo "File not found or not an executable: ${SCRIPT_D}"; exit 1; }
+[[ -x "$SCRIPT_E" ]] || { echo "File not found or not an executable: ${SCRIPT_E}"; exit 1; }
+[[ -x "$SCRIPT_F" ]] || { echo "File not found or not an executable: ${SCRIPT_F}"; exit 1; }
+
+
+WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/MutInDel
+mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
+cd "${WDIR}" || { echo "ERROR [$PROG:$LINENO]: Failed to set working directory to ${WDIR}"; exit 1; }
 
 echo -e "\n************ Cat all SNV files per patient"
-"$BIN/combine_snvs.sh" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_A}" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Annotate mutations from aligned bam files"
-"$BIN/annotate_mutations_from_bam.sh" "${CONV}" "${PATIENT}" "${PROJ}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJ}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Convert library IDs to patient IDs"
-"$BIN/libID_to_patientID.sh" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_C}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
-/opt/R/R-latest/bin/Rscript "$BIN/MutDet_filter.R" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Combine indels and snvs into one file"
-/opt/R/R-latest/bin/Rscript "$BIN/combine_snvs_pindel.R" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Calculate mutation overlaps"
-"$BIN/mutation_overlaps.sh" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_D}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Annotate with shared coverage"
-"$BIN/mutect_coverage_intersection_mutations.sh" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_E}" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -e "\n************ Generate MAF files & LOH plots"
-"$BIN/runLOH_ivan.sh" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_F}" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
 echo -ne "\n************ End of script "
 date
 
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

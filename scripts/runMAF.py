@@ -16,13 +16,13 @@ def runMAF(patient_ID, projectname, conversionfile):
   tumors = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID and x.strip().split('\t')[col_st] != "Normal", data)
   normal = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID and x.strip().split('\t')[col_st] == "Normal", data)
   
-  UGfile = "/costellolab/data1/jocostello/LG3/exomes_recal/" + patient_ID + "/germline/" + patient_ID + ".UG.snps.vcf"
+  UGfile = os.environ["LG3_INPUT_ROOT"] + "/LG3/exomes_recal/" + patient_ID + "/germline/" + patient_ID + ".UG.snps.vcf"
 
   ## generate MAF file for normal
   if len(normal) != 0:
     normA0 = normal[0].split('\t')[col_lib]
     outfile = patient_ID + ".Normal.MAF.txt"
-    command = ["python", "/home/jocostello/shared/LG3_Pipeline/scripts/vcf_MAF_normal.py", UGfile, normA0]
+    command = ["python", os.environ["LG3_HOME"] + "/scripts/vcf_MAF_normal.py", UGfile, normA0]
     task=subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (stdout,stderr)=task.communicate()
     of = open(outfile, 'w')
@@ -35,7 +35,7 @@ def runMAF(patient_ID, projectname, conversionfile):
   for t in tumors:
     tumA0 = t.split('\t')[col_lib]
     outfile = patient_ID + "." + t.strip().split('\t')[col_st] + ".MAF.txt"
-    command = ["python", "/home/jocostello/shared/LG3_Pipeline/scripts/vcf_MAF_tumor.py", UGfile, tumA0, normA0]
+    command = ["python", os.environ["LG3_HOME"] + "/scripts/vcf_MAF_tumor.py", UGfile, tumA0, normA0]
     task=subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (stdout,stderr)=task.communicate()
     of = open(outfile, 'w')

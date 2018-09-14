@@ -5,11 +5,11 @@ SHELL:=/bin/bash
 LG3_HOME:=$(shell dirname $(CURDIR))
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
-TEST_SUFFIX:=
+TEST_SUFFIX:=t
 TEST_SAMPLES:=Z00599$(TEST_SUFFIX) Z00600$(TEST_SUFFIX) Z00601$(TEST_SUFFIX)
 TEST_NORMAL:=Z00599$(TEST_SUFFIX)
 TEST_PATIENT:=Patient157$(TEST_SUFFIX)
-TEST_CHASTITY_FILTERING:=
+TEST_CHASTITY_FILTERING:=false
 
 .PHONY: test
 
@@ -21,6 +21,7 @@ debug:
 	@echo "TEST_SAMPLES=$$TEST_SAMPLES"
 	@echo "TEST_NORMAL=$$TEST_NORMAL"
 	@echo "TEST_PATIENT=$$TEST_PATIENT"
+	@echo "TEST_CHASTITY_FILTERING=$$TEST_CHASTITY_FILTERING"
 
 setup-assert:
 ifeq ($(wildcard output/.),)
@@ -120,3 +121,14 @@ step6b: setup step6a-setup
 	./_run_MutDet
 
 step6b-validate:
+
+step7-setup: setup
+	ln -fs $${PWD}/pykent $${LG3_HOME}/  ## FIXME: AD HOC (correct?)
+
+step7: setup step7-setup
+	LG3_INPUT_ROOT=output \
+	LG3_OUTPUT_ROOT=output \
+	PATIENT=$(TEST_PATIENT) \
+	PROJ=LG3 \
+	CONV=patient_ID_conversions.txt \
+	./_run_PostMut

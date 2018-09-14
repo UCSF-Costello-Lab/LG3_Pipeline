@@ -17,12 +17,12 @@ def combine_snvs(patient_ID, projectname, conversionfile, outfile):
   normal = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID and x.strip().split('\t')[col_st] == "Normal", data)
   print normal
   print tumors
-  if len(normal) != 1: print "ERROR: too many normals"
+  if len(normal) != 1: raise Exception("ERROR: too many normals")
   normalA0 = normal[0].strip().split('\t')[col_lib]
   #normalA0="NA"
 
   ## find all mutation files for this patient
-  loc = "/costellolab/data1/jocostello/" + projectname + "/mutations/" + patient_ID + "_mutect/"
+  loc = os.environ["LG3_INPUT_ROOT"] + "/" + projectname + "/mutations/" + patient_ID + "_mutect/"
   allRNA = glob.glob(loc + patient_ID + ".NOR-" + normalA0 + "__*.annotated.withRNA.mutations")
   print allRNA
   allnot = glob.glob(loc + patient_ID + ".NOR-" + normalA0 + "__*.annotated.mutations")
@@ -30,7 +30,7 @@ def combine_snvs(patient_ID, projectname, conversionfile, outfile):
 
   ## 
   #if len(allRNA) == 0: tomerge = allnot ## including this removes the check for each sample
-  if len(allRNA) == 0 and len(allnot) == 0: print "ERROR: no files found for this patient"
+  if len(allRNA) == 0 and len(allnot) == 0: raise Exception("ERROR: no files found for this patient")
   else:
     tomerge = [] 
     for t in tumors:
@@ -53,7 +53,7 @@ def combine_snvs(patient_ID, projectname, conversionfile, outfile):
   print tomerge
 
   ## call R code to merge these files
-  command = ["/opt/R/R-latest/bin/Rscript", "/home/jocostello/shared/LG3_Pipeline/scripts/combine_snvs.R"] + tomerge + [outfile]
+  command = ["/opt/R/R-latest/bin/Rscript", os.environ["LG3_HOME"] + "/scripts/combine_snvs.R"] + tomerge + [outfile]
   print command
   task=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (stdout,stderr)=task.communicate()
