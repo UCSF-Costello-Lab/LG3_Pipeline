@@ -34,6 +34,7 @@ echo "Input:"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PREFIX=${PREFIX:?}"
+echo "- CHASTITY_FILTERING=${CHASTITY_FILTERING}"
 
 ## Assert existance of input files
 [[ -f "$FASTQ1" ]] || { echo "File not found: ${FASTQ1}"; exit 1; }
