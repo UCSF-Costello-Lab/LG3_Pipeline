@@ -4,30 +4,34 @@ proj <- args[2]
 conv <- args[3]
 
 wdir <- file.path(Sys.getenv("LG3_INPUT_ROOT", "/costellolab/data1/jocostello"), proj, "MAF")
-message("Setting work directory: ", sQuote(wdir))
 setwd(wdir)
-
+ 
 source(file.path(Sys.getenv("LG3_HOME", "/home/jocostello/shared/LG3_Pipeline"), "scripts/MAFplot_version3.R"))
 
-message("1. Loading patient data: ", sQuote(pat))
 dd <- loadMAF(pat)
-str(dd)
 
-uchrs <- sort(unique(dd[[pat]]$chromosome))
-uchrs <- as.integer(gsub("chr", "", uchrs))
-nchrs <- length(uchrs)
-message(sprintf("Chromsomes: [n=%d] %s", nchrs, paste(uchrs, collapse = ", ")))
+##### modified by Ivan
+chrs=unique(dd[[pat]]$chromosome)
+chrs.num=length(chrs)
+   ## standardize chromosome notation (1-24, no "chr")
+   chrs=gsub("chr","",chrs)
+   chrs[chrs=="X"]=23
+   chrs[chrs=="Y"]=24
+   chrs=as.numeric(as.vector(chrs))
+cat("Found ",chrs.num,"chromosomes\n")
+print(chrs)
 
-message("2. plotMAF()")
-if (nchrs >= 23) {
-  #png(paste0(pat,"_plots/",pat,".LOH.png"), width=1000, height=400)
-  png(paste0(pat,"_plots/",pat,".LOH.png"), width=10, height=4, units="in", res=300)
-  plotMAF(dd,conv,pat)
-  dev.off()
+if(chrs.num > 22) {
+	cat("Whole genome LOH plot\n")
+	png(paste0(pat,"_plots/",pat,".LOH.png"), width=10, height=4, units="in", res=300)
+	plotMAF(dd,conv,pat)
+	dev.off()
+} else {
+	cat("Only ",chrs.num,"chromosomes available, skiping whole genome plot\n")
 }
 
-message("3. plotMAF() per chromosome")
-for(c in uchrs) {
+for(c in chrs) {
+  cat("LOH plot for chr",c,"\n")
   pdf(paste0(pat,"_plots/",pat,".LOH.chr",c,".pdf"), width=10, height=4)
   plotMAF(dd,conv,pat,ch=c)
   dev.off()
@@ -35,20 +39,11 @@ for(c in uchrs) {
 
 if(length(unique(dd[[pat]]$samp)) > 2) {
   source(file.path(Sys.getenv("LG3_HOME", "/home/jocostello/shared/LG3_Pipeline"), "scripts/MAFplot_version3_grid.R"))
-  message("4. Loading patient data: ", sQuote(pat))
   dd <- loadMAF(pat)
-  str(dd)
-  
-  uchrs <- sort(unique(dd[[pat]]$chromosome))
-  uchrs <- as.integer(gsub("chr", "", uchrs))
-  nchrs <- length(uchrs)
-  message(sprintf("Chromsomes: [n=%d] %s", nchrs, paste(uchrs, collapse = ", ")))
-
-  message("5. plotMAF() per chromosome")
-  for(c in uchrs) {
+  for(c in chrs) {
+	cat("Grid plot for chr",c,"\n")
     pdf(paste0(pat,"_plots/",pat,".LOH.grid.chr",c,".pdf"), width=12, height=6)
     plotMAF(dd,conv,pat,ch=c, grid=TRUE)
     dev.off()
   }
 }
-
