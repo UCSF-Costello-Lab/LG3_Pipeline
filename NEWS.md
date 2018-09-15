@@ -24,7 +24,10 @@
    typically be set to the same folder as 'LG3_OUTPUT_PATH', i.e.
    `export LG3_INPUT_PATH=${LG3_OUTPUT_PATH}`. The folder will be created, if
    missing.
-  
+
+ * Environment variable 'EMAIL' can be used to set the email address to which
+   the Torque/PBS scheduler will send email reports when the jobs finishes.
+
  * Chastity filtering prior to alignment of FASTQ files is now optional by
    setting environment variable 'CHASTITY_FILTERING' (default is true).
   
