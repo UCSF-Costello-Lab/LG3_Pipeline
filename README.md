@@ -33,43 +33,43 @@ ln -s runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
 ### 3 Copy _run_Trim_P157 script to the main directory and run it (~4-5h)
 
 ``` sh
- cp runs_demo/_run_Trim_P157 .
-_run_Trim_P157
+ cp runs_demo/_run_Trim_P157t .
+_run_Trim_P157t
 ```
 
-### 4 Copy _run_Align_gz_P157 script to the main directory and run it (~10-16h)
+### 4 Copy _run_Align_gz_P157t script to the main directory and run it (~10-16h)
 
 ```sh
-cp runs_demo/_run_Align_gz_P157 .
-_run_Align_gz_P157
+cp runs_demo/_run_Align_gz_P157t .
+_run_Align_gz_P157t
 ```
 
-### 5 Copy _run_Recal_P157_3 script to the main directory and run it (~85h)
+### 5 Copy _run_Recal_P157t script to the main directory and run it (~85h)
 
 ```sh
-cp runs_demo/_run_Recal_P157_3 .
-_run_Recal_P157_3
+cp runs_demo/_run_Recal_P157t .
+_run_Recal_P157t
 ```
 
-### 6a Copy _run_Pindel_157 script to the main directory and run it (~4h)
+### 6a Copy _run_Pindel_157t script to the main directory and run it (~4h)
 
 ```sh
-cp runs_demo/_run_Pindel_157 .
-_run_Pindel_157
+cp runs_demo/_run_Pindel_157t .
+_run_Pindel_157t
 ```
 
-### 6b Copy _run_MutDet_P157 script to the main directory and run it (~20-21h)
+### 6b Copy _run_MutDet_P157t script to the main directory and run it (~20-21h)
 
 ```sh
-cp runs_demo/_run_MutDet_P157 .
-_run_MutDet_P157
+cp runs_demo/_run_MutDet_P157t .
+_run_MutDet_P157t
 ```
    
-### 7 Copy _run_PostMut_P157 script to the main directory and run it (~1h)
+### 7 Copy _run_PostMut_P157t script to the main directory and run it (~1h)
 
 ```sh
-cp runs_demo/_run_PostMut_P157 .
-_run_PostMut_P157
+cp runs_demo/_run_PostMut_P157t .
+_run_PostMut_P157t
 ```
 
 All Done!

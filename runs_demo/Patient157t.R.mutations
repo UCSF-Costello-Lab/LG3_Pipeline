@@ -1,0 +1,17 @@
+#gene	contig	position	ref_allele	alt_allele	nucleotide	protein	context	type	mutect_covered_in_all	algorithm	n_ref_count	n_alt_count	COSMIC_mutation_frequency	COSMIC_mutation_within_3bp_frequency	COSMIC_gene_frequency	KINASE.	SangerCancerGeneCensus.	Normal_ref_reads	Normal_alt_reads	Normal_ref_Q20reads	Normal_alt_Q20reads	Primary_ref_reads	Primary_alt_reads	Primary_ref_Q20reads	Primary_alt_Q20reads	Recurrence1_ref_reads	Recurrence1_alt_reads	Recurrence1_ref_Q20reads	Recurrence1_alt_Q20reads	Recurrence1_called	Primary_called	samples_called
+NOS2	chr17	26089902	A	G	T2722C	Y908H	exonic	Missense	covered_in_all	MuTect	132	0	0	0	5	NO	NO	152	0	152	0	257	0	257	0	125	71	121	71	True	False	Recurrence1
+DPY19L3	chr19	32930021	A	C	A600C,A600C	I200I,I200I	exonic	Silent	covered_in_all	MuTect	78	0	0	0	4	NO	NO	88	0	88	0	121	0	121	0	94	21	85	4	True	False	Recurrence1
+SLFN12	chr17	33747349	G	T	C1091A	P364H	exonic	Missense	covered_in_all	MuTect	92	0	0	0	3	NO	NO	119	0	115	0	141	0	140	0	83	55	77	55	True	False	Recurrence1
+LRFN3	chr19	36435687	A	G	A1653G	V551V	exonic	Silent	covered_in_all	MuTect	53	0	0	0	1	NO	NO	62	0	59	0	36	0	34	0	16	9	16	8	True	False	Recurrence1
+ZNF835	chr19	57176357	G	A	C210T	T70T	exonic	Silent	covered_in_all	MuTect	143	0	0	0	8	NO	NO	161	0	159	0	195	0	194	0	2	57	2	57	True	False	Recurrence1
+DOCK6	chr19	11348348	C	G	G1940C	G647A	exonic	Missense	covered_in_all	MuTect	176	0	0	0	5	NO	NO	256	0	255	0	245	0	241	0	162	45	161	43	True	False	Recurrence1
+CDC27	chr17	45234407	AGCTGAATCAATAT	GCTTAATCAGTAG	c.701_714CTACTGATTAAGC,c.701_714CTACTGATTAAGC	NA,NA	exonic	frameshift substitution	NA	Pindel	NA	NA	0	0	11	NO	NO	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	True	True	Primary,Recurrence1
+ABCA7	chr19	1046328	C	T	C1545T	V515V	exonic	Silent	covered_in_all	MuTect	396	0	0	0	11	NO	NO	455	0	452	0	424	0	420	0	270	138	270	137	True	False	Recurrence1
+TP53	chr17	7578523	T	G	A11C,A407C,A11C,A407C,A407C,A407C,A11C	Q4P,Q136P,Q4P,Q136P,Q136P,Q136P,Q4P	exonic	Missense	covered_in_all	MuTect	106	0	5	202	22656	YES	YES	120	0	118	0	14	89	14	89	4	71	4	71	True	True	Primary,Recurrence1
+ELSPBP1	chr19	48525532	G	A	G620A	W207X	exonic	Nonsense	covered_in_all	MuTect	121	0	0	0	1	NO	NO	145	0	145	0	98	61	96	61	72	48	71	48	True	True	Primary,Recurrence1
+KIAA1267	chr17	44159843	A	G	T1497C,T1497C,T1497C	S499S,S499S,S499S	exonic	Silent	covered_in_all	MuTect	59	0	0	0	7	NO	NO	77	0	75	0	108	0	106	0	73	59	71	59	True	False	Recurrence1
+TMEM205	chr19	11453717	C	G	G344C,G344C,G344C	W115S,W115S,W115S	exonic	Missense	covered_in_all	MuTect	126	0	0	0	0	NO	NO	146	0	145	0	148	0	146	0	82	52	80	52	True	False	Recurrence1
+EPN3	chr17	48618382	C	T	C1208T	A403V	exonic	Missense	covered_in_all	MuTect	221	0	0	0	3	NO	NO	252	0	250	0	162	103	160	101	180	0	178	0	False	True	Primary
+SCN4A	chr17	62019222	C	T	G4420A	A1474T	exonic	Missense	covered_in_all	MuTect	109	0	0	0	10	NO	NO	129	0	129	0	145	0	143	0	50	34	50	34	True	False	Recurrence1
+C17orf57	chr17	45419342	-	A	c.247_248insA,c.247_248insA	p.E83fs,p.E83fs	exonic	frameshift insertion	NA	Pindel	NA	NA	0	0	7	NO	NO	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	False	True	Primary
+ICT1	chr17	73008926	T	G	T145G	Y49D	exonic	Missense	covered_in_all	MuTect	84	0	0	0	2	NO	NO	97	0	93	0	125	1	119	0	105	24	70	5	True	False	Recurrence1
