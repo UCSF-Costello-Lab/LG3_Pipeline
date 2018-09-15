@@ -20,12 +20,12 @@ $ cd /path/to/tests/LG3_Pipeline/tests
 and then run each of the following steps in order.  You _cannot_ launch the next step until the _jobs_ of the previous step has completed.  The expection are `make step6a` and `make step6b` that can be launched in parallel.
 
 ```sh
-$ make step3
-$ make step4
-$ make step5
-$ make step6a
-$ make step6b
-$ make step7
+$ make step3    ## ~20 minutes
+$ make step4    ## ~1 hour
+$ make step5    ## ~13-14 hours
+$ make step6a   ## ~1.5 hours
+$ make step6b   ## ~4 hours
+$ make step7    ## < 5 minutes
 ```
 
 The expected set of files produced in each of the above steps are summarized in [Demo_output.md].  The set of identified mutations are available in [Patient157t.R.mutations].

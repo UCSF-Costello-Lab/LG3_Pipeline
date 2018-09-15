@@ -47,7 +47,7 @@
  * TESTS: Two in-house tumor-normal data sets are now available for testing the
    pipeline; one complete whole-genome sample ('Patient157') and one
    two-chromosome subset ('Patient157t') of the same sample.  Testing of full
-   sample takes ~120+ hours (walltime) and the smaller sample ~25 hours to
+   sample takes ~120+ hours (walltime) and the smaller sample ~20 hours to
    complete. Note, it is necessary to disable chastity filtering when testing
    with the smaller set.
 
