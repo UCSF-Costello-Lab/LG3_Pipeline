@@ -10,7 +10,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
-SAMPLES=${SAMPLES:-Z00599 Z00600 Z00601}
+SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
