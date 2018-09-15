@@ -33,5 +33,5 @@ The expected set of files produced in each of the above steps are summarized in 
 
 
 [LG3_Pipeline]: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
-[Demo_output.md]: ../run_demo/Demo_output.md
-[Patient157t.R.mutations]: ../run_demo/Patient157t.R.mutations
+[Demo_output.md]: ../runs_demo/Demo_output.md
+[Patient157t.R.mutations]: ../runs_demo/Patient157t.R.mutations
