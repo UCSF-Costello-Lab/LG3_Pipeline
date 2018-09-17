@@ -29,7 +29,7 @@ echo "- NORMAL=${NORMAL:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
@@ -46,7 +46,7 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 PBS=${LG3_HOME}/Recal_bigmem.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
-D=${LG3_OUTPUT_ROOT}/LG3/exomes
+D=${LG3_INPUT_ROOT}/LG3/exomes
 [[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
 
 ## Requires absolute path 
