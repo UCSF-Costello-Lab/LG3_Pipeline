@@ -48,9 +48,8 @@ PBS=${LG3_HOME}/Recal_bigmem.pbs
 
 D=${LG3_INPUT_ROOT}/LG3/exomes
 [[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
+D=$(readlink -e "$D") ## requires absolute path
 
-## Requires absolute path 
-#TODO# D=$(readlink -e "$D")
 #TODO# ILIST=$(readlink -e "$ILIST")
 
 SUFF=trim.bwa.sorted.bam
