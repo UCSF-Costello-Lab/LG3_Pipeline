@@ -1,4 +1,4 @@
-import sys, subprocess, os.path
+import sys, subprocess, os.path, os
 
 def pindel_setup(patient_ID, projectname, patIDs):
   ## read ID conversion file
@@ -33,7 +33,7 @@ def pindel_setup(patient_ID, projectname, patIDs):
     patient_ID_folder = patient_ID.split("norm")[0]
   else:
     patient_ID_folder = patient_ID
-  fullpath = "/costellolab/data1/jocostello/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
+  fullpath = os.environ["LG3_INPUT_ROOT"] + "/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
   if not os.path.isfile(fullpath + testID + fileheader + ".insert_size_metrics"):
     fullpath = fullpath.replace("data", "home", 1)
     if not os.path.isfile(fullpath + testID + fileheader + ".insert_size_metrics"):
@@ -54,7 +54,7 @@ def pindel_setup(patient_ID, projectname, patIDs):
     #if len(l) > col_file and l[col_file] != "":
      # fileheader = l[col_file]
     #elif patient_ID == "Patient126" and  sample_type != "Normal":
-     # fullpath = "/costellolab/data1/jocostello/LG3/exomes/" + lib_ID + "/"
+     # fullpath = os.environ["LG3_INPUT_ROOT"] + "/exomes/" + lib_ID + "/"
       #fileheader = ".merged"
     #else:
      # fileheader = ".bwa.realigned.rmDups.recal"

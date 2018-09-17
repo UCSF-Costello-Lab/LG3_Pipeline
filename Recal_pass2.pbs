@@ -7,29 +7,45 @@
 #PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
 #PBS -m ae
 
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
+
 ##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
 
-U=$(whoami)
 date
-mkdir -p "/scratch/$U/${PATIENT}"
-cd "/scratch/$U/${PATIENT}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${PATIENT}"; exit 1; }
+mkdir -p "${SCRATCHDIR}/${PATIENT}"
+cd "${SCRATCHDIR}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}/${PATIENT}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_pass2.sh "$BAMS" "$PATIENT" "$ILIST"
+"${LG3_HOME}/scripts/Recal_pass2.sh" "$BAMS" "$PATIENT" "$ILIST"
 
-cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
+cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
 
-mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
-cp -p "/scratch/$U/${PATIENT}"/* "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
-rm -rf "/scratch/$U/${PATIENT}"
+mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}"
+cp -p "${SCRATCHDIR}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}"
+rm -rf "${SCRATCHDIR:?}/${PATIENT}"
 
-mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
-cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"
+cd "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam" \
+"${LG3_HOME}/scripts/Germline.sh" \
+      "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam" \
       "${PATIENT}" "$ILIST"
 
-###/home/jocostello/shared/LG3_Pipeline/resources/All_exome_targets.extended_200bp.interval_list
+###${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 
 echo "End of script!"
 date

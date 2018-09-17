@@ -3,13 +3,29 @@
 #PBS -o _post_${PREFIX}.out
 #PBS -l nodes=1:bigmem:ppn=12,vmem=100gb
 #PBS -m ae
-U=$(whoami)
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
-echo "Started Post Alignment on $DATE as $U"
+echo "Started Post Alignment on $DATE as $USER"
 echo -e "Steps: \n\tverify mate; \n\tsort and enforce read group; \n\tconvert to BAM; \n\tindex; \n\tcalculate flag stats"
 echo "Using node(s): $NODES"
-TMP=/scratch/jocostello
+TMP=${SCRATCHDIR}
 
 if [ ! -f "$SAM" ]; then
    echo "ERROR: Can't open $SAM! STOP"
@@ -26,11 +42,11 @@ mkdir -p "$TMP/${PREFIX}" || { echo "Can't create scratch directory $TMP/${PREFI
 cd "$TMP/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${TMP}/${PREFIX}"; exit 1; }
 cp "$SAM" "./${PREFIX}.bwa.sam"
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Post_align.sh "$PREFIX"
+"${LG3_HOME}/scripts/Post_align.sh" "$PREFIX"
 
 cd "$TMP" || { echo "ERROR: Failed to set working directory to ${TMP}"; exit 1; }
 
-cp -r -p  "$TMP/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/ || { echo "Can't copy directory $TMP/${PREFIX}"; exit 1; }
+cp -r -p  "$TMP/${PREFIX}" "${LG3_OUTPUT_ROOT}/LG3/exomes/" || { echo "Can't copy directory $TMP/${PREFIX}"; exit 1; }
 rm -rf "${TMP:?}/${PREFIX}"
 
 echo "End of script!"

@@ -1,4 +1,21 @@
 #!/bin/bash
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 #
 ## Base quality recalibration, prep for indel detection, and quality control
 #
@@ -11,17 +28,18 @@
 #
 ### https://broadinstitute.github.io/picard/picard-metric-definitions.html#HsMetrics
 
-source /home/jocostello/.bashrc
-DIR=/costellolab/data1/jocostello/LG3/exomes_recal
+# shellcheck source=.bashrc
+source "${LG3_HOME}/.bashrc"
+DIR=${LG3_OUTPUT_ROOT}/LG3/exomes_recal
 
-JAVA=/home/jocostello/shared/LG3_Pipeline/tools/java/jre1.6.0_27/bin/java
+JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 #Input variables
 patientID=$1
 ilist=$2
 shift
 shift
 
-TMP="/scratch/jocostello/${patientID}_tmp"
+TMP="${SCRATCHDIR}/${patientID}_tmp"
 mkdir -p "$TMP"
 
 echo "------------------------------------------------------"
@@ -37,20 +55,20 @@ cd "$DIR/$patientID" || { echo "ERROR: Can't cd in $DIR/$patientID"; exit 1; }
 echo "[QC] Calculate hybrid selection metrics..."
 for i in "$@"
 do
-	echo "------------------------------------------------------"
-	base=${i%%.bwa.realigned.rmDups.recal.bam}
-	echo "[QC] Sample: $base"
+        echo "------------------------------------------------------"
+        base=${i%%.bwa.realigned.rmDups.recal.bam}
+        echo "[QC] Sample: $base"
 
-	$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-		-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/CalculateHsMetrics.jar \
-		BAIT_INTERVALS="${ilist}" \
-		TARGET_INTERVALS="${ilist}" \
-		INPUT="$i" \
-		OUTPUT="${base}.bwa.realigned.rmDups.recal.HS_metrics" \
-		TMP_DIR="${TMP}" \
-		VERBOSITY=WARNING \
-		QUIET=true \
-		VALIDATION_STRINGENCY=SILENT || { echo "Calculate hybrid selection metrics failed"; exit 1; }
+        $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+                -jar "${LG3_HOME}/tools/picard-tools-1.64/CalculateHsMetrics.jar" \
+                BAIT_INTERVALS="${ilist}" \
+                TARGET_INTERVALS="${ilist}" \
+                INPUT="$i" \
+                OUTPUT="${base}.bwa.realigned.rmDups.recal.HS_metrics" \
+                TMP_DIR="${TMP}" \
+                VERBOSITY=WARNING \
+                QUIET=true \
+                VALIDATION_STRINGENCY=SILENT || { echo "Calculate hybrid selection metrics failed"; exit 1; }
 
 done
 

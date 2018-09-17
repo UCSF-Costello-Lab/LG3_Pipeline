@@ -5,6 +5,23 @@
 #PBS -o _UG_${PAT}.out
 #PBS -l nodes=1:bigmem:ppn=12
 #PBS -m ae
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
@@ -13,7 +30,7 @@ echo "Using node(s): $NODES"
 echo "BAMS=$BAMS"
 echo "OUT=$OUT"
 
-/home/jocostello/shared/LG3_Pipeline/scripts/UG.sh \
+"${LG3_HOME}/scripts/UG.sh" \
       -bams="$BAMS" \
       -out="${OUT}" \
       -list="$ILIST"

@@ -5,6 +5,32 @@
 #PBS -l nodes=1:bigmem:ppn=12,vmem=8gb
 #PBS -m ae
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:1}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- ncores=$ncores"
+fi
+
+
 if [ ! -r "$FASTQ" ]; then
 	echo "ERROR: can't open $FASTQ"
 	exit 1
@@ -15,12 +41,12 @@ D=$(dirname "$FASTQ")
 B=$(basename "$FASTQ" .fastq.gz)
 LOC=$(basename "$FASTQ")
 
-SCRATCH="/scratch/$USER/$B"
+SCRATCH="${SCRATCHDIR}/$B"
 mkdir -p "$SCRATCH"
 cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 cp "$FASTQ" .
 
-time "$FQC" -t 10 "$LOC"
+time "$FQC" -t "${ncores}" "$LOC"
 fastqc-summary ./*.zip
 
 rm -f "$LOC"
@@ -32,4 +58,6 @@ rmdir "$SCRATCH"
 echo "Output in $D"
 echo "End of script!"
 date
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 exit 0

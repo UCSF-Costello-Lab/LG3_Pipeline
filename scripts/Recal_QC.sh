@@ -1,4 +1,21 @@
 #!/bin/bash
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 #
 ## Base quality recalibration, prep for indel detection, and quality control
 #
@@ -12,19 +29,20 @@
 
 #Fix the path so the QC scripts can output pdfs
 #Both of these aren't necessary, but I'm leaving them here for future use
-source /home/jocostello/.bashrc
+# shellcheck source=.bashrc
+source "${LG3_HOME}/.bashrc"
 PATH=/opt/R/R-latest/bin/R:$PATH
 
 #Define resources and tools
-JAVA=/home/jocostello/shared/LG3_Pipeline/tools/java/jre1.6.0_27/bin/java
-SAMTOOLS=/home/jocostello/shared/LG3_Pipeline/tools/samtools-0.1.18/samtools
-REF="/home/jocostello/shared/LG3_Pipeline/resources/UCSC_HG19_Feb_2009/hg19.fa"
+JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
+SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
+REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
 
 #Input variables
 bamfiles=$1
 patientID=$2
 ilist=$3
-TMP="/scratch/jocostello/${patientID}_tmp"
+TMP="${SCRATCHDIR}/${patientID}_tmp"
 mkdir -p "$TMP"
 
 echo "------------------------------------------------------"
@@ -55,36 +73,36 @@ echo "------------------------------------------------------"
 echo "[QC] Quality Control"
 for i in *.bwa.realigned.rmDups.recal.bam
 do
-	echo "------------------------------------------------------"
-	base=${i%%.bwa.realigned.rmDups.recal.bam}
-	echo "[QC] $base"
+        echo "------------------------------------------------------"
+        base=${i%%.bwa.realigned.rmDups.recal.bam}
+        echo "[QC] $base"
 
-	echo "[QC] Calculate flag statistics..."
-	$SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat" 2>&1
+        echo "[QC] Calculate flag statistics..."
+        $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat" 2>&1
 
-	echo "[QC] Calculate hybrid selection metrics..."
-	$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-		-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/CalculateHsMetrics.jar \
-		BAIT_INTERVALS="${ilist}" \
-		TARGET_INTERVALS="${ilist}" \
-		INPUT="$i" \
-		OUTPUT="${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" \
-		TMP_DIR="${TMP}" \
-		VERBOSITY=WARNING \
-		QUIET=true \
-		VALIDATION_STRINGENCY=SILENT || { echo "Calculate hybrid selection metrics failed"; exit 1; }
+        echo "[QC] Calculate hybrid selection metrics..."
+        $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+                -jar "${LG3_HOME}/tools/picard-tools-1.64/CalculateHsMetrics.jar" \
+                BAIT_INTERVALS="${ilist}" \
+                TARGET_INTERVALS="${ilist}" \
+                INPUT="$i" \
+                OUTPUT="${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" \
+                TMP_DIR="${TMP}" \
+                VERBOSITY=WARNING \
+                QUIET=true \
+                VALIDATION_STRINGENCY=SILENT || { echo "Calculate hybrid selection metrics failed"; exit 1; }
 
-	echo "[QC] Collect multiple QC metrics..."
-	$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-		-jar /home/jocostello/shared/LG3_Pipeline/tools/picard-tools-1.64/CollectMultipleMetrics.jar \
-		INPUT="$i" \
-		OUTPUT="${base}.bwa.realigned.rmDups.recal" \
-		REFERENCE_SEQUENCE=${REF} \
-		TMP_DIR="${TMP}" \
-		VERBOSITY=WARNING \
-		QUIET=true \
-		VALIDATION_STRINGENCY=SILENT || { echo "Collect multiple QC metrics failed"; exit 1; }
-	echo "------------------------------------------------------"
+        echo "[QC] Collect multiple QC metrics..."
+        $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+                -jar "${LG3_HOME}/tools/picard-tools-1.64/CollectMultipleMetrics.jar" \
+                INPUT="$i" \
+                OUTPUT="${base}.bwa.realigned.rmDups.recal" \
+                REFERENCE_SEQUENCE="${REF}" \
+                TMP_DIR="${TMP}" \
+                VERBOSITY=WARNING \
+                QUIET=true \
+                VALIDATION_STRINGENCY=SILENT || { echo "Collect multiple QC metrics failed"; exit 1; }
+        echo "------------------------------------------------------"
 done
 
 echo -n "[QC] Finished! "

@@ -5,12 +5,28 @@
 #PBS -o _Align_${PREFIX}.out
 #PBS -l nodes=1:bigmem:ppn=12,vmem=16gb
 #PBS -m ae
-U=$(whoami)
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
-echo "Started $PROG on $DATE as $U"
+echo "Started $PROG on $DATE as $USER"
 echo "Using node(s): $NODES"
-TMP=/scratch/jocostello
+TMP=${SCRATCHDIR}
 
 mkdir -p "$TMP/${PREFIX}" || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }
 
@@ -19,12 +35,12 @@ cp "$FASTQ1" "$FASTQ2" .
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Align_fastq_mm9.sh "$FQ1" "$FQ2" "$PREFIX"
+"${LG3_HOME}/scripts/Align_fastq_mm9.sh" "$FQ1" "$FQ2" "$PREFIX"
 rm "$FQ1" "$FQ2"
 
 cd "$TMP" || { echo "ERROR: Failed to set working directory to $TMP"; exit 1; }
 
-cp -r -p  "$TMP/${PREFIX}" /costellolab/data1/jocostello/LG3/exomes/
+cp -r -p  "$TMP/${PREFIX}" "${LG3_OUTPUT_ROOT}/LG3/exomes/"
 rm -rf "${TMP:?}/${PREFIX}"
 
 echo "End of script!"

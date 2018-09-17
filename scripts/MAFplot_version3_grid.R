@@ -21,14 +21,17 @@ loadMAF=function(pat) {
 # Function to plot any individual chromosome or the whole genome
 ######################################################################
 
-plotMAF=function(dd,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
+plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
+        ## FIXME: Constants used
+        pathnameFAI <- file.path(Sys.getenv("LG3_HOME", "/home/jocostello/shared/LG3_Pipeline"), "resources/UCSC_HG19_Feb_2009/hg19.fa.fai")
+
+        message("plotMAF() ...")
 	if(is.na(samp) | is.null(dd[[samp]])) {   ### samp = PATIENT
-		cat("Please provide a sample label (or one that exists in the data)!")
-		return()
+		stop("Please provide a sample label (or one that exists in the data)!")
 	}
 	
-	## read in samples associated with a particular patient
-	conv <- read.table("/costellolab/data1/mazort/LG3/exome/patient_ID_conversions.txt", header=TRUE, sep="\t", as.is=TRUE)
+        message("Reading patient information: ", sQuote(convFILE))
+	conv <- read.table(convFILE, header=TRUE, sep="\t", as.is=TRUE)
 	types <- conv$sample_type[which(conv$patient_ID == samp)]   ### ie normal, primary, etc
 	count <- length(types)
 	
@@ -57,12 +60,11 @@ plotMAF=function(dd,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
 		idx <- list()
 		for(i in 1:count) { idx[[i]] = which(d$samp == types[i]) }
 		isGenome=TRUE
-		if(!file.exists("/home/jocostello/shared/LG3_Pipeline/resources/UCSC_HG19_Feb_2009/hg19.fa.fai")) {
-			cat("Full genome data requires an indexed FASTA (faidx) file for the genome in question")
-			return()
+		if(!file.exists(pathnameFAI)) {
+			stop("Full genome data requires an indexed FASTA (faidx) file for the genome in question")
 		}
 		### haven't gone through the code below this...
-		hg=read.table("/home/jocostello/shared/LG3_Pipeline/resources/UCSC_HG19_Feb_2009/hg19.fa.fai",header=F,as.is=T)[,1:2]
+		hg=read.table(pathnameFAI,header=F,as.is=T)[,1:2]
 		hg=cbind(hg,cumsum(hg[,2]/pad))
 		colnames(hg)=c("chrom","pos","absPos")
 		hg=hg[unique(d$chromosome),]
@@ -154,4 +156,5 @@ plotMAF=function(dd,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
 		  axis(1,at=xs,cex.axis=0.8)
 	  }
 	}
+        message("plotMAF() ... DONE")
 }

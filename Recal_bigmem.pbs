@@ -5,38 +5,85 @@
 #PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
 #PBS -m ea -M ivan.smirnov@ucsf.edu
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+fi
+
+
+### Input
+echo "Input:"
+echo "- BAMS=${BAMS:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- ILIST=${ILIST:?}"
+
+## Assert existance of input files
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+
+ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
+
+
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output
 
 module load CBC r/3.4.2
 Rscript --version
 
-
-U=$(whoami)
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
-mkdir -p "/scratch/$U/${PATIENT}"
 
-cd "/scratch/$U/${PATIENT}" || { echo "ERROR: Failed to set working directory to /scratch/$U/${PATIENT}"; exit 1; }
+## Assert existance of software
+SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
+[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Recal_bigmem.sh "$BAMS" "$PATIENT" "$ILIST"
+SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
+[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
 
-cd "/scratch/$U" || { echo "ERROR: Failed to set working directory to /scratch/$U"; exit 1; }
 
-mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}"
-cp -p "/scratch/$U/${PATIENT}"/* "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}" || { echo "ERROR cp!" ; exit 1 ; }
+WDIR=${SCRATCHDIR}/${PATIENT}
+mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
+cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
-echo "Cleaning /scratch ..."
-rm -rf "/scratch/$U/${PATIENT}"
+"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST"
 
-mkdir -p "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"
-cd "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to /costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
+cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
 
-/home/jocostello/shared/LG3_Pipeline/scripts/Germline.sh \
-      "/costellolab/data1/jocostello/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+DESTDIR=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}
+mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
+cp -p "${SCRATCHDIR}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
+
+echo "Cleaning ${SCRATCHDIR} ..."
+rm -rf "${SCRATCHDIR:?}/${PATIENT}"
+
+WDIR=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline
+mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
+cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+
+"${SCRIPT_B}" \
+      "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
       "${PATIENT}" "$ILIST"
 
 echo -n "End of script! "
 date
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

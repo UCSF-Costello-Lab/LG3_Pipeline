@@ -1,0 +1,67 @@
+#!/bin/bash
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
+
+## Requires absolute path 
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- EMAIL=${EMAIL}"       ## optional
+echo "- DIROUT=${DIROUT}"     ## optional
+echo "- TG=${TG}"             ## optional
+echo "- SAMPLES=${SAMPLES:?}"
+
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+if [[ -n ${DIROUT} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},DIROUT=${DIROUT}"; fi
+if [[ -n ${TG} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},TG=${TG}"; fi
+QSUB_OPTS="-d ${PWD:?}"
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
+echo "Qsub extras:"
+echo "- QSUB_OPTS=${QSUB_OPTS}"
+echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
+
+PBS=${LG3_HOME}/trim_galore.pbs
+[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+
+echo "ETA ~4h"
+
+QTY=20
+
+for PREFIX in ${SAMPLES}
+do
+   FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}_R1.fastq.gz
+   FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}_R2.fastq.gz
+
+   ## Requires absolute path 
+   FASTQ1=$(readlink -e "$FASTQ1")
+   FASTQ2=$(readlink -e "$FASTQ2")
+   
+   if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
+      echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
+   else
+      echo "Submitting $PREFIX: quality $QTY ..."
+      # shellcheck disable=SC2086
+      qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY}" "$PBS"
+   fi
+done
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

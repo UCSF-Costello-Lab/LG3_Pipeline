@@ -59,7 +59,7 @@ def pindel_annotate_normal_coverage(filename, projectname):
       ## generate mpileup for this patient
       print '  making pileup'
       mpilefile = tmp_file_header + '.pileup'
-      command = ['/home/jocostello/tools/samtools-0.1.12a/samtools', 'pileup', '-l', bedfile, norm_file]
+      command = [os.environ["LG3_HOME"] + '/tools/samtools-0.1.12a/samtools', 'pileup', '-l', bedfile, norm_file]
       task=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
       (stdout,stderr)=task.communicate()
       outfile = open(mpilefile, 'w')

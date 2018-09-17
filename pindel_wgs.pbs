@@ -7,29 +7,46 @@
 #PBS -l nodes=1:ppn=6,vmem=12gb
 #PBS -m ae
 
+### Configuration
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "LG3_HOME=$LG3_HOME"
+  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "PWD=$PWD"
+  echo "USER=$USER"
+fi
+
+
+
 echo "PINDEL"
 echo "Patient: ${SAMPLE}"
 echo "Project: ${PROJ}"
 echo "Conversion File: ${CONV}"
 echo "----------------------------------"
 
-WDIR=/costellolab/data1/jocostello/${PROJ}/pindel
-BIN=/home/jocostello/shared/LG3_Pipeline/scripts
+WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/pindel
+BIN=${LG3_HOME}/scripts
 
-PINDEL=/home/jocostello/shared/LG3_Pipeline/tools/pindel024t/pindel
-PINDEL2VCF=/home/jocostello/shared/LG3_Pipeline/tools/pindel024t/pindel2vcf
+PINDEL=${LG3_HOME}/tools/pindel024t/pindel
+PINDEL2VCF=${LG3_HOME}/tools/pindel024t/pindel2vcf
 
-REF=/home/jocostello/shared/LG3_Pipeline/resources/UCSC_HG19_Feb_2009/hg19.fa
-TARGET=/home/jocostello/shared/LG3_Pipeline/resources/WG_hg19-ENCFF001TDO.bed
+REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
+TARGET=${LG3_HOME}/resources/WG_hg19-ENCFF001TDO.bed
 
 ## setup pindel cfg file
 date
 echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
-$BIN/pindel_wgs_setup.sh "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"$BIN/pindel_wgs_setup.sh" "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
-SCRATCH=/scratch/$USER/${SAMPLE}_pindel_wgs
+SCRATCH=${SCRATCHDIR}/${SAMPLE}_pindel_wgs
 mkdir -p "$SCRATCH"
 cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
@@ -48,7 +65,7 @@ $PINDEL2VCF -P "${SAMPLE}_pindel_wgs/${SAMPLE}.pindel" -r "$REF" -R hg19 -d 2012
 
 ## convert to tdt
 echo -e "\n========= [Pindel] Convert vcf to tdt"
-$BIN/vcf2tdt.py "${SAMPLE}_pindel_wgs/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"$BIN/vcf2tdt.py" "${SAMPLE}_pindel_wgs/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
 cd "${SAMPLE}_pindel_wgs" || { echo "ERROR: Failed to set working directory to ${SAMPLE}_pindel_wgs"; exit 1; }
@@ -56,11 +73,11 @@ mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
 echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
-$BIN/pindel_filter.sh "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"$BIN/pindel_filter.sh" "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
-$BIN/pindel_annotate.sh "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"$BIN/pindel_annotate.sh" "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 echo -ne "\nEnd of script $0 on "
 date
