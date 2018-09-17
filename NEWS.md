@@ -2,7 +2,12 @@
 
 ## Version 2018-09-17-9000 (develop version)
 
- * ...
+### SIGNIFICANT CHANGES
+
+ * Environment variable 'EMAIL' must now be set in order to run any of the
+   steps in the pipeline; if not set, an informative error is produced.  Set
+   it to the email address where you wish the scheduler to send job reports,
+   e.g. `export EMAIL=alice@example.org`.
 
 
 ## Version 2018-09-17
