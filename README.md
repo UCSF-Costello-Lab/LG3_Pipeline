@@ -111,6 +111,18 @@ $ module load CBC lg3
 then all you need to set is the `EMAIL` environment variable.
 
 
+_Oh, one more thing_:  We need to install the RColorBrewer packages in order for the `_run_PostMut` step to work, and we need it to be installed for the legacy version of R that is currently used by the pipeline.  To install this, do:
+
+```sh
+$ /opt/R/R-latest/bin/R   ## the version of R used by the pipeline!
+[...]
+> install.packages("RColorBrewer", repos = "http://cloud.r-project.org")
+[...]
+> quit("no")
+$
+```
+
+
 Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
