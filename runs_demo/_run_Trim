@@ -11,6 +11,7 @@ if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
     LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 else
     LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+    DIROUT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 fi    
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
