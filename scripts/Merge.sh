@@ -96,6 +96,8 @@ rm -f "${prefix}.merged.sorted.sam"
 echo "[Merge] Index the BAM file..."
 $SAMTOOLS index "${prefix}.merged.sorted.bam" || { echo "BAM indexing failed"; exit 1; }
 
+echo "[QC] Calculate flag statistics..."
+$SAMTOOLS flagstat "${prefix}.merged.sorted.bam" > "${prefix}.merged.sorted.flagstat" 2>&1
 
 echo "[Merge] Finished!"
 echo "------------------------------------------------------"
