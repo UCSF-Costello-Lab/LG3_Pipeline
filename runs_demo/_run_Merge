@@ -1,0 +1,70 @@
+#!/bin/bash
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+SAMPLE=${SAMPLE:-Y00600t}
+SAMPLES=${SAMPLES:-Z00600t Z00601t}
+PATIENT=${PATIENT:-Patient157t}
+
+## Requires absolute path
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- EMAIL=${EMAIL}"
+echo "- SAMPLE=${SAMPLE:?}"
+echo "- SAMPLES=${SAMPLES:?}"
+echo "- PATIENT=${PATIENT:?}"
+
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_OPTS="-d ${PWD:?}"
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
+echo "Qsub extras:"
+echo "- QSUB_OPTS=${QSUB_OPTS}"
+echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
+
+PBS=${LG3_HOME}/Merge.pbs
+[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+
+D=${LG3_INPUT_ROOT}/LG3/exomes_recal
+[[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
+D=$(readlink -e "$D") ## requires absolute path
+
+SUFF=bwa.realigned.rmDups.recal.bam
+
+CNT=0
+for S in ${SAMPLES}
+do
+   ((CNT++))
+   B=$D/${PATIENT}.before.merge/${S}.$SUFF
+   if [ ! -f "$B" ]; then
+      echo "ABORT: Can't open $B !"
+      exit 1
+   fi
+   echo "Found $B"
+   BAMS=${BAMS}:$B
+done
+## Clip first char (:)
+BAMS=$(echo "$BAMS" | cut -c2-)
+echo "Total BAMS: $CNT"
+echo "$BAMS"
+
+# shellcheck disable=SC2086
+qsub ${QSUB_OPTS} -N Merge_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},PREFIX=${SAMPLE},PATIENT=${PATIENT}" "$PBS"
+

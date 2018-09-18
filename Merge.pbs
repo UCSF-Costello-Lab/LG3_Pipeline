@@ -4,7 +4,7 @@
 ### Output files
 #PBS -e _Merge_${PREFIX}.err
 #PBS -o _Merge_${PREFIX}.out
-#PBS -l nodes=1:bigmem:ppn=6
+#PBS -l nodes=1:bigmem:ppn=6,vmem=32gb
 #PBS -m ae
 
 ### Configuration
@@ -25,7 +25,6 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
-
 date
 mkdir -p "${SCRATCHDIR}/${PREFIX}"
 cd "${SCRATCHDIR}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}/${PREFIX}"; exit 1; }
@@ -33,9 +32,11 @@ cd "${SCRATCHDIR}/${PREFIX}" || { echo "ERROR: Failed to set working directory t
 "${LG3_HOME}/scripts/Merge.sh" "$BAMS" "$PREFIX"
 
 cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
-mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes/${PREFIX}"
-cp -p "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes/${PREFIX}"
+#mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes/${PREFIX}"
+#cp -p "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes/${PREFIX}"
+cp -p "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${SCRATCHDIR}/${PREFIX}"; exit 1; }
 rm -rf "${SCRATCHDIR:?}/${PREFIX}"
 
+echo "Output: ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge"
 echo "End of script!"
 date
