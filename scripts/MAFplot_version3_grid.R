@@ -1,4 +1,13 @@
+if (system.file(package = "RColorBrewer") == "") install.packages("RColorBrewer")
 library(RColorBrewer)
+
+assertFile <- function(pathname) {
+  if (!utils::file_test("-f", pathname)) {
+    pathnameX <- normalizePath(pathname, mustWork = FALSE)
+    stop(sprintf("File not found: %s => %s (current working directory is %s)", sQuote(pathname), sQuote(pathnameX), sQuote(getwd())))
+  }
+  invisible(pathname)
+}
 
 ###
 # Function to load MAF files for a particular patient
@@ -7,6 +16,7 @@ loadMAF=function(pat) {
   files=dir(paste0(pat,"_MAF"),full.names=T,pattern="[.]txt")
   dd=list()
   for(ff in files) {
+    assertFile(ff)
     d=read.table(ff,header=T,as.is=T,sep="\t")  ## read in a file: data.frame with columns "chromosome" "position" "MAF"
     id=gsub("(^.*/|[.]MAF.*$)","",ff)  ## "^.*/" removes "MAF/"  and "[.]MAF.*$"  removes the ending ".MAF.txt"
     ptnt=strsplit(id,"[.]")[[1]][1]  ## separate id into patient...
@@ -31,6 +41,7 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
 	}
 	
         message("Reading patient information: ", sQuote(convFILE))
+        assertFile(convFILE)
 	conv <- read.table(convFILE, header=TRUE, sep="\t", as.is=TRUE)
 	types <- conv$sample_type[which(conv$patient_ID == samp)]   ### ie normal, primary, etc
 	count <- length(types)
@@ -64,6 +75,7 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
 			stop("Full genome data requires an indexed FASTA (faidx) file for the genome in question")
 		}
 		### haven't gone through the code below this...
+                assertFile(pathnameFAI)
 		hg=read.table(pathnameFAI,header=F,as.is=T)[,1:2]
 		hg=cbind(hg,cumsum(hg[,2]/pad))
 		colnames(hg)=c("chrom","pos","absPos")
