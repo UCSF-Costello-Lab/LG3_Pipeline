@@ -13,7 +13,7 @@ EMAIL=${EMAIL:?}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 NORMAL=${NORMAL:-Z00599t}
 PATIENT=${PATIENT:-Patient157t}
-ILIST=${ILIST:-resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
