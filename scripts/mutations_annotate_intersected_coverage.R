@@ -6,6 +6,14 @@
 ### FUNCTION:
 ## annotates mutation list with whether or not MuTect considered that site covered in ALL tumors
 
+assertFile <- function(pathname) {
+  if (!utils::file_test("-f", pathname)) {
+    pathnameX <- normalizePath(pathname, mustWork = FALSE)
+    stop(sprintf("File not found: %s => %s (current working directory is %s)", sQuote(pathname), sQuote(pathnameX), sQuote(getwd())))
+  }
+  invisible(pathname)
+}
+
 args <- commandArgs(trailingOnly = TRUE)
 
 ## get files names
@@ -14,6 +22,10 @@ overlapsfile <- args[2]
 mutfile <- sub("overlaps.", "", overlapsfile)
 tmp.file.header <- paste0(overlapsfile, "_TMP_")
 outfile <- args[3]
+
+assertFile(bedfile)
+assertFile(overlapsfile)
+assertFile(mutfile)
 
 ## read in data
 dat.bed <- read.delim(bedfile, sep="\t", as.is=TRUE, header=FALSE)
@@ -34,7 +46,9 @@ write.table(dat.overlaps[which(dat.overlaps$algorithm=="MuTect"), c(2,3,3)], fil
 
 ## run bedtools intersect
 system(paste0("/opt/BEDTools/BEDTools-2.16.2/bin/intersectBed -wa -a ", tmp.file.header, "muts.bed -b ", tmp.file.header, "coveredinall.bed > ", tmp.file.header, "intersect.bed"), wait=TRUE)
-intersect.bed <- read.table(paste0(tmp.file.header, "intersect.bed"), header=FALSE, as.is=TRUE)
+bedfile2 <- paste0(tmp.file.header, "intersect.bed")
+assertFile(bedfile2)
+intersect.bed <- read.table(bedfile2, header=FALSE, as.is=TRUE)
 intersect.bed.nameuniq <- paste(intersect.bed[ ,1], intersect.bed[ ,2], sep="_")
 
 ## annotate the mutations that are covered in all
