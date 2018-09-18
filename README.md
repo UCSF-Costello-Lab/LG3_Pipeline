@@ -47,7 +47,7 @@ $ ln -s /another/drive/lg3-test/output output
 ```
 In both cases, there will be a local `./output/` folder that the LG3 pipeline can write to.
 
-Next we want to create a `rawdata/` folder where our input data lives.  As above, we can either create it and copy our files over or we can point a symbolic link to an existing folder elsewhere on the file system.  For the test example, we will use:
+Next we want to create a `rawdata/` folder where the pipeline looks for the raw input data.  As above, we can either create it and copy our files over or we can point a symbolic link to an existing folder elsewhere on the file system.  For the test example, we will use:
 ```sh
 $ ln -s /costellolab/data1/ismirnov/tmp rawdata
 ```
@@ -86,7 +86,6 @@ $ tree
 ```sh
 export EMAIL=first.last@example.org     ## scheduler sent notifications here!
 export LG3_HOME=/path/to/LG3_Pipeline
-export LG3_INPUT_ROOT=output
 export LG3_OUTPUT_ROOT=output
 ```
 These can all be set in your global `~/.bashrc` script or equivalently.
@@ -97,12 +96,12 @@ Now, we are ready to launch the pipeline (step by step):
 ``` sh
 $ cd /path/to/lg3-test
 $ export TG=/home/shared/cbc/software_frozen/20180907-LG3_Pipeline/TrimGalore-0.4.4/trim_galore
-$ LG3_INPUT_ROOT=rawdata ./_run_Trim      ## ~20 minutes
-$ LG3_INPUT_ROOT=rawdata ./_run_Align_gz  ## ~1 hour
-$ ./_run_Recal                            ## ~13-15 hours
-$ ./_run_Pindel                           ## ~1.5 hours
-$ ./_run_MutDet                           ## ~4 hours
-$ ./_run_PostMut                          ## ~5 minutes
+$ ./_run_Trim       ## ~20 minutes
+$ ./_run_Align_gz   ## ~1 hour
+$ ./_run_Recal      ## ~13-15 hours
+$ ./_run_Pindel     ## ~1.5 hours
+$ ./_run_MutDet     ## ~4 hours
+$ ./_run_PostMut    ## ~5 minutes
 ```
 
 _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_MutDet`, which can be ran in parallel (as soon as `_run_Recal` has finished).
