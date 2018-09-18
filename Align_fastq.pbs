@@ -65,17 +65,33 @@ echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" "$FASTQ2" .
 
+echo "Content of ${PWD}:"
+ls -lrt
+
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
 "${SCRIPT}" "$FQ1" "$FQ2" "$PREFIX" || { echo "ERROR: ${SCRIPT} FAILED"; exit 1; }
 
+echo "Content of ${PWD}:"
+ls -lrt
+
 rm "$FQ1" "$FQ2"
+
+echo "Content of ${PWD}:"
+ls -lrt
 
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
 
+echo "Content of ${WDIR}:"
+ls -lrt "${WDIR}"
+
 cp -r -p "${WDIR}" "${DEST}/"
+
+echo "Content of ${DEST}:"
+ls -lrt "${DEST}"
+
 rm -rf "${WDIR:?}"
 
 echo "End of script!"
