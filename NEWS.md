@@ -9,6 +9,22 @@
    it to the email address where you wish the scheduler to send job reports,
    e.g. `export EMAIL=alice@example.org`.
 
+ * Renamed the optional environment variable 'CHASTITY_FILTERING' to
+   'LG3_CHASTITY_FILTERING'.
+
+### NEW FEATURES
+
+ * Added run scripts `_run_Merge` and `_run_Merge_QC` for merging recalibrated,
+   replicated BAM files that are for the same sample.
+ 
+ * Environment variable 'LG3_INPUT_ROOT' is now optional.  If not specified,
+   it will be set to a sensible default depending on 'LG3_OUTPUT_ROOT'.
+
+### BUG FIXES
+
+ * Run script `_run_Pindel` assumed that resources/ folder was in the working
+   directory rather than in the 'LG3_HOME' directory.
+   
 
 ## Version 2018-09-17
 
