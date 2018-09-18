@@ -17,10 +17,6 @@ fi
 
 
 #
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 # shellcheck source=.bashrc

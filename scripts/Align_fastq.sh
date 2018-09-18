@@ -33,10 +33,6 @@ fi
 ###
 ### /path/to/Align_fastq.sh <fastq1> <fastq2> <output prefix>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 ## References

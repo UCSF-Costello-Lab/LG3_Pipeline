@@ -17,10 +17,6 @@ fi
 
 
 #
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 PROG=$(basename "$0")
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python

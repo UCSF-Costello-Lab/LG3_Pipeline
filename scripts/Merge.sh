@@ -21,10 +21,6 @@ fi
 #
 ## Usage: /path/to/Merge.sh <bamfiles> <prefix> 
 #
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 # shellcheck source=.bashrc
 source "${LG3_HOME}/.bashrc"

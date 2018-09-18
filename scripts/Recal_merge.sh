@@ -31,10 +31,6 @@ fi
 #
 ## Usage: /path/to/Recal.sh <bamfiles> <patientID> <exome_kit.interval_list>
 #
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 #Fix the path so the QC scripts can output pdfs

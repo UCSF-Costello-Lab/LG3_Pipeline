@@ -22,10 +22,6 @@ fi
 ###
 ### /path/to/pindel_setup.sh
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 patient_ID=$1

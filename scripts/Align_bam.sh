@@ -32,10 +32,6 @@ fi
 ###
 ### /path/to/Align_bam.sh <bam_file> <output prefix>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa

@@ -22,10 +22,6 @@ fi
 ###
 ### /path/to/FixReadGroups.sh <bam_in> <bam_out>  <new_prefix>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 if [ $# -ne 3 ]; then
