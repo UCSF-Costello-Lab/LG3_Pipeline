@@ -68,7 +68,7 @@ cp "$FASTQ1" "$FASTQ2" .
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
-"${SCRIPT}" "$FQ1" "$FQ2" "$PREFIX"
+"${SCRIPT}" "$FQ1" "$FQ2" "$PREFIX" || { echo "ERROR: ${SCRIPT} FAILED"; exit 1; }
 
 rm "$FQ1" "$FQ2"
 
