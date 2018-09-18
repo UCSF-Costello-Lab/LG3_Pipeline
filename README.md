@@ -95,7 +95,6 @@ Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
 $ cd /path/to/lg3-test
-$ export TG=/home/shared/cbc/software_frozen/20180907-LG3_Pipeline/TrimGalore-0.4.4/trim_galore
 $ ./_run_Trim       ## ~20 minutes
 $ ./_run_Align_gz   ## ~1 hour
 $ ./_run_Recal      ## ~13-15 hours
