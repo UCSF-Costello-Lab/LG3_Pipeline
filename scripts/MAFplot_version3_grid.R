@@ -1,3 +1,4 @@
+if (system.file("RColorBrewer") == "") install.packages("RColorBrewer")
 library(RColorBrewer)
 
 assertFile <- function(pathname) {
