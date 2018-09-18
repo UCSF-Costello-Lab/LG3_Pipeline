@@ -116,7 +116,7 @@ _Oh, one more thing_:  We need to install the RColorBrewer packages in order for
 ```sh
 $ /opt/R/R-latest/bin/R   ## the version of R used by the pipeline!
 [...]
-> install.packages("RColorBrewer", repos = "http://cloud.r-project.org")
+> if (!require("RColorBrewer")) install.packages("RColorBrewer", repos = "http://cloud.r-project.org")
 [...]
 > quit("no")
 $
