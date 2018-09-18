@@ -22,9 +22,7 @@ fi
 ## Usage: /path/to/Merge.sh <bamfiles> <prefix> 
 #
 #
-# shellcheck source=.bashrc
-source "${LG3_HOME}/.bashrc"
-PATH=/opt/R/R-latest/bin/R:$PATH
+export PATH=/opt/R/R-latest/bin:$PATH
 
 #Define resources and tools
 pl="Illumina"
@@ -96,6 +94,10 @@ rm -f "${prefix}.merged.sorted.sam"
 
 echo "[Merge] Index the BAM file..."
 $SAMTOOLS index "${prefix}.merged.sorted.bam" || { echo "BAM indexing failed"; exit 1; }
+
+echo "[Merge] make symbolic link for downstream compatibility..."
+ln -sf "${prefix}.merged.sorted.bam" "${prefix}.bwa.realigned.rmDups.recal.bam"
+ln -sf "${prefix}.merged.sorted.bam.bai" "${prefix}.bwa.realigned.rmDups.recal.bam.bai"
 
 echo "[QC] Calculate flag statistics..."
 $SAMTOOLS flagstat "${prefix}.merged.sorted.bam" > "${prefix}.merged.sorted.flagstat" 2>&1
