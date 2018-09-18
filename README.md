@@ -3,9 +3,23 @@
 [![Build Status](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline.svg?branch=develop)](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline)
 
 
+_Warning: Because of hardcoded paths and software dependencies, this software currently only runs on the UCSF [TIPCC] compute cluster!_
+
+
 ## What's new?
 
 See [NEWS](NEWS.md) for the changlog.
+
+
+## TIPCC users do not have to install
+
+The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, load the following module:
+
+```sh
+$ module load CBC lg3
+```
+
+See `module avail` for available versions.
 
 
 ## Installation
@@ -90,6 +104,12 @@ export LG3_OUTPUT_ROOT=output
 ```
 These can all be set in your global `~/.bashrc` script or equivalently.
 
+If you're on the TIPCC cluster and loaded the lg3 module;
+```sh
+$ module load CBC lg3
+```
+then all you need to set is the `EMAIL` environment variable.
+
 
 Now, we are ready to launch the pipeline (step by step):
 
@@ -112,3 +132,4 @@ See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output l
 
 
 [LG3_Pipeline]: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
+[TIPCC]: https://ucsf-ti.github.io/tipcc-web/
