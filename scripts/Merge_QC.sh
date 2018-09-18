@@ -22,9 +22,7 @@ fi
 ## Usage: /path/to/Merge.sh <bamfiles> <prefix> 
 #
 #
-# shellcheck source=.bashrc
-source "${LG3_HOME}/.bashrc"
-PATH=/opt/R/R-latest/bin/R:$PATH
+export PATH=/opt/R/R-latest/bin:$PATH
 
 #Define resources and tools
 pl="Illumina"
