@@ -13,7 +13,7 @@ EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 SAMPLE=${SAMPLE:-Y00600t}
 SAMPLES=${SAMPLES:-Z00600t Z00601t}
 PATIENT=${PATIENT:-Patient157t}
-ILIST=${ILIST:-resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 
 ## Requires absolute path
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -72,4 +72,3 @@ echo "$BAMS"
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},PREFIX=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST}" "$PBS"
-
