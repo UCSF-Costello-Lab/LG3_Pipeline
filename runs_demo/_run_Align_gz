@@ -7,7 +7,11 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
+else
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+fi    
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
