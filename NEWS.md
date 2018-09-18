@@ -23,6 +23,8 @@
  * In order to minimize the risk for clashes, now using user and job specific
    scratch folders - used to only be only user specific.
 
+ * Giving more informative error message in case files are missing.
+
 ### BUG FIXES
 
  * Run script `_run_Pindel` assumed that resources/ folder was in the working
