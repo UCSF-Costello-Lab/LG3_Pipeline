@@ -3,7 +3,7 @@
 #PBS -e _Recal_${PATIENT}.err
 #PBS -o _Recal_${PATIENT}.out
 #PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
-#PBS -m ea -M ivan.smirnov@ucsf.edu
+#PBS -m ea
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
