@@ -28,10 +28,6 @@ fi
 ###
 ### /path/to/pindel_annotate.sh
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 PROG=$(basename "$0")
 OK() {

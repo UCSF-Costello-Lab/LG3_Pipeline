@@ -3,6 +3,7 @@
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+EMAIL=${EMAIL:?}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
@@ -10,6 +11,7 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "EMAIL=${EMAIL}"
   echo "SCRATCHDIR=$SCRATCHDIR"
   echo "PWD=$PWD"
   echo "USER=$USER"
@@ -73,8 +75,8 @@ do
         if [ -s "$OUT" ]; then
                 echo "WARNING: file $OUT exists, skipping this job ... "
         else
-                echo "qsub -M ivan.smirnov@ucsf.edu -N ${patient}.mut -v PROJECT=${project},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL $PBS"
-                qsub -M ivan.smirnov@ucsf.edu -N "${patient}.mut" -v "PROJECT=${project},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL,XMX=$XMX,WORKDIR=$WORKDIR" "$PBS"
+                echo "qsub -M ${EMAIL:?} -N ${patient}.mut -v PROJECT=${project},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL $PBS"
+                qsub -M "${EMAIL:?}" -N "${patient}.mut" -v "PROJECT=${project},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL,XMX=$XMX,WORKDIR=$WORKDIR" "$PBS"
         fi
 
 done < "${patient}.temp.conversions.txt"

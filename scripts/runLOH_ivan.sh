@@ -26,10 +26,6 @@ fi
 
 #
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 PROG=$(basename "$0")
 OK() {

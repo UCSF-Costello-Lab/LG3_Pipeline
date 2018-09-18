@@ -21,10 +21,6 @@ fi
 #
 ## Usage: /path/to/Recal.sh <bamfiles> <patientID> <exome_kit.interval_list>
 #
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 ### https://broadinstitute.github.io/picard/picard-metric-definitions.html#HsMetrics
 

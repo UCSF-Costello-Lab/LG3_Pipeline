@@ -22,10 +22,6 @@ fi
 ###
 ### path/to/MutContext.sh </path/to/example.mutations> </path/to/example.mutect.wig> <Output Prefix>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 mutsfile=$1

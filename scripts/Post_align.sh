@@ -20,10 +20,6 @@ fi
 ##
 ### Post alignment 
 ###
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java

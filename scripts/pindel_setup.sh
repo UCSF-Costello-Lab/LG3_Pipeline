@@ -30,10 +30,6 @@ fi
 ###
 ### /path/to/pindel_setup.sh
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 PYTHON_SCRIPT_A=${LG3_HOME}/scripts/pindel_setup.py

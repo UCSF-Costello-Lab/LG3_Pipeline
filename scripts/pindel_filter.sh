@@ -28,10 +28,6 @@ fi
 ###
 ### /path/to/pindel_filter.sh <pindel_output_all>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools

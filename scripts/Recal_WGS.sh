@@ -27,10 +27,6 @@ fi
 
 
 #
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 #Fix the path so the QC scripts can output pdfs
