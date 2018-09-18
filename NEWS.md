@@ -20,6 +20,9 @@
  * Environment variable 'LG3_INPUT_ROOT' is now optional.  If not specified,
    it will be set to a sensible default depending on 'LG3_OUTPUT_ROOT'.
 
+ * In order to minimize the risk for clashes, now using user and job specific
+   scratch folders - used to only be only user specific.
+
 ### BUG FIXES
 
  * Run script `_run_Pindel` assumed that resources/ folder was in the working
