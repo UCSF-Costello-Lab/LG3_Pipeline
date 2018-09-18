@@ -139,8 +139,7 @@ _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_Mut
 
 Done!  All results are written to the `./output/` folder in different subdirectories.
 
-
-See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output looks like.
+See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output looks like.  Particularly, the text file `./output/LG3/MutInDel/Patient157t.R.mutations` contain the identified multations.
 
 
 [LG3_Pipeline]: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
