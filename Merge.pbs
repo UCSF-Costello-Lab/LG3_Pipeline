@@ -36,9 +36,9 @@ fi
 echo "Input:"
 echo "- BAMS=${BAMS:?}"
 echo "- PREFIX=${PREFIX:?}"
-echo "- ILIST=${ILIST:?}"
+#echo "- ILIST=${ILIST:?}"
 
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+#[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 date
 
@@ -50,9 +50,8 @@ echo "Current working directory: ${PWD}"
 "${LG3_HOME}/scripts/Merge.sh" "$BAMS" "$PREFIX"
 
 cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
-#mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes/${PREFIX}"
-#cp -p "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes/${PREFIX}"
-cp -p "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${SCRATCHDIR}/${PREFIX}"; exit 1; }
+
+cp -a "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${SCRATCHDIR}/${PREFIX}"; exit 1; }
 rm -rf "${SCRATCHDIR:?}/${PREFIX}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge"
