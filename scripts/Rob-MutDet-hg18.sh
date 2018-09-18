@@ -11,7 +11,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:2}  ## FIXME: The default should really be 1 /HB
+ncores=${PBS_NUM_PPN:-2}  ## FIXME: The default should really be 1 /HB
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then

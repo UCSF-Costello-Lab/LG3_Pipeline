@@ -24,7 +24,11 @@
 
  * Run script `_run_Pindel` assumed that resources/ folder was in the working
    directory rather than in the 'LG3_HOME' directory.
-   
+
+ * A jobs that was allocated 12 cores by the scheduler would only run 2 cores,
+   because the first digits was dropped due to a Bash typo.  This bug was
+   introduced in the previous version.
+ 
 
 ## Version 2018-09-17
 
