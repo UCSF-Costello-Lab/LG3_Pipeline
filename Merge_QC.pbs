@@ -28,7 +28,7 @@ date
 mkdir -p "${SCRATCHDIR}/${PREFIX}"
 cd "${SCRATCHDIR}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}/${PREFIX}"; exit 1; }
 
-"${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$PREFIX" "$ILIST"
+"${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$PREFIX" "${LG3_HOME}/${ILIST}"
 
 cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
 #mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes/${PREFIX}"
