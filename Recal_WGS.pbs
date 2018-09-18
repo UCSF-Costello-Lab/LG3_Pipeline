@@ -2,7 +2,7 @@
 #PBS -e _RecalW_${Z}.err
 #PBS -o _RecalW_${Z}.out
 #PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
-#PBS -m ea
+#PBS -m ae
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
