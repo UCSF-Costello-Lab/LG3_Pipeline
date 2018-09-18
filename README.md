@@ -127,12 +127,11 @@ Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
 $ cd /path/to/lg3-test
-$ ./_run_Trim       ## ~20 minutes
-$ ./_run_Align_gz   ## ~1 hour
-$ ./_run_Recal      ## ~13-15 hours
-$ ./_run_Pindel     ## ~1.5 hours
-$ ./_run_MutDet     ## ~4 hours
-$ ./_run_PostMut    ## ~5 minutes
+$ ./_run_Trim                    ## ~20 minutes
+$ ./_run_Align_gz                ## ~1 hour
+$ ./_run_Recal                   ## ~13-15 hours
+$ ./_run_Pindel && ./_run_MutDet ## ~1.5 hours & ~4 hours
+$ ./_run_PostMut                 ## ~5 minutes
 ```
 
 _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_MutDet`, which can be ran in parallel (as soon as `_run_Recal` has finished).
