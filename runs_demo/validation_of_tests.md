@@ -34,7 +34,7 @@ diff -u <(cd ${truth}; du -b ${path}/Z00*t/*) <(du -b ${path}/Z00*t/*)
 
 ## _run_Recal
 
-The following output should be empty (because all files should be of the "human-readable" size and BAI files of identical size):
+The following output should be empty (because all files should be of the same "human-readable" size and BAI files of identical size):
 ```sh
 path=output/LG3/exomes_recal
 diff -u <(cd ${truth}; tree ${path}) <(tree ${path})
@@ -46,7 +46,7 @@ diff -u <(cd ${truth}; du -b ${path}/Patient*t/*.bai) <(du -b ${path}/Patient*t/
 
 ## _run_Pindel
 
-The following output should be empty (because all files should be of the "human-readable" size):
+The following output should be empty (because all files should be of the same "human-readable" size):
 
 ```sh
 path=output/LG3/pindel
@@ -57,7 +57,7 @@ diff -u <(cd ${truth}; du -h ${path}/Patient*t_pindel/*) <(du -h ${path}/Patient
  
 ## _run_MutDet
 
-The following output should be empty (because all files should be of the "human-readable" size):
+The following output should be empty (because all files should be of the same "human-readable" size):
 
 ```sh
 path=output/LG3/mutations
@@ -83,7 +83,7 @@ for ff in ${path}/Patient*t_*/*.wig; do diff -U 0 ${truth}/${ff} ${ff}; done
 
 ## _run_PostMut
 
-The following output should be empty (because all files should be of the "human-readable" size):
+The following output should be empty (because all files should be of the same "human-readable" size):
 
 ```sh
 path=output/LG3/MAF
