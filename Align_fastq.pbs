@@ -15,7 +15,8 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+EMAIL=${EMAIL:?}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -23,6 +24,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- EMAIL=${EMAIL}"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
@@ -34,7 +36,7 @@ echo "Input:"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PREFIX=${PREFIX:?}"
-echo "- CHASTITY_FILTERING=${CHASTITY_FILTERING}"
+echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 ## Assert existance of input files
 [[ -f "$FASTQ1" ]] || { echo "File not found: ${FASTQ1}"; exit 1; }
@@ -63,17 +65,33 @@ echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" "$FASTQ2" .
 
+echo "Content of ${PWD}:"
+ls -lrt
+
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
-"${SCRIPT}" "$FQ1" "$FQ2" "$PREFIX"
+"${SCRIPT}" "$FQ1" "$FQ2" "$PREFIX" || { echo "ERROR: ${SCRIPT} FAILED"; exit 1; }
+
+echo "Content of ${PWD}:"
+ls -lrt
 
 rm "$FQ1" "$FQ2"
+
+echo "Content of ${PWD}:"
+ls -lrt
 
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
 
+echo "Content of ${WDIR}:"
+ls -lrt "${WDIR}"
+
 cp -r -p "${WDIR}" "${DEST}/"
+
+echo "Content of ${DEST}:"
+ls -lrt "${DEST}"
+
 rm -rf "${WDIR:?}"
 
 echo "End of script!"

@@ -1,5 +1,47 @@
 # LG3_Pipeline
 
+## Version 2018-09-19
+
+### SIGNIFICANT CHANGES
+
+ * Environment variable 'EMAIL' must now be set in order to run any of the
+   steps in the pipeline; if not set, an informative error is produced.  Set
+   it to the email address where you wish the scheduler to send job reports,
+   e.g. `export EMAIL=alice@example.org`.
+
+ * Renamed the optional environment variable 'CHASTITY_FILTERING' to
+   'LG3_CHASTITY_FILTERING'.
+
+### NEW FEATURES
+
+ * Added run scripts `_run_Merge` and `_run_Merge_QC` for merging recalibrated,
+   replicated BAM files that are for the same sample.
+ 
+ * Environment variable 'LG3_INPUT_ROOT' is now optional.  If not specified,
+   it will be set to a sensible default depending on 'LG3_OUTPUT_ROOT'.
+
+ * In order to minimize the risk for clashes, now using user and job specific
+   scratch folders - used to only be only user specific.
+
+ * Giving more informative error message in case files are missing.
+
+### DOCUMENTATION
+
+ * Updated README with details on how to run the pipeline on the example test
+   data and from any location.
+
+ * Mention `module load CBC lg3` for TIPCC users.
+ 
+### BUG FIXES
+
+ * Run script `_run_Pindel` assumed that resources/ folder was in the working
+   directory rather than in the 'LG3_HOME' directory.
+
+ * A jobs that was allocated 12 cores by the scheduler would only run 2 cores,
+   because the first digits was dropped due to a Bash typo.  This bug was
+   introduced in the previous version.
+ 
+
 ## Version 2018-09-17
 
 ### SIGNIFICANT CHANGES

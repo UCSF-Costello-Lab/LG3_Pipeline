@@ -9,7 +9,7 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -28,10 +28,6 @@ fi
 ###
 ### /path/to/pindel_filter.sh <pindel_output_all>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools

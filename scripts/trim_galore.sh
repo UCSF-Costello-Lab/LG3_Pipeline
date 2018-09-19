@@ -9,9 +9,10 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-TG=${TG:-/home/ismirnov/install/trim_galore/v0.4.4/trim_galore}
+TG=${TG:-${LG3_HOME}/tools/TrimGalore-0.4.4/trim_galore}
+
 #CUTADAPT=/opt/Python/Python-2.7.9/bin/cutadapt ### Problem !
 CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
 

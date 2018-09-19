@@ -4,18 +4,20 @@
 #PBS -e _Recal_${PATIENT}.err
 #PBS -o _Recal_${PATIENT}.out
 #PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
-#PBS -m ea -M ivan.smirnov@ucsf.edu
+#PBS -m ae
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+EMAIL=${EMAIL:?}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "EMAIL=${EMAIL}"
   echo "SCRATCHDIR=$SCRATCHDIR"
   echo "PWD=$PWD"
   echo "USER=$USER"

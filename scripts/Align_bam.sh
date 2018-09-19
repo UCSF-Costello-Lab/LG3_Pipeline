@@ -9,9 +9,9 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:1}
+ncores=${PBS_NUM_PPN:-1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -32,10 +32,6 @@ fi
 ###
 ### /path/to/Align_bam.sh <bam_file> <output prefix>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa

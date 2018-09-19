@@ -7,11 +7,15 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
+else
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+fi    
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+EMAIL=${EMAIL:?}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
-CHASTITY_FILTERING=${CHASTITY_FILTERING:-false}
+LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-false}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -23,7 +27,7 @@ echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- SAMPLES=${SAMPLES:?}"
-echo "- CHASTITY_FILTERING=${CHASTITY_FILTERING}"
+echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="-d ${PWD:?}"
@@ -61,7 +65,7 @@ do
 		else
 		        echo "Submitting $PREFIX ..."
 		        # shellcheck disable=SC2086
-			qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},CHASTITY_FILTERING=${CHASTITY_FILTERING}" "${PBS}"
+			qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}" "${PBS}"
 		fi
 	fi
 done

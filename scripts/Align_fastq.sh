@@ -9,10 +9,10 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:1}
-CHASTITY_FILTERING=${CHASTITY_FILTERING:-true}
+ncores=${PBS_NUM_PPN:-1}
+LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -24,7 +24,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- ncores=$ncores"
-  echo "- CHASTITY_FILTERING=${CHASTITY_FILTERING:-?}"
+  echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-?}"
 fi
 
 #
@@ -33,10 +33,6 @@ fi
 ###
 ### /path/to/Align_fastq.sh <fastq1> <fastq2> <output prefix>
 ##
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 ## References
@@ -103,7 +99,7 @@ echo "[Align] BWA index: $BWA_INDEX"
 echo "-------------------------------------------------"
 
 
-if [[ "${CHASTITY_FILTERING}" == "true" ]]; then
+if [[ "${LG3_CHASTITY_FILTERING}" == "true" ]]; then
   echo "[Align] Removing chastity filtered first-in-pair reads..."
   $PYTHON "${PYTHON_SCRIPT}" "$fastq1" \
           > "${prefix}.read1.QC.fastq" || { echo "Chastity filtering read1 failed"; exit 1; }

@@ -14,10 +14,10 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+EMAIL=${EMAIL:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
-EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
 PATIENT=${PATIENT:-Patient157}
 PROJ=${PROJ:-LG3}
 CONV=${CONV:-patient_ID_conversions.txt}
@@ -33,6 +33,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- EMAIL=${EMAIL}"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
   echo "- USER=$USER"

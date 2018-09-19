@@ -3,7 +3,7 @@
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}}
+SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -20,10 +20,6 @@ fi
 ##
 ### Post alignment 
 ###
-#$ -clear
-#$ -S /bin/bash
-#$ -cwd
-#$ -j y
 #
 
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
