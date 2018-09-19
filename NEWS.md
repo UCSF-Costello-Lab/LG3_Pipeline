@@ -25,6 +25,13 @@
 
  * Giving more informative error message in case files are missing.
 
+### DOCUMENTATION
+
+ * Updated README with details on how to run the pipeline on the example test
+   data and from any location.
+
+ * Mention `module load CBC lg3` for TIPCC users.
+ 
 ### BUG FIXES
 
  * Run script `_run_Pindel` assumed that resources/ folder was in the working
