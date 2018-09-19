@@ -63,10 +63,10 @@ The following output should be empty (because all files should be of the same "h
 ```sh
 path=output/LG3/mutations
 diff -u <(cd ${truth}; tree -I '*.bed' ${path}) <(tree -I '*.bed' ${path})
-diff -u <(cd ${truth}; du -h ${path}/Patient*t_mutect/* | grep -vF .bed) <(du -h ${path}/Patient*t_mutect/* | grep -vF .bed)
+diff -u <(cd ${truth}; du -h ${path}/Patient*t_mutect/* | grep -vF .bed) <(du -h ${path}/Patient*t_mutect/*)
 ```
 
-When `_run_PostMut_`, which produce BED files, has been, we can do a full comparison:
+When `_run_PostMut_`, which produce BED files, has been completed, we can do a full comparison:
 ```sh
 diff -u <(cd ${truth}; tree ${path}) <(tree ${path})
 diff -u <(cd ${truth}; du -h ${path}/Patient*t_mutect/*) <(du -h ${path}/Patient*t_mutect/*)

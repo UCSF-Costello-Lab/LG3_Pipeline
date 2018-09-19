@@ -21,7 +21,7 @@ LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
-echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- SAMPLES=${SAMPLES:?}"
