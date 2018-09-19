@@ -10,7 +10,8 @@ truth=/cbc/henrik/LG3_Pipeline/tests/Patient157t-truth-20180914
 The following output should be empty (because all files should exist):
 
 ```sh
-diff -u <(cd ${truth}; tree -I '*_2018*' output) <(tree -I '*_2018*' output)
+path=output
+diff -u <(cd ${truth}; tree ${path}) -u <(tree ${path})
 ```
 
 ## _run_Trim
@@ -18,8 +19,8 @@ diff -u <(cd ${truth}; tree -I '*_2018*' output) <(tree -I '*_2018*' output)
 The following output should be empty (because all files should be of identical sizes):
 ```sh
 path=output
-diff <(cd ${truth}; tree ${path}/Z00*t-trim) -u <(tree ${path}/Z00*t-trim)
-diff <(cd ${truth}; du -b ${path}/Z00*t-trim/*) -u <(du -b ${path}/Z00*t-trim/*)
+diff -u <(cd ${truth}; tree ${path}/Z00*t-trim) -u <(tree ${path}/Z00*t-trim)
+diff -u <(cd ${truth}; du -b ${path}/Z00*t-trim/*) -u <(du -b ${path}/Z00*t-trim/*)
 ```	     
 
 ## _run_Align_gz
@@ -27,7 +28,7 @@ diff <(cd ${truth}; du -b ${path}/Z00*t-trim/*) -u <(du -b ${path}/Z00*t-trim/*)
 The following output should be empty (because all files should be of identical sizes):
 ```sh
 path=output/LG3/exomes
-diff <(cd ${truth}; tree ${path}) -u <(tree ${path})
+diff -u <(cd ${truth}; tree ${path}) -u <(tree ${path})
 diff -u <(cd ${truth}; du -b ${path}/Z00*t/*) <(du -b ${path}/Z00*t/*)
 ``` 
 
@@ -95,5 +96,5 @@ and
 path=output/LG3/MutInDel
 diff -u <(cd ${truth}; tree ${path}) <(tree ${path})
 diff -u <(cd ${truth}; du -h ${path}/*) <(du -h ${path}/*)
-diff -u ${truth}/${path}/Patient157t.R.mutations ${path}/Patient157t.R.mutations
+diff -u ${truth}/${path}/Patient*t.R.mutations ${path}/Patient*t.R.mutations
 ```
