@@ -12,7 +12,7 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PATIENT=${PATIENT:-Patient157t}
-PROJ=${PROJ:-LG3}
+PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.txt}
 
 ## Requires absolute path 
@@ -25,7 +25,7 @@ echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- PATIENT=${PATIENT:?}"
-echo "- PROJ=${PROJ:?}"
+echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
@@ -41,15 +41,13 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 [[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
-
-## Requires absolute path 
-#TODO# CONV=$(readlink -e "$CONV")
+CONV=$(readlink -e "$CONV")
 
 PBS=${LG3_HOME}/pindel_all.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},SAMPLE=${PATIENT},PROJ=${PROJ},CONV=${CONV}" "$PBS"
+qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},SAMPLE=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

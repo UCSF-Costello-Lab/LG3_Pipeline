@@ -11,7 +11,7 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PATIENT=${PATIENT:-Patient157t}
-PROJ=${PROJ:-LG3}
+PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.txt}
 
 ## Requires absolute path 
@@ -24,7 +24,7 @@ echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- PATIENT=${PATIENT:?}"
-echo "- PROJ=${PROJ:?}"
+echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
@@ -54,6 +54,6 @@ SCRIPT_B=${LG3_HOME}/scripts/chk_mutdet.sh
 "${SCRIPT_B}" "${PATIENT}"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJ=${PROJ},CONV=${CONV}" "$PBS"
+qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

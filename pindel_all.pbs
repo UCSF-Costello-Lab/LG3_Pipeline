@@ -1,5 +1,5 @@
 #!/bin/bash
-### Usage: qsub -v SAMPLE=PatientXX,PROJ=LG3orGBM,CONV=patient_ID_conversions.txt /path/to/pindel_all.pbs
+### Usage: qsub -v SAMPLE=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.txt /path/to/pindel_all.pbs
 #PBS -N ${SAMPLE}.pindel
 #PBS -e ${SAMPLE}.pindel.err
 #PBS -o ${SAMPLE}.pindel.out
@@ -43,7 +43,7 @@ LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}") ## Absolute path
 ### Input
 echo "Input:"
 echo "- SAMPLE=${SAMPLE}"
-echo "- PROJ=${PROJ}"
+echo "- PROJECT=${PROJECT}"
 echo "- CONV=${CONV}"
 
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
@@ -53,7 +53,7 @@ CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
 echo "PINDEL"
 echo "Patient: ${SAMPLE}"
-echo "Project: ${PROJ}"
+echo "Project: ${PROJECT}"
 echo "Conversion File: ${CONV}"
 echo "----------------------------------"
 
@@ -86,7 +86,7 @@ echo "- TARGET=${TARGET:?}"
 SCRATCH=${SCRATCHDIR}/${SAMPLE}_pindel
 mkdir -p "${SCRATCH}" || { echo "Can't create destination directory ${SCRATCH}"; exit 1; }
 
-WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/pindel
+WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
 mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
 
 ## setup pindel cfg file
@@ -94,7 +94,7 @@ date
 echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
-"${SCRIPT_A}" "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_A}" "${SAMPLE}" "${PROJECT}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
 cd "${SCRATCH}" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
@@ -122,11 +122,11 @@ mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
 echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
-"${SCRIPT_B}" "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_B}" "${SAMPLE}.indels" "${PROJECT}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
-"${SCRIPT_C}" "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_C}" "${SAMPLE}.indels" "${PROJECT}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 echo -ne "\nEnd of script on "
 date
