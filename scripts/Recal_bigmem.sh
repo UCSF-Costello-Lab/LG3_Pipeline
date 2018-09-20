@@ -37,7 +37,7 @@ fi
 #Both of these aren't necessary, but I'm leaving them here for future use
 # shellcheck source=.bashrc
 source "${LG3_HOME}/.bashrc"
-PATH=/opt/R/R-latest/bin/R:$PATH
+PATH=/opt/R/R-latest/bin:$PATH
 
 ## References
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
