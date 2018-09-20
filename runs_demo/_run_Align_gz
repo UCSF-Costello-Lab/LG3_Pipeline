@@ -7,13 +7,15 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
-    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
-else
-    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
-fi    
+#if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
+    #LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
+#else
+    #LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+#fi    
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-false}
 
@@ -29,7 +31,7 @@ echo "- EMAIL=${EMAIL}"
 echo "- SAMPLES=${SAMPLES:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
 QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
@@ -44,23 +46,24 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 PBS=${LG3_HOME}/Align_fastq.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
-## Location of output: aligned BAMs
-ALIGN=${LG3_OUTPUT_DIR}/exomes
 
 for PREFIX in ${SAMPLES}
 do
+	## Expected Location of aligned BAMs
+	ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${PREFIX}
+
 	FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
 	FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
 
-        ## Requires absolute path 
-        FASTQ1=$(readlink -e "$FASTQ1")
-        FASTQ2=$(readlink -e "$FASTQ2")
+   ## Requires absolute path 
+   FASTQ1=$(readlink -e "$FASTQ1")
+   FASTQ2=$(readlink -e "$FASTQ2")
 	
 	if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
 		echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
 	else
-		if [ -f "${ALIGN}/${PREFIX}.trim.bwa.sorted.bam" ]; then
-			echo "WARNING: already aligned: $ALIGN/${PREFIX}.trim.bwa.sorted.bam"
+		if [ -f "${ALIGNED}/${PREFIX}.trim.bwa.sorted.bam" ]; then
+			echo "WARNING: already aligned: $ALIGNED/${PREFIX}.trim.bwa.sorted.bam"
 			echo "Skipping $PREFIX ..."
 		else
 		        echo "Submitting $PREFIX ..."

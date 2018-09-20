@@ -19,6 +19,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- PROJECT=$PROJECT"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
   echo "- USER=$USER"

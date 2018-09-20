@@ -24,6 +24,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- PROJECT=${PROJECT}"
   echo "- EMAIL=${EMAIL}"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
@@ -36,6 +37,7 @@ echo "Input:"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PREFIX=${PREFIX:?}"
+echo "- PROJECT=${PROJECT:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 ## Assert existance of input files
@@ -55,7 +57,7 @@ echo "Using node(s): $NODES"
 SCRIPT=${LG3_HOME}/scripts/Align_fastq.sh
 [[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
 
-DEST="${LG3_OUTPUT_ROOT}/LG3/exomes"
+DEST="${LG3_OUTPUT_ROOT}/${PROJECT}/exomes"
 mkdir -p "${DEST}" || { echo "Can't create destination directory ${DEST}"; exit 1; }
 
 WDIR=${SCRATCHDIR}/${PREFIX}
