@@ -1,0 +1,15 @@
+#!/bin/bash
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+CONV=patient_ID_conversions.txt
+
+"${LG3_HOME}/scripts/chk_data.sh" \
+	-fastq=true \
+	-trim=true \
+	-bwa=true \
+	-recal=true \
+	-germline=true \
+	-pindel=true \
+	-mutect=true \
+	-combined=true \
+	-conv=$CONV \
+	Patient157t
