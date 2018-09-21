@@ -18,13 +18,12 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- PROJECT=${PROJECT}"
   echo "EMAIL=${EMAIL}"
   echo "SCRATCHDIR=$SCRATCHDIR"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
-
-
 
 ##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
 
@@ -36,15 +35,27 @@ cd "${SCRATCHDIR}/${PATIENT}" || { echo "ERROR: Failed to set working directory 
 
 cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
 
-mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}"
-cp -p "${SCRATCHDIR}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}"
+mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
+cp -p "${SCRATCHDIR}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
 rm -rf "${SCRATCHDIR:?}/${PATIENT}"
 
-mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"
-cd "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
+echo "Making symlinks ..."
+cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
+mk_links() {
+   while read F
+   do
+      L=$(echo "$F" | sed "s|rmDups|rmDups.recal|")
+      ln -sf "$F" "$L"
+   done
+}
+ls -1 *.bwa.realigned.rmDups.* | grep -v recal | mk_links
+
+
+mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline"
+cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
 
 "${LG3_HOME}/scripts/Germline.sh" \
-      "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam" \
+      "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam" \
       "${PATIENT}" "$ILIST"
 
 ###${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
