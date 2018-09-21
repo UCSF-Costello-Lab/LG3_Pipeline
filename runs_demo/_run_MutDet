@@ -28,9 +28,7 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 
 [[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
-
-## Requires absolute path 
-#TODO# CONV=$(readlink -e "$CONV")
+CONV=$(readlink -e "$CONV")
 
 SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
 [[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
