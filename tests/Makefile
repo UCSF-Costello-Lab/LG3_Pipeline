@@ -15,7 +15,6 @@ TEST_LG3_CHASTITY_FILTERING:=false
 
 debug:
 	@echo "LG3_HOME: $$LG3_HOME (hardcoded to parent directory)"
-	@echo "PROJ: $$PROJ (hardcoded; FIXME: Should not be needed)"
 	@echo "EMAIL: $$EMAIL"
 	@echo "TEST_SUFFIX=$$TEST_SUFFIX (may be empty)"
 	@echo "TEST_SAMPLES=$$TEST_SAMPLES"
@@ -103,7 +102,6 @@ step6a: setup step6a-setup step5-validate
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	PATIENT=$(TEST_PATIENT) \
-	PROJ=LG3 \
 	CONV=patient_ID_conversions.txt \
 	./_run_Pindel
 
@@ -116,7 +114,6 @@ step6b: setup step6a-setup
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	PATIENT=$(TEST_PATIENT) \
-	PROJ=LG3 \
 	CONV=patient_ID_conversions.txt \
 	./_run_MutDet
 
@@ -129,6 +126,5 @@ step7: setup step7-setup
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	PATIENT=$(TEST_PATIENT) \
-	PROJ=LG3 \
 	CONV=patient_ID_conversions.txt \
 	./_run_PostMut
