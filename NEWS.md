@@ -2,7 +2,36 @@
 
 ## Version 2018-09-19-9000 (develop version)
 
- * ...
+### SIGNIFICANT CHANGES
+
+ * Added _run_Recal_pass2 for recalibrating merged BAM files.
+
+ * Now the default input folder for trimming and alignment is rawdata/.
+   It used to be an absolute path specific to the Costello lab storage.
+
+ * Chastity filtering (prior to alignment of FASTQ files) is now disabled by
+   default. To enable, set environment variable 'LG3_CHASTITY_FILTERING=true'.
+
+### NEW FEATURES
+
+ * Added scripts/chk_data.sh for checking of the output on the different
+   stages in the pipeline.
+
+ * More scripts now takes environment variable 'PROJECT' (defaults to 'LG3')
+   as an optional input to control the subfolder of the output data.
+ 
+ * If the optional _run_Recal_pass2 step is run, which is occurs after
+   recalibration and merging, it will rename the existing exome_recal/$PATIENT/
+   subfolder to exome_recal/$PATIENT.before.merge/ such that the final output
+   is always in exome_recal/$PATIENT/ regardless of merging or not.
+
+### SOFTWARE QUALITY:
+
+ * HARMONIZATION: Using 'PROJECT' everywhere; previously 'PROJ' was also used.
+
+### BUG FIXES
+
+ * _run_Align_gz failed to detect already processed samples (due to a typo).
  
 
 ## Version 2018-09-19
@@ -75,7 +104,7 @@
  * Environment variable 'EMAIL' can be used to set the email address to which
    the Torque/PBS scheduler will send email reports when the jobs finishes.
 
- * Chastity filtering prior to alignment of FASTQ files is now optional by
+ * Chastity filtering (prior to alignment of FASTQ files) is now optional by
    setting environment variable 'CHASTITY_FILTERING' (default is true).
   
  * Generalized the `run_demo/_run_*` scripts to make it easier to reuse them
