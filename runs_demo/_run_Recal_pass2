@@ -52,6 +52,10 @@ D=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 [[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
 D=$(readlink -e "$D") ## requires absolute path
 
+[[ -d "$D/${PATIENT}" ]] || { echo "Directory not found: ${D}/${PATIENT}"; exit 1; }
+
+echo "Renaming $D/${PATIENT} to $D/${PATIENT}.before.merge"
+mv "$D/${PATIENT}" "$D/${PATIENT}.before.merge"
 
 SUFF=bwa.realigned.rmDups.recal.bam
 
