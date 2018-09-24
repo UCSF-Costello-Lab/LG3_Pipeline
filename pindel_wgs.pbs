@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Usage: qsub -v SAMPLE=PatientXX,PROJ=LG3orGBM,CONV=patient_ID_conversions.txt /path/to/pindel_all.pbs
+### Usage: qsub -v SAMPLE=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.txt /path/to/pindel_all.pbs
 #PBS -N ${SAMPLE}.pindel
 #PBS -e ${SAMPLE}.pindel.err
 #PBS -o ${SAMPLE}.pindel.out
@@ -27,12 +27,12 @@ fi
 
 
 echo "PINDEL"
-echo "Patient: ${SAMPLE}"
-echo "Project: ${PROJ}"
-echo "Conversion File: ${CONV}"
+echo "Patient: ${SAMPLE:?}"
+echo "Project: ${PROJECT:?}"
+echo "Conversion File: ${CONV:?}"
 echo "----------------------------------"
 
-WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/pindel
+WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
 BIN=${LG3_HOME}/scripts
 
 PINDEL=${LG3_HOME}/tools/pindel024t/pindel
@@ -45,7 +45,7 @@ TARGET=${LG3_HOME}/resources/WG_hg19-ENCFF001TDO.bed
 date
 echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
-"$BIN/pindel_wgs_setup.sh" "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"$BIN/pindel_wgs_setup.sh" "${SAMPLE}" "${PROJECT}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
 SCRATCH=${SCRATCHDIR}/${SAMPLE}_pindel_wgs
@@ -75,11 +75,11 @@ mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
 echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
-"$BIN/pindel_filter.sh" "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"$BIN/pindel_filter.sh" "${SAMPLE}.indels" "${PROJECT}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
-"$BIN/pindel_annotate.sh" "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"$BIN/pindel_annotate.sh" "${SAMPLE}.indels" "${PROJECT}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 echo -ne "\nEnd of script $0 on "
 date
