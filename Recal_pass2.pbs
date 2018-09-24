@@ -11,6 +11,7 @@
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
@@ -40,15 +41,15 @@ cp -p "${SCRATCHDIR}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/$
 rm -rf "${SCRATCHDIR:?}/${PATIENT}"
 
 echo "Making symlinks ..."
-cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
+cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || { echo "ERROR: failed to cd to ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"; exit 1; }
 mk_links() {
-   while read F
+   while read -r F
    do
-      L=$(echo "$F" | sed "s|rmDups|rmDups.recal|")
+		L=${F/rmDups/rmDups.recal}
       ln -sf "$F" "$L"
    done
 }
-ls -1 *.bwa.realigned.rmDups.* | grep -v recal | mk_links
+grep -v recal ./*.bwa.realigned.rmDups.* | mk_links
 
 
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline"

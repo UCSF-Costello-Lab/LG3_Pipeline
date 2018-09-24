@@ -17,6 +17,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
@@ -91,7 +92,7 @@ mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 
 
 ## setup pindel cfg file
 date
-echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
+echo -e "\\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
 "${SCRIPT_A}" "${SAMPLE}" "${PROJECT}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
@@ -100,7 +101,7 @@ cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit
 cd "${SCRATCH}" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
 ## run pindel
-echo -e "\n========= [Pindel] Run pindel"
+echo -e "\\n========= [Pindel] Run pindel"
 $PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## move from scratch to project folder
@@ -109,11 +110,11 @@ cp -r "$SCRATCH" ./
 rm -rf "$SCRATCH"
 
 ## convert to vcf
-echo -e "\n========= [Pindel] Convert pindel to vcf"
+echo -e "\\n========= [Pindel] Convert pindel to vcf"
 $PINDEL2VCF -P "${SAMPLE}_pindel/${SAMPLE}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf" -G  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## convert to tdt
-echo -e "\n========= [Pindel] Convert vcf to tdt"
+echo -e "\\n========= [Pindel] Convert vcf to tdt"
 "${PYTHON_SCRIPT_A}" "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
@@ -121,14 +122,14 @@ cd "${SAMPLE}_pindel" || { echo "ERROR: Failed to set working directory to ${SAM
 mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
-echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
+echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"
 "${SCRIPT_B}" "${SAMPLE}.indels" "${PROJECT}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
-echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
+echo -e "\\n========= [Annotate] Annotate indels and apply annotation-based filters"
 "${SCRIPT_C}" "${SAMPLE}.indels" "${PROJECT}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
-echo -ne "\nEnd of script on "
+echo -ne "\\nEnd of script on "
 date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

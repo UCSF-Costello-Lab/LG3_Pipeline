@@ -7,6 +7,7 @@
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -25,7 +26,7 @@ fi
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started Post Alignment on $DATE as $USER"
-echo -e "Steps: \n\tverify mate; \n\tsort and enforce read group; \n\tconvert to BAM; \n\tindex; \n\tcalculate flag stats"
+echo -e "Steps: \\n\\tverify mate; \\n\\tsort and enforce read group; \\n\\tconvert to BAM; \\n\\tindex; \\n\\tcalculate flag stats"
 echo "Using node(s): $NODES"
 TMP=${SCRATCHDIR}
 
