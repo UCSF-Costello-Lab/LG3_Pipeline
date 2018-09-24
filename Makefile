@@ -12,7 +12,8 @@ check_pbs:
 	shellcheck *.pbs
 
 check_sh:
-	shellcheck -x --exclude=SC1091 scripts/*.sh
+	shellcheck FilterMutations/*.sh
+	shellcheck -x scripts/*.sh
 
 check_demo:
 	shellcheck runs_demo/_run_*
