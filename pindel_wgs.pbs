@@ -44,7 +44,7 @@ TARGET=${LG3_HOME}/resources/WG_hg19-ENCFF001TDO.bed
 
 ## setup pindel cfg file
 date
-echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
+echo -e "\\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 "$BIN/pindel_wgs_setup.sh" "${SAMPLE}" "${PROJECT}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
@@ -54,7 +54,7 @@ mkdir -p "$SCRATCH"
 cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
 ## run pindel
-echo -e "\n========= [Pindel] Run pindel"
+echo -e "\\n========= [Pindel] Run pindel"
 $PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel_wgs.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T 6  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## move from scratch to project folder
@@ -63,11 +63,11 @@ cp -r "$SCRATCH" ./
 rm -rf "$SCRATCH"
 
 ## convert to vcf
-echo -e "\n========= [Pindel] Convert pindel to vcf"
+echo -e "\\n========= [Pindel] Convert pindel to vcf"
 $PINDEL2VCF -P "${SAMPLE}_pindel_wgs/${SAMPLE}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${SAMPLE}_pindel_wgs/${SAMPLE}.pindel.vcf" -G  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## convert to tdt
-echo -e "\n========= [Pindel] Convert vcf to tdt"
+echo -e "\\n========= [Pindel] Convert vcf to tdt"
 "$BIN/vcf2tdt.py" "${SAMPLE}_pindel_wgs/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
@@ -75,12 +75,12 @@ cd "${SAMPLE}_pindel_wgs" || { echo "ERROR: Failed to set working directory to $
 mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
-echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
+echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"
 "$BIN/pindel_filter.sh" "${SAMPLE}.indels" "${PROJECT}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
-echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
+echo -e "\\n========= [Annotate] Annotate indels and apply annotation-based filters"
 "$BIN/pindel_annotate.sh" "${SAMPLE}.indels" "${PROJECT}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
-echo -ne "\nEnd of script $0 on "
+echo -ne "\\nEnd of script $0 on "
 date
