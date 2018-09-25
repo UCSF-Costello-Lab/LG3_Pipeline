@@ -16,7 +16,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
-SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -25,7 +25,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCH_ROOT=$SCRATCH_ROOT"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -68,18 +68,18 @@ mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}";
 DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
 mkdir -p "${DESTDIR2}" || { echo "Can't create destination directory ${DESTDIR2}"; exit 1; }
 
-WDIR=${SCRATCH_ROOT}/${PATIENT}
+WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
 mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
 "${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST"
 
-cd "${SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
-cp -p "${SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
 
-echo "Cleaning ${SCRATCH_ROOT} ..."
-rm -rf "${SCRATCH_ROOT:?}/${PATIENT}"
+echo "Cleaning ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
 cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
 

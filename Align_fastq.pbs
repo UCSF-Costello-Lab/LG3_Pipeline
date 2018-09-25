@@ -17,7 +17,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
-SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 
@@ -27,7 +27,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCH_ROOT=$SCRATCH_ROOT"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -61,7 +61,7 @@ SCRIPT=${LG3_HOME}/scripts/Align_fastq.sh
 DEST="${LG3_OUTPUT_ROOT}/${PROJECT}/exomes"
 mkdir -p "${DEST}" || { echo "Can't create destination directory ${DEST}"; exit 1; }
 
-WDIR=${SCRATCH_ROOT}/${PREFIX}
+WDIR=${LG3_SCRATCH_ROOT}/${PREFIX}
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 echo "Current working directory: ${PWD}"

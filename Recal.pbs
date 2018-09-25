@@ -12,7 +12,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
-SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -20,7 +20,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "EMAIL=${EMAIL}"
-  echo "SCRATCH_ROOT=$SCRATCH_ROOT"
+  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
@@ -34,16 +34,16 @@ DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
-mkdir -p "${SCRATCH_ROOT}/${PATIENT}"
+mkdir -p "${LG3_SCRATCH_ROOT}/${PATIENT}"
 
-cd "${SCRATCH_ROOT}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}/${PATIENT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}/${PATIENT}"; exit 1; }
 
 "${LG3_HOME}/scripts/Recal.sh" "$BAMS" "$PATIENT" "$ILIST"
 
-cd "${SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
 mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}"
-cp -p "${SCRATCH_ROOT}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}" || { echo "ERROR cp!" ; exit 1 ; }
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}" || { echo "ERROR cp!" ; exit 1 ; }
 
 mkdir -p "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"
 cd "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }

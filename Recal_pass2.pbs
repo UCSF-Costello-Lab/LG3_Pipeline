@@ -12,7 +12,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
-SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -21,7 +21,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- PROJECT=${PROJECT}"
   echo "EMAIL=${EMAIL}"
-  echo "SCRATCH_ROOT=$SCRATCH_ROOT"
+  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
@@ -29,16 +29,16 @@ fi
 ##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
 
 date
-mkdir -p "${SCRATCH_ROOT}/${PATIENT}"
-cd "${SCRATCH_ROOT}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}/${PATIENT}"; exit 1; }
+mkdir -p "${LG3_SCRATCH_ROOT}/${PATIENT}"
+cd "${LG3_SCRATCH_ROOT}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}/${PATIENT}"; exit 1; }
 
 "${LG3_HOME}/scripts/Recal_pass2.sh" "$BAMS" "$PATIENT" "$ILIST"
 
-cd "${SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
-cp -p "${SCRATCH_ROOT}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
-rm -rf "${SCRATCH_ROOT:?}/${PATIENT}"
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
+rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
 echo "Making symlinks ..."
 cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || { echo "ERROR: failed to cd to ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"; exit 1; }

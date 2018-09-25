@@ -4,14 +4,14 @@
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:?}
-SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCH_ROOT=$SCRATCH_ROOT"
+  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
@@ -28,7 +28,7 @@ source "${LG3_HOME}/.bashrc"
 PATH=/opt/R/R-latest/bin/R:$PATH
 
 #Define resources and tools
-TMP=${SCRATCH_ROOT}
+TMP=${LG3_SCRATCH_ROOT}
 pl="Illumina"
 pu="Exome"
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java

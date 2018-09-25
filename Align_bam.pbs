@@ -12,7 +12,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
-SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -20,20 +20,20 @@ if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "EMAIL=${EMAIL}"
-  echo "SCRATCH_ROOT=$SCRATCH_ROOT"
+  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
 
 
 
-mkdir "${SCRATCH_ROOT}/${PREFIX}"
+mkdir "${LG3_SCRATCH_ROOT}/${PREFIX}"
 
-cd "${SCRATCH_ROOT}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}/${PREFIX}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}/${PREFIX}"; exit 1; }
 
 "${LG3_HOME}/scripts/Align_bam.sh" "$BAM" "$PREFIX"
 
 
-mv "${SCRATCH_ROOT}/${PREFIX}" "${LG3_OUTPUT_ROOT}/LG3/exomes/"
+mv "${LG3_SCRATCH_ROOT}/${PREFIX}" "${LG3_OUTPUT_ROOT}/LG3/exomes/"
 
 echo "End of script!"
