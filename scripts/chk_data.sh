@@ -90,7 +90,7 @@ if $FQ ; then
 fi
 
 if $TRIM ; then
-	WORKDIR=rawdata
+	WORKDIR=${LG3_OUTPUT_ROOT}
    ## Cycle through samples and check trim-galore output
    while IFS=$'\t' read -r ID _ _ SAMP
    do
