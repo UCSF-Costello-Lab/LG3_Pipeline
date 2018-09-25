@@ -63,7 +63,7 @@ In both cases, there will be a local `./output/` folder that the LG3 pipeline ca
 
 Next we want to create a `rawdata/` folder where the pipeline looks for the raw input data.  As above, we can either create it and copy our files over or we can point a symbolic link to an existing folder elsewhere on the file system.  For the test example, we will use:
 ```sh
-$ ln -s /costellolab/data1/ismirnov/tmp rawdata
+$ ln -s /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata .
 ```
 
 We also need a sample annotation file.  For the test example, we reuse the following:
@@ -82,7 +82,7 @@ $ tree
 .
 ├── output -> /another/drive/lg3-test/output
 ├── patient_ID_conversions.txt
-├── rawdata -> /costellolab/data1/ismirnov/tmp
+├── rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
 ├── _run_Align_gz
 ├── _run_Merge
 ├── _run_Merge_QC

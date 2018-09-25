@@ -4,7 +4,7 @@ SHELL:=/bin/bash
 
 LG3_HOME:=$(shell dirname $(CURDIR))
 LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
-LG3_TEST_DATA_DIR:=/costellolab/data1/ismirnov/tmp
+LG3_TEST_DATA_DIR:=/costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
 TEST_SUFFIX:=t
 TEST_SAMPLES:=Z00599$(TEST_SUFFIX) Z00600$(TEST_SUFFIX) Z00601$(TEST_SUFFIX)
 TEST_NORMAL:=Z00599$(TEST_SUFFIX)
