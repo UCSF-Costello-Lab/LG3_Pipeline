@@ -37,6 +37,9 @@
 
  * _run_Align_gz failed to detect already processed samples (due to a typo).
  
+ * _run_Align_gz used the wrong default input folder - it looked for the
+   trimmed FASTQ files in rawdata/ rather than output/.
+ 
 
 ## Version 2018-09-19
 
