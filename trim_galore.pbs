@@ -17,9 +17,6 @@ PROJECT=${PROJECT:-LG3}
 SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
-## AD HOC: Make it possible to override DIROUT
-DIROUT=${DIROUT:-$(dirname "$FASTQ1")}
-
 ### Input
 echo "Input:"
 echo "- PROJECT=${PROJECT:?}"
@@ -27,7 +24,6 @@ echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PREFIX=${PREFIX:?}"
 echo "- QTY=${QTY:?}"
-echo "- DIROUT=${DIROUT}"
 echo "- TG=${TG}"
 
 ## Assert existance of input files
@@ -63,7 +59,7 @@ echo "Using node(s): $NODES"
 SCRIPT=${LG3_HOME}/scripts/trim_galore.sh
 [[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
 
-mkdir -p "${DIROUT}" || { echo "Can't create destination directory ${DIROUT}"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}"; exit 1; }
 
 WDIR=${SCRATCHDIR}/${PREFIX}-trim
 echo "WDIR=${WDIR}"
@@ -93,12 +89,12 @@ mv "${PREFIX}_R2.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R2.trimming
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
 
-cp -r -p "${WDIR}" "${DIROUT}"
+cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}"
 
 echo "Removing directory (recursively): ${WDIR}"
 rm -rf "${WDIR}"
 
-ls -s "${DIROUT}/${PREFIX}-trim"
+ls -s "${LG3_OUTPUT_ROOT}/${PREFIX}-trim"
 
 echo "End of PBS script!"
 date

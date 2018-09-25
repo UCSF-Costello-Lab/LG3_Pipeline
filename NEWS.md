@@ -12,6 +12,10 @@
  * Chastity filtering (prior to alignment of FASTQ files) is now disabled by
    default. To enable, set environment variable 'LG3_CHASTITY_FILTERING=true'.
 
+ * The default output folder to which trimmed FASTQ files are written is now
+   defined by the 'LG3_OUTPUT_ROOT' environment variable (default is output/)
+   rather than the folder of the raw FASTQ files.
+
 ### NEW FEATURES
 
  * Added scripts/chk_data.sh for checking of the output on the different
