@@ -68,7 +68,7 @@ $ ln -s /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata .
 
 We also need a sample annotation file.  For the test example, we reuse the following:
 ```sh
-$ cp ${LG3_HOME}/runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
+$ cp ${LG3_HOME}/runs_demo/patient_ID_conversions.txt .
 ```
 
 Finally, we need to create a set up "run scripts".  For the test example, we can copy the built-in ones:
