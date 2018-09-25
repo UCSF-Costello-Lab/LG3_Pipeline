@@ -29,7 +29,7 @@ ifeq ($(wildcard output/.),)
 endif
 
 clean: 
-	rm -f resources tools AnnoVar pykent rawdata patient_ID_conversions.txt
+	rm -f resources tools AnnoVar pykent rawdata patient_ID_conversions.tsv
 	rm -f _run_*
 
 setup-annotation: setup-assert
@@ -39,7 +39,7 @@ setup-annotation: setup-assert
 	ln -fs $(LG3_HOME_HIDE)/pykent .
 	## Location of links to FASTQ.gz files
 	ln -fs $(LG3_TEST_DATA_DIR) rawdata
-	ln -fs ../runs_demo/patient_ID_conversions.demo patient_ID_conversions.txt
+	ln -fs ../runs_demo/patient_ID_conversions.tsv .
 
 setup: setup-annotation
 	cp ../runs_demo/_run_Trim .
@@ -98,11 +98,11 @@ step6a-setup: setup
 	ln -fs $${PWD}/pykent $${LG3_HOME}/  ## FIXME: AD HOC (needed here?)
 
 step6a: setup step6a-setup step5-validate
-	## FIXME FIRST: ${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt
+	## FIXME FIRST: ${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.tsv
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	PATIENT=$(TEST_PATIENT) \
-	CONV=patient_ID_conversions.txt \
+	CONV=patient_ID_conversions.tsv \
 	./_run_Pindel
 
 step6a-validate:
@@ -114,7 +114,7 @@ step6b: setup step6a-setup
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	PATIENT=$(TEST_PATIENT) \
-	CONV=patient_ID_conversions.txt \
+	CONV=patient_ID_conversions.tsv \
 	./_run_MutDet
 
 step6b-validate:
@@ -126,5 +126,5 @@ step7: setup step7-setup
 	LG3_INPUT_ROOT=output \
 	LG3_OUTPUT_ROOT=output \
 	PATIENT=$(TEST_PATIENT) \
-	CONV=patient_ID_conversions.txt \
+	CONV=patient_ID_conversions.tsv \
 	./_run_PostMut

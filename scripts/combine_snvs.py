@@ -61,7 +61,7 @@ def combine_snvs(patient_ID, projectname, conversionfile, outfile):
 
 if __name__=="__main__":
   if len(sys.argv) != 5:
-    print 'usage: %s patient_ID project_name patient_ID_conversions.txt outfile' %(sys.argv[0])
+    print 'usage: %s patient_ID project_name patient_ID_conversions.tsv outfile' %(sys.argv[0])
     sys.exit(1)
 
   combine_snvs(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4].strip())

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Usage: qsub -v SAMPLE=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.txt /path/to/pindel_all.pbs
+### Usage: qsub -v SAMPLE=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.tsv /path/to/pindel_all.pbs
 #PBS -N ${SAMPLE}.pindel
 #PBS -e ${SAMPLE}.pindel.err
 #PBS -o ${SAMPLE}.pindel.out

@@ -68,7 +68,7 @@ $ ln -s /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata .
 
 We also need a sample annotation file.  For the test example, we reuse the following:
 ```sh
-$ cp ${LG3_HOME}/runs_demo/patient_ID_conversions.txt .
+$ cp ${LG3_HOME}/runs_demo/patient_ID_conversions.tsv .
 ```
 
 Finally, we need to create a set up "run scripts".  For the test example, we can copy the built-in ones:
@@ -81,7 +81,7 @@ From the above, we should have a directory containing the following files and fo
 $ tree
 .
 ├── output -> /another/drive/lg3-test/output
-├── patient_ID_conversions.txt
+├── patient_ID_conversions.tsv
 ├── rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
 ├── _run_Align_gz
 ├── _run_Merge

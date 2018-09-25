@@ -3,7 +3,7 @@
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.txt}
+CONV=${CONV:-patient_ID_conversions.tsv}
 
 #BAM_SUFF=bwa.realigned.rmDups.recal.bam
 BAM_SUFF=bwa.realigned.rmDups.recal.insert_size_metrics

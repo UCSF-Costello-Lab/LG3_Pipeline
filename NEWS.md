@@ -29,6 +29,9 @@
    subfolder to exome_recal/$PATIENT.before.merge/ such that the final output
    is always in exome_recal/$PATIENT/ regardless of merging or not.
 
+ * Now using extension *.tsv for patient_ID_conversions.tsv (was *.txt) to
+   clarify that it is a tab-delimited file.
+
 ### SOFTWARE QUALITY:
 
  * HARMONIZATION: Using 'PROJECT' everywhere; previously 'PROJ' was also used.

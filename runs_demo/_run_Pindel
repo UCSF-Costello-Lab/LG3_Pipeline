@@ -13,7 +13,7 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PATIENT=${PATIENT:-Patient157t}
 PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.txt}
+CONV=${CONV:-patient_ID_conversions.tsv}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")

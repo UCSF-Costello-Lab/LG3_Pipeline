@@ -1,6 +1,6 @@
 #!/bin/bash
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-CONV=${CONV:-patient_ID_conversions.txt}
+CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157t}
 
 "${LG3_HOME}/scripts/chk_data.sh" \

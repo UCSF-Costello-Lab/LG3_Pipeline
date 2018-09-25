@@ -23,7 +23,7 @@ YEL='\033[0;33m'
 NOC='\033[0m'
 
 patient=$1
-conv=patient_ID_conversions.txt
+conv=patient_ID_conversions.tsv
 project=LG3
 WORKDIR=${LG3_OUTPUT_ROOT}/${project:?}/mutations/${patient}_mutect
 
