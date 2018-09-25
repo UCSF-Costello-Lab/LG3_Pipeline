@@ -36,8 +36,8 @@ if [ ! -f "$SAM" ]; then
 fi
 B=$(basename "$SAM" .sam)
 if [ "$PREFIX" != "${B%%.*}" ]; then
-	echo "ERROR: Prefix mismatch!"
-	exit 1;
+  echo "ERROR: Prefix mismatch!"
+  exit 1;
 fi
 
 mkdir -p "$TMP/${PREFIX}" || { echo "Can't create scratch directory $TMP/${PREFIX}"; exit 1; }

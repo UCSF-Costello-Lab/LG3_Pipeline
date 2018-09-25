@@ -43,11 +43,11 @@ rm -rf "${SCRATCHDIR:?}/${PATIENT}"
 echo "Making symlinks ..."
 cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || { echo "ERROR: failed to cd to ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"; exit 1; }
 mk_links() {
-   while read -r F
-   do
-		L=${F/rmDups/rmDups.recal}
-      ln -sf "$F" "$L"
-   done
+  while read -r F
+  do
+    L=${F/rmDups/rmDups.recal}
+    ln -sf "$F" "$L"
+  done
 }
 grep -v recal ./*.bwa.realigned.rmDups.* | mk_links
 

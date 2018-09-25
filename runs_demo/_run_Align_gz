@@ -49,28 +49,28 @@ PBS=${LG3_HOME}/Align_fastq.pbs
 
 for PREFIX in ${SAMPLES}
 do
-	## Expected Location of aligned BAMs
-	ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${PREFIX}
+  ## Expected Location of aligned BAMs
+  ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${PREFIX}
 
-	FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
-	FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
+  FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
+  FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
 
-   ## Requires absolute path 
-   FASTQ1=$(readlink -e "$FASTQ1")
-   FASTQ2=$(readlink -e "$FASTQ2")
-	
-	if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
-		echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
-	else
-		if [ -f "${ALIGNED}/${PREFIX}.trim.bwa.sorted.bam" ]; then
-			echo "WARNING: already aligned: $ALIGNED/${PREFIX}.trim.bwa.sorted.bam"
-			echo "Skipping $PREFIX ..."
-		else
-		        echo "Submitting $PREFIX ..."
-		        # shellcheck disable=SC2086
-			qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING},PROJECT=${PROJECT}" "${PBS}"
-		fi
-	fi
+  ## Requires absolute path 
+  FASTQ1=$(readlink -e "$FASTQ1")
+  FASTQ2=$(readlink -e "$FASTQ2")
+  
+  if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
+    echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
+  else
+    if [ -f "${ALIGNED}/${PREFIX}.trim.bwa.sorted.bam" ]; then
+      echo "WARNING: already aligned: $ALIGNED/${PREFIX}.trim.bwa.sorted.bam"
+      echo "Skipping $PREFIX ..."
+    else
+      echo "Submitting $PREFIX ..."
+      # shellcheck disable=SC2086
+      qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING},PROJECT=${PROJECT}" "${PBS}"
+    fi
+  fi
 done
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

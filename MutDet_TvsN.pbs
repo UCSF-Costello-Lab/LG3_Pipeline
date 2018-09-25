@@ -72,10 +72,10 @@ BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
 BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
 
 if [ ! -f "$BAMN" ] || [ ! -f "$BAMT" ]; then
-	echo "ERROR: BAM file(s) not found"
-	echo "Expected Normal: $BAMN"
-	echo "Expected Tumor: $BAMT"
-	exit 1
+  echo "ERROR: BAM file(s) not found"
+  echo "Expected Normal: $BAMN"
+  echo "Expected Tumor: $BAMT"
+  exit 1
 fi
 echo -n "Starting MutDet job on "
 date
@@ -89,13 +89,13 @@ echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
 
 "${SCRIPT}" \
-	"$BAMN" \
-	"$BAMT" \
-	"NOR-${NORMAL}__${TYPE}-${TUMOR}" \
-	"${PATIENT}" \
-	"${CONFIG}" \
-	"${INTERVAL}" \
-	"$XMX"
+  "$BAMN" \
+  "$BAMT" \
+  "NOR-${NORMAL}__${TYPE}-${TUMOR}" \
+  "${PATIENT}" \
+  "${CONFIG}" \
+  "${INTERVAL}" \
+  "$XMX"
 
 echo "End of PBS script!"
 date

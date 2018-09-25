@@ -21,7 +21,7 @@ The following output should be empty (because all files should be of identical s
 path=output
 diff -u <(cd ${truth}; tree ${path}/Z00*t-trim) -u <(tree ${path}/Z00*t-trim)
 diff -u <(cd ${truth}; du -b ${path}/Z00*t-trim/*) -u <(du -b ${path}/Z00*t-trim/*)
-```	     
+```
 
 ## _run_Align_gz
 
