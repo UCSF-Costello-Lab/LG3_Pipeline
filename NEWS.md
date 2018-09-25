@@ -24,7 +24,7 @@
  * More scripts now takes environment variable 'PROJECT' (defaults to 'LG3')
    as an optional input to control the subfolder of the output data.
  
- * If the optional _run_Recal_pass2 step is run, which is occurs after
+ * If the optional _run_Recal_pass2 step is run, which occurs after
    recalibration and merging, it will rename the existing exome_recal/$PATIENT/
    subfolder to exome_recal/$PATIENT.before.merge/ such that the final output
    is always in exome_recal/$PATIENT/ regardless of merging or not.
