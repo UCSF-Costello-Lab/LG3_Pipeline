@@ -2,7 +2,7 @@
 
 The reference results to compare to:
 ```sh
-truth=/cbc/henrik/LG3_Pipeline/tests/Patient157t-truth-20180914
+truth=/costellolab/data1/shared/LG3_Pipeline/example_data/output
 ```
 
 ## Existence of folders and files
