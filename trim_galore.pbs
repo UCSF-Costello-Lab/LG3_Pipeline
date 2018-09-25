@@ -22,6 +22,7 @@ DIROUT=${DIROUT:-$(dirname "$FASTQ1")}
 
 ### Input
 echo "Input:"
+echo "- PROJECT=${PROJECT:?}"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PREFIX=${PREFIX:?}"
@@ -73,6 +74,7 @@ echo "Current working directory: ${PWD}"
 cp "$FASTQ1" .
 cp "$FASTQ2" .
 
+export PROJECT
 "${SCRIPT}" -quality="$QTY" "$FASTQ1" "$FASTQ2" || { echo "ERROR: trim_galore FAILED"; exit 1; }
 
 FQ1=$(basename "$FASTQ1")
