@@ -24,7 +24,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- PROJECT=${PROJECT}"
   echo "- EMAIL=${EMAIL}"
   echo "- SCRATCHDIR=$SCRATCHDIR"
   echo "- PWD=$PWD"
@@ -35,6 +34,7 @@ fi
 
 ### Input
 echo "Input:"
+echo "- PROJECT=${PROJECT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
@@ -62,6 +62,11 @@ SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
 SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
 [[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
 
+DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
+
+DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
+mkdir -p "${DESTDIR2}" || { echo "Can't create destination directory ${DESTDIR2}"; exit 1; }
 
 WDIR=${SCRATCHDIR}/${PATIENT}
 mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
@@ -71,16 +76,12 @@ cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit
 
 cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
 
-DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
 cp -p "${SCRATCHDIR}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
 
 echo "Cleaning ${SCRATCHDIR} ..."
 rm -rf "${SCRATCHDIR:?}/${PATIENT}"
 
-WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
-mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
 
 "${SCRIPT_B}" \
       "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
