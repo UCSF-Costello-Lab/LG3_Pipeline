@@ -4,14 +4,14 @@
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "SCRATCH_ROOT=$SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
@@ -39,7 +39,7 @@ REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
 bamfiles=$1
 patientID=$2
 ilist=$3
-TMP="${SCRATCHDIR}/${patientID}_tmp"
+TMP="${SCRATCH_ROOT}/${patientID}_tmp"
 mkdir -p "$TMP"
 
 echo "------------------------------------------------------"

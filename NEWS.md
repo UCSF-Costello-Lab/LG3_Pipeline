@@ -39,7 +39,9 @@
  
  * _run_Align_gz used the wrong default input folder - it looked for the
    trimmed FASTQ files in rawdata/ rather than output/.
- 
+
+ * Scratch folders were not job specific for most TIPCC users.
+
 
 ## Version 2018-09-19
 

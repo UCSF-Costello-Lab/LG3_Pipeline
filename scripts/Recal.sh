@@ -10,7 +10,7 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 
@@ -19,7 +19,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- SCRATCH_ROOT=$SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -52,7 +52,7 @@ DBSNP="${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf"
 bamfiles=$1
 patientID=$2
 ilist=$3
-TMP="${SCRATCHDIR}/$patientID"
+TMP="${SCRATCH_ROOT}/$patientID"
 mkdir -p "$TMP"
 
 echo "------------------------------------------------------"

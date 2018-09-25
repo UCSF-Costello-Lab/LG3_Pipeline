@@ -18,7 +18,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -27,7 +27,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- SCRATCH_ROOT=$SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -42,15 +42,15 @@ echo "- ILIST=${ILIST:?}"
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 date
-mkdir -p "${SCRATCHDIR}/${PREFIX}"
-cd "${SCRATCHDIR}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}/${PREFIX}"; exit 1; }
+mkdir -p "${SCRATCH_ROOT}/${PREFIX}"
+cd "${SCRATCH_ROOT}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}/${PREFIX}"; exit 1; }
 
 "${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$PREFIX" "${ILIST}"
 
-cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
+cd "${SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${SCRATCH_ROOT}"; exit 1; }
 
-cp -a "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${SCRATCHDIR}/${PREFIX}"; exit 1; }
-rm -rf "${SCRATCHDIR:?}/${PREFIX}"
+cp -a "${SCRATCH_ROOT}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${SCRATCH_ROOT}/${PREFIX}"; exit 1; }
+rm -rf "${SCRATCH_ROOT:?}/${PREFIX}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge"
 echo "End of script!"

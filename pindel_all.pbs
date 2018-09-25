@@ -18,7 +18,7 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 
@@ -29,7 +29,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- SCRATCH_ROOT=$SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -84,7 +84,7 @@ echo "- TARGET=${TARGET:?}"
 [[ -f "$REF" ]]    || { echo "File not found: ${REF}"; exit 1; }
 [[ -f "$TARGET" ]] || { echo "File not found: ${TARGET}"; exit 1; }
 
-SCRATCH=${SCRATCHDIR}/${SAMPLE}_pindel
+SCRATCH=${SCRATCH_ROOT}/${SAMPLE}_pindel
 mkdir -p "${SCRATCH}" || { echo "Can't create destination directory ${SCRATCH}"; exit 1; }
 
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel

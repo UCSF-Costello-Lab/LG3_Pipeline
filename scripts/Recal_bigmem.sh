@@ -9,7 +9,7 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+SCRATCH_ROOT=${SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 
@@ -18,7 +18,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- SCRATCH_ROOT=$SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -93,7 +93,7 @@ echo "- ilist=${ilist:?}"
 [[ -f "$ilist" ]] || { echo "File not found: ${ilist}"; exit 1; }
 
 
-TMP="${SCRATCHDIR}/${patientID}_tmp"
+TMP="${SCRATCH_ROOT}/${patientID}_tmp"
 mkdir -p "${TMP}" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
 
 echo "------------------------------------------------------"
