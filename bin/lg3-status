@@ -66,14 +66,14 @@ case $1 in
 esac
 done
 
-PATIENTS=${@:-Patient157t}
+PATIENTS=${*:-Patient157t}
 
 echo -e "Checking output for project ${PROJECT}"
 echo "Patient/samples table ${CONV}"
 echo "BAM suffix ${BAM_SUFF}"
 echo "Patients ${PATIENTS:?}"
 
-for PATIENT in ${PATIENTS[@]}
+for PATIENT in ${PATIENTS[*]}
 do
 	normid="$ERR"
 	echo -e -n "$SEP Checking ${YEL}${PATIENT}${NOC}"
@@ -248,8 +248,8 @@ if $COMB ; then
 	
 	WORKDIR3=${LG3_OUTPUT_ROOT}/${PROJECT}/MAF
 	res=true
-	for ff in $(ls ${WORKDIR3}/${PATIENT}_plots/${PATIENT}.LOH*.pdf); do
-	    if [ ! -s "$OUT" ]; then
+	for ff in "${WORKDIR3}/${PATIENT}_plots/${PATIENT}".LOH*.pdf; do
+	    if [ ! -s "$ff" ]; then
 		res=false
 		break
 	    fi
