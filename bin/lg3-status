@@ -1,0 +1,34 @@
+#! /usr/bin/env bash
+### Check Status of Running LG3 Pipeline
+###
+### Usage:
+###  lg3-status [options] <patientX> <patientY> ...
+###
+### Options:
+###  -conv=<pathame>         The path to the tab-delimited patient file
+###  -fastq=(true|false)     Check raw FASTQ files
+###  -trim=(true|false)      Check trimmed FASTQ files
+###  -bam=(true|false)       Check raw BAM files
+###  -bwa=(true|false)       Check aligned BAM files
+###  -recal=(true|false)     Check recalibrated output
+###  -germline=(true|false)  Check germline output
+###  -pindel=(true|false)    Check Pindel output
+###  -mutect=(true|false)    Check MutDet output
+###  -combined=(true|false)  Check mutation output
+###
+
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+CONV=${CONV:-patient_ID_conversions.tsv}
+PATIENT=${PATIENT:-Patient157t}
+
+"${LG3_HOME}/scripts/chk_data.sh" \
+	-fastq=true \
+	-trim=true \
+	-bwa=true \
+	-recal=true \
+	-germline=true \
+	-pindel=true \
+	-mutect=true \
+	-combined=true \
+	-conv=$CONV \
+	${PATIENT}

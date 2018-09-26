@@ -18,8 +18,8 @@
 
 ### NEW FEATURES
 
- * Added scripts/chk_data.sh for checking of the output on the different
-   stages in the pipeline.
+ * Add bin/ folder with 'lg3' command.  Currently, it implements 'lg3 status'
+   for checking of the output on the different stages in the pipeline.
 
  * More scripts now takes environment variable 'PROJECT' (defaults to 'LG3')
    as an optional input to control the subfolder of the output data.
