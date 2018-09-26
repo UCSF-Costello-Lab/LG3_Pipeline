@@ -9,6 +9,11 @@
 ###  lg3 --version
 ###  lg3 status
 ###
+### Settings:
+###  LG3_HOME={{LG3_HOME}}
+###  EMAIL={{EMAIL}}
+###  LG3_OUTPUT_ROOT={{LG3_OUTPUT_ROOT}}
+###
 ### Version: 2018-09-19-9000
 ### Source: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 
@@ -63,7 +68,7 @@ help() {
       local t
       t=$(table_of_tools)
       t=${t//$'\n'/\\n}
-      grep "^###" "$0" | cut -b 5- | sed "s/{{table_of_tools}}/$t/"
+      grep "^###" "$0" | cut -b 5- | sed "s|{{LG3_HOME}}|$LG3_HOME|" | sed "s|{{LG3_OUTPUT_ROOT}}|$LG3_OUTPUT_ROOT|" | sed "s|{{EMAIL}}|$EMAIL|"
     else
       local pathname
       pathname="$(which "lg3-$1")"
