@@ -50,8 +50,8 @@ SCRIPT_A=${LG3_HOME}/scripts/chk_pindel.sh
 SCRIPT_B=${LG3_HOME}/scripts/chk_mutdet.sh
 [[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
 
-"${SCRIPT_A}" "${PATIENT}"
-"${SCRIPT_B}" "${PATIENT}"
+"${SCRIPT_A}" "${PROJECT}" "${PATIENT}"
+"${SCRIPT_B}" "${PROJECT}" "${PATIENT}"
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
