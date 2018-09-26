@@ -247,14 +247,16 @@ if $COMB ; then
 	fi
 	
 	WORKDIR3=${LG3_OUTPUT_ROOT}/${PROJECT}/MAF
-	res=true
+	res=false
 	for ff in "${WORKDIR3}/${PATIENT}_plots/${PATIENT}".LOH*.pdf; do
-	    if [ ! -s "$ff" ]; then
+	    if [ -s "$ff" ]; then
+                res=true
+	    else
 		res=false
 		break
 	    fi
 	done
-	if [ $res ]; then
+	if $res; then
 		echo -e "LOH plots $OK"
 	else
 		echo -e "LOH plots $ERR"
