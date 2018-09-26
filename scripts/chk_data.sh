@@ -17,14 +17,14 @@ OK="$GRN OK$NOC"
 ERR="$RED missing$NOC"
 SEP="$YEL******$NOC"
 
-FQ=false
-TRIM=false
-BWA=false
-REC=false
-GL=false
-PINDEL=false
-MUT=false
-COMB=false
+FQ=true
+TRIM=true
+BWA=true
+REC=true
+GL=true
+PINDEL=true
+MUT=true
+COMB=true
 
 wcl() {
 	grep -vc "^#" "$1" 
