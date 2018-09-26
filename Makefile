@@ -12,6 +12,7 @@ check_pbs:
 	shellcheck *.pbs
 
 check_sh:
+	shellcheck bin/lg3*
 	shellcheck FilterMutations/*.sh
 	shellcheck -x scripts/*.sh
 

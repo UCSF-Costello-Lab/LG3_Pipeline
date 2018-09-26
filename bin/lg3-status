@@ -30,5 +30,5 @@ PATIENT=${PATIENT:-Patient157t}
 	-pindel=true \
 	-mutect=true \
 	-combined=true \
-	-conv=$CONV \
-	${PATIENT}
+	-conv="${CONV}" \
+	"${PATIENT}"
