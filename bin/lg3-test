@@ -33,12 +33,13 @@ function expected_file_tree {
 	path="${path}/${glob}"
     fi
     
-    res=$(diff -u <(cd "${truth}"; tree ${path}) <(tree ${path}))
+    # shellcheck disable=SC2164
+    res=$(diff -u <(cd "${truth}"; tree "${path}") <(tree "${path}"))
         
     if [ -z "${res}" ]; then
         echo "[OK] file tree ('${path}')"
     else
-        echo "[WARN] unexpected file tree ('${path}')"
+        echo "[WARN] unexpected file tree ('${truth}/${path}' != '${path}')"
         echo "${res}"
     fi
 }
@@ -65,13 +66,14 @@ function expected_file_sizes {
     if [[ -n "${glob}" ]]; then
 	path=${path}/${glob}
     fi
-    
-    res=$(diff -u <(cd ${truth}; du ${unit} ${path}) <(du ${unit} ${path}))
+
+    # shellcheck disable=SC2164,SC2086
+    res=$(diff -u <(cd "${truth}"; du --si ${unit} ${path}) <(du --si ${unit} ${path}))
         
     if [ -z "${res}" ]; then
         echo "[OK] file sizes ('${path}')"
     else
-        echo "[WARN] unexpected file sizes ('${path}')"
+        echo "[WARN] unexpected file sizes ('${truth}/${path}' != '${path}')"
         echo "${res}"
     fi
 }
@@ -91,12 +93,13 @@ function expected_file_rows {
 	path="${path}/${glob}"
     fi
     
+    # shellcheck disable=SC2164,SC2086
     res=$(diff -u <(cd "${truth}"; wc -l ${path}) <(wc -l ${path}))
         
     if [ -z "${res}" ]; then
         echo "[OK] file rows ('${path}')"
     else
-        echo "[WARN] unexpected file rows ('${path}')"
+        echo "[WARN] unexpected file rows ('${truth}/${path}' != '${path}')"
         echo "${res}"
     fi
 }
@@ -112,7 +115,7 @@ function expected_file_content {
     [[ -f "${pathname}" ]] || { echo "[WARN] No such file: ${pathname}"; return; }
     shift
 
-    res=$(diff -u ${truth}/${pathname} ${pathname})
+    res=$(diff -u "${truth}/${pathname}" "${pathname}")
     if [ -z "${res}" ]; then
         echo "[OK] file content ('${path}')"
     else
@@ -133,7 +136,7 @@ done
 
 PATIENT=${1:-Patient157t}
 
-truth=/costellolab/data1/shared/LG3_Pipeline/example_data/truth
+truth=/costellolab/data1/shared/LG3_Pipeline/example_data/truth-devel
 
 echo "Project ${PROJECT:?}"
 echo "Patient ${PATIENT:?}"
@@ -183,6 +186,6 @@ if [ "$action" == "validate" ]; then
     path=output/${PROJECT}/MutInDel
     expected_file_tree "${path}"
     expected_file_sizes human "${path}" "*"
-    expected_file_content ${path}/${PATIENT}.R.mutations
+    expected_file_content "${path}/${PATIENT}.R.mutations"
     echo
 fi
