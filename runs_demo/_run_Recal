@@ -32,7 +32,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="-d ${PWD:?}"
+QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then

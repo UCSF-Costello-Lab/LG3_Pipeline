@@ -26,7 +26,7 @@ echo "- SAMPLES=${SAMPLES:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 if [[ -n ${TG} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},TG=${TG}"; fi
-QSUB_OPTS="-d ${PWD:?}"
+QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
