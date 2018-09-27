@@ -126,7 +126,7 @@ function expected_file_sizes {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -u <(cd "${truth}"; du --si ${unit} ${path}) <(du --si ${unit} ${path}))
+    res=$(diff -U 0 <(cd "${truth}"; du --apparent-size --si ${unit} ${path}) <(du --apparent-size --si ${unit} ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file sizes ('${path}')"
