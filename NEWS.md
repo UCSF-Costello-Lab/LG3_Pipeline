@@ -19,7 +19,10 @@
 ### NEW FEATURES
 
  * Add bin/ folder with 'lg3' command.  Currently, it implements 'lg3 status'
-   for checking of the output on the different stages in the pipeline.
+   and 'lg3 test'.  'lg3 status' is used for checking of the output on the
+   different stages in the pipeline.  'lg3 test validate' is used for
+   validating the different steps of the test example toward a reference
+   result set currently stored on the TIPCC file system.
 
  * More scripts now takes environment variable 'PROJECT' (defaults to 'LG3')
    as an optional input to control the subfolder of the output data.
