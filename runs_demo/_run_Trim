@@ -7,10 +7,15 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-rawdata}
-EMAIL=${EMAIL:?}
+if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
+else
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+fi    
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+PROJECT=${PROJECT:-LG3}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
+EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -58,7 +63,7 @@ do
    else
       echo "Submitting $PREFIX: quality $QTY ..."
       # shellcheck disable=SC2086
-      qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY}" "$PBS"
+      qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY},PROJECT=${PROJECT}" "$PBS"
    fi
 done
 

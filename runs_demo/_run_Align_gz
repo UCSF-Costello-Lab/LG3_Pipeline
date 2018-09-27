@@ -7,11 +7,16 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
+else
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+fi    
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-false}
+EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -19,13 +24,14 @@ LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- SAMPLES=${SAMPLES:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="-d ${PWD:?}"
 
 ## Override the qsub email address?
@@ -43,18 +49,18 @@ PBS=${LG3_HOME}/Align_fastq.pbs
 
 for PREFIX in ${SAMPLES}
 do
-  ## Expected Location of aligned BAMs
-  ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${PREFIX}
-
-  FASTQ1=${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
-  FASTQ2=${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
+  FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
+  FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
 
   ## Requires absolute path 
   FASTQ1=$(readlink -e "$FASTQ1")
   FASTQ2=$(readlink -e "$FASTQ2")
   
+  ## Expected Location of aligned BAMs
+  ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${PREFIX}
+
   if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
-    echo "ERROR: Can't open $PREFIX from ${LG3_OUTPUT_ROOT}/"
+    echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
   else
     if [ -f "${ALIGNED}/${PREFIX}.trim.bwa.sorted.bam" ]; then
       echo "WARNING: already aligned: $ALIGNED/${PREFIX}.trim.bwa.sorted.bam"
