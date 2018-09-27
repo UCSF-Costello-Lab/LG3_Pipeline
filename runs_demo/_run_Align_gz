@@ -54,7 +54,7 @@ do
   FASTQ2=$(readlink -e "$FASTQ2")
   
   if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
-    echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
+    echo "ERROR: Can't open $PREFIX from ${LG3_OUTPUT_ROOT}/"
   else
     if [ -f "${ALIGNED}/${PREFIX}.trim.bwa.sorted.bam" ]; then
       echo "WARNING: already aligned: $ALIGNED/${PREFIX}.trim.bwa.sorted.bam"
