@@ -59,6 +59,8 @@ SCRIPT=${LG3_HOME}/scripts/trim_galore.sh
 [[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
 
 mkdir -p "${LG3_OUTPUT_ROOT}" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/trim" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}/trim"; exit 1; }
 
 WDIR=${LG3_SCRATCH_ROOT}/${PREFIX}-trim
 echo "WDIR=${WDIR}"
