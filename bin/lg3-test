@@ -25,14 +25,20 @@ function expected_file_tree {
 
     local path="$1"
     [[ -d "${truth}/${path}" ]] || { echo "ERROR: No such folder: ${truth}/${path}"; exit 1; }
-    [[ -d "${path}" ]] || { echo "[WARN] No such folder: ${path}"; return; }
+    [[ -d "${path}" ]] || { echo "[SKIP] No such folder: ${path}"; return; }
     shift
 
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { echo "[SKIP] No files found: ${path}"; return; }
+    
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
 	path="${path}/${glob}"
     fi
-    
+
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { echo "[SKIP] No files found: ${path}"; return; }
+
     # shellcheck disable=SC2164
     res=$(diff -u <(cd "${truth}"; tree "${path}") <(tree "${path}"))
         
@@ -59,9 +65,12 @@ function expected_file_sizes {
     
     local path="$1"
     [[ -d "${truth}/${path}" ]] || { echo "ERROR: No such folder: ${truth}/${path}"; exit 1; }
-    [[ -d "${path}" ]] || { echo "[WARN] No such folder: ${path}"; return; }
+    [[ -d "${path}" ]] || { echo "[SKIP] No such folder: ${path}"; return; }
     shift
 
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { echo "[SKIP] No files found: ${path}"; return; }
+    
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
 	path=${path}/${glob}
@@ -85,14 +94,14 @@ function expected_file_rows {
 
     local path="$1"
     [[ -d "${truth}/${path}" ]] || { echo "ERROR: No such folder: ${truth}/${path}"; exit 1; }
-    [[ -d "${path}" ]] || { echo "[WARN] No such folder: ${path}"; return; }
+    [[ -d "${path}" ]] || { echo "[SKIP] No such folder: ${path}"; return; }
     shift
 
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
 	path="${path}/${glob}"
     fi
-    
+
     # shellcheck disable=SC2164,SC2086
     res=$(diff -u <(cd "${truth}"; wc -l ${path}) <(wc -l ${path}))
         
@@ -112,7 +121,7 @@ function expected_file_content {
 
     local pathname="$1"
     [[ -f "${truth}/${pathname}" ]] || { echo "ERROR: No such file: ${truth}/${pathname}"; exit 1; }
-    [[ -f "${pathname}" ]] || { echo "[WARN] No such file: ${pathname}"; return; }
+    [[ -f "${pathname}" ]] || { echo "[SKIP] No such file: ${pathname}"; return; }
     shift
 
     res=$(diff -u "${truth}/${pathname}" "${pathname}")
@@ -136,6 +145,7 @@ done
 
 PATIENT=${1:-Patient157t}
 
+truth=/costellolab/data1/shared/LG3_Pipeline/example_data/truth
 truth=/costellolab/data1/shared/LG3_Pipeline/example_data/truth-devel
 
 echo "Project ${PROJECT:?}"
@@ -146,46 +156,74 @@ echo "Truth ${truth:?}"
 if [ "$action" == "validate" ]; then
     echo "*** Trimmed FASTQ files"
     path=output
-    expected_file_tree "${path}" 'Z00*t-trim'
-    expected_file_sizes bytes "${path}" 'Z00*t-trim/*'
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}" 'Z00*t-trim'
+        expected_file_sizes bytes "${path}" 'Z00*t-trim/*'
+    else
+	echo "[SKIP] No such folder: ${path}"
+    fi
     echo
     
     echo "*** BWA Aligned FASTQ files"
     path=output/LG3/exomes
-    expected_file_tree "${path}"
-    expected_file_sizes human "${path}" "Z00*t/*"
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "Z00*t/*"
+    else
+	echo "[SKIP] No such folder: ${path}"
+    fi
     echo
 
     echo "*** Recalibrated BAM files"
     path=output/${PROJECT}/exomes_recal/${PATIENT}
-    expected_file_tree "${path}"
-    expected_file_sizes human "${path}" "*"
-    expected_file_sizes human "${path}" "germline/*"
-    expected_file_sizes human "${path}" "*.bai"
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "*"
+        expected_file_sizes human "${path}" "germline/*"
+        expected_file_sizes human "${path}" "*.bai"
+    else
+	echo "[SKIP] No such folder: ${path}"
+    fi
     echo
     
     echo "*** Pindel files"
     path=output/${PROJECT}/pindel
-    expected_file_tree "${path}"
-    expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
-    expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
+        expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
+    else
+	echo "[SKIP] No such folder: ${path}"
+    fi
     echo
     
     echo "*** MutDet files"
     path=output/${PROJECT}/mutations/${PATIENT}_mutect
-    expected_file_tree "${path}"
-    expected_file_sizes human "${path}" "*"
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "*"
+    else
+	echo "[SKIP] No such folder: ${path}"
+    fi
     echo
 
     echo "*** Mutation files"
     path=output/${PROJECT}/MAF
-    expected_file_tree "${path}"
-    expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
-    expected_file_sizes human "${path}" "${PATIENT}_plots/*"
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
+        expected_file_sizes human "${path}" "${PATIENT}_plots/*"
+    else
+	echo "[SKIP] No such folder: ${path}"
+    fi
 
     path=output/${PROJECT}/MutInDel
-    expected_file_tree "${path}"
-    expected_file_sizes human "${path}" "*"
-    expected_file_content "${path}/${PATIENT}.R.mutations"
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "*"
+        expected_file_content "${path}/${PATIENT}.R.mutations"
+    else
+	echo "[SKIP] No such folder: ${path}"
+    fi
     echo
 fi
