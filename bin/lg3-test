@@ -1,0 +1,188 @@
+#! /usr/bin/env bash
+### Run and Validate LG3 Pipeline Test Examples
+###
+### Usage:
+###  lg3-test <command> [options] <patientX>
+###
+### Command:
+###   validate               Validate output of tests
+###
+### Options:
+###
+
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+PROJECT=${PROJECT:-LG3}
+CONV=${CONV:-patient_ID_conversions.tsv}
+
+## Enable extended globbing, e.g. for exluding
+## shopt -s extglob
+
+function expected_file_tree {
+    local res;
+
+    [[ -d "${truth}" ]] || { echo "ERROR: No such folder: ${truth}"; exit 1; }
+
+    local path="$1"
+    [[ -d "${truth}/${path}" ]] || { echo "ERROR: No such folder: ${truth}/${path}"; exit 1; }
+    [[ -d "${path}" ]] || { echo "[WARN] No such folder: ${path}"; return; }
+    shift
+
+    local glob=$1  ## optional
+    if [[ -n "${glob}" ]]; then
+	path="${path}/${glob}"
+    fi
+    
+    res=$(diff -u <(cd "${truth}"; tree ${path}) <(tree ${path}))
+        
+    if [ -z "${res}" ]; then
+        echo "[OK] file tree ('${path}')"
+    else
+        echo "[WARN] unexpected file tree ('${path}')"
+        echo "${res}"
+    fi
+}
+
+function expected_file_sizes {
+    local res;
+
+    [[ -d "${truth}" ]] || { echo "WARNING: No such folder: ${truth}"; exit 1; }
+
+    local unit=$1
+    if [[ "${unit}" == "bytes" ]]; then
+	unit=-b
+    elif [[ "${unit}" == "human" ]]; then
+	unit=-h
+    fi
+    shift
+    
+    local path="$1"
+    [[ -d "${truth}/${path}" ]] || { echo "ERROR: No such folder: ${truth}/${path}"; exit 1; }
+    [[ -d "${path}" ]] || { echo "[WARN] No such folder: ${path}"; return; }
+    shift
+
+    local glob=$1  ## optional
+    if [[ -n "${glob}" ]]; then
+	path=${path}/${glob}
+    fi
+    
+    res=$(diff -u <(cd ${truth}; du ${unit} ${path}) <(du ${unit} ${path}))
+        
+    if [ -z "${res}" ]; then
+        echo "[OK] file sizes ('${path}')"
+    else
+        echo "[WARN] unexpected file sizes ('${path}')"
+        echo "${res}"
+    fi
+}
+
+function expected_file_rows {
+    local res;
+
+    [[ -d "${truth}" ]] || { echo "WARNING: No such folder: ${truth}"; exit 1; }
+
+    local path="$1"
+    [[ -d "${truth}/${path}" ]] || { echo "ERROR: No such folder: ${truth}/${path}"; exit 1; }
+    [[ -d "${path}" ]] || { echo "[WARN] No such folder: ${path}"; return; }
+    shift
+
+    local glob=$1  ## optional
+    if [[ -n "${glob}" ]]; then
+	path="${path}/${glob}"
+    fi
+    
+    res=$(diff -u <(cd "${truth}"; wc -l ${path}) <(wc -l ${path}))
+        
+    if [ -z "${res}" ]; then
+        echo "[OK] file rows ('${path}')"
+    else
+        echo "[WARN] unexpected file rows ('${path}')"
+        echo "${res}"
+    fi
+}
+
+
+function expected_file_content {
+    local res;
+
+    [[ -d "${truth}" ]] || { echo "WARNING: No such folder: ${truth}"; exit 1; }
+
+    local pathname="$1"
+    [[ -f "${truth}/${pathname}" ]] || { echo "ERROR: No such file: ${truth}/${pathname}"; exit 1; }
+    [[ -f "${pathname}" ]] || { echo "[WARN] No such file: ${pathname}"; return; }
+    shift
+
+    res=$(diff -u ${truth}/${pathname} ${pathname})
+    if [ -z "${res}" ]; then
+        echo "[OK] file content ('${path}')"
+    else
+        echo "[WARN] unexpected file content ('${path}')"
+        echo "${res}"
+    fi
+}
+
+
+#### Parse optional args
+while [ -n "$1" ]; do
+    case $1 in
+        validate) action="${1}"; shift;;
+        --*) echo "ERROR: Unknown option $1"; exit 1;;
+        *)  break;;
+    esac
+done
+
+PATIENT=${1:-Patient157t}
+
+truth=/costellolab/data1/shared/LG3_Pipeline/example_data/truth
+
+echo "Project ${PROJECT:?}"
+echo "Patient ${PATIENT:?}"
+echo "Truth ${truth:?}"
+
+
+if [ "$action" == "validate" ]; then
+    echo "*** Trimmed FASTQ files"
+    path=output
+    expected_file_tree "${path}" 'Z00*t-trim'
+    expected_file_sizes bytes "${path}" 'Z00*t-trim/*'
+    echo
+    
+    echo "*** BWA Aligned FASTQ files"
+    path=output/LG3/exomes
+    expected_file_tree "${path}"
+    expected_file_sizes human "${path}" "Z00*t/*"
+    echo
+
+    echo "*** Recalibrated BAM files"
+    path=output/${PROJECT}/exomes_recal/${PATIENT}
+    expected_file_tree "${path}"
+    expected_file_sizes human "${path}" "*"
+    expected_file_sizes human "${path}" "germline/*"
+    expected_file_sizes human "${path}" "*.bai"
+    echo
+    
+    echo "*** Pindel files"
+    path=output/${PROJECT}/pindel
+    expected_file_tree "${path}"
+    expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
+    expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
+    echo
+    
+    echo "*** MutDet files"
+    path=output/${PROJECT}/mutations/${PATIENT}_mutect
+    expected_file_tree "${path}"
+    expected_file_sizes human "${path}" "*"
+    echo
+
+    echo "*** Mutation files"
+    path=output/${PROJECT}/MAF
+    expected_file_tree "${path}"
+    expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
+    expected_file_sizes human "${path}" "${PATIENT}_plots/*"
+
+    path=output/${PROJECT}/MutInDel
+    expected_file_tree "${path}"
+    expected_file_sizes human "${path}" "*"
+    expected_file_content ${path}/${PATIENT}.R.mutations
+    echo
+fi
