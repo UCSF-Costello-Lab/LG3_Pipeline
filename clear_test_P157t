@@ -68,7 +68,7 @@ if ${RECAL} ; then
 fi
 
 if ${RECAL2} ; then
-   echo "========== Removing recal pass 2 data for ${PATIENT} ..."
+   echo "========== Removing recal before.merge data for ${PATIENT} ..."
 	D="${RECALDATA}/${PATIENT}.before.merge"
 	du -h "${D}" || { echo "STOP"; exit 1; }
    echo -e "\\trm -rf ${D}"
