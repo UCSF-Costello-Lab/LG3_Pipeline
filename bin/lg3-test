@@ -2,12 +2,13 @@
 ### Run and Validate LG3 Pipeline Test Examples
 ###
 ### Usage:
-###  lg3-test <command> [options] <patientX>
+###  lg3 test <command> [options] <patient>
 ###
 ### Command:
 ###   validate               Validate output of tests
 ###
-### Options:
+### Examples:
+###  lg3 test validate
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
@@ -89,7 +90,7 @@ function expected_file_tree {
     fi
 
     # shellcheck disable=SC2164
-    res=$(diff -u <(cd "${truth}"; tree "${path}") <(tree "${path}"))
+    res=$(diff -U 0 <(cd "${truth}"; tree "${path}") <(tree "${path}"))
         
     if [ -z "${res}" ]; then
         report_ok "file tree ('${path}')"
@@ -152,7 +153,7 @@ function expected_file_rows {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -u <(cd "${truth}"; wc -l ${path}) <(wc -l ${path}))
+    res=$(diff -U 0 <(cd "${truth}"; wc -l ${path}) <(wc -l ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file rows ('${path}')"
@@ -173,7 +174,7 @@ function expected_file_content {
     [[ -f "${pathname}" ]] || { report_skip "No such file: ${pathname}"; return; }
     shift
 
-    res=$(diff -u "${truth}/${pathname}" "${pathname}")
+    res=$(diff -U 0 "${truth}/${pathname}" "${pathname}")
     if [ -z "${res}" ]; then
         report_ok "file content ('${path}')"
     else
