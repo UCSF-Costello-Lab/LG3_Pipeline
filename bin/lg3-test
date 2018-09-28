@@ -13,6 +13,7 @@
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_TEST_TRUTH=${LG3_TEST_TRUTH:-/costellolab/data1/shared/LG3_Pipeline/example_data/truth-devel}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
 
@@ -74,10 +75,10 @@ function report_skip {
 function expected_file_tree {
     local res;
 
-    [[ -d "${truth}" ]] || error "No such folder: ${truth}"
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
 
     local path="$1"
-    [[ -d "${truth}/${path}" ]] || error "No such folder: ${truth}/${path}"
+    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
@@ -90,12 +91,12 @@ function expected_file_tree {
     fi
 
     # shellcheck disable=SC2164
-    res=$(diff -U 0 <(cd "${truth}"; tree "${path}") <(tree "${path}"))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; tree "${path}") <(tree "${path}"))
         
     if [ -z "${res}" ]; then
         report_ok "file tree ('${path}')"
     else
-        report_warn "unexpected file tree ('${truth}/${path}' != '${path}')"
+        report_warn "unexpected file tree ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -103,7 +104,7 @@ function expected_file_tree {
 function expected_file_sizes {
     local res;
 
-    [[ -d "${truth}" ]] || error "No such folder: ${truth}"
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
 
     local unit=$1
     if [[ "${unit}" == "bytes" ]]; then
@@ -114,7 +115,7 @@ function expected_file_sizes {
     shift
     
     local path="$1"
-    [[ -d "${truth}/${path}" ]] || error "No such folder: ${truth}/${path}"
+    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
@@ -127,12 +128,12 @@ function expected_file_sizes {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${truth}"; du --apparent-size --si ${unit} ${path}) <(du --apparent-size --si ${unit} ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; du --apparent-size --si ${unit} ${path}) <(du --apparent-size --si ${unit} ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file sizes ('${path}')"
     else
-        report_warn "unexpected file sizes ('${truth}/${path}' != '${path}')"
+        report_warn "unexpected file sizes ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -140,10 +141,10 @@ function expected_file_sizes {
 function expected_file_rows {
     local res;
 
-    [[ -d "${truth}" ]] || error "No such folder: ${truth}"
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
 
     local path="$1"
-    [[ -d "${truth}/${path}" ]] || error "No such folder: ${truth}/${path}"
+    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
@@ -153,12 +154,12 @@ function expected_file_rows {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${truth}"; wc -l ${path}) <(wc -l ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; wc -l ${path}) <(wc -l ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file rows ('${path}')"
     else
-        report_warn "unexpected file rows ('${truth}/${path}' != '${path}')"
+        report_warn "unexpected file rows ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -167,14 +168,14 @@ function expected_file_rows {
 function expected_file_content {
     local res;
 
-    [[ -d "${truth}" ]] || error "No such folder: ${truth}"
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
 
     local pathname="$1"
-    [[ -f "${truth}/${pathname}" ]] || error "No such file: ${truth}/${pathname}"
+    [[ -f "${LG3_TEST_TRUTH}/${pathname}" ]] || error "No such file: ${LG3_TEST_TRUTH}/${pathname}"
     [[ -f "${pathname}" ]] || { report_skip "No such file: ${pathname}"; return; }
     shift
 
-    res=$(diff -U 0 "${truth}/${pathname}" "${pathname}")
+    res=$(diff -U 0 "${LG3_TEST_TRUTH}/${pathname}" "${pathname}")
     if [ -z "${res}" ]; then
         report_ok "file content ('${path}')"
     else
@@ -195,13 +196,10 @@ done
 
 PATIENT=${1:-Patient157t}
 
-truth=/costellolab/data1/shared/LG3_Pipeline/example_data/truth
-truth=/costellolab/data1/shared/LG3_Pipeline/example_data/truth-devel
-
 title "Setup"
 report_ok "Project: ${PROJECT:?}"
 report_ok "Patient: ${PATIENT:?}"
-report_ok "Truth: ${truth:?}"
+report_ok "Truth: ${LG3_TEST_TRUTH:?}"
 echo
 
 if [ "$action" == "validate" ]; then
