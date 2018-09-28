@@ -177,9 +177,9 @@ function expected_file_content {
 
     res=$(diff -U 0 "${LG3_TEST_TRUTH}/${pathname}" "${pathname}")
     if [ -z "${res}" ]; then
-        report_ok "file content ('${path}')"
+        report_ok "file content ('${pathname}')"
     else
-        report_warn "unexpected file content ('${path}')"
+        report_warn "unexpected file content ('${pathname}')"
         echo "${res}"
     fi
 }
