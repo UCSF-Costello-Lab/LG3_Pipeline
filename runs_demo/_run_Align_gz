@@ -49,8 +49,8 @@ PBS=${LG3_HOME}/Align_fastq.pbs
 
 for PREFIX in ${SAMPLES}
 do
-  FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
-  FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
+  FASTQ1=${LG3_INPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
+  FASTQ2=${LG3_INPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
 
   ## Requires absolute path 
   FASTQ1=$(readlink -e "$FASTQ1")
