@@ -19,7 +19,7 @@
 ###  EMAIL={{EMAIL}}
 ###  LG3_OUTPUT_ROOT={{LG3_OUTPUT_ROOT}}
 ###
-### Version: 2018-09-19-9000
+### Version: 2018-09-27
 ### Source: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 
 LG3_DIR=$(dirname "$(readlink -e "$0")")

@@ -1,6 +1,6 @@
 # LG3_Pipeline
 
-## Version 2018-09-19-9000 (develop version)
+## Version 2018-09-27
 
 ### SIGNIFICANT CHANGES
 

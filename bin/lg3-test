@@ -213,20 +213,51 @@ if [ "$action" == "setup" ]; then
     else
         report_error "EMAIL: <not set>"
     fi
-    if [[ -n "${LG3_OUTPUT_ROOT}" ]]; then
+    if [[ -z "${LG3_HOME}" ]]; then
+        report_error "LG3_HOME: <not set>"
+    elif [[ -d "${LG3_HOME}" ]]; then
+        report_ok "LG3_HOME: ${LG3_HOME}"
+    else
+        report_error "LG3_HOME: ${LG3_HOME} (non-existing folder)"
+    fi
+    if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
+        report_error "LG3_OUTPUT_ROOT: <not set>"
+    elif [[ -d "${LG3_OUTPUT_ROOT}" ]]; then
         report_ok "LG3_OUTPUT_ROOT: ${LG3_OUTPUT_ROOT}"
     else
-        report_warn "LG3_OUTPUT_ROOT: <not set>"
+        report_error "LG3_OUTPUT_ROOT: ${LG3_OUTPUT_ROOT} (non-existing folder)"
     fi
-    if [[ -d "${LG3_OUTPUT_ROOT}" ]]; then
-        report_ok "Output folder: ${LG3_OUTPUT_ROOT}"
+    file=patient_ID_conversions.tsv
+    target=${LG3_HOME}/runs_demo/${file}
+    ln -fs "${target}" .
+    if [ -f "${file}" ]; then
+        report_ok "Patient TSV file: ${file}"
     else
-        report_error "Output folder is missing: ${LG3_OUTPUT_ROOT} (please create or link to existing)"
+        report_error "Patient TSV file: ${file} (failed to link to '${target}')"
     fi
-    ln -fs "${LG3_HOME}/runs_demo/patient_ID_conversions.tsv" .
-    ln -fs "${LG3_HOME}/runs_demo/"_run_* .
-    ln -fs "/costellolab/data1/shared/LG3_Pipeline/example_data/rawdata" .
-    report_ok "Linking to test files"
+    dir=rawdata
+    target=/costellolab/data1/shared/LG3_Pipeline/example_data/${dir}
+    ln -fs "${target}" .
+    if [ -d "${dir}" ]; then
+        report_ok "Raw data folder: ${dir}"
+    else
+        report_error "Raw data folder: ${dir} (failed to link to '${target}')"
+    fi
+    path=${LG3_HOME}/runs_demo
+    files=$(ls -1 "${path}"/_run_* 2> /dev/null)
+    if [ -z "${files}" ]; then
+        report_error "Run scripts: ${path}/_run_* (no such files)"
+    else
+        for file in ${files}; do
+	    target=${path}/${file}
+            ln -fs "${target}" .
+	    if [ -f "${file}" ]; then
+                report_ok "Run scripts: ${file}"
+	    else
+                report_error "Run scripts: ${file} (failed to link to '${target}')"
+	    fi
+        done
+    fi
     echo
 elif [ "$action" == "validate" ]; then
     title "Configuration"
