@@ -64,14 +64,24 @@ In both cases, there will be a local `./output/` folder that the LG3 pipeline ca
 The remaining parts of the test setup can be either be created automatically using `lg3 test setup` (the `lg3` command is in `${LG3_HOME}/bin`), or manually as one would do when analyzing other data than the test data.  To set up the test automatically, use:
 
 ```sh
-lg3 test setup
+$ lg3 test setup
 *** Setup
 [OK] Project: LG3
 [OK] Patient: Patient157t
 [OK] EMAIL: henrik.bengtsson@gmail.com
+[OK] LG3_HOME: /home/shared/cbc/software_cbc/LG3_Pipeline-devel
 [OK] LG3_OUTPUT_ROOT: output
-[OK] Output folder: output
-[OK] Linking to test files
+[OK] Patient TSV file: patient_ID_conversions.tsv
+[OK] Raw data folder: rawdata
+[OK] Run scripts: _run_Align_gz
+[OK] Run scripts: _run_Merge
+[OK] Run scripts: _run_Merge_QC
+[OK] Run scripts: _run_MutDet
+[OK] Run scripts: _run_Pindel
+[OK] Run scripts: _run_PostMut
+[OK] Run scripts: _run_Recal
+[OK] Run scripts: _run_Recal_pass2
+[OK] Run scripts: _run_Trim
 ```
 
 To set it up manually, we want to create a `rawdata/` folder where the pipeline looks for the raw input data.  As above, we can either create it and copy our files over or we can point a symbolic link to an existing folder elsewhere on the file system.  For the test example, we will use:

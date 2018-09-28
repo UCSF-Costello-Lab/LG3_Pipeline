@@ -244,12 +244,12 @@ if [ "$action" == "setup" ]; then
         report_error "Raw data folder: ${dir} (failed to link to '${target}')"
     fi
     path=${LG3_HOME}/runs_demo
-    files=$(ls -1 "${path}"/_run_* 2> /dev/null)
-    if [ -z "${files}" ]; then
+    targets=$(ls -1 "${path}"/_run_* 2> /dev/null)
+    if [ -z "${targets}" ]; then
         report_error "Run scripts: ${path}/_run_* (no such files)"
     else
-        for file in ${files}; do
-	    target=${path}/${file}
+        for target in ${targets}; do
+	    file=$(basename "${target}")
             ln -fs "${target}" .
 	    if [ -f "${file}" ]; then
                 report_ok "Run scripts: ${file}"
