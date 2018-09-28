@@ -102,6 +102,7 @@ $ tree
 export EMAIL=first.last@example.org     ## scheduler sent notifications here!
 export LG3_HOME=/path/to/LG3_Pipeline
 export LG3_OUTPUT_ROOT=output
+export PATH=${LG3_HOME}/bin:${PATH}     ## to use the 'lg3' command
 ```
 These can all be set in your global `~/.bashrc` script or equivalently.
 
@@ -114,7 +115,7 @@ then all you need to set is the `EMAIL` environment variable.
 
 _Oh, one more thing_:  We need to install the RColorBrewer packages in order for the `_run_PostMut` step to work, and we need it to be installed for the legacy version of R that is currently used by the pipeline.  To install this, do:
 
-```sh
+```r
 $ /opt/R/R-latest/bin/R   ## the version of R used by the pipeline!
 [...]
 > if (!require("RColorBrewer")) install.packages("RColorBrewer", repos = "http://cloud.r-project.org")
@@ -137,9 +138,91 @@ $ ./_run_PostMut                 ## ~5 minutes
 
 _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_MutDet`, which can be ran in parallel (as soon as `_run_Recal` has finished).
 
+Throughout all steps, you can check the current status using the `lg3 status` command.  Here is what the output looks like when all steps are complete:
+```sh
+$ lg3 status
+hecking output for project LG3
+Patient/samples table patient_ID_conversions.tsv
+BAM suffix bwa.realigned.rmDups.recal.insert_size_metrics
+Patients Patient157t
+****** Checking Patient157t Normal: Z00599t
+Fastq Z00599t  OK
+Fastq Z00600t  OK
+Fastq Z00601t  OK
+Trim Z00599t  OK
+Trim Z00600t  OK
+Trim Z00601t  OK
+BWA Z00599t  OK
+BWA Z00600t  OK
+BWA Z00601t  OK
+Recal Z00599t  OK
+Recal Z00600t  OK
+Recal Z00601t  OK
+UG  OK 7581
+Germline Z00600t  OK
+Germline Z00601t  OK
+Pindel  OK 3
+Mutect Z00600t  OK 29
+Mutect Z00601t  OK 54
+MutCombine  OK 16
+MAF  OK
+LOH plots  OK
+```
+
 Done!  All results are written to the `./output/` folder in different subdirectories.
 
+
 See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output looks like.  Particularly, the text file `./output/LG3/MutInDel/Patient157t.R.mutations` contain the identified multations.
+
+
+
+### Validate test results
+
+To validate that you get the expected results when running through the tests, call `lg3 test validate`.  Here is an example of the output when all steps are completed:
+
+```
+$ lg3 test validate
+*** Setup
+[OK] Project: LG3
+[OK] Patient: Patient157t
+[OK] Truth: /costellolab/data1/shared/LG3_Pipeline/example_data/truth
+
+*** Trimmed FASTQ files
+[OK] file tree ('output/Z00*t-trim')
+[OK] file sizes ('output/Z00*t-trim/*')
+
+*** BWA Aligned FASTQ files
+[OK] file tree ('output/LG3/exomes')
+[OK] file sizes ('output/LG3/exomes/Z00*t/*')
+
+*** Recalibrated BAM files
+[OK] file tree ('output/LG3/exomes_recal/Patient157t')
+[WARN] unexpected file sizes ('/costellolab/data1/shared/LG3_Pipeline/example_data/truth/output/LG3/exomes_recal/Patient157t/*' != 'output/LG3/exomes_recal/Patient157t/*')
+@@ -13 +13 @@
+-5.4K   output/LG3/exomes_recal/Patient157t/Z00599t.bwa.realigned.rmDups.recal.quality_distribution.pdf
++5.3K   output/LG3/exomes_recal/Patient157t/Z00599t.bwa.realigned.rmDups.recal.quality_distribution.pdf
+[OK] file sizes ('output/LG3/exomes_recal/Patient157t/germline/*')
+[OK] file sizes ('output/LG3/exomes_recal/Patient157t/*.bai')
+
+*** Pindel files
+[OK] file tree ('output/LG3/pindel')
+[OK] file rows ('output/LG3/pindel/Patient157t.pindel.cfg')
+[OK] file sizes ('output/LG3/pindel/Patient157t_pindel/*')
+
+*** MutDet files
+[OK] file tree ('output/LG3/mutations/Patient157t_mutect')
+[OK] file sizes ('output/LG3/mutations/Patient157t_mutect/*')
+
+*** Mutation files
+[OK] file tree ('output/LG3/MAF')
+[OK] file sizes ('output/LG3/MAF/Patient157t_MAF/*')
+[OK] file sizes ('output/LG3/MAF/Patient157t_plots/*')
+[OK] file tree ('output/LG3/MutInDel')
+[OK] file sizes ('output/LG3/MutInDel/*')
+[OK] file content ('output/LG3/MutInDel/Patient157t.R.mutations')
+```
+
+As you see, you might get some minor differences, which is due to these tests being slightly to strict.  If you get all `OK` for the content of 'output/LG3/MutInDel/Patient157t.R.mutations', which contains the set of identified mutations, then you reproduced the expected results.
 
 
 [LG3_Pipeline]: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
