@@ -108,13 +108,13 @@ if $FQ ; then
 fi
 
 if $TRIM ; then
-    WORKDIR=${LG3_OUTPUT_ROOT}
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/trim
     ## Cycle through samples and check trim-galore output
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
         OUT=${WORKDIR}/${ID}-trim/${ID}-trim_R1.fastq.gz
-        if [ -s "$OUT" ]; then
+        if [ -r "$OUT" ]; then
             echo -e "Trim $ID $OK"
         else
             echo -e "Trim $ID $ERR"
