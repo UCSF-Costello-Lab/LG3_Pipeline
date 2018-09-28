@@ -10,7 +10,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
     LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 else
-    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
+    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 fi    
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:-LG3}
