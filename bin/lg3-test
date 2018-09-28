@@ -205,6 +205,7 @@ echo
 if [ "$action" == "validate" ]; then
     title "Trimmed FASTQ files"
     path=output/${PROJECT}/trim
+    ## Backward compatibility
     if [ ! -d "${path}" ]; then path=output; fi
     if [ -d "${path}" ]; then
         expected_file_tree "${path}" 'Z00*t-trim'

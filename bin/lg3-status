@@ -109,6 +109,8 @@ fi
 
 if $TRIM ; then
     WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/trim
+    ## Backward compatibility
+    if [ ! -d "${WORKDIR}" ]; then WORKDIR=output; fi
     ## Cycle through samples and check trim-galore output
     while IFS=$'\t' read -r ID _ _ SAMP
     do
