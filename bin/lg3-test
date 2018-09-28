@@ -223,9 +223,9 @@ if [ "$action" == "setup" ]; then
     else
         report_error "Output folder is missing: ${LG3_OUTPUT_ROOT} (please create or link to existing)"
     fi
-    ln -fs ${LG3_HOME}/runs_demo/patient_ID_conversions.tsv .
-    ln -fs ${LG3_HOME}/runs_demo/_run_* .
-    ln -fs /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata .
+    ln -fs "${LG3_HOME}/runs_demo/patient_ID_conversions.tsv" .
+    ln -fs "${LG3_HOME}/runs_demo/"_run_* .
+    ln -fs "/costellolab/data1/shared/LG3_Pipeline/example_data/rawdata" .
     report_ok "Linking to test files"
     echo
 elif [ "$action" == "validate" ]; then
