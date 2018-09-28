@@ -15,7 +15,8 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+PROJECT=${PROJECT:-LG3}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 
@@ -25,7 +26,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -34,8 +35,8 @@ fi
 
 
 if [ ! -r "$FASTQ" ]; then
-	echo "ERROR: can't open $FASTQ"
-	exit 1
+  echo "ERROR: can't open $FASTQ"
+  exit 1
 fi
 
 FQC=/home/ismirnov/install/fastqc/FastQC_v0.11.5/fastqc
@@ -43,7 +44,7 @@ D=$(dirname "$FASTQ")
 B=$(basename "$FASTQ" .fastq.gz)
 LOC=$(basename "$FASTQ")
 
-SCRATCH="${SCRATCHDIR}/$B"
+SCRATCH="${LG3_SCRATCH_ROOT}/$B"
 mkdir -p "$SCRATCH"
 cd "$SCRATCH" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 cp "$FASTQ" .

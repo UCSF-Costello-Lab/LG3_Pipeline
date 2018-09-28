@@ -13,19 +13,16 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-
-## AD HOC: Make it possible to override DIROUT
-DIROUT=${DIROUT:-$(dirname "$FASTQ1")}
 
 ### Input
 echo "Input:"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
+echo "- PROJECT=${PROJECT:?}"
 echo "- PREFIX=${PREFIX:?}"
 echo "- QTY=${QTY:?}"
-echo "- DIROUT=${DIROUT}"
 echo "- TG=${TG}"
 
 ## Assert existance of input files
@@ -38,7 +35,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -61,9 +58,11 @@ echo "Using node(s): $NODES"
 SCRIPT=${LG3_HOME}/scripts/trim_galore.sh
 [[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
 
-mkdir -p "${DIROUT}" || { echo "Can't create destination directory ${DIROUT}"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}"; exit 1; }
+mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/trim" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}/trim"; exit 1; }
 
-WDIR=${SCRATCHDIR}/${PREFIX}-trim
+WDIR=${LG3_SCRATCH_ROOT}/${PREFIX}-trim
 echo "WDIR=${WDIR}"
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
@@ -90,12 +89,12 @@ mv "${PREFIX}_R2.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R2.trimming
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
 
-cp -r -p "${WDIR}" "${DIROUT}"
+cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
 
 echo "Removing directory (recursively): ${WDIR}"
 rm -rf "${WDIR}"
 
-ls -s "${DIROUT}/${PREFIX}-trim"
+ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim"
 
 echo "End of PBS script!"
 date

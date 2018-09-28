@@ -1,5 +1,5 @@
 #!/bin/bash
-### Usage: qsub -v SAMPLE=PatientXX,PROJ=LG3orGBM,CONV=patient_ID_conversions.txt /path/to/pindel_all.pbs
+### Usage: qsub -v SAMPLE=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.tsv /path/to/pindel_all.pbs
 #PBS -N ${SAMPLE}.pindel
 #PBS -e ${SAMPLE}.pindel.err
 #PBS -o ${SAMPLE}.pindel.out
@@ -17,7 +17,8 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+PROJECT=${PROJECT:-LG3}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 
@@ -28,7 +29,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -43,7 +44,7 @@ LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}") ## Absolute path
 ### Input
 echo "Input:"
 echo "- SAMPLE=${SAMPLE}"
-echo "- PROJ=${PROJ}"
+echo "- PROJECT=${PROJECT}"
 echo "- CONV=${CONV}"
 
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
@@ -53,7 +54,7 @@ CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
 echo "PINDEL"
 echo "Patient: ${SAMPLE}"
-echo "Project: ${PROJ}"
+echo "Project: ${PROJECT}"
 echo "Conversion File: ${CONV}"
 echo "----------------------------------"
 
@@ -83,24 +84,24 @@ echo "- TARGET=${TARGET:?}"
 [[ -f "$REF" ]]    || { echo "File not found: ${REF}"; exit 1; }
 [[ -f "$TARGET" ]] || { echo "File not found: ${TARGET}"; exit 1; }
 
-SCRATCH=${SCRATCHDIR}/${SAMPLE}_pindel
+SCRATCH=${LG3_SCRATCH_ROOT}/${SAMPLE}_pindel
 mkdir -p "${SCRATCH}" || { echo "Can't create destination directory ${SCRATCH}"; exit 1; }
 
-WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/pindel
+WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
 mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
 
 ## setup pindel cfg file
 date
-echo -e "\n========= [Setup] Make pindel cfg file in $WDIR"
+echo -e "\\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
-"${SCRIPT_A}" "${SAMPLE}" "${PROJ}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_A}" "${SAMPLE}" "${PROJECT}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
 cd "${SCRATCH}" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
 ## run pindel
-echo -e "\n========= [Pindel] Run pindel"
+echo -e "\\n========= [Pindel] Run pindel"
 $PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## move from scratch to project folder
@@ -109,11 +110,11 @@ cp -r "$SCRATCH" ./
 rm -rf "$SCRATCH"
 
 ## convert to vcf
-echo -e "\n========= [Pindel] Convert pindel to vcf"
+echo -e "\\n========= [Pindel] Convert pindel to vcf"
 $PINDEL2VCF -P "${SAMPLE}_pindel/${SAMPLE}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf" -G  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## convert to tdt
-echo -e "\n========= [Pindel] Convert vcf to tdt"
+echo -e "\\n========= [Pindel] Convert vcf to tdt"
 "${PYTHON_SCRIPT_A}" "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
@@ -121,14 +122,14 @@ cd "${SAMPLE}_pindel" || { echo "ERROR: Failed to set working directory to ${SAM
 mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
 
 ## filter pindel data
-echo -e "\n========= [Filter] Filter pindel output using target $TARGET"
-"${SCRIPT_B}" "${SAMPLE}.indels" "${PROJ}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"
+"${SCRIPT_B}" "${SAMPLE}.indels" "${PROJECT}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
-echo -e "\n========= [Annotate] Annotate indels and apply annotation-based filters"
-"${SCRIPT_C}" "${SAMPLE}.indels" "${PROJ}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+echo -e "\\n========= [Annotate] Annotate indels and apply annotation-based filters"
+"${SCRIPT_C}" "${SAMPLE}.indels" "${PROJECT}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
-echo -ne "\nEnd of script on "
+echo -ne "\\nEnd of script on "
 date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

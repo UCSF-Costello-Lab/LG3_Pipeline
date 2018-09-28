@@ -45,7 +45,7 @@ def runMAF(patient_ID, projectname, conversionfile):
 
 if __name__=="__main__":
   if len(sys.argv) != 4:
-    print 'usage: %s patient_ID project_name patient_ID_conversions.txt' %(sys.argv[0])
+    print 'usage: %s patient_ID project_name patient_ID_conversions.tsv' %(sys.argv[0])
     sys.exit(1)
 
   runMAF(sys.argv[1], sys.argv[2], sys.argv[3].strip())

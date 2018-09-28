@@ -15,7 +15,8 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 EMAIL=${EMAIL:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+PROJECT=${PROJECT:-LG3}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -24,7 +25,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -33,13 +34,13 @@ fi
 
 ### Input
 echo "Input:"
+echo "- PROJECT=${PROJECT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
-
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
 
@@ -61,28 +62,29 @@ SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
 SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
 [[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
 
+DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
 
-WDIR=${SCRATCHDIR}/${PATIENT}
+DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
+mkdir -p "${DESTDIR2}" || { echo "Can't create destination directory ${DESTDIR2}"; exit 1; }
+
+WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
 mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
 "${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST"
 
-cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
-DESTDIR=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}
-mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
-cp -p "${SCRATCHDIR}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
 
-echo "Cleaning ${SCRATCHDIR} ..."
-rm -rf "${SCRATCHDIR:?}/${PATIENT}"
+echo "Cleaning ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
-WDIR=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline
-mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
 
 "${SCRIPT_B}" \
-      "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
       "${PATIENT}" "$ILIST"
 
 echo -n "End of script! "

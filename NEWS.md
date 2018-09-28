@@ -1,24 +1,79 @@
 # LG3_Pipeline
 
+## Version 2018-09-28
+
+### SIGNIFICANT CHANGES
+
+ * Added `_run_Recal_pass2` for recalibrating merged BAM files.
+
+ * Now the default input folder for trimming and alignment is rawdata/.
+   It used to be an absolute path specific to the Costello lab storage.
+
+ * Chastity filtering (prior to alignment of FASTQ files) is now disabled by
+   default. To enable, set environment variable `LG3_CHASTITY_FILTERING=true`.
+
+ * The default output folder to which trimmed FASTQ files are written is now
+   defined by the `LG3_OUTPUT_ROOT` environment variable (default is output/)
+   rather than the folder of the raw FASTQ files.
+
+### NEW FEATURES
+
+ * Add bin/ folder with `lg3` command.  Currently, it implements `lg3 status`
+   and `lg3 test`.  `lg3 status` is used for checking of the output on the
+   different stages in the pipeline.  `lg3 test setup` is used to set up the
+   test example.  `lg3 test validate` is used to validate the results of the
+   test example toward a reference currently stored on the TIPCC file system.
+
+ * More scripts now takes environment variable `PROJECT` (defaults to `LG3`)
+   as an optional input to control the subfolder of the output data.
+ 
+ * If the optional _run_Recal_pass2 step is run, which occurs after
+   recalibration and merging, it will rename the existing exome_recal/$PATIENT/
+   subfolder to exome_recal/$PATIENT.before.merge/ such that the final output
+   is always in exome_recal/$PATIENT/ regardless of merging or not.
+
+ * Now using extension *.tsv for patient_ID_conversions.tsv (was *.txt) to
+   clarify that it is a tab-delimited file.
+
+### DOCUMENTATION
+
+ * README now include instructions on how to check the progress (`lg3 status`)
+   and the reproducibility of the test example (`lg3 test setup` and
+   `lg3 test validate`).
+   
+### SOFTWARE QUALITY:
+
+ * HARMONIZATION: Using `PROJECT` everywhere; previously `PROJ` was also used.
+
+### BUG FIXES
+
+ * _run_Align_gz failed to detect already processed samples (due to a typo).
+ 
+ * _run_Align_gz used the wrong default input folder - it looked for the
+   trimmed FASTQ files in rawdata/ rather than output/.
+
+ * Scratch folders were not job specific for most TIPCC users.
+
+
 ## Version 2018-09-19
 
 ### SIGNIFICANT CHANGES
 
- * Environment variable 'EMAIL' must now be set in order to run any of the
+ * Environment variable `EMAIL` must now be set in order to run any of the
    steps in the pipeline; if not set, an informative error is produced.  Set
    it to the email address where you wish the scheduler to send job reports,
    e.g. `export EMAIL=alice@example.org`.
 
- * Renamed the optional environment variable 'CHASTITY_FILTERING' to
-   'LG3_CHASTITY_FILTERING'.
+ * Renamed the optional environment variable `CHASTITY_FILTERING` to
+   `LG3_CHASTITY_FILTERING`.
 
 ### NEW FEATURES
 
  * Added run scripts `_run_Merge` and `_run_Merge_QC` for merging recalibrated,
    replicated BAM files that are for the same sample.
  
- * Environment variable 'LG3_INPUT_ROOT' is now optional.  If not specified,
-   it will be set to a sensible default depending on 'LG3_OUTPUT_ROOT'.
+ * Environment variable `LG3_INPUT_ROOT` is now optional.  If not specified,
+   it will be set to a sensible default depending on `LG3_OUTPUT_ROOT`.
 
  * In order to minimize the risk for clashes, now using user and job specific
    scratch folders - used to only be only user specific.
@@ -35,7 +90,7 @@
 ### BUG FIXES
 
  * Run script `_run_Pindel` assumed that resources/ folder was in the working
-   directory rather than in the 'LG3_HOME' directory.
+   directory rather than in the `LG3_HOME` directory.
 
  * A jobs that was allocated 12 cores by the scheduler would only run 2 cores,
    because the first digits was dropped due to a Bash typo.  This bug was
@@ -47,37 +102,37 @@
 ### SIGNIFICANT CHANGES
 
  * The pipeline can now be run by any user on the TIPCC compute cluster by
-   setting environment variables 'LG3_HOME', 'LG3_OUTPUT_ROOT', and
-   'LG3_INPUT_ROOT'. If not set, the default is to use the hardcoded folders
+   setting environment variables `LG3_HOME`, `LG3_OUTPUT_ROOT`, and
+   `LG3_INPUT_ROOT`. If not set, the default is to use the hardcoded folders
    used in previous versions of the pipeline.
 
 ### NEW FEATURES
 
  * The location of the LG3 Pipeline folder can now set via environment variable
-   'LG3_HOME', e.g. `export LG3_HOME=/path/to/LG3_Pipeline`.
+   `LG3_HOME`, e.g. `export LG3_HOME=/path/to/LG3_Pipeline`.
   
  * The location of where result files are written can be set via environment
-   variable 'LG3_OUTPUT_PATH'.  For example, to output to the folder `output/`
+   variable `LG3_OUTPUT_PATH`.  For example, to output to the folder `output/`
    in the current directory use `export LG3_OUTPUT_PATH=output`. The folder
    will be created, if missing.
   
  * The location of where output files from previous steps in the pipeline is
-   located can be set via environment variable 'LG3_INPUT_PATH', which should
-   typically be set to the same folder as 'LG3_OUTPUT_PATH', i.e.
+   located can be set via environment variable `LG3_INPUT_PATH`, which should
+   typically be set to the same folder as `LG3_OUTPUT_PATH`, i.e.
    `export LG3_INPUT_PATH=${LG3_OUTPUT_PATH}`. The folder will be created, if
    missing.
 
- * Environment variable 'EMAIL' can be used to set the email address to which
+ * Environment variable `EMAIL` can be used to set the email address to which
    the Torque/PBS scheduler will send email reports when the jobs finishes.
 
- * Chastity filtering prior to alignment of FASTQ files is now optional by
-   setting environment variable 'CHASTITY_FILTERING' (default is true).
+ * Chastity filtering (prior to alignment of FASTQ files) is now optional by
+   setting environment variable `CHASTITY_FILTERING` (default is true).
   
  * Generalized the `run_demo/_run_*` scripts to make it easier to reuse them
    for other samples.
 
  * Most scripts do now respect the number of cores assigned to it
-   ('PBS_NUM_PPN') by the Torque/PBS scheduler.  This makes it easier to
+   (`PBS_NUM_PPN`) by the Torque/PBS scheduler.  This makes it easier to
    increase the amount of parallelization used.  It also lowers the risk of
    using more cores by mistake than assigned.
 
@@ -98,8 +153,8 @@
 
 ### BUG FIXES
 
- * If 'PYTHONPATH' was set to include a non Python 2.6.6 version, then various
-   Python errors were produced.  Now 'PYTHONPATH' is unset everywhere before
+ * If `PYTHONPATH` was set to include a non Python 2.6.6 version, then various
+   Python errors were produced.  Now `PYTHONPATH` is unset everywhere before
    calling Python.
 
 

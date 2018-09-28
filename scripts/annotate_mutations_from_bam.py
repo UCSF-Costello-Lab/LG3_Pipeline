@@ -198,7 +198,7 @@ def getNormalCoverage(rnaFilename, contig, position, ref_allele, alt_allele, qua
 
 if __name__=="__main__":
   if len(sys.argv) != 5:
-    print 'usage: %s mutationfile.txt patient_ID_conversions.txt patient_ID projectname' %(sys.argv[0])
+    print 'usage: %s mutationfile.txt patient_ID_conversions.tsv patient_ID projectname' %(sys.argv[0])
     sys.exit(1)
 
   get_samples_from_patient(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4].strip())

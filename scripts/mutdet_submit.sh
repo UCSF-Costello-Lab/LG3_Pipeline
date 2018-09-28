@@ -11,7 +11,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -21,14 +21,14 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=$EMAIL"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
 fi
 
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="-d ${PWD:?}"
+QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
@@ -43,11 +43,11 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 ### Input
 patient=$1
 conv=$2
-project=$3
+PROJECT=$3
 echo "Input:"
 echo "- patient=${patient:?}"
 echo "- conv=${conv:?}"
-echo "- project=${project:?}"
+echo "- PROJECT=${PROJECT:?}"
 [[ -f "$conv" ]] || { echo "File not found: ${conv}"; exit 1; }
 
 if [ $# -ne 3 ]; then
@@ -69,7 +69,7 @@ echo "- INTERVAL=${INTERVAL:?}"
 PBS=${LG3_HOME}/MutDet_TvsN.pbs
 [[ -f "$PBS" ]] || { echo "File not found or not executable: ${PBS}"; exit 1; }
 
-WORKDIR=${LG3_OUTPUT_ROOT}/${project:?}/mutations/${patient}_mutect
+WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${patient}_mutect
 mkdir -p "${WORKDIR}" || { echo "Can't create scratch directory ${WORKDIR}"; exit 1; }
 
 XMX=Xmx8g
@@ -115,9 +115,8 @@ do
         if [ -s "$OUT" ]; then
                 echo "WARNING: file $OUT exists, skipping this job ... "
         else
-                echo "qsub ${QSUB_OPTS} -N ${patient}.mut -v ${QSUB_ENVVARS},PROJECT=${project},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL $PBS"
-		# shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "${patient}.mut" -v "${QSUB_ENVVARS},PROJECT=${project},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                # shellcheck disable=SC2086
+                qsub ${QSUB_OPTS} -N "${patient}.mut" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${patient}.temp.conversions.txt"

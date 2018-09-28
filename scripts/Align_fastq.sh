@@ -9,7 +9,7 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
@@ -19,7 +19,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -86,7 +86,7 @@ echo "- pu=${pu:?} (hard coded)"
 [[ -f "$fastq2" ]] || { echo "File not found: ${fastq2}"; exit 1; }
 
 
-TMP="${SCRATCHDIR}/$prefix/tmp"
+TMP="${LG3_SCRATCH_ROOT}/$prefix/tmp"
 mkdir -p "${TMP}" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
 
 echo "-------------------------------------------------"

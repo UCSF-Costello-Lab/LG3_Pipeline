@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.txt /path/to/pindel_all.pbs
+### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.tsv /path/to/pindel_all.pbs
 #PBS -N ${PATIENT}.comb
 #PBS -e ${PATIENT}.muts.err
 #PBS -o ${PATIENT}.muts.out
@@ -16,11 +16,11 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 PATIENT=${PATIENT:-Patient157}
-PROJ=${PROJ:-LG3}
-CONV=${CONV:-patient_ID_conversions.txt}
+CONV=${CONV:-patient_ID_conversions.tsv}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -34,12 +34,12 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- PATIENT=${PATIENT:?}"
-  echo "- PROJ=${PROJ:?}"
+  echo "- PROJECT=${PROJECT:?}"
   echo "- CONV=${CONV:?}"
 fi
 
@@ -56,7 +56,7 @@ echo -n "Mutation filtering & combining "
 date
 echo "Patient: ${PATIENT:?}"
 # shellcheck disable=SC2153
-echo "Project: ${PROJ:?}"
+echo "Project: ${PROJECT:?}"
 echo "Conversion file: ${CONV:?}"
 echo "----------------------------------"
 
@@ -83,43 +83,43 @@ SCRIPT_F=${LG3_HOME}/scripts/runLOH_ivan.sh
 [[ -x "$SCRIPT_F" ]] || { echo "File not found or not an executable: ${SCRIPT_F}"; exit 1; }
 
 
-WDIR=${LG3_OUTPUT_ROOT}/${PROJ}/MutInDel
+WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
 mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR [$PROG:$LINENO]: Failed to set working directory to ${WDIR}"; exit 1; }
 
-echo -e "\n************ Cat all SNV files per patient"
-"${SCRIPT_A}" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+echo -e "\\n************ Cat all SNV files per patient"
+"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -e "\n************ Annotate mutations from aligned bam files"
-"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJ}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+echo -e "\\n************ Annotate mutations from aligned bam files"
+"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJECT}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -e "\n************ Convert library IDs to patient IDs"
+echo -e "\\n************ Convert library IDs to patient IDs"
 "${SCRIPT_C}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -e "\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
+echo -e "\\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
 "${RSCRIPT_BIN}" "${RSCRIPT_A}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -e "\n************ Combine indels and snvs into one file"
-"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJ}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+echo -e "\\n************ Combine indels and snvs into one file"
+"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -e "\n************ Calculate mutation overlaps"
+echo -e "\\n************ Calculate mutation overlaps"
 "${SCRIPT_D}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -e "\n************ Annotate with shared coverage"
-"${SCRIPT_E}" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+echo -e "\\n************ Annotate with shared coverage"
+"${SCRIPT_E}" "${PATIENT}" "${PROJECT}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -e "\n************ Generate MAF files & LOH plots"
-"${SCRIPT_F}" "${PATIENT}" "${PROJ}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+echo -e "\\n************ Generate MAF files & LOH plots"
+"${SCRIPT_F}" "${PATIENT}" "${PROJECT}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
 OK "$LINENO"
 
-echo -ne "\n************ End of script "
+echo -ne "\\n************ End of script "
 date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

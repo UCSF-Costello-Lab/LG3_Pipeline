@@ -16,8 +16,9 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -26,7 +27,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -42,17 +43,17 @@ echo "- PREFIX=${PREFIX:?}"
 
 date
 
-WDIR=${SCRATCHDIR}/${PREFIX}
+WDIR=${LG3_SCRATCH_ROOT}/${PREFIX}
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 echo "Current working directory: ${PWD}"
 
 "${LG3_HOME}/scripts/Merge.sh" "$BAMS" "$PREFIX"
 
-cd "${SCRATCHDIR}" || { echo "ERROR: Failed to set working directory to ${SCRATCHDIR}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
-cp -a "${SCRATCHDIR}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${SCRATCHDIR}/${PREFIX}"; exit 1; }
-rm -rf "${SCRATCHDIR:?}/${PREFIX}"
+cp -a "${LG3_SCRATCH_ROOT}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${LG3_SCRATCH_ROOT}/${PREFIX}"; exit 1; }
+rm -rf "${LG3_SCRATCH_ROOT:?}/${PREFIX}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge"
 echo "End of script!"

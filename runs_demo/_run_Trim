@@ -11,11 +11,11 @@ if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
     LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
 else
     LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
-    DIROUT=${DIROUT:-${LG3_OUTPUT_ROOT}}
 fi    
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
+EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -26,14 +26,12 @@ echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
-echo "- DIROUT=${DIROUT}"     ## optional
 echo "- TG=${TG}"             ## optional
 echo "- SAMPLES=${SAMPLES:?}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-if [[ -n ${DIROUT} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},DIROUT=${DIROUT}"; fi
 if [[ -n ${TG} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},TG=${TG}"; fi
-QSUB_OPTS="-d ${PWD:?}"
+QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then
@@ -65,7 +63,7 @@ do
    else
       echo "Submitting $PREFIX: quality $QTY ..."
       # shellcheck disable=SC2086
-      qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY}" "$PBS"
+      qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY},PROJECT=${PROJECT}" "$PBS"
    fi
 done
 

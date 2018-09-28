@@ -20,8 +20,9 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+PROJECT=${PROJECT:?}
 EMAIL=${EMAIL:?}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -31,7 +32,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- SCRATCHDIR=$SCRATCHDIR"
+  echo "- PROJECT=${PROJECT}"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -50,7 +52,7 @@ echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 echo "- XMX=${XMX:?}"
 echo "- WORKDIR=${WORKDIR:?}"
-BAMDIR=${LG3_INPUT_ROOT}/LG3/exomes_recal
+BAMDIR=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 [[ -d "$BAMDIR" ]] || { echo "Folder not found: ${BAMDIR}"; exit 1; }
 [[ -f "$CONFIG" ]] || { echo "File not found: ${CONFIG}"; exit 1; }
 [[ -f "$INTERVAL" ]] || { echo "File not found: ${INTERVAL}"; exit 1; }
@@ -69,15 +71,11 @@ echo "*** Working directory: $WORKDIR"
 BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
 BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
 
-### For Recal2
-#BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam
-#BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.bam
-
 if [ ! -f "$BAMN" ] || [ ! -f "$BAMT" ]; then
-	echo "ERROR: BAM file(s) not found"
-	echo "Expected Normal: $BAMN"
-	echo "Expected Tumor: $BAMT"
-	exit 1
+  echo "ERROR: BAM file(s) not found"
+  echo "Expected Normal: $BAMN"
+  echo "Expected Tumor: $BAMT"
+  exit 1
 fi
 echo -n "Starting MutDet job on "
 date
@@ -91,13 +89,13 @@ echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
 
 "${SCRIPT}" \
-	"$BAMN" \
-	"$BAMT" \
-	"NOR-${NORMAL}__${TYPE}-${TUMOR}" \
-	"${PATIENT}" \
-	"${CONFIG}" \
-	"${INTERVAL}" \
-	"$XMX"
+  "$BAMN" \
+  "$BAMT" \
+  "NOR-${NORMAL}__${TYPE}-${TUMOR}" \
+  "${PATIENT}" \
+  "${CONFIG}" \
+  "${INTERVAL}" \
+  "$XMX"
 
 echo "End of PBS script!"
 date

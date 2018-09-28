@@ -3,14 +3,14 @@
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-SCRATCHDIR=${SCRATCHDIR:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "SCRATCHDIR=$SCRATCHDIR"
+  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
@@ -21,17 +21,17 @@ GRN='\033[0;32m'
 YEL='\033[0;33m'
 NOC='\033[0m'
 
-patient=$1
-conv=patient_ID_conversions.txt
-project=LG3
-WORKDIR=${LG3_OUTPUT_ROOT}/${project:?}/mutations/${patient}_mutect
-
-if [ $# -eq 0 ]; then
-        echo "ERROR: please specify patient!"
+if [ $# -lt 2 ]; then
+        echo "ERROR: please specify project and patient!"
         exit 1
 fi
 
-echo -e "Checking MuTect output for ${YEL}${patient}${NOC}, project ${project}"
+PROJECT=$1
+patient=$2
+conv=patient_ID_conversions.tsv
+WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${patient}_mutect
+
+echo -e "Checking MuTect output for ${YEL}${patient}${NOC}, project ${PROJECT}"
 echo "conversion ${conv}"
 
 ## Pull out patient specific conversion info
