@@ -2,7 +2,7 @@
 ### Check Status of Running LG3 Pipeline
 ###
 ### Usage:
-###  lg3-status [options] <patientX> <patientY> ...
+###  lg3 status [options] <patient> <patient2> ...
 ###
 ### Options:
 ###  -conv=<pathame>         The path to the tab-delimited patient file
@@ -15,6 +15,9 @@
 ###  -pindel=(true|false)    Check Pindel output
 ###  -mutect=(true|false)    Check MutDet output
 ###  -combined=(true|false)  Check mutation output
+###
+### Examples:
+###  lg3 status Patient157t
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
