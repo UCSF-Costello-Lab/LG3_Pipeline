@@ -61,7 +61,20 @@ $ ln -s /another/drive/lg3-test/output output
 ```
 In both cases, there will be a local `./output/` folder that the LG3 pipeline can write to.
 
-Next we want to create a `rawdata/` folder where the pipeline looks for the raw input data.  As above, we can either create it and copy our files over or we can point a symbolic link to an existing folder elsewhere on the file system.  For the test example, we will use:
+The remaining parts of the test setup can be either be created automatically using `lg3 test setup` (the `lg3` command is in `${LG3_HOME}/bin`), or manually as one would do when analyzing other data than the test data.  To set up the test automatically, use:
+
+```sh
+lg3 test setup
+*** Setup
+[OK] Project: LG3
+[OK] Patient: Patient157t
+[OK] EMAIL: henrik.bengtsson@gmail.com
+[OK] LG3_OUTPUT_ROOT: output
+[OK] Output folder: output
+[OK] Linking to test files
+```
+
+To set it up manually, we want to create a `rawdata/` folder where the pipeline looks for the raw input data.  As above, we can either create it and copy our files over or we can point a symbolic link to an existing folder elsewhere on the file system.  For the test example, we will use:
 ```sh
 $ ln -s /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata .
 ```

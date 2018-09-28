@@ -66,6 +66,12 @@ function report_warn {
     echo "] $*"
 }
 
+function report_error {
+    printf "["
+    printf_red "ERROR"
+    echo "] $*"
+}
+
 function report_skip {
     printf "["
     printf_yellow "SKIP"
@@ -87,7 +93,7 @@ function expected_file_tree {
     
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
-	path="${path}/${glob}"
+        path="${path}/${glob}"
     fi
 
     # shellcheck disable=SC2164
@@ -108,9 +114,9 @@ function expected_file_sizes {
 
     local unit=$1
     if [[ "${unit}" == "bytes" ]]; then
-	unit=-b
+        unit=-b
     elif [[ "${unit}" == "human" ]]; then
-	unit=-h
+        unit=-h
     fi
     shift
     
@@ -124,7 +130,7 @@ function expected_file_sizes {
     
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
-	path=${path}/${glob}
+        path=${path}/${glob}
     fi
 
     # shellcheck disable=SC2164,SC2086
@@ -150,7 +156,7 @@ function expected_file_rows {
 
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
-	path="${path}/${glob}"
+        path="${path}/${glob}"
     fi
 
     # shellcheck disable=SC2164,SC2086
@@ -188,6 +194,7 @@ function expected_file_content {
 #### Parse optional args
 while [ -n "$1" ]; do
     case $1 in
+        setup) action="$1"; shift;;
         validate) action="$1"; shift;;
         --*) error "Unknown option $1";;
         *)  break;;
@@ -196,13 +203,38 @@ done
 
 PATIENT=${1:-Patient157t}
 
-title "Setup"
-report_ok "Project: ${PROJECT:?}"
-report_ok "Patient: ${PATIENT:?}"
-report_ok "Truth: ${LG3_TEST_TRUTH:?}"
-echo
 
-if [ "$action" == "validate" ]; then
+if [ "$action" == "setup" ]; then
+    title "Setup"
+    report_ok "Project: ${PROJECT:?}"
+    report_ok "Patient: ${PATIENT:?}"
+    if [[ -n "${EMAIL}" ]]; then
+        report_ok "EMAIL: ${EMAIL}"
+    else
+        report_error "EMAIL: <not set>"
+    fi
+    if [[ -n "${LG3_OUTPUT_ROOT}" ]]; then
+        report_ok "LG3_OUTPUT_ROOT: ${LG3_OUTPUT_ROOT}"
+    else
+        report_warn "LG3_OUTPUT_ROOT: <not set>"
+    fi
+    if [[ -d "${LG3_OUTPUT_ROOT}" ]]; then
+        report_ok "Output folder: ${LG3_OUTPUT_ROOT}"
+    else
+        report_error "Output folder is missing: ${LG3_OUTPUT_ROOT} (please create or link to existing)"
+    fi
+    ln -fs ${LG3_HOME}/runs_demo/patient_ID_conversions.tsv .
+    ln -fs ${LG3_HOME}/runs_demo/_run_* .
+    ln -fs /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata .
+    report_ok "Linking to test files"
+    echo
+elif [ "$action" == "validate" ]; then
+    title "Configuration"
+    report_ok "Project: ${PROJECT:?}"
+    report_ok "Patient: ${PATIENT:?}"
+    report_ok "Truth: ${LG3_TEST_TRUTH:?}"
+    echo
+    
     title "Trimmed FASTQ files"
     path=output/${PROJECT}/trim
     ## Backward compatibility
@@ -211,7 +243,7 @@ if [ "$action" == "validate" ]; then
         expected_file_tree "${path}" 'Z00*t-trim'
         expected_file_sizes bytes "${path}" 'Z00*t-trim/*'
     else
-	report_skip "No such folder: ${path}"
+        report_skip "No such folder: ${path}"
     fi
     echo
     
@@ -221,7 +253,7 @@ if [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "Z00*t/*"
     else
-	report_skip "No such folder: ${path}"
+        report_skip "No such folder: ${path}"
     fi
     echo
 
@@ -233,7 +265,7 @@ if [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "germline/*"
         expected_file_sizes human "${path}" "*.bai"
     else
-	report_skip "No such folder: ${path}"
+        report_skip "No such folder: ${path}"
     fi
     echo
     
@@ -244,7 +276,7 @@ if [ "$action" == "validate" ]; then
         expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
         expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
     else
-	report_skip "No such folder: ${path}"
+        report_skip "No such folder: ${path}"
     fi
     echo
     
@@ -254,7 +286,7 @@ if [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
     else
-	report_skip "No such folder: ${path}"
+        report_skip "No such folder: ${path}"
     fi
     echo
 
@@ -265,7 +297,7 @@ if [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
         expected_file_sizes human "${path}" "${PATIENT}_plots/*"
     else
-	report_skip "No such folder: ${path}"
+        report_skip "No such folder: ${path}"
     fi
 
     path=output/${PROJECT}/MutInDel
@@ -274,7 +306,7 @@ if [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "*"
         expected_file_content "${path}/${PATIENT}.R.mutations"
     else
-	report_skip "No such folder: ${path}"
+        report_skip "No such folder: ${path}"
     fi
     echo
 fi
