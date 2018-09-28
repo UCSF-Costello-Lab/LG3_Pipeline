@@ -1,0 +1,279 @@
+#! /usr/bin/env bash
+### Run and Validate LG3 Pipeline Test Examples
+###
+### Usage:
+###  lg3 test <command> [options] <patient>
+###
+### Command:
+###   validate               Validate output of tests
+###
+### Examples:
+###  lg3 test validate
+###
+
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_TEST_TRUTH=${LG3_TEST_TRUTH:-/costellolab/data1/shared/LG3_Pipeline/example_data/truth-devel}
+PROJECT=${PROJECT:-LG3}
+CONV=${CONV:-patient_ID_conversions.tsv}
+
+## Enable extended globbing, e.g. for exluding
+## shopt -s extglob
+
+function mecho {
+    >&2 echo "$*"
+}
+
+function printf_red {
+    tput setaf 1 2> /dev/null ## red
+    # shellcheck disable=SC2059,SC2068
+    printf "${@}"
+    tput sgr0 2> /dev/null    ## reset
+}
+
+function printf_yellow {
+    tput setaf 3 2> /dev/null ## yellow
+    # shellcheck disable=SC2059,SC2068
+    printf "${@}"
+    tput sgr0 2> /dev/null    ## reset
+}
+
+function printf_green {
+    tput setaf 2 2> /dev/null ## green
+    # shellcheck disable=SC2059,SC2068
+    printf "${@}"
+    tput sgr0 2> /dev/null    ## reset
+}
+
+function error {
+    >&2 printf_red "ERROR: %s\\n" "$*"
+    exit 1
+}
+
+function title {
+    echo "*** $*"
+}
+
+function report_ok {
+    printf "["
+    printf_green "OK"
+    echo "] $*"
+}
+
+function report_warn {
+    printf "["
+    printf_yellow "WARN"
+    echo "] $*"
+}
+
+function report_skip {
+    printf "["
+    printf_yellow "SKIP"
+    echo "] $*"
+}
+
+function expected_file_tree {
+    local res;
+
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+
+    local path="$1"
+    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
+    shift
+
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    
+    local glob=$1  ## optional
+    if [[ -n "${glob}" ]]; then
+	path="${path}/${glob}"
+    fi
+
+    # shellcheck disable=SC2164
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; tree "${path}") <(tree "${path}"))
+        
+    if [ -z "${res}" ]; then
+        report_ok "file tree ('${path}')"
+    else
+        report_warn "unexpected file tree ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        echo "${res}" | tail -n +3
+    fi
+}
+
+function expected_file_sizes {
+    local res;
+
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+
+    local unit=$1
+    if [[ "${unit}" == "bytes" ]]; then
+	unit=-b
+    elif [[ "${unit}" == "human" ]]; then
+	unit=-h
+    fi
+    shift
+    
+    local path="$1"
+    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
+    shift
+
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    
+    local glob=$1  ## optional
+    if [[ -n "${glob}" ]]; then
+	path=${path}/${glob}
+    fi
+
+    # shellcheck disable=SC2164,SC2086
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; du --apparent-size --si ${unit} ${path}) <(du --apparent-size --si ${unit} ${path}))
+        
+    if [ -z "${res}" ]; then
+        report_ok "file sizes ('${path}')"
+    else
+        report_warn "unexpected file sizes ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        echo "${res}" | tail -n +3
+    fi
+}
+
+function expected_file_rows {
+    local res;
+
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+
+    local path="$1"
+    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
+    shift
+
+    local glob=$1  ## optional
+    if [[ -n "${glob}" ]]; then
+	path="${path}/${glob}"
+    fi
+
+    # shellcheck disable=SC2164,SC2086
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; wc -l ${path}) <(wc -l ${path}))
+        
+    if [ -z "${res}" ]; then
+        report_ok "file rows ('${path}')"
+    else
+        report_warn "unexpected file rows ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        echo "${res}" | tail -n +3
+    fi
+}
+
+
+function expected_file_content {
+    local res;
+
+    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+
+    local pathname="$1"
+    [[ -f "${LG3_TEST_TRUTH}/${pathname}" ]] || error "No such file: ${LG3_TEST_TRUTH}/${pathname}"
+    [[ -f "${pathname}" ]] || { report_skip "No such file: ${pathname}"; return; }
+    shift
+
+    res=$(diff -U 0 "${LG3_TEST_TRUTH}/${pathname}" "${pathname}")
+    if [ -z "${res}" ]; then
+        report_ok "file content ('${path}')"
+    else
+        report_warn "unexpected file content ('${path}')"
+        echo "${res}"
+    fi
+}
+
+
+#### Parse optional args
+while [ -n "$1" ]; do
+    case $1 in
+        validate) action="$1"; shift;;
+        --*) error "Unknown option $1";;
+        *)  break;;
+    esac
+done
+
+PATIENT=${1:-Patient157t}
+
+title "Setup"
+report_ok "Project: ${PROJECT:?}"
+report_ok "Patient: ${PATIENT:?}"
+report_ok "Truth: ${LG3_TEST_TRUTH:?}"
+echo
+
+if [ "$action" == "validate" ]; then
+    title "Trimmed FASTQ files"
+    path=output/${PROJECT}/trim
+    if [ ! -d "${path}" ]; then path=output; fi
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}" 'Z00*t-trim'
+        expected_file_sizes bytes "${path}" 'Z00*t-trim/*'
+    else
+	report_skip "No such folder: ${path}"
+    fi
+    echo
+    
+    title "BWA Aligned FASTQ files"
+    path=output/${PROJECT}/exomes
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "Z00*t/*"
+    else
+	report_skip "No such folder: ${path}"
+    fi
+    echo
+
+    title "Recalibrated BAM files"
+    path=output/${PROJECT}/exomes_recal/${PATIENT}
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "*"
+        expected_file_sizes human "${path}" "germline/*"
+        expected_file_sizes human "${path}" "*.bai"
+    else
+	report_skip "No such folder: ${path}"
+    fi
+    echo
+    
+    title "Pindel files"
+    path=output/${PROJECT}/pindel
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
+        expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
+    else
+	report_skip "No such folder: ${path}"
+    fi
+    echo
+    
+    title "MutDet files"
+    path=output/${PROJECT}/mutations/${PATIENT}_mutect
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "*"
+    else
+	report_skip "No such folder: ${path}"
+    fi
+    echo
+
+    title "Mutation files"
+    path=output/${PROJECT}/MAF
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
+        expected_file_sizes human "${path}" "${PATIENT}_plots/*"
+    else
+	report_skip "No such folder: ${path}"
+    fi
+
+    path=output/${PROJECT}/MutInDel
+    if [ -d "${path}" ]; then
+        expected_file_tree "${path}"
+        expected_file_sizes human "${path}" "*"
+        expected_file_content "${path}/${PATIENT}.R.mutations"
+    else
+	report_skip "No such folder: ${path}"
+    fi
+    echo
+fi

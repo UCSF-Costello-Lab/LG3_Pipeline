@@ -35,6 +35,8 @@ SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
 
 echo -n "Submitting jobs for $PATIENT "
 date
+
+export QSUB_OPTS
 "${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
