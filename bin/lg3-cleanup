@@ -18,7 +18,7 @@ PATIENT=${PATIENT:-Patient157t}
 SAMPLES="Z00599t Z00600t Z00601t"
 
 help() {
-	echo "Selectively delete pipeline output"
+	echo "Selectively delete LG3 pipeline output"
 	echo "Usage: ${PROG} -project=$PROJECT -patient=$PATIENT -samples=\"$SAMPLES\" -hot=$HOT [options]" 
 	echo -e "\\twhere options indicate what data to delete"
 	echo -e "\\t\\t-trim"
