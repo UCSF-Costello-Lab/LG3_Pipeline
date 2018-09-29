@@ -1,8 +1,8 @@
 #!/bin/bash
 ### Usage: qsub -v SAMPLE=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.tsv /path/to/pindel_all.pbs
 #PBS -N ${SAMPLE}.pindel
-#PBS -e ${SAMPLE}.pindel.err
-#PBS -o ${SAMPLE}.pindel.out
+#PBS -e _Pindel_${SAMPLE}.err
+#PBS -o _Pindel_${SAMPLE}.out
 #PBS -l nodes=1:ppn=6,vmem=12gb
 #PBS -m ae
 

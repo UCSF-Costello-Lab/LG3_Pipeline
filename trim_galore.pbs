@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -e _trim_${PREFIX}.err
-#PBS -o _trim_${PREFIX}.out
+#PBS -e _Trim_${PREFIX}.err
+#PBS -o _Trim_${PREFIX}.out
 #PBS -l nodes=1:ppn=1,vmem=4gb
 #PBS -m ae
 

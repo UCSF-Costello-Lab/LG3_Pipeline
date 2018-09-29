@@ -4,8 +4,8 @@
 ### Use Config: ${LG3_HOME}/FilterMutations/mutationConfig.cfg
 ### Use Interval: ${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list 
 ### Output files
-#PBS -e MutDet.${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.err
-#PBS -o MutDet.${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.out
+#PBS -e _MutDet_${TUMOR}.err
+#PBS -o _MutDet_${TUMOR}.out
 #PBS -N MutDet
 #PBS -l nodes=1:ppn=4,vmem=42g
 #PBS -m ae

@@ -2,8 +2,8 @@
 
 ### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal_pass2.pbs
 ### Output files
-#PBS -e _Rec2_${PATIENT}.err
-#PBS -o _Rec2_${PATIENT}.out
+#PBS -e _Recal2_${PATIENT}.err
+#PBS -o _Recal2_${PATIENT}.out
 #PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
 #PBS -m ae
 
