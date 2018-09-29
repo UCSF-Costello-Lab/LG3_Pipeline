@@ -1,6 +1,6 @@
 #!/bin/bash
 PROGRAM=${BASH_SOURCE[0]}
-PROG=$(basename $PROGRAM)
+PROG=$(basename "$PROGRAM")
 HOT=false
 
 TRIM=false
@@ -19,17 +19,17 @@ SAMPLES="Z00599t Z00600t Z00601t"
 
 help() {
 	echo "Selectively delete LG3 pipeline output"
-	echo "Usage: ${PROG} -project=$PROJECT -patient=$PATIENT -samples=\"$SAMPLES\" -hot=$HOT [options]" 
+	echo "Usage: ${PROG} --project=$PROJECT --patient=$PATIENT --samples=\"$SAMPLES\" --hot [options]" 
 	echo -e "\\twhere options indicate what data to delete"
-	echo -e "\\t\\t-trim"
-	echo -e "\\t\\t-align"
-	echo -e "\\t\\t-recal"
-	echo -e "\\t\\t-recal2"
-	echo -e "\\t\\t-mut"
-	echo -e "\\t\\t-pindel"
-	echo -e "\\t\\t-comb"
-	echo -e "\\t\\t-maf"
-	echo -e "\\t\\t-all\\tRemove all"
+	echo -e "\\t\\t--trim"
+	echo -e "\\t\\t--align"
+	echo -e "\\t\\t--recal"
+	echo -e "\\t\\t--recal2"
+	echo -e "\\t\\t--mut"
+	echo -e "\\t\\t--pindel"
+	echo -e "\\t\\t--comb"
+	echo -e "\\t\\t--maf"
+	echo -e "\\t\\t--all\\tRemove all"
 	exit 1
 }
 
@@ -39,16 +39,19 @@ fi
 
 while [ -n "$1" ]; do
 case $1 in
-    -hot) HOT=true;shift 1;;
-    -trim) TRIM=true;shift 1;;
-    -align) ALIGN=true;shift 1;;
-    -recal) RECAL=true;shift 1;;
-    -recal2) RECAL2=true;shift 1;;
-    -mut) MUT=true;shift 1;;
-    -pindel) PINDEL=true;shift 1;;
-    -comb) COMB=true;shift 1;;
-    -maf) MAF=true;shift 1;;
-    -all) ALL=true;shift 1;;
+	 --project=*) PROJECT=${1#*=};shift 1;;
+	 --patient=*) PATIENT=${1#*=};shift 1;;
+	 --samples=*) SAMPLES="${1#*=}";shift 1;;
+    --hot) HOT=true;shift 1;;
+    --trim) TRIM=true;shift 1;;
+    --align) ALIGN=true;shift 1;;
+    --recal) RECAL=true;shift 1;;
+    --recal2) RECAL2=true;shift 1;;
+    --mut) MUT=true;shift 1;;
+    --pindel) PINDEL=true;shift 1;;
+    --comb) COMB=true;shift 1;;
+    --maf) MAF=true;shift 1;;
+    --all) ALL=true;shift 1;;
     -*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -57,7 +60,7 @@ if $ALL ; then
 	TRIM=true
 	ALIGN=true
 	RECAL=true
-	RECAL2=true
+	#RECAL2=true
 	MUT=true
 	PINDEL=true
 	COMB=true
@@ -78,7 +81,7 @@ COMBDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
 MAFDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MAF
 
 if ! ${HOT} ; then
-	echo "WARNING: Dry run! Use -hot to actually delete data"	
+	echo "WARNING: Dry run! Use --hot to actually delete data"	
 fi
 
 if ${TRIM} ; then
