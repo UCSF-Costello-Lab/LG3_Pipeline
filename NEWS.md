@@ -3,6 +3,12 @@
 ## Version 2018-09-28-9000 (develop version)
 
  * ...
+
+BUG FIXES:
+
+ * The last run script, `_run_PostMut`, did not acknowledge the environment
+   variable `PROJECT` in one of its parts, where it instead used a hardcoded
+   `LG3` value.
  
 
 ## Version 2018-09-28
