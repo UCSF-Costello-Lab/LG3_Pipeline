@@ -84,7 +84,8 @@ function expected_file_tree {
     [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
 
     local path="$1"
-    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${truth_path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
@@ -94,15 +95,16 @@ function expected_file_tree {
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
         path="${path}/${glob}"
+        truth_path="${truth_path}/${glob}"
     fi
 
     # shellcheck disable=SC2164
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; tree "${path}") <(tree "${path}"))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; tree ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(tree ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file tree ('${path}')"
     else
-        report_warn "unexpected file tree ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        report_warn "unexpected file tree ('${LG3_TEST_TRUTH}/${truth_path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -121,7 +123,8 @@ function expected_file_sizes {
     shift
     
     local path="$1"
-    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${truth_path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
@@ -131,15 +134,17 @@ function expected_file_sizes {
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
         path=${path}/${glob}
+        truth_path="${truth_path}/${glob}"
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; du --apparent-size --si ${unit} ${path}) <(du --apparent-size --si ${unit} ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; du --apparent-size --si ${unit} ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(du --apparent-size --si ${unit} ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; du --apparent-size --si ${unit} ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(du --apparent-size --si ${unit} ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file sizes ('${path}')"
     else
-        report_warn "unexpected file sizes ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        report_warn "unexpected file sizes ('${LG3_TEST_TRUTH}/${truth_path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -150,22 +155,26 @@ function expected_file_rows {
     [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
 
     local path="$1"
-    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${truth_path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
         path="${path}/${glob}"
+        truth_path="${truth_path}/${glob}"
     fi
-
+    echo path=$path
+    echo truth_path=$truth_path
+    
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; wc -l ${path}) <(wc -l ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; wc -l ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(wc -l ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file rows ('${path}')"
     else
-        report_warn "unexpected file rows ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        report_warn "unexpected file rows ('${LG3_TEST_TRUTH}/${truth_path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -177,7 +186,8 @@ function expected_file_content {
     [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
 
     local pathname="$1"
-    [[ -f "${LG3_TEST_TRUTH}/${pathname}" ]] || error "No such file: ${LG3_TEST_TRUTH}/${pathname}"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${truth_path}"
     [[ -f "${pathname}" ]] || { report_skip "No such file: ${pathname}"; return; }
     shift
 
@@ -277,7 +287,6 @@ elif [ "$action" == "validate" ]; then
         report_skip "No such folder: ${path}"
     fi
     echo
-    
     title "BWA Aligned FASTQ files"
     path=output/${PROJECT}/exomes
     if [ -d "${path}" ]; then
