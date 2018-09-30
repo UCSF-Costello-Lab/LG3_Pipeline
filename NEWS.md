@@ -6,8 +6,10 @@
 
  * Now `lg3 test validate` also handles the new Patient157t10 data set.
 
- * ROBUSTNESS: Now `_run_Recal` and `Recal_bigmem.pbs` asserts that there
-   exists a (NORMAL, PATIENT, 'Normal') entry in the patient file (ILIST).
+ * ROBUSTNESS: Now `_run_Recal`,`_run_Recal_pass2`, and `Recal_bigmem.pbs`
+   asserts that there exists a (`NORMAL`, `PATIENT`, 'Normal') entry in the
+   patient file (`$ILIST`).  They also assert that `NORMAL` exists in the
+   specified set of `SAMPLES`.
 
 ### BUG FIXES
 
