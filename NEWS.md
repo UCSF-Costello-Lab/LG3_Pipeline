@@ -6,6 +6,9 @@
 
  * Now `lg3 test validate` also handles the new Patient157t10 data set.
 
+ * ROBUSTNESS: Now `_run_Recal` and `Recal_bigmem.pbs` asserts that there
+   exists a (NORMAL, PATIENT, 'Normal') entry in the patient file (ILIST).
+
 ### BUG FIXES
 
  * The last run script, `_run_PostMut`, did not acknowledge the environment
