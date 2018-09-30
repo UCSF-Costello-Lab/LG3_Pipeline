@@ -42,14 +42,6 @@ ILIST=$(readlink -e "$ILIST")
 ## Assert that NORMAL is one of the SAMPLES
 echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || { echo "ERROR: NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"; exit 1; }
 
-## Assert that (NORMAL, SAMPLE, 'Normal') exists in ILIST
-for SAMPLE in ${SAMPLES}; do
-    grep -q -P "^${SAMPLE}\\t[^\\t]+\\t${PATIENT}\\tNormal" "${ILIST}" || { echo "ERROR: No such (SAMPLE, PATIENT) = (${SAMPLE}, ${PATIENT}) entry in ILIST: ${ILIST}"; exit 1; }
-done
-
-## Assert that (NORMAL, PATIENT, 'Normal') exists in ILIST
-grep -q -P "^${NORMAL}\\t[^\\t]+\\t${PATIENT}\\tNormal" "${ILIST}" || { echo "ERROR: No such (NORMAL, PATIENT, 'Normal') = (${NORMAL}, ${PATIENT}, 'Normal') entry in ILIST: ${ILIST}"; exit 1; }
-
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"

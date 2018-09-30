@@ -44,8 +44,6 @@ echo "- ILIST=${ILIST:?}"
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
-## Assert that (NORMAL, PATIENT, 'Normal') exists in ILIST
-grep -q -P "^${NORMAL}\\t[^\\t]+\\t${PATIENT}\\tNormal" "${ILIST}" || { echo "ERROR: No such (NORMAL, PATIENT, 'Normal') = (${NORMAL}, ${PATIENT}, 'Normal') entry in ILIST: ${ILIST}"; exit 1; }
 
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output
