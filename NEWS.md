@@ -2,9 +2,11 @@
 
 ## Version 2018-09-28-9000 (develop version)
 
- * ...
+### NEW FEATURES
 
-BUG FIXES:
+ * Now `lg3 test validate` also handles the new Patient157t10 data set.
+
+### BUG FIXES
 
  * The last run script, `_run_PostMut`, did not acknowledge the environment
    variable `PROJECT` in one of its parts, where it instead used a hardcoded
