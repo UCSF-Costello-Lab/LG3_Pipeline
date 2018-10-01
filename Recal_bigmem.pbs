@@ -44,12 +44,8 @@ echo "- ILIST=${ILIST:?}"
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
-
-### Updated by Ivan
-### New location of recalibrated files and germline analysis output
-
-#module load CBC r/3.4.2
-Rscript --version
+echo -n "Checking R: "
+Rscript --version || {echo "No Rscript is available!", exit 1; }
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
