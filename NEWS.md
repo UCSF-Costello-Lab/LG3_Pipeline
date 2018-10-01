@@ -9,6 +9,9 @@
  * ROBUSTNESS: Now `_run_Recal` and `_run_Recal_pass2`, asserts that `NORMAL`
    is part of the specified `SAMPLES` set.
 
+ * Harmonized the names of the *.out and *.err log files produced by the
+   run scripts.
+
 ### BUG FIXES
 
  * The last run script, `_run_PostMut`, did not acknowledge the environment
