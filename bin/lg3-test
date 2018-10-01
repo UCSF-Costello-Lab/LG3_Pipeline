@@ -197,6 +197,17 @@ function expected_file_content {
     fi
 }
 
+function time_range_of_files {
+    ## At this point, file timestamps is *not* a sufficient estimate on how
+    ## long each step took at, because they don't reflect when each step *started*.
+    ## For that, we need to add an initial file when the step starts.
+    ## Skipping for now. /HB 2018-10-01
+    return
+    files=$(find "$*" -type f -exec stat --format '%Y :%y %n' "{}" \; | sort -n | cut -d ' ' -f 2-3 | sed -E 's/(^:|[.].*)//g')
+    first=$(echo "${files}" | head -1)
+    last=$(echo "${files}" | tail -1)
+    echo "     Time range of files: ${first} -- ${last}"
+}
 
 #### Parse optional args
 while [ -n "$1" ]; do
@@ -273,66 +284,72 @@ elif [ "$action" == "validate" ]; then
     report_ok "LG3_TEST_TRUTH=${LG3_TEST_TRUTH:?}"
     echo
     
-    title "Trimmed FASTQ files"
+    title "Trimming of FASTQ Files"
     path=output/${PROJECT}/trim
     ## Backward compatibility
     if [ ! -d "${path}" ]; then path=output; fi
     if [ -d "${path}" ]; then
         expected_file_tree "${path}" 'Z00*-trim'
         expected_file_sizes bytes "${path}" 'Z00*-trim/*'
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
-    title "BWA Aligned FASTQ files"
+    title "BWA Alignment of FASTQ Files"
     path=output/${PROJECT}/exomes
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "Z00*/*"
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
 
-    title "Recalibrated BAM files"
+    title "Recalibrattion of BAM Files"
     path=output/${PROJECT}/exomes_recal/${PATIENT}
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
         expected_file_sizes human "${path}" "germline/*"
         expected_file_sizes human "${path}" "*.bai"
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
     
-    title "Pindel files"
+    title "Pindel Processing"
     path=output/${PROJECT}/pindel
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
         expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
     
-    title "MutDet files"
+    title "MutDet Processing"
     path=output/${PROJECT}/mutations/${PATIENT}_mutect
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
 
-    title "Mutation files"
+    title "Post-MutDet Processing"
     path=output/${PROJECT}/MAF
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
         expected_file_sizes human "${path}" "${PATIENT}_plots/*"
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -342,6 +359,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
         expected_file_content "${path}/${PATIENT}.R.mutations"
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
