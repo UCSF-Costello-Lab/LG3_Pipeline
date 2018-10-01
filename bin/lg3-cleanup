@@ -23,6 +23,7 @@
 ###
 ### Examples:
 ###  lg3 cleanup --patient Patient157t
+###  lg3 cleanup --patient Patient157t --hot --trim
 ###
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")

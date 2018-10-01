@@ -10,9 +10,11 @@
 ### Examples:
 ###  lg3 --help
 ###  lg3 --version
-###  lg3 status
+###  lg3 status Patient157t
 ###  lg3 status --help
-###  lg3 test validate
+###  lg3 cleanup --help
+###  lg3 test setup
+###  lg3 test validate Patient157t
 ###
 ### Settings:
 ###  LG3_HOME={{LG3_HOME}}
