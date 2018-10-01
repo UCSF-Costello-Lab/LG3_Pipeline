@@ -1,4 +1,29 @@
-#!/bin/bash
+#! /usr/bin/env bash
+### Selectively Delete LG3 Pipeline Output"
+###
+### Usage:
+###  lg3 cleanup [options] (--hot [hot-options])
+###
+### Options:
+###  --project=<PROJECT>  Name of project (default: LG3)
+###  --patient=<PATIENT>  Name of patient (default: Patient157t)
+###  --samples="<SAMPLES" Space-separated set of samples (default: "Z00599t Z00600t Z00601t")
+###  --hot                Delete the files (otherwise only list)
+###
+### "Hot" options (following --hot):
+###  --trim    Remove trimmed FASTQ files
+###  --align   Remove aligned BAM files
+###  --recal   Remove recalibrated BAM files
+###  --recal2  Remove recalibrated Pass 2 BAM files 
+###  --mut     Remove MutDet files
+###  --pindel  Remove Pindel files
+###  --comb    Remove comb(?_ output
+###  --maf     Remove MAF files
+###  --all     Remove everything"
+###
+### Examples:
+###  lg3 cleanup --patient Patient157t
+###
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
 HOT=false
