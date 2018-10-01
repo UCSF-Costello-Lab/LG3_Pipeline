@@ -6,6 +6,9 @@
 
  * Now `lg3 test validate` also handles the new Patient157t10 data set.
 
+ * ROBUSTNESS: Now `_run_Recal` and `_run_Recal_pass2`, asserts that `NORMAL`
+   is part of the specified `SAMPLES` set.
+
 ### BUG FIXES
 
  * The last run script, `_run_PostMut`, did not acknowledge the environment

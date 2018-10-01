@@ -278,8 +278,8 @@ elif [ "$action" == "validate" ]; then
     ## Backward compatibility
     if [ ! -d "${path}" ]; then path=output; fi
     if [ -d "${path}" ]; then
-        expected_file_tree "${path}" 'Z00*t-trim'
-        expected_file_sizes bytes "${path}" 'Z00*t-trim/*'
+        expected_file_tree "${path}" 'Z00*-trim'
+        expected_file_sizes bytes "${path}" 'Z00*-trim/*'
     else
         report_skip "No such folder: ${path}"
     fi
@@ -288,7 +288,7 @@ elif [ "$action" == "validate" ]; then
     path=output/${PROJECT}/exomes
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
-        expected_file_sizes human "${path}" "Z00*t/*"
+        expected_file_sizes human "${path}" "Z00*/*"
     else
         report_skip "No such folder: ${path}"
     fi

@@ -37,6 +37,7 @@ echo "Input:"
 echo "- PROJECT=${PROJECT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- PATIENT=${PATIENT:?}"
+echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
