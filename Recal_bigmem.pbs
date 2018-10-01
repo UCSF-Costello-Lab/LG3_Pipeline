@@ -45,7 +45,7 @@ echo "- ILIST=${ILIST:?}"
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
 echo -n "Checking R: "
-Rscript --version || {echo "No Rscript is available!", exit 1; }
+Rscript --version || { echo "ERROR: No Rscript is available!", exit 1; }
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
