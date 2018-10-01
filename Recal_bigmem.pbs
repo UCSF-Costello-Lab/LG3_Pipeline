@@ -47,7 +47,7 @@ ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 ### Updated by Ivan
 ### New location of recalibrated files and germline analysis output
 
-module load CBC r/3.4.2
+#module load CBC r/3.4.2
 Rscript --version
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
@@ -83,9 +83,9 @@ rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
 cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
 
-"${SCRIPT_B}" \
+{ time "${SCRIPT_B}" \
       "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
-      "${PATIENT}" "$ILIST"
+      "${PATIENT}" "$ILIST"; } 2>&1
 
 echo -n "End of script! "
 date
