@@ -107,7 +107,7 @@ echo "------------------------------------------------------"
 ## Construct string with one or more '-I <bam>' elements
 inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 
-echo "[Recal] Merge BAM files..."
+echo -e "\\n[Recal] Merge BAM files..."
 # shellcheck disable=SC2086
 
 # Comment: Because how 'inputs' is created and used below
@@ -124,7 +124,7 @@ echo "[Recal] Merge BAM files..."
 echo "[Recal] Index new BAM file..."
 { time $SAMTOOLS index "${patientID}.merged.bam"; } 2>&1 || { echo "First indexing failed"; exit 1; }
 
-echo "[Recal] Create intervals for indel detection..."
+echo -e "\\n[Recal] Create intervals for indel detection..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
@@ -135,7 +135,7 @@ echo "[Recal] Create intervals for indel detection..."
         --input_file "${patientID}.merged.bam" \
         --out "${patientID}.merged.intervals"; } 2>&1 || { echo "Interval creation failed"; exit 1; }
 
-echo "[Recal] Indel realignment..."
+echo -e "\\n[Recal] Indel realignment..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type IndelRealigner \
@@ -151,7 +151,7 @@ rm -f "${patientID}.merged.bam"
 rm -f "${patientID}.merged.bam.bai"
 rm -f "${patientID}.merged.intervals"
 
-echo "[Recal] Fix mate information..."
+echo -e "\\n[Recal] Fix mate information..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_SCRIPT_B}" \
         INPUT="${patientID}.merged.realigned.bam" \
@@ -165,7 +165,7 @@ echo "[Recal] Fix mate information..."
 rm -f "${patientID}.merged.realigned.bam"
 rm -f "${patientID}.merged.realigned.bai"
 
-echo "[Recal] Mark duplicates..."
+echo -e "\\n[Recal] Mark duplicates..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_SCRIPT_C}" \
         INPUT="${patientID}.merged.realigned.mateFixed.bam" \
@@ -179,11 +179,11 @@ echo "[Recal] Mark duplicates..."
 
 rm -f "${patientID}.merged.realigned.mateFixed.bam"
 
-echo "[Recal] Index BAM file..."
+echo -e "\\n[Recal] Index BAM file..."
 { time $SAMTOOLS index "${patientID}.merged.realigned.rmDups.bam"; } 2>&1 || { echo "Second indexing failed"; exit 1; } 
 
 ### Job crushed at -Xmx8g, increase!
-echo "[Recal] Base-quality recalibration: Count covariates..."
+echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
 { time $JAVA -Xmx128g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type CountCovariates \
         --reference_sequence "$REF" \
@@ -199,7 +199,7 @@ echo "[Recal] Base-quality recalibration: Count covariates..."
         --input_file "${patientID}.merged.realigned.rmDups.bam" \
         --recal_file "${patientID}.merged.realigned.rmDups.csv"; } 2>&1 || { echo "CountCovariates failed"; exit 1; }
 
-echo "[Recal] Base-quality recalibration: Table Recalibration..."
+echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type TableRecalibration \
         --reference_sequence "$REF" \
@@ -213,10 +213,10 @@ rm -f "${patientID}.merged.realigned.rmDups.bam"
 rm -f "${patientID}.merged.realigned.rmDups.bam.bai"
 rm -f "${patientID}.merged.realigned.rmDups.csv"
 
-echo "[Recal] Index BAM file..."
+echo -e "\\n[Recal] Index BAM file..."
 { time $SAMTOOLS index "${patientID}.merged.realigned.rmDups.recal.bam"; } 2>&1 || { echo "Third indexing failed"; exit 1; } 
 
-echo "[Recal] Split BAM files..."
+echo -e "\\n[Recal] Split BAM files..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
@@ -232,7 +232,7 @@ for i in temp_*.bam
 do
         base=${i##temp_}
         base=${base%%.bam}
-        echo "[Recal] Splitting off $base..."
+        echo -e "\\n[Recal] Splitting off $base..."
         { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || { echo "Sorting $base failed"; exit 1; }
         { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || { echo "Indexing $base failed"; exit 1; }        
         rm -f "$i"
@@ -250,10 +250,10 @@ do
         base=${i%%.bwa.realigned.rmDups.recal.bam}
         echo "[QC] $base"
 
-        echo "[QC] Calculate flag statistics..."
+        echo -e "\\n[QC] Calculate flag statistics..."
         { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat"; } 2>&1
 
-        echo "[QC] Calculate hybrid selection metrics..."
+        echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_SCRIPT_D}" \
                 BAIT_INTERVALS="${ilist}" \
@@ -265,7 +265,7 @@ do
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Calculate hybrid selection metrics failed"; exit 1; }
 
-        echo "[QC] Collect multiple QC metrics..."
+        echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_SCRIPT_E}" \
                 INPUT="$i" \
@@ -278,7 +278,7 @@ do
         echo "------------------------------------------------------"
 done
 
-echo -n "[QC] Finished! "
+echo -ne "\\n[QC] Finished! "
 date
 echo "-------------------------------------------------"
 
