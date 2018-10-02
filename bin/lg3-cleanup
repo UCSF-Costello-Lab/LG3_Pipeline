@@ -40,13 +40,8 @@ MAF=false
 ALL=false
 
 PROJECT=${PROJECT:-LG3}
-<<<<<<< HEAD
 PATIENT=${PATIENT:-Patient157t}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
-=======
-PATIENT=${PATIENT}
-SAMPLES=${SAMPLES}
->>>>>>> b5142651fab052dc8786e0f7edbe0966d9f639e4
 
 help() {
 	echo "Selectively delete LG3 pipeline output"
