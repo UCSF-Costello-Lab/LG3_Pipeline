@@ -6,8 +6,8 @@
 ###
 ### Options:
 ###  --project=<PROJECT>  Name of project (default: LG3)
-###  --patient=<PATIENT>  Name of patient (default: Patient157t)
-###  --samples="<SAMPLES" Space-separated set of samples (default: "Z00599t Z00600t Z00601t")
+###  --patient=<PATIENT>  Name of patient
+###  --samples="<SAMPLES" Space-separated set of samples
 ###
 ###  --trim    Remove trimmed FASTQ files
 ###  --align   Remove aligned BAM files
@@ -19,11 +19,11 @@
 ###  --maf     Remove MAF files
 ###  --all     Remove everything
 ###
-###  --hot     Delete the files (otherwise only list)
+###  --hot     Delete the files (otherwise only a dry run)
 ###
 ### Examples:
-###  lg3 cleanup --patient=Patient157t
-###  lg3 cleanup --patient=Patient157t --trim --hot
+###  lg3 cleanup --patient=Patient157t --samples="Z00599t Z00600t Z00601t"
+###  lg3 cleanup --patient=Patient157t --recal --hot
 ###
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
@@ -40,8 +40,8 @@ MAF=false
 ALL=false
 
 PROJECT=${PROJECT:-LG3}
-PATIENT=${PATIENT:-Patient157t}
-SAMPLES="Z00599t Z00600t Z00601t"
+PATIENT=${PATIENT}
+SAMPLES=${SAMPLES}
 
 help() {
 	echo "Selectively delete LG3 pipeline output"
@@ -94,8 +94,8 @@ if $ALL ; then
 fi
 
 echo "Project = ${PROJECT}"
-echo "Patient = ${PATIENT}"
-echo "Samples = ${SAMPLES}"
+echo "Patient = ${PATIENT:?}"
+echo "Samples = ${SAMPLES:?}"
 
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 RAWDATA=/costellolab/data1/ismirnov/tmp
@@ -112,7 +112,7 @@ fi
 
 if ${TRIM} ; then
 	echo "========== Removing trimmed data ..."
-	for SAMPLE in ${SAMPLES}
+	for SAMPLE in ${SAMPLES:?}
 	do
 		echo -e "\\t${SAMPLE}"
 		D="${RAWDATA}/${SAMPLE}-trim"
@@ -124,7 +124,7 @@ fi
 
 if ${ALIGN} ; then
    echo "========== Removing aligned data ..."
-   for SAMPLE in ${SAMPLES}
+   for SAMPLE in ${SAMPLES:?}
    do
       echo -e "\\t${SAMPLE}"
 		D="${ALIGNDATA}/${SAMPLE}"
@@ -135,7 +135,7 @@ if ${ALIGN} ; then
 fi
 
 if ${RECAL} ; then
-   echo "========== Removing recal data for ${PATIENT} ..."
+   echo "========== Removing recal data for ${PATIENT:?} ..."
 	D="${RECALDATA}/${PATIENT}"
 	du -h "${D}" || { echo "STOP"; exit 1; }
    echo -e "\\trm -rf ${D}"
@@ -143,7 +143,7 @@ if ${RECAL} ; then
 fi
 
 if ${RECAL2} ; then
-   echo "========== Removing recal before.merge data for ${PATIENT} ..."
+   echo "========== Removing recal before.merge data for ${PATIENT:?} ..."
 	D="${RECALDATA}/${PATIENT}.before.merge"
 	du -h "${D}" || { echo "STOP"; exit 1; }
    echo -e "\\trm -rf ${D}"
@@ -151,7 +151,7 @@ if ${RECAL2} ; then
 fi
 
 if ${MUT} ; then
-   echo "========== Removing mutect data for ${PATIENT} ..."
+   echo "========== Removing mutect data for ${PATIENT:?} ..."
 	D="${MUTDATA}/${PATIENT}_mutect"
 	du -h "${D}" || { echo "STOP"; exit 1; }
    echo -e "\\trm -rf ${D}"
@@ -159,7 +159,7 @@ if ${MUT} ; then
 fi
 
 if ${PINDEL} ; then
-   echo "========== Removing pindel data for ${PATIENT} ..."
+   echo "========== Removing pindel data for ${PATIENT:?} ..."
 	D="${PINDELDATA}/${PATIENT}_pindel"
 	du -h "${D}" || { echo "STOP"; exit 1; }
    echo -e "\\trm -rf ${D}"
@@ -169,14 +169,14 @@ if ${PINDEL} ; then
 fi
 
 if ${COMB} ; then
-   echo "========== Removing combined data for ${PATIENT} ..."
+   echo "========== Removing combined data for ${PATIENT:?} ..."
    echo -e "\\trm -f ${COMBDATA}/${PATIENT}.[sR]*"
 	du -hc "${COMBDATA}/${PATIENT}."[sR]*
    ${HOT} && rm -rf "${D}"
 fi
 
 if ${MAF} ; then
-   echo "========== Removing MAF data for ${PATIENT} ..."
+   echo "========== Removing MAF data for ${PATIENT:?} ..."
 
 	D="${MAFDATA}/${PATIENT}_MAF"
 	du -h "${D}" || { echo "STOP"; exit 1; }
