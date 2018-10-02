@@ -28,7 +28,7 @@ CONV=${CONV:-patient_ID_conversions.tsv}
 #BAM_SUFF=bwa.realigned.rmDups.recal.bam
 BAM_SUFF=bwa.realigned.rmDups.recal.insert_size_metrics
 
-### Colors and colored messages
+## Colors and colored messages
 RED='\033[0;31m'
 GRN='\033[0;32m'
 YEL='\033[0;33m'
@@ -51,7 +51,7 @@ wcl() {
     #grep -v "^#" $1 | wc -l
 }
 
-#### Parse optional args
+## Parse optional args
 while [ -n "$1" ]; do
 case $1 in
     --conv*=*) CONV=${1#*=};shift 1;;

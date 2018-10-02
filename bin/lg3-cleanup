@@ -5,9 +5,9 @@
 ###  lg3 cleanup [options] (--hot)
 ###
 ### Options:
-###  --project=<PROJECT>  Name of project (default: LG3)
-###  --patient=<PATIENT>  Name of patient
-###  --samples="<SAMPLES" Space-separated set of samples
+###  --project=<PROJECT>   Name of project (default: LG3)
+###  --patient=<PATIENT>   Name of patient
+###  --samples="<SAMPLES>" Space-separated set of samples
 ###
 ###  --trim    Remove trimmed FASTQ files
 ###  --align   Remove aligned BAM files
