@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PROGRAM=${BASH_SOURCE[0]}
+PROG=$(basename "$PROGRAM")
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
@@ -15,7 +16,7 @@ ncores=${PBS_NUM_PPN:-1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+  echo "$PROG Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
