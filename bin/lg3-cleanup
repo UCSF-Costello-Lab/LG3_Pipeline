@@ -41,7 +41,7 @@ ALL=false
 
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t}
-SAMPLES="Z00599t Z00600t Z00601t"
+SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 
 help() {
 	echo "Selectively delete LG3 pipeline output"
