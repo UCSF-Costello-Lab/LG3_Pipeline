@@ -15,7 +15,7 @@
 ###  --recal2  Remove recalibrated Pass 2 BAM files 
 ###  --mut     Remove MutDet files
 ###  --pindel  Remove Pindel files
-###  --comb    Remove comb(?_ output
+###  --comb    Remove combo output
 ###  --maf     Remove MAF files
 ###  --all     Remove everything
 ###

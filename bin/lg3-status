@@ -6,24 +6,26 @@
 ###
 ### Options:
 ###  --conv=<pathame>         The path to the tab-delimited patient file
-###  --fastq=(true|false)     Check raw FASTQ files
-###  --trim=(true|false)      Check trimmed FASTQ files
-###  --bam=(true|false)       Check raw BAM files
-###  --bwa=(true|false)       Check aligned BAM files
-###  --recal=(true|false)     Check recalibrated output
-###  --germline=(true|false)  Check germline output
-###  --pindel=(true|false)    Check Pindel output
-###  --mutect=(true|false)    Check MutDet output
-###  --combined=(true|false)  Check mutation output
+###  --bam=(<string>)         raw BAM files suffix
+###  --fastq     Check raw FASTQ files
+###  --trim      Check trimmed FASTQ files
+###  --bwa       Check aligned BAM files
+###  --recal     Check recalibrated output
+###  --recal2    Check before merge recalibrated output
+###  --germline  Check germline output
+###  --mutect    Check MutDet output
+###  --pindel    Check Pindel output
+###  --combined  Check mutation output
+###  --all       Check all outputs
 ###
 ### Examples:
-###  lg3 status Patient157t
+###  lg3 status --all Patient157t
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
 PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
+CONV=${CONV:-${LG3_HOME}/patient_ID_conversions.tsv}
 
 #BAM_SUFF=bwa.realigned.rmDups.recal.bam
 BAM_SUFF=bwa.realigned.rmDups.recal.insert_size_metrics
@@ -37,18 +39,19 @@ OK="$GRN OK$NOC"
 ERR="$RED missing$NOC"
 SEP="$YEL******$NOC"
 
-FQ=true
-TRIM=true
-BWA=true
-REC=true
-GL=true
-PINDEL=true
-MUT=true
-COMB=true
+ALL=false
+FQ=false
+TRIM=false
+BWA=false
+REC=false
+REC2=false
+GL=false
+PINDEL=false
+MUT=false
+COMB=false
 
 wcl() {
     grep -vc "^#" "$1" 
-    #grep -v "^#" $1 | wc -l
 }
 
 ## Parse optional args
@@ -56,18 +59,33 @@ while [ -n "$1" ]; do
 case $1 in
     --conv*=*) CONV=${1#*=};shift 1;;
     --bam*=*) BAM_SUFF=${1#*=};shift 1;;
-    --tr*=*) TRIM=${1#*=};shift 1;;
-    --f*=*) FQ=${1#*=};shift 1;;
-    --bwa*=*) BWA=${1#*=};shift 1;;
-    --rec*=*) REC=${1#*=};shift 1;;
-    --g*=*) GL=${1#*=};shift 1;;
-    --p*=*) PINDEL=${1#*=};shift 1;;
-    --m*=*) MUT=${1#*=};shift 1;;
-    --comb*=*) COMB=${1#*=};shift 1;;
+	 --all) ALL=true;shift 1;;
+
+    --f*) FQ=true;shift 1;;
+    --trim) TRIM=true;shift 1;;
+    --bwa) BWA=true;shift 1;;
+    --recal) REC=true;shift 1;;
+    --recal2) REC2=true;shift 1;;
+    --g*) GL=true;shift 1;;
+    --p*) PINDEL=true;shift 1;;
+    --mut*) MUT=true;shift 1;;
+    --comb*) COMB=true;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
 done
+
+if $ALL ; then
+	FQ=true
+	TRIM=true
+	BWA=true
+	REC=true
+	#REC2=true
+	GL=true
+	PINDEL=true
+	MUT=true
+	COMB=true
+fi
 
 PATIENTS=${*:-Patient157t}
 
@@ -141,6 +159,21 @@ fi
 
 if $REC ; then
     WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+    ## Cycle through samples and check Recal output
+    while IFS=$'\t' read -r ID _ _ SAMP
+    do
+        ### Expected output
+        OUT=${WORKDIR}/${ID}.$BAM_SUFF
+        if [ -s "$OUT" ]; then
+            echo -e "Recal $ID $OK"
+        else
+            echo -e "Recal $ID $ERR"
+        fi
+    done < "${PATIENT}.temp.conversions.txt"
+fi
+
+if $REC2 ; then
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}.before.merge
     ## Cycle through samples and check Recal output
     while IFS=$'\t' read -r ID _ _ SAMP
     do
