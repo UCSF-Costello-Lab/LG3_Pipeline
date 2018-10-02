@@ -83,6 +83,6 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N Recal_$PATIENT -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+qsub ${QSUB_OPTS} -N Rec_$PATIENT -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
