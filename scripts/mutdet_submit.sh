@@ -116,7 +116,7 @@ do
                 echo "WARNING: file $OUT exists, skipping this job ... "
         else
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "${patient}.mut" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "Mut_${patient}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${patient}.temp.conversions.txt"

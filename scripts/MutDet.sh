@@ -134,7 +134,7 @@ echo "-------------------------------------------------"
 
 if [ ! -e "${prefix}.snvs.raw.mutect.txt" ]; then
         echo "[MutDet] Running muTect..."
-        $JAVA -"$XMX" -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA -"$XMX" -Djava.io.tmpdir="${TMP}" \
                 -jar "$MUTECT" \
                 --analysis_type MuTect \
                 --logging_level WARN \
@@ -144,7 +144,7 @@ if [ ! -e "${prefix}.snvs.raw.mutect.txt" ]; then
                 --input_file:tumor "$tbamfile" \
                 -baq CALCULATE_AS_NECESSARY \
                 --out "${prefix}.snvs.raw.mutect.txt" \
-                --coverage_file "${prefix}.snvs.coverage.mutect.wig" || { echo "muTect failed"; exit 1; }
+                --coverage_file "${prefix}.snvs.coverage.mutect.wig"; } 2>&1 || { echo "muTect failed"; exit 1; }
                 echo "Done"
 else
         echo "[MutDet] Found MuTect output, skipping ..."
@@ -154,7 +154,7 @@ wc -l "${prefix}.snvs.raw.mutect.txt"
 if [ ! -e "${prefix}.indels.raw.vcf" ]; then
         echo "[MutDet] Running Somatic Indel Detector..."
                 ##--window_size 225 \
-        $JAVA "-$XMX" -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA "-$XMX" -Djava.io.tmpdir="${TMP}" \
                 -jar "$GATK" \
                 --analysis_type SomaticIndelDetector \
                 -I:normal "$nbamfile" \
@@ -166,7 +166,7 @@ if [ ! -e "${prefix}.indels.raw.vcf" ]; then
                 --maxNumberOfReads 10000 \
                 --window_size 350 \
                 --filter_expressions "N_COV<8||T_COV<14||T_INDEL_F<0.1||T_INDEL_CF<0.7" \
-                --out "${prefix}.indels.raw.vcf" || { echo "Indel detection failed"; exit 1; }
+                --out "${prefix}.indels.raw.vcf"; } 2>&1 || { echo "Indel detection failed"; exit 1; }
                 echo "Done"
 else
         echo "[MutDet] Found Somatic Indel Detector output, skipping ..."
@@ -175,7 +175,7 @@ wc -l "${prefix}.indels.raw.vcf"
 
 if [ ! -e "${prefix}.indels.annotated.vcf" ]; then
         echo "[MutDet] Annotating raw indel calls..."
-        $JAVA "-$XMX" -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA "-$XMX" -Djava.io.tmpdir="${TMP}" \
                 -jar "$GATK" \
                 --analysis_type VariantAnnotator \
                 --variant "${prefix}.indels.raw.vcf" \
@@ -186,7 +186,7 @@ if [ ! -e "${prefix}.indels.annotated.vcf" ]; then
                 --reference_sequence "$REF" \
                 --dbsnp "$DBSNP" \
                 --group StandardAnnotation \
-                --out "${prefix}.indels.annotated.vcf" || { echo "Indel annotation failed"; exit 1; }
+                --out "${prefix}.indels.annotated.vcf"; } 2>&1 || { echo "Indel annotation failed"; exit 1; }
                 echo "Done"
 else
         echo "[MutDet] Found InDel Annotation output, skipping ..."
@@ -195,21 +195,21 @@ wc -l "${prefix}.indels.annotated.vcf"
 
 if [ ! -e "${prefix}.mutations" ]; then
         echo "[MutDet] Reordering indel vcf..."
-        $PYTHON "$REORDER" "${prefix}.indels.annotated.vcf" \
+        { time $PYTHON "$REORDER" "${prefix}.indels.annotated.vcf" \
                 "$tumorname" \
                 "$normalname" \
-                > "${prefix}.indels.annotated.temp.vcf" || { echo "Reordering failed"; exit 1; }
+                > "${prefix}.indels.annotated.temp.vcf"; } 2>&1 || { echo "Reordering failed"; exit 1; }
         echo "Done"
         wc -l "${prefix}.indels.annotated.temp.vcf"
 
         echo "[MutDet] Filtering mutect and indel output..."
         # shellcheck source=FilterMutations/filter.profile.sh
         source "${LG3_HOME}/FilterMutations/filter.profile.sh"
-        $FILTER \
+        { time $FILTER \
                 "$CONFIG" \
                 "${prefix}.snvs.raw.mutect.txt" \
                 "${prefix}.indels.annotated.temp.vcf" \
-                "${prefix}.mutations" || { echo "Filtering failed"; exit 1; }
+                "${prefix}.mutations"; } 2>&1 || { echo "Filtering failed"; exit 1; }
         echo "Done"
 
         rm -f "${prefix}.indels.annotated.temp.vcf"
@@ -229,13 +229,13 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
         echo "-------------------------------------------------"
 
         echo "[Annotate] Generate bed file from mutations..."
-        $PYTHON "${LG3_HOME}/scripts/annotation_BED_forUG.py" \
+        { time $PYTHON "${LG3_HOME}/scripts/annotation_BED_forUG.py" \
                 "${prefix}.mutations" \
-                > "${patientID}.${prefix}.temp.bed" || { echo "Bed file creation failed"; exit 1; }
+                > "${patientID}.${prefix}.temp.bed"; } 2>&1 || { echo "Bed file creation failed"; exit 1; }
         wc -l "${patientID}.${prefix}.temp.bed"
 
         echo "[Annotate] Generate Unified Genotyper data..."
-        $JAVA "-$XMX" \
+        { time $JAVA "-$XMX" \
                 -jar "$GATK" \
                 --analysis_type UnifiedGenotyper \
                 --genotype_likelihoods_model SNP \
@@ -252,13 +252,13 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 --standard_min_confidence_threshold_for_emitting 10.0 \
                 --min_base_quality_score 20 \
                 --output_mode EMIT_VARIANTS_ONLY \
-                --out "${patientID}.${prefix}.UG.snps.raw.vcf" || { echo "Unified Genotyper SNP calling failed"; exit 1; }
+                --out "${patientID}.${prefix}.UG.snps.raw.vcf"; } 2>&1 || { echo "Unified Genotyper SNP calling failed"; exit 1; }
 
         rm -f "${patientID}.${prefix}.temp.bed"
         wc -l "${patientID}.${prefix}.UG.snps.raw.vcf"
 
         echo "[Annotate] Annotating Unified Genotyper SNPs..."
-        $JAVA "-$XMX" \
+        { time $JAVA "-$XMX" \
                 -jar "$GATK" \
                 --analysis_type VariantAnnotator \
                 --input_file "$nbamfile" \
@@ -278,14 +278,14 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 --annotation HaplotypeScore \
                 --annotation ReadPosRankSumTest \
                 --annotation DepthOfCoverage \
-                --out "${patientID}.${prefix}.UG.snps.annotated.vcf" || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
+                --out "${patientID}.${prefix}.UG.snps.annotated.vcf"; } 2>&1 || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
 
         rm -f "${patientID}.${prefix}.UG.snps.raw.vcf"
         rm -f "${patientID}.${prefix}.UG.snps.raw.vcf.idx"
         wc -l "${patientID}.${prefix}.UG.snps.annotated.vcf"
 
         echo "[Annotate] Filtering Unified Genotyper SNPs..."
-        $JAVA "-$XMX" \
+        { time $JAVA "-$XMX" \
                 -jar "$GATK" \
                 --analysis_type VariantFiltration \
                 --reference_sequence "$REF" \
@@ -304,46 +304,46 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 --filterName MQRankSumFilter \
                 --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
-                --out "${patientID}.${prefix}.UG.snps.filtered.vcf" || { echo "Unified Genotyper SNP filtration failed"; exit 1; }
+                --out "${patientID}.${prefix}.UG.snps.filtered.vcf"; } 2>&1 || { echo "Unified Genotyper SNP filtration failed"; exit 1; }
 
         rm -f "${patientID}.${prefix}.UG.snps.annotated.vcf"
         rm -f "${patientID}.${prefix}.UG.snps.annotated.vcf.idx"
         wc -l "${patientID}.${prefix}.UG.snps.filtered.vcf"
 
         echo "[Annotate] Add Unified Genotyper data..."
-        $PYTHON "${LG3_HOME}/scripts/annotation_UG.py" \
+        { time $PYTHON "${LG3_HOME}/scripts/annotation_UG.py" \
                 "${prefix}.mutations" \
                 "${patientID}.${prefix}.UG.snps.filtered.vcf" \
-                > "${patientID}.${prefix}.temp1.mutations" || { echo "Unified Genotyper annotation failed"; exit 1; }
+                > "${patientID}.${prefix}.temp1.mutations"; } 2>&1 || { echo "Unified Genotyper annotation failed"; exit 1; }
         wc -l "${patientID}.${prefix}.temp1.mutations"
 
         rm -f "${patientID}.${prefix}.UG.snps.filtered.vcf"
         rm -f "${patientID}.${prefix}.UG.snps.filtered.vcf.idx"
 
         echo "[Annotate] Add COSMIC data..."
-        $PYTHON "${LG3_HOME}/scripts/annotation_COSMIC.py" \
+        { time $PYTHON "${LG3_HOME}/scripts/annotation_COSMIC.py" \
                 "${patientID}.${prefix}.temp1.mutations" \
                 "$COSMICDATA" \
-                > "${patientID}.${prefix}.temp2.mutations" || { echo "COSMIC annotation failed"; exit 1; }
+                > "${patientID}.${prefix}.temp2.mutations"; } 2>&1 || { echo "COSMIC annotation failed"; exit 1; }
         wc -l "${patientID}.${prefix}.temp2.mutations"
 
         rm -f "${patientID}.${prefix}.temp1.mutations"
 
         echo "[Annotate] Identify kinase genes..."
-        $PYTHON "${LG3_HOME}/scripts/annotation_KINASE.py" \
+        { time $PYTHON "${LG3_HOME}/scripts/annotation_KINASE.py" \
                 "${patientID}.${prefix}.temp2.mutations" \
                 "$KINASEDATA" \
-                > "${patientID}.${prefix}.temp3.mutations" || { echo "Kinase gene annotation failed"; exit 1; }
+                > "${patientID}.${prefix}.temp3.mutations"; } 2>&1 || { echo "Kinase gene annotation failed"; exit 1; }
         wc -l "${patientID}.${prefix}.temp3.mutations"
 
         rm -f "${patientID}.${prefix}.temp2.mutations"
 
         echo "[Annotate] Identify cancer genes..."
-        $PYTHON "${LG3_HOME}/scripts/annotation_CANCER.py" \
+        { time $PYTHON "${LG3_HOME}/scripts/annotation_CANCER.py" \
                 "${patientID}.${prefix}.temp3.mutations" \
                 "$CANCERDATA" \
                 "$CONVERT" \
-                > "${patientID}.${prefix}.annotated.mutations" || { echo "Cancer gene annotation failed"; exit 1; }
+                > "${patientID}.${prefix}.annotated.mutations"; } 2>&1 || { echo "Cancer gene annotation failed"; exit 1; }
         wc -l "${patientID}.${prefix}.annotated.mutations"
 
         rm -f "${patientID}.${prefix}.temp3.mutations"
