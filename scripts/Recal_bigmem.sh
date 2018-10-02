@@ -33,12 +33,6 @@ fi
 #
 #
 
-#Fix the path so the QC scripts can output pdfs
-#Both of these aren't necessary, but I'm leaving them here for future use
-# shellcheck source=.bashrc
-source "${LG3_HOME}/.bashrc"
-PATH=/opt/R/R-latest/bin:$PATH
-
 ## References
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 THOUSAND=${LG3_HOME}/resources/1000G_biallelic.indels.hg19.sorted.vcf
@@ -121,15 +115,16 @@ echo -e "\\n[Recal] Merge BAM files..."
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Merge BAM files failed"; exit 1; }
 
-echo "[Recal] Index new BAM file..."
+echo -e "\\n[Recal] Index new BAM file..."
 { time $SAMTOOLS index "${patientID}.merged.bam"; } 2>&1 || { echo "First indexing failed"; exit 1; }
 
 echo -e "\\n[Recal] Create intervals for indel detection..."
-{ time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
         --reference_sequence "$REF" \
         --known "$THOUSAND" \
+		  -L "${ilist}" \
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${patientID}.merged.bam" \
