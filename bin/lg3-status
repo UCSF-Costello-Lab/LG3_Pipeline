@@ -5,18 +5,18 @@
 ###  lg3 status [options] <patient> <patient2> ...
 ###
 ### Options:
-###  --conv=<pathame>         The path to the tab-delimited patient file
-###  --bam=(<string>)         raw BAM files suffix
-###  --fastq     Check raw FASTQ files
-###  --trim      Check trimmed FASTQ files
-###  --bwa       Check aligned BAM files
-###  --recal     Check recalibrated output
-###  --recal2    Check before merge recalibrated output
-###  --germline  Check germline output
-###  --mutect    Check MutDet output
-###  --pindel    Check Pindel output
-###  --combined  Check mutation output
-###  --all       Check all outputs
+###  --conv=<pathame>  The path to the tab-delimited patient file
+###  --bam=(<string>)  Raw BAM files suffix
+###  --fastq           Check raw FASTQ files
+###  --trim            Check trimmed FASTQ files
+###  --bwa             Check aligned BAM files
+###  --recal           Check recalibrated output
+###  --recal2          Check before merge recalibrated output
+###  --germline        Check germline output
+###  --mutect          Check MutDet output
+###  --pindel          Check Pindel output
+###  --combined        Check mutation output
+###  --all             Check all outputs
 ###
 ### Examples:
 ###  lg3 status --all Patient157t

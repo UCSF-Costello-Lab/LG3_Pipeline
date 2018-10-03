@@ -5,7 +5,8 @@
 ###  lg3 test <command> [options] <patient>
 ###
 ### Command:
-###   validate               Validate output of tests
+###   setup      Set up test in current folder
+###   validate   Validate output of tests
 ###
 ### Examples:
 ###  lg3 test setup
@@ -307,7 +308,7 @@ elif [ "$action" == "validate" ]; then
     fi
     echo
 
-    title "Recalibrattion of BAM Files"
+    title "Recalibration of BAM Files"
     path=output/${PROJECT}/exomes_recal/${PATIENT}
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"

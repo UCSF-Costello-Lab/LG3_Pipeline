@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-### Selectively Delete LG3 Pipeline Output"
+### Selectively Delete LG3 Pipeline Output
 ###
 ### Usage:
 ###  lg3 cleanup [options] (--hot)
@@ -9,17 +9,17 @@
 ###  --patient=<PATIENT>   Name of patient
 ###  --samples="<SAMPLES>" Space-separated set of samples
 ###
-###  --trim    Remove trimmed FASTQ files
-###  --align   Remove aligned BAM files
-###  --recal   Remove recalibrated BAM files
-###  --recal2  Remove recalibrated Pass 2 BAM files 
-###  --mut     Remove MutDet files
-###  --pindel  Remove Pindel files
-###  --comb    Remove combo output
-###  --maf     Remove MAF files
-###  --all     Remove everything
+###  --trim                Remove trimmed FASTQ files
+###  --align               aligned BAM files
+###  --recal               recalibrated BAM files
+###  --recal2              recalibrated Pass 2 BAM files 
+###  --mut                 MutDet files
+###  --pindel              Pindel files
+###  --comb                combo output
+###  --maf                 MAF files
+###  --all                 everything
 ###
-###  --hot     Delete the files (otherwise only a dry run)
+###  --hot                 Delete the files (otherwise only a dry run)
 ###
 ### Examples:
 ###  lg3 cleanup --patient=Patient157t --samples="Z00599t Z00600t Z00601t"
@@ -65,9 +65,9 @@ fi
 
 while [ -n "$1" ]; do
 case $1 in
-	 --project=*) PROJECT=${1#*=};shift 1;;
-	 --patient=*) PATIENT=${1#*=};shift 1;;
-	 --samples=*) SAMPLES="${1#*=}";shift 1;;
+    --project=*) PROJECT=${1#*=};shift 1;;
+    --patient=*) PATIENT=${1#*=};shift 1;;
+    --samples=*) SAMPLES="${1#*=}";shift 1;;
     --hot) HOT=true;shift 1;;
     --trim) TRIM=true;shift 1;;
     --align) ALIGN=true;shift 1;;
