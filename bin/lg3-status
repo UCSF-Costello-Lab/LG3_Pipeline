@@ -188,7 +188,8 @@ if $REC2 ; then
 fi
 
 if $GL ; then
-    OUT=${WORKDIR}/germline/${PATIENT}.UG.snps.vcf
+	 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
+    OUT=${WORKDIR}/${PATIENT}.UG.snps.vcf
     if [ -s "$OUT" ]; then
         LCNT=$(wcl "$OUT")
         echo -e "UG $OK ${YEL}${LCNT}${NOC}"
@@ -202,7 +203,7 @@ if $GL ; then
         if [ "$ID" == "$normid" ]; then continue; fi
 
         ### Expected output
-        OUT=${WORKDIR}/germline/NOR-${normid}_vs_${ID}.germline
+        OUT=${WORKDIR}/NOR-${normid}_vs_${ID}.germline
         if [ -s "$OUT" ]; then
             echo -e "Germline $ID $OK"
         else
