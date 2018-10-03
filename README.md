@@ -46,8 +46,8 @@ export LG3_HOME=/path/to/LG3_Pipeline
 
 To run through the built-in "small" test example (20-25 hours), let's create a separate project folder:
 ```sh
-$ mkdir -p /path/to/lg3-test
-$ cd /path/to/lg3-test
+$ mkdir -p /path/to/lg3-ex
+$ cd /path/to/lg3-ex
 ```
 
 The first thing we want to do is to create an `output/` folder.  If we want it in the same location, we do:
@@ -56,8 +56,8 @@ $ mkdir output   ## folder where the output files will be saved
 ```
 If we want it to be on a separate drive, we can create it there and then using a symbol link, e.g.
 ```sh
-$ mkdir -p /another/drive/lg3-test/output
-$ ln -s /another/drive/lg3-test/output output
+$ mkdir -p /another/drive/lg3-ex/output
+$ ln -s /another/drive/lg3-ex/output output
 ```
 In both cases, there will be a local `./output/` folder that the LG3 pipeline can write to.
 
@@ -103,7 +103,7 @@ From the above, we should have a directory containing the following files and fo
 ```sh
 $ tree
 .
-├── output -> /another/drive/lg3-test/output
+├── output -> /another/drive/lg3-ex/output
 ├── patient_ID_conversions.tsv
 ├── rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
 ├── _run_Align_gz
@@ -151,7 +151,7 @@ $
 Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
-$ cd /path/to/lg3-test
+$ cd /path/to/lg3-ex
 $ ./_run_Trim                    ## ~20 minutes
 $ ./_run_Align_gz                ## ~1 hour
 $ ./_run_Recal                   ## ~13-15 hours
@@ -163,7 +163,7 @@ _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_Mut
 
 Throughout all steps, you can check the current status using the `lg3 status` command.  Here is what the output looks like when all steps are complete:
 ```sh
-$ lg3 status
+$ lg3 status --all Patient157t
 hecking output for project LG3
 Patient/samples table patient_ID_conversions.tsv
 BAM suffix bwa.realigned.rmDups.recal.insert_size_metrics
@@ -204,21 +204,21 @@ See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output l
 To validate that you get the expected results when running through the tests, call `lg3 test validate`.  Here is an example of the output when all steps are completed:
 
 ```
-$ lg3 test validate
+$ lg3 test validate Patient157t
 *** Setup
 [OK] Project: LG3
 [OK] Patient: Patient157t
-[OK] Truth: /costellolab/data1/shared/LG3_Pipeline/example_data/truth
+[OK] Truth: /costellolab/data1/shared/LG3_Pipeline/example_data
 
-*** Trimmed FASTQ files
+*** Trimming of FASTQ Files
 [OK] file tree ('output/Z00*t-trim')
 [OK] file sizes ('output/Z00*t-trim/*')
 
-*** BWA Aligned FASTQ files
+*** BWA Alignment of FASTQ Files
 [OK] file tree ('output/LG3/exomes')
 [OK] file sizes ('output/LG3/exomes/Z00*t/*')
 
-*** Recalibrated BAM files
+*** Recalibration of BAM Files
 [OK] file tree ('output/LG3/exomes_recal/Patient157t')
 [WARN] unexpected file sizes ('/costellolab/data1/shared/LG3_Pipeline/example_data/truth/output/LG3/exomes_recal/Patient157t/*' != 'output/LG3/exomes_recal/Patient157t/*')
 @@ -13 +13 @@
@@ -227,16 +227,16 @@ $ lg3 test validate
 [OK] file sizes ('output/LG3/exomes_recal/Patient157t/germline/*')
 [OK] file sizes ('output/LG3/exomes_recal/Patient157t/*.bai')
 
-*** Pindel files
+*** Pindel Processing
 [OK] file tree ('output/LG3/pindel')
 [OK] file rows ('output/LG3/pindel/Patient157t.pindel.cfg')
 [OK] file sizes ('output/LG3/pindel/Patient157t_pindel/*')
 
-*** MutDet files
+*** MutDet Processing
 [OK] file tree ('output/LG3/mutations/Patient157t_mutect')
 [OK] file sizes ('output/LG3/mutations/Patient157t_mutect/*')
 
-*** Mutation files
+*** Post-MutDet Processing
 [OK] file tree ('output/LG3/MAF')
 [OK] file sizes ('output/LG3/MAF/Patient157t_MAF/*')
 [OK] file sizes ('output/LG3/MAF/Patient157t_plots/*')

@@ -2,15 +2,22 @@
 
 ## Version 2018-09-28-9000 (develop version)
 
+### SIGNIFICANT CHANGES
+
+ * ...
+ 
+
 ### NEW FEATURES
 
- * Now `lg3 test validate` also handles the new Patient157t10 data set.
+ * Now `lg3 test validate` supports also the new Patient157t10 data set.
 
  * ROBUSTNESS: Now `_run_Recal` and `_run_Recal_pass2`, asserts that `NORMAL`
    is part of the specified `SAMPLES` set.
 
  * Harmonized the names of the *.out and *.err log files produced by the
    run scripts.
+
+ * `lg3 status` now uses boolean flags instead of options with boolean values.
 
 ### BUG FIXES
 

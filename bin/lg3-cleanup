@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-### Selectively Delete LG3 Pipeline Output"
+### Selectively Delete LG3 Pipeline Output
 ###
 ### Usage:
 ###  lg3 cleanup [options] (--hot)
@@ -9,17 +9,17 @@
 ###  --patient=<PATIENT>   Name of patient
 ###  --samples="<SAMPLES>" Space-separated set of samples
 ###
-###  --trim    Remove trimmed FASTQ files
-###  --align   Remove aligned BAM files
-###  --recal   Remove recalibrated BAM files
-###  --recal2  Remove recalibrated Pass 2 BAM files 
-###  --mut     Remove MutDet files
-###  --pindel  Remove Pindel files
-###  --comb    Remove combo output
-###  --maf     Remove MAF files
-###  --all     Remove everything
+###  --trim                Remove trimmed FASTQ files
+###  --align               aligned BAM files
+###  --recal               recalibrated BAM files
+###  --recal2              recalibrated Pass 2 BAM files 
+###  --mut                 MutDet files
+###  --pindel              Pindel files
+###  --comb                combo output
+###  --maf                 MAF files
+###  --all                 everything
 ###
-###  --hot     Delete the files (otherwise only a dry run)
+###  --hot                 Delete the files (otherwise only a dry run)
 ###
 ### Examples:
 ###  lg3 cleanup --patient=Patient157t --samples="Z00599t Z00600t Z00601t"
@@ -44,30 +44,30 @@ PATIENT=${PATIENT:-Patient157t}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 
 help() {
-	echo "Selectively delete LG3 pipeline output"
-	echo "Usage: ${PROG} --project=$PROJECT --patient=$PATIENT --samples=\"$SAMPLES\" --hot [options]" 
-	echo -e "\\twhere options indicate what data to delete"
-	echo -e "\\t\\t--trim"
-	echo -e "\\t\\t--align"
-	echo -e "\\t\\t--recal"
-	echo -e "\\t\\t--recal2"
-	echo -e "\\t\\t--mut"
-	echo -e "\\t\\t--pindel"
-	echo -e "\\t\\t--comb"
-	echo -e "\\t\\t--maf"
-	echo -e "\\t\\t--all\\tRemove all"
-	exit 1
+    echo "Selectively delete LG3 pipeline output"
+    echo "Usage: ${PROG} --project=$PROJECT --patient=$PATIENT --samples=\"$SAMPLES\" --hot [options]" 
+    echo -e "\\twhere options indicate what data to delete"
+    echo -e "\\t\\t--trim"
+    echo -e "\\t\\t--align"
+    echo -e "\\t\\t--recal"
+    echo -e "\\t\\t--recal2"
+    echo -e "\\t\\t--mut"
+    echo -e "\\t\\t--pindel"
+    echo -e "\\t\\t--comb"
+    echo -e "\\t\\t--maf"
+    echo -e "\\t\\t--all\\tRemove all"
+    exit 1
 }
 
 if [ $# -eq 0 ]; then
-	help
+    help
 fi
 
 while [ -n "$1" ]; do
 case $1 in
-	 --project=*) PROJECT=${1#*=};shift 1;;
-	 --patient=*) PATIENT=${1#*=};shift 1;;
-	 --samples=*) SAMPLES="${1#*=}";shift 1;;
+    --project=*) PROJECT=${1#*=};shift 1;;
+    --patient=*) PATIENT=${1#*=};shift 1;;
+    --samples=*) SAMPLES="${1#*=}";shift 1;;
     --hot) HOT=true;shift 1;;
     --trim) TRIM=true;shift 1;;
     --align) ALIGN=true;shift 1;;
@@ -83,14 +83,14 @@ case $1 in
 esac
 done
 if $ALL ; then
-	TRIM=true
-	ALIGN=true
-	RECAL=true
-	#RECAL2=true
-	MUT=true
-	PINDEL=true
-	COMB=true
-	MAF=true	
+    TRIM=true
+    ALIGN=true
+    RECAL=true
+    #RECAL2=true
+    MUT=true
+    PINDEL=true
+    COMB=true
+    MAF=true
 fi
 
 echo "Project = ${PROJECT}"
@@ -107,19 +107,19 @@ COMBDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
 MAFDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MAF
 
 if ! ${HOT} ; then
-	echo "WARNING: Dry run! Use --hot to actually delete data"	
+    echo "WARNING: Dry run! Use --hot to actually delete data"    
 fi
 
 if ${TRIM} ; then
-	echo "========== Removing trimmed data ..."
-	for SAMPLE in ${SAMPLES:?}
-	do
-		echo -e "\\t${SAMPLE}"
-		D="${RAWDATA}/${SAMPLE}-trim"
-		du -h "${D}" || { echo "STOP"; exit 1; }
-		echo -e "\\trm -rf ${D}"
-		${HOT} && rm -rf "${D}" 
-	done	
+    echo "========== Removing trimmed data ..."
+    for SAMPLE in ${SAMPLES:?}
+    do
+        echo -e "\\t${SAMPLE}"
+        D="${RAWDATA}/${SAMPLE}-trim"
+        du -h "${D}" || { echo "STOP"; exit 1; }
+        echo -e "\\trm -rf ${D}"
+        ${HOT} && rm -rf "${D}" 
+    done
 fi
 
 if ${ALIGN} ; then
@@ -127,66 +127,66 @@ if ${ALIGN} ; then
    for SAMPLE in ${SAMPLES:?}
    do
       echo -e "\\t${SAMPLE}"
-		D="${ALIGNDATA}/${SAMPLE}"
-		du -h "${D}" || { echo "STOP"; exit 1; }
+      D="${ALIGNDATA}/${SAMPLE}"
+      du -h "${D}" || { echo "STOP"; exit 1; }
       echo -e "\\trm -rf ${D}"
-		${HOT} && rm -rf "${D}" 
+      ${HOT} && rm -rf "${D}" 
    done
 fi
 
 if ${RECAL} ; then
-   echo "========== Removing recal data for ${PATIENT:?} ..."
-	D="${RECALDATA}/${PATIENT}"
-	du -h "${D}" || { echo "STOP"; exit 1; }
-   echo -e "\\trm -rf ${D}"
-	${HOT} && rm -rf "${D}"
+    echo "========== Removing recal data for ${PATIENT:?} ..."
+    D="${RECALDATA}/${PATIENT}"
+    du -h "${D}" || { echo "STOP"; exit 1; }
+    echo -e "\\trm -rf ${D}"
+    ${HOT} && rm -rf "${D}"
 fi
 
 if ${RECAL2} ; then
-   echo "========== Removing recal before.merge data for ${PATIENT:?} ..."
-	D="${RECALDATA}/${PATIENT}.before.merge"
-	du -h "${D}" || { echo "STOP"; exit 1; }
-   echo -e "\\trm -rf ${D}"
-	${HOT} && rm -rf "${D}"
+    echo "========== Removing recal before.merge data for ${PATIENT:?} ..."
+    D="${RECALDATA}/${PATIENT}.before.merge"
+    du -h "${D}" || { echo "STOP"; exit 1; }
+    echo -e "\\trm -rf ${D}"
+    ${HOT} && rm -rf "${D}"
 fi
 
 if ${MUT} ; then
-   echo "========== Removing mutect data for ${PATIENT:?} ..."
-	D="${MUTDATA}/${PATIENT}_mutect"
-	du -h "${D}" || { echo "STOP"; exit 1; }
-   echo -e "\\trm -rf ${D}"
-	${HOT} && rm -rf "${D}"
+    echo "========== Removing mutect data for ${PATIENT:?} ..."
+    D="${MUTDATA}/${PATIENT}_mutect"
+    du -h "${D}" || { echo "STOP"; exit 1; }
+    echo -e "\\trm -rf ${D}"
+    ${HOT} && rm -rf "${D}"
 fi
 
 if ${PINDEL} ; then
-   echo "========== Removing pindel data for ${PATIENT:?} ..."
-	D="${PINDELDATA}/${PATIENT}_pindel"
-	du -h "${D}" || { echo "STOP"; exit 1; }
-   echo -e "\\trm -rf ${D}"
-	${HOT} && rm -rf "${D}"
-   echo -e "\\trm -f ${PINDELDATA}/${PATIENT}.pindel.cfg"
-   ${HOT} && rm -rf "${D}"
+    echo "========== Removing pindel data for ${PATIENT:?} ..."
+    D="${PINDELDATA}/${PATIENT}_pindel"
+    du -h "${D}" || { echo "STOP"; exit 1; }
+    echo -e "\\trm -rf ${D}"
+    ${HOT} && rm -rf "${D}"
+    echo -e "\\trm -f ${PINDELDATA}/${PATIENT}.pindel.cfg"
+    ${HOT} && rm -rf "${D}"
 fi
 
 if ${COMB} ; then
-   echo "========== Removing combined data for ${PATIENT:?} ..."
-   echo -e "\\trm -f ${COMBDATA}/${PATIENT}.[sR]*"
-	du -hc "${COMBDATA}/${PATIENT}."[sR]*
-   ${HOT} && rm -rf "${D}"
+    echo "========== Removing combined data for ${PATIENT:?} ..."
+    echo -e "\\trm -f ${COMBDATA}/${PATIENT}.[sR]*"
+    du -hc "${COMBDATA}/${PATIENT}."[sR]*
+    ${HOT} && rm -rf "${D}"
 fi
 
 if ${MAF} ; then
-   echo "========== Removing MAF data for ${PATIENT:?} ..."
+    echo "========== Removing MAF data for ${PATIENT:?} ..."
 
-	D="${MAFDATA}/${PATIENT}_MAF"
-	du -h "${D}" || { echo "STOP"; exit 1; }
-   echo -e "\\trm -rf ${D}"
-	${HOT} && rm -rf "${D}"
+    D="${MAFDATA}/${PATIENT}_MAF"
+    du -h "${D}" || { echo "STOP"; exit 1; }
+    echo -e "\\trm -rf ${D}"
+    ${HOT} && rm -rf "${D}"
 
-	D="${MAFDATA}/${PATIENT}_plots"
-	du -h "${D}" || { echo "STOP"; exit 1; }
-   echo -e "\\trm -rf ${D}"
-	${HOT} && rm -rf "${D}"
+    D="${MAFDATA}/${PATIENT}_plots"
+    du -h "${D}" || { echo "STOP"; exit 1; }
+    echo -e "\\trm -rf ${D}"
+    ${HOT} && rm -rf "${D}"
 fi
 
 echo "Finished!"

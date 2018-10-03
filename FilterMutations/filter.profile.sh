@@ -2,7 +2,7 @@
 
 PYDIR=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 if ! echo "${PYTHONPATH}" | grep -E "(^|:)${PYDIR}($|:)" >/dev/null ; then
-	export PYTHONPATH=${PYTHONPATH}:$PYDIR
+    export PYTHONPATH=${PYTHONPATH}:$PYDIR
 fi
 
 DIR=${PYDIR}/FilterMutations

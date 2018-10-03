@@ -10,8 +10,8 @@
 ### Examples:
 ###  lg3 --help
 ###  lg3 --version
-###  lg3 status Patient157t
 ###  lg3 status --help
+###  lg3 status --all Patient157t
 ###  lg3 cleanup --help
 ###  lg3 test setup
 ###  lg3 test validate Patient157t
@@ -42,8 +42,8 @@ function mcat {
 function list_tools {
     tools=
     for path in $(echo -e "${PATH//:/\\n}" | sort -u); do
-	# shellcheck disable=SC2010,SC2086
-	tools="$tools $(ls $path/lg3-* 2> /dev/null | grep -vE '(^#|~$|#$)' | sed 's|.*/lg3-||')"
+    # shellcheck disable=SC2010,SC2086
+    tools="$tools $(ls $path/lg3-* 2> /dev/null | grep -vE '(^#|~$|#$)' | sed 's|.*/lg3-||')"
     done
     echo -e "${tools// /\\n}" | sort -u | grep -vE "^$"
 }
