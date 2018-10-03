@@ -4,8 +4,16 @@
 
 ### SIGNIFICANT CHANGES
 
- * ...
- 
+ * The recalibration steps (Recal and Recall_pass2) now specifies the region
+   list when calling GATK's RealignerTargetCreator for creating the intervals
+   used for indel detection.  This significantly speeds up these recalibration
+   steps, e.g. recalibration of Patient157t (two chromosomes) went down from
+   ~14-15 hours to ~6 hours.  In addition, the power to detect mutations
+   should improve by specifying regions because we will not waste power in
+   testing for mutations outside these regions.  Note that the set of
+   mutations identified will change slightly because of this, i.e. although
+   the difference should be few, ideally already processed samples should be
+   reprocessed.
 
 ### NEW FEATURES
 
@@ -26,6 +34,9 @@
    `LG3` value.
 
  * `lg3 test validate` failed if `PROJECT` was not the default value ('LG3').
+
+ * `FilterMutations/filter.profile.sh` added `/home/jocostello/shared/LG3_Pipeline`
+   to the `PYTHONPATH` instead of `${LG3_HOME}`.
 
 
 ## Version 2018-09-28
