@@ -268,13 +268,13 @@ if [ "$action" == "setup" ]; then
         report_error "Run scripts: ${path}/_run_* (no such files)"
     else
         for target in ${targets}; do
-	    file=$(basename "${target}")
+        file=$(basename "${target}")
             ln -fs "${target}" .
-	    if [ -f "${file}" ]; then
+            if [ -f "${file}" ]; then
                 report_ok "Run scripts: ${file}"
-	    else
+            else
                 report_error "Run scripts: ${file} (failed to link to '${target}')"
-	    fi
+            fi
         done
     fi
     echo
@@ -292,7 +292,7 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}" 'Z00*-trim'
         expected_file_sizes bytes "${path}" 'Z00*-trim/*'
-	time_range_of_files "${path}"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -302,7 +302,7 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "Z00*/*"
-	time_range_of_files "${path}"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -315,7 +315,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "*"
         expected_file_sizes human "${path}" "germline/*"
         expected_file_sizes human "${path}" "*.bai"
-	time_range_of_files "${path}"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -327,7 +327,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
         expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
-	time_range_of_files "${path}"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -338,7 +338,7 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
-	time_range_of_files "${path}"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -350,7 +350,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
         expected_file_sizes human "${path}" "${PATIENT}_plots/*"
-	time_range_of_files "${path}"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -360,7 +360,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
         expected_file_content "${path}/${PATIENT}.R.mutations"
-	time_range_of_files "${path}"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi

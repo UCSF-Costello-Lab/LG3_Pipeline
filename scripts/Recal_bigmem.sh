@@ -125,7 +125,7 @@ echo -e "\\n[Recal] Create intervals for indel detection..."
         --analysis_type RealignerTargetCreator \
         --reference_sequence "$REF" \
         --known "$THOUSAND" \
-		  -L "${ilist}" \
+        -L "${ilist}" \
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${patientID}.merged.bam" \

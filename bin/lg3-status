@@ -59,7 +59,7 @@ while [ -n "$1" ]; do
 case $1 in
     --conv*=*) CONV=${1#*=};shift 1;;
     --bam*=*) BAM_SUFF=${1#*=};shift 1;;
-	 --all) ALL=true;shift 1;;
+    --all) ALL=true;shift 1;;
 
     --f*) FQ=true;shift 1;;
     --trim) TRIM=true;shift 1;;
@@ -76,15 +76,15 @@ esac
 done
 
 if $ALL ; then
-	FQ=true
-	TRIM=true
-	BWA=true
-	REC=true
-	#REC2=true
-	GL=true
-	PINDEL=true
-	MUT=true
-	COMB=true
+    FQ=true
+    TRIM=true
+    BWA=true
+    REC=true
+    #REC2=true
+    GL=true
+    PINDEL=true
+    MUT=true
+    COMB=true
 fi
 
 PATIENTS=${*:-Patient157t}
@@ -188,7 +188,7 @@ if $REC2 ; then
 fi
 
 if $GL ; then
-	 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
     OUT=${WORKDIR}/${PATIENT}.UG.snps.vcf
     if [ -s "$OUT" ]; then
         LCNT=$(wcl "$OUT")

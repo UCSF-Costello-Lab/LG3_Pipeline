@@ -42,8 +42,8 @@ function mcat {
 function list_tools {
     tools=
     for path in $(echo -e "${PATH//:/\\n}" | sort -u); do
-	# shellcheck disable=SC2010,SC2086
-	tools="$tools $(ls $path/lg3-* 2> /dev/null | grep -vE '(^#|~$|#$)' | sed 's|.*/lg3-||')"
+    # shellcheck disable=SC2010,SC2086
+    tools="$tools $(ls $path/lg3-* 2> /dev/null | grep -vE '(^#|~$|#$)' | sed 's|.*/lg3-||')"
     done
     echo -e "${tools// /\\n}" | sort -u | grep -vE "^$"
 }
