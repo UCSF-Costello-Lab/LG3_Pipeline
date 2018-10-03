@@ -78,14 +78,14 @@ echo "- PICARD_HOME=${PICARD_HOME:?}"
 ## Input
 bamfiles=$1
 patientID=$2
-ilist=$3
+ILIST=$3
 echo "Input:"
 echo "- bamfiles=${bamfiles:?}"
 echo "- patientID=${patientID:?}"
-echo "- ilist=${ilist:?}"
+echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
-[[ -f "$ilist" ]] || { echo "File not found: ${ilist}"; exit 1; }
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 
 TMP="${LG3_SCRATCH_ROOT}/${patientID}_tmp"
@@ -120,12 +120,12 @@ echo -e "\\n[Recal] Index new BAM file..."
 { time $SAMTOOLS index "${patientID}.merged.bam"; } 2>&1 || { echo "First indexing failed"; exit 1; }
 
 echo -e "\\n[Recal] Create intervals for indel detection..."
-{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
         --reference_sequence "$REF" \
         --known "$THOUSAND" \
-		  -L "${ilist}" \
+		  -L "${ILIST}" \
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${patientID}.merged.bam" \
@@ -252,8 +252,8 @@ do
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_SCRIPT_D}" \
-                BAIT_INTERVALS="${ilist}" \
-                TARGET_INTERVALS="${ilist}" \
+                BAIT_INTERVALS="${ILIST}" \
+                TARGET_INTERVALS="${ILIST}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" \
                 TMP_DIR="${TMP}" \

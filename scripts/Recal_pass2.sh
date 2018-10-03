@@ -46,8 +46,12 @@ GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 bamfiles=$1
 patientID=$2
 ILIST=$3
+
+## Assert existance of input files
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+
 TMP="${LG3_SCRATCH_ROOT}/${patientID}_tmp"
-mkdir -p "$TMP"
+mkdir -p "$TMP" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
 
 echo "------------------------------------------------------"
 echo "[Recal_pass2] Merging recalibrated files"
