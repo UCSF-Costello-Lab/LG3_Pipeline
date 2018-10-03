@@ -190,7 +190,12 @@ function expected_file_content {
     [[ -f "${pathname}" ]] || { report_skip "No such file: ${pathname}"; return; }
     shift
 
-    res=$(diff -U 0 "${LG3_TEST_TRUTH}/${PATIENT}/${pathname}" "${pathname}")
+    local cols="$1"
+    if [ -z "${cols}" ]; then
+        res=$(diff -U 0 "${LG3_TEST_TRUTH}/${PATIENT}/${pathname}" "${pathname}")
+    else
+        res=$(diff -U 0 <(cut -d $'\t' -f "1-$cols" "${LG3_TEST_TRUTH}/${PATIENT}/${pathname}") <(cut -d $'\t' -f "1-$cols" "${pathname}"))
+    fi
     if [ -z "${res}" ]; then
         report_ok "file content ('${pathname}')"
     else
@@ -359,7 +364,11 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
-        expected_file_content "${path}/${PATIENT}.R.mutations"
+        res=$(expected_file_content "${path}/${PATIENT}.R.mutations")
+	cat "${res}"
+	if [ -n "${res}" ]; then
+            expected_file_content "${path}/${PATIENT}.R.mutations" 10
+	fi
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
