@@ -220,13 +220,12 @@ while [ -n "$1" ]; do
     esac
 done
 
-PATIENT=${1:-Patient157t}
-
+PATIENT=$1
 
 if [ "$action" == "setup" ]; then
     title "Setup"
     report_ok "Project: ${PROJECT:?}"
-    report_ok "Patient: ${PATIENT:?}"
+    report_ok "Patient: ${PATIENT} (required for validate')"
     if [[ -n "${EMAIL}" ]]; then
         report_ok "EMAIL: ${EMAIL}"
     else
