@@ -44,6 +44,8 @@ echo "- ILIST=${ILIST:?}"
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
+module load CBC r/3.4.2
+
 echo -n "Checking R: "
 Rscript --version || { echo "ERROR: No Rscript is available!"; exit 1; }
 
