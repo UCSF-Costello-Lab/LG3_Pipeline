@@ -226,12 +226,14 @@ while [ -n "$1" ]; do
     esac
 done
 
-PATIENT=$1
+PATIENT=${PATIENT:-$1}
 
 if [ "$action" == "setup" ]; then
     title "Setup"
-    report_ok "Project: ${PROJECT:?}"
-    report_ok "Patient: ${PATIENT} (required for validate')"
+    report_ok "PROJECT: ${PROJECT:?}"
+    report_ok "PATIENT: ${PATIENT} (required for 'lg3 test validate')"
+    report_ok "SAMPLES: ${SAMPLES} (required by '_run_Recal')"
+    report_ok "NORMAL: ${NORMAL} (required by '_run_Recal')"
     if [[ -n "${EMAIL}" ]]; then
         report_ok "EMAIL: ${EMAIL}"
     else
