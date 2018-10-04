@@ -232,8 +232,17 @@ if [ "$action" == "setup" ]; then
     title "Setup"
     report_ok "PROJECT: ${PROJECT:?}"
     report_ok "PATIENT: ${PATIENT} (required for 'lg3 test validate')"
-    report_ok "SAMPLES: ${SAMPLES} (required by '_run_Recal')"
-    report_ok "NORMAL: ${NORMAL} (required by '_run_Recal')"
+    if [[ -z "${CONV}" ]]; then
+        report_error "CONV: <not set>"
+    elif [[ -f "${CONV}" ]]; then
+        report_ok "CONV: ${CONV}"
+    else
+        report_error "CONV: ${CONV} (no such file)"
+    fi
+    SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f 1 | tr '\n' ' ')}
+    report_ok "  => SAMPLES: ${SAMPLES} (required by '_run_Recal')"
+    NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)}
+    report_ok "  => NORMAL: '${NORMAL}' (required by '_run_Recal')"
     if [[ -n "${EMAIL}" ]]; then
         report_ok "EMAIL: ${EMAIL}"
     else
@@ -289,7 +298,9 @@ elif [ "$action" == "validate" ]; then
     title "Configuration"
     report_ok "PROJECT=${PROJECT:?}"
     report_ok "PATIENT=${PATIENT:?}"
+    report_ok "CONV=${CONV:?}"
     report_ok "LG3_TEST_TRUTH=${LG3_TEST_TRUTH:?}"
+    [[ -f "${CONV}" ]] || { echo "File not found: ${CONV}"; exit 1; }
     echo
     
     title "Trimming of FASTQ Files"
