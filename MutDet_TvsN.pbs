@@ -7,7 +7,7 @@
 #PBS -e _MutDet_${TUMOR}.err
 #PBS -o _MutDet_${TUMOR}.out
 #PBS -N MutDet
-#PBS -l nodes=1:ppn=4,vmem=42g
+#PBS -l nodes=1:ppn=4,vmem=64g
 #PBS -m ae
 
 PROGRAM=${BASH_SOURCE[0]}

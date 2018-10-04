@@ -137,6 +137,7 @@ if [ ! -e "${prefix}.snvs.raw.mutect.txt" ]; then
         { time $JAVA -"$XMX" -Djava.io.tmpdir="${TMP}" \
                 -jar "$MUTECT" \
                 --analysis_type MuTect \
+					 -nt $ncores \
                 --logging_level WARN \
                 --reference_sequence "$REF" \
                 --intervals "$ILIST" \
