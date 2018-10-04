@@ -8,7 +8,7 @@ echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
 SAMPLES=${SAMPLES:-Z00599t Y00600t}
