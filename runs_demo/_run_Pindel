@@ -46,6 +46,9 @@ CONV=$(readlink -e "$CONV")
 PBS=${LG3_HOME}/pindel_all.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
+## Assert that input files exist
+D=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}
+[[ -d "${D}" ]] || { echo "No such folder: ${D}"; exit 1; }
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},SAMPLE=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
