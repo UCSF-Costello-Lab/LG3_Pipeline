@@ -39,9 +39,14 @@ COMB=false
 MAF=false
 ALL=false
 
+CONV=${CONV:-patient_ID_conversions.tsv}
+echo "CONV=${CONV:?}"
+[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
+CONV=$(readlink -e "$CONV")
+
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t}
-SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
+#SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 
 help() {
     echo "Selectively delete LG3 pipeline output"
@@ -93,6 +98,7 @@ if $ALL ; then
     MAF=true
 fi
 
+SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
 echo "Project = ${PROJECT}"
 echo "Patient = ${PATIENT:?}"
 echo "Samples = ${SAMPLES:?}"
