@@ -24,7 +24,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
-  echo "- ncores=$ncores"
+  echo "- ncores=${ncores}"
 fi
 
 #
@@ -138,7 +138,7 @@ if [ ! -e "${prefix}.snvs.raw.mutect.txt" ]; then
         { time $JAVA -"$XMX" -Djava.io.tmpdir="${TMP}" \
                 -jar "$MUTECT" \
                 --analysis_type MuTect \
-					 -nt $ncores \
+                -nt "${ncores}" \
                 --logging_level WARN \
                 --reference_sequence "$REF" \
                 --intervals "$ILIST" \
