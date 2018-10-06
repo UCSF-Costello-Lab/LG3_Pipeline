@@ -23,6 +23,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
   echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-?}"
 fi

@@ -27,6 +27,8 @@
 
  * `lg3 status` now uses boolean flags instead of options with boolean values.
 
+ * Scripts now report on the hostname to help any troubleshooting.
+
 ### BUG FIXES
 
  * The last run script, `_run_PostMut`, did not acknowledge the environment

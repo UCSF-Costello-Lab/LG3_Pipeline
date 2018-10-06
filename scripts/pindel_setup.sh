@@ -23,6 +23,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
+  echo "- hostname=$(hostname)"
 fi
 
 #
