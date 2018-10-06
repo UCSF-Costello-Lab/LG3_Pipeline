@@ -15,6 +15,12 @@
    the difference should be few, ideally already processed samples should be
    reprocessed.
 
+ * The default output folder is now 'output/' in the current working directory.
+   It used to be a folder specific to the Costello Lab, which could be
+   overridden by setting `LG3_OUTPUT_ROOT`.  There is no longer a need to set
+   this environment variable, which soon will be deprecated together with the
+   LG3_INPUT_ROOT environment variable.
+
 ### NEW FEATURES
 
  * Now `lg3 test validate` supports also the new Patient157t10 data set.
