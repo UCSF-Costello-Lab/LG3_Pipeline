@@ -19,7 +19,6 @@
 ### Settings:
 ###  LG3_HOME={{LG3_HOME}}
 ###  EMAIL={{EMAIL}}
-###  LG3_OUTPUT_ROOT={{LG3_OUTPUT_ROOT}}
 ###
 ### Version: 2018-09-28-9000
 ### Source: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
