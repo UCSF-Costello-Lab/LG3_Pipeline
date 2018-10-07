@@ -185,16 +185,16 @@ function expected_file_content {
     [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
 
     local pathname="$1"
-    local truth_path=${path/${PROJECT}/LG3}
-    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
+    local truth_pathname=${pathname/${PROJECT}/LG3}
+    [[ -f "${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}" ]] || error "No such file: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}"
     [[ -f "${pathname}" ]] || { report_skip "No such file: ${pathname}"; return; }
     shift
 
     local cols="$1"
     if [ -z "${cols}" ]; then
-        res=$(diff -U 0 "${LG3_TEST_TRUTH}/${PATIENT}/${pathname}" "${pathname}")
+        res=$(diff -U 0 "${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}" "${pathname}")
     else
-        res=$(diff -U 0 <(cut -d $'\t' -f "1-$cols" "${LG3_TEST_TRUTH}/${PATIENT}/${pathname}") <(cut -d $'\t' -f "1-$cols" "${pathname}"))
+        res=$(diff -U 0 <(cut -d $'\t' -f "1-$cols" "${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}") <(cut -d $'\t' -f "1-$cols" "${pathname}"))
     fi
     if [ -z "${res}" ]; then
         report_ok "file content ('${pathname}')"
