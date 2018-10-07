@@ -378,7 +378,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
         res=$(expected_file_content "${path}/${PATIENT}.R.mutations")
-	cat "${res}"
+	echo "${res}"
 	if [ -n "${res}" ]; then
             expected_file_content "${path}/${PATIENT}.R.mutations" 10
 	fi
