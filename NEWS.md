@@ -23,6 +23,8 @@
 
 ### NEW FEATURES
 
+ * Now 'lg3 test setup' also installs required R packages, if missing.
+ 
  * Now `lg3 test validate` supports also the new Patient157t10 data set.
 
  * ROBUSTNESS: Now `_run_Recal` and `_run_Recal_pass2`, asserts that `NORMAL`

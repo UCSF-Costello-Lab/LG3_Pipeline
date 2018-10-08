@@ -293,6 +293,18 @@ if [ "$action" == "setup" ]; then
             fi
         done
     fi
+    RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
+    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
+	## Create R user library folder
+        "R_LIBS_USER=~/R/%p-library/%v ${RSCRIPT}" -e "dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)"
+	## Install missing package
+	"${RSCRIPT}" -e 'install.packages("RColorBrewer", repos = "http://cloud.r-project.org")'
+    fi
+    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
+        report_error "R package 'RColorBrewer' (failed to install)"
+    else
+        report_ok "R package 'RColorBrewer'"
+    fi
     echo
 elif [ "$action" == "validate" ]; then
     title "Configuration"
