@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PROGRAM=${BASH_SOURCE[0]}
+PROG=$(basename "$PROGRAM")
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
@@ -8,30 +9,24 @@ echo "Arguments: $*"
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+  echo "$PROG Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
 fi
 
-
-#
-## Mutation detection with muTect, Somatic Indel Detector, and Unified Genotyper
-##
-## Exmaple run: path/to/Germline.sh path/to/Normal.bam path/to/Tumor.bam output_prefix patientID
-#
-#
 
 ## Input
 nbamfile=$1
@@ -98,7 +93,7 @@ if [ ! -e "${patientID}.UG.snps.raw.vcf" ]; then
         echo "[Germline] Running Unified Genotyper..."
         # shellcheck disable=SC2086
         # Comment: Because how INPUTS is created and used below
-        $JAVA -Xmx64g \
+        { time $JAVA -Xmx64g \
                 -jar "$GATK" \
                 --analysis_type UnifiedGenotyper \
                 --genotype_likelihoods_model SNP \
@@ -115,7 +110,7 @@ if [ ! -e "${patientID}.UG.snps.raw.vcf" ]; then
                 --standard_min_confidence_threshold_for_emitting 10.0 \
                 --min_base_quality_score 20 \
                 --output_mode EMIT_VARIANTS_ONLY \
-                --out "${patientID}.UG.snps.raw.vcf" || { echo "Unified Genotyper SNP calling failed"; exit 1; }
+                --out "${patientID}.UG.snps.raw.vcf"; } 2>&1 || { echo "Unified Genotyper SNP calling failed"; exit 1; }
 else
         echo "[Germline] Found output ${patientID}.UG.snps.raw.vcf -- Skipping..."
 fi
@@ -124,7 +119,7 @@ if [ ! -e "${patientID}.UG.snps.annotated.vcf" ]; then
         echo "[Germline] Annotating Unified Genotyper SNPs..."
         # shellcheck disable=SC2086
         # Comment: Because how INPUTS is created and used below
-        $JAVA -Xmx64g \
+        { time $JAVA -Xmx64g \
                 -jar "$GATK" \
                 --analysis_type VariantAnnotator \
                 $INPUTS \
@@ -143,7 +138,7 @@ if [ ! -e "${patientID}.UG.snps.annotated.vcf" ]; then
                 --annotation HaplotypeScore \
                 --annotation ReadPosRankSumTest \
                 --annotation DepthOfCoverage \
-                --out "${patientID}.UG.snps.annotated.vcf" || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
+                --out "${patientID}.UG.snps.annotated.vcf"; } 2>&1 || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
 
         rm -f "${patientID}.UG.snps.raw.vcf"
         rm -f "${patientID}.UG.snps.raw.vcf.idx"
@@ -153,7 +148,7 @@ fi
 
 if [ ! -e "${patientID}.UG.snps.vcf" ]; then
         echo "[Germline] Filtering Unified Genotyper SNPs..."
-        $JAVA -Xmx64g \
+        { time $JAVA -Xmx64g \
                 -jar "$GATK" \
                 --analysis_type VariantFiltration \
                 --reference_sequence "$REF" \
@@ -174,7 +169,7 @@ if [ ! -e "${patientID}.UG.snps.vcf" ]; then
                 --filterName MQRankSumFilter \
                 --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
-                --out "${patientID}.UG.snps.vcf" || { echo "Unified Genotyper SNP filtration failed"; exit 1; }
+                --out "${patientID}.UG.snps.vcf"; } 2>&1 || { echo "Unified Genotyper SNP filtration failed"; exit 1; }
 
         rm -f "${patientID}.UG.snps.annotated.vcf"
         rm -f "${patientID}.UG.snps.annotated.vcf.idx"

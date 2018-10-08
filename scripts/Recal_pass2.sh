@@ -8,7 +8,7 @@ echo "Arguments: $*"
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -34,13 +34,6 @@ fi
 #
 #
 
-##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
-#Fix the path so the QC scripts can output pdfs
-#Both of these aren't necessary, but I'm leaving them here for future use
-# shellcheck source=.bashrc
-source "${LG3_HOME}/.bashrc"
-PATH=/opt/R/R-latest/bin/R:$PATH
-
 #Define resources and tools
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
@@ -52,9 +45,13 @@ GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 #Input variables
 bamfiles=$1
 patientID=$2
-ilist=$3
+ILIST=$3
+
+## Assert existance of input files
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+
 TMP="${LG3_SCRATCH_ROOT}/${patientID}_tmp"
-mkdir -p "$TMP"
+mkdir -p "$TMP" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
 
 echo "------------------------------------------------------"
 echo "[Recal_pass2] Merging recalibrated files"
@@ -83,9 +80,10 @@ echo "[Recal_pass2] Index new BAM file..."
 $SAMTOOLS index "${patientID}.merged.bam" || { echo "First indexing failed"; exit 1; }
 
 echo "[Recal_pass2] Create intervals for indel detection..."
-$JAVA -Xmx4g -Djava.io.tmpdir="${TMP}" \
+$JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
+		  -L "${ILIST}" \
         --reference_sequence "$REF" \
         --known "$THOUSAND" \
         --num_threads "${ncores}" \
@@ -178,8 +176,8 @@ do
         echo "[QC] Calculate hybrid selection metrics..."
         $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
                 -jar "${LG3_HOME}/tools/picard-tools-1.64/CalculateHsMetrics.jar" \
-                BAIT_INTERVALS="${ilist}" \
-                TARGET_INTERVALS="${ilist}" \
+                BAIT_INTERVALS="${ILIST}" \
+                TARGET_INTERVALS="${ILIST}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups.hybrid_selection_metrics" \
                 TMP_DIR="${TMP}" \

@@ -4,10 +4,10 @@
 ### Use Config: ${LG3_HOME}/FilterMutations/mutationConfig.cfg
 ### Use Interval: ${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list 
 ### Output files
-#PBS -e MutDet.${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.err
-#PBS -o MutDet.${PATIENT}.NOR-${NORMAL}__${TYPE}-${TUMOR}.out
+#PBS -e _MutDet_${TUMOR}.err
+#PBS -o _MutDet_${TUMOR}.out
 #PBS -N MutDet
-#PBS -l nodes=1:ppn=4,vmem=42g
+#PBS -l nodes=1:ppn=4,vmem=64g
 #PBS -m ae
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -18,7 +18,7 @@ echo "Arguments: $*"
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PROJECT=${PROJECT:?}
 EMAIL=${EMAIL:?}
@@ -37,6 +37,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- hostname=$(hostname)"
 fi
 
 [[ -d "$LG3_INPUT_ROOT" ]] || { echo "Folder not found: ${LG3_INPUT_ROOT}"; exit 1; }

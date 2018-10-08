@@ -8,7 +8,7 @@ echo "Arguments: $*"
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PROJECT=${PROJECT:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
@@ -23,6 +23,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
+  echo "- hostname=$(hostname)"
 fi
 
 #

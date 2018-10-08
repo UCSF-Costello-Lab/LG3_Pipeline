@@ -1,5 +1,54 @@
 # LG3_Pipeline
 
+## Version 2018-10-08
+
+### SIGNIFICANT CHANGES
+
+ * The recalibration steps (Recal and Recall_pass2) now specifies the region
+   list when calling GATK's RealignerTargetCreator for creating the intervals
+   used for indel detection.  This significantly speeds up these recalibration
+   steps, e.g. recalibration of Patient157t (two chromosomes) went down from
+   ~14-15 hours to ~6 hours.  In addition, the power to detect mutations
+   should improve by specifying regions because we will not waste power in
+   testing for mutations outside these regions.  Note that the set of
+   mutations identified will change slightly because of this, i.e. although
+   the difference should be few, ideally already processed samples should be
+   reprocessed.
+
+ * The default output folder is now 'output/' in the current working directory.
+   It used to be a folder specific to the Costello Lab, which could be
+   overridden by setting `LG3_OUTPUT_ROOT`.  There is no longer a need to set
+   this environment variable, which soon will be deprecated together with the
+   LG3_INPUT_ROOT environment variable.
+
+### NEW FEATURES
+
+ * Now 'lg3 test setup' also installs required R packages, if missing.
+ 
+ * Now `lg3 test validate` supports also the new Patient157t10 data set.
+
+ * ROBUSTNESS: Now `_run_Recal` and `_run_Recal_pass2`, asserts that `NORMAL`
+   is part of the specified `SAMPLES` set.
+
+ * Harmonized the names of the *.out and *.err log files produced by the
+   run scripts.
+
+ * `lg3 status` now uses boolean flags instead of options with boolean values.
+
+ * Scripts now report on the hostname to help any troubleshooting.
+
+### BUG FIXES
+
+ * The last run script, `_run_PostMut`, did not acknowledge the environment
+   variable `PROJECT` in one of its parts, where it instead used a hardcoded
+   `LG3` value.
+
+ * `lg3 test validate` failed if `PROJECT` was not the default value ('LG3').
+
+ * `FilterMutations/filter.profile.sh` added `/home/jocostello/shared/LG3_Pipeline`
+   to the `PYTHONPATH` instead of `${LG3_HOME}`.
+
+
 ## Version 2018-09-28
 
 ### SIGNIFICANT CHANGES

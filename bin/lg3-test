@@ -5,15 +5,17 @@
 ###  lg3 test <command> [options] <patient>
 ###
 ### Command:
-###   validate               Validate output of tests
+###   setup      Set up test in current folder
+###   validate   Validate output of tests
 ###
 ### Examples:
-###  lg3 test validate
+###  lg3 test setup
+###  lg3 test validate Patient157t
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
-LG3_TEST_TRUTH=${LG3_TEST_TRUTH:-/costellolab/data1/shared/LG3_Pipeline/example_data/truth}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+LG3_TEST_TRUTH=${LG3_TEST_TRUTH:-/costellolab/data1/shared/LG3_Pipeline/example_data}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
 
@@ -81,10 +83,11 @@ function report_skip {
 function expected_file_tree {
     local res;
 
-    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
 
     local path="$1"
-    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
@@ -94,15 +97,16 @@ function expected_file_tree {
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
         path="${path}/${glob}"
+        truth_path="${truth_path}/${glob}"
     fi
 
-    # shellcheck disable=SC2164
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; tree "${path}") <(tree "${path}"))
+    # shellcheck disable=SC2164,SC2086
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; tree ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(tree ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file tree ('${path}')"
     else
-        report_warn "unexpected file tree ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        report_warn "unexpected file tree ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -110,7 +114,7 @@ function expected_file_tree {
 function expected_file_sizes {
     local res;
 
-    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
 
     local unit=$1
     if [[ "${unit}" == "bytes" ]]; then
@@ -121,7 +125,8 @@ function expected_file_sizes {
     shift
     
     local path="$1"
-    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
@@ -130,16 +135,17 @@ function expected_file_sizes {
     
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
-        path=${path}/${glob}
+        path="${path}/${glob}"
+        truth_path="${truth_path}/${glob}"
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; du --apparent-size --si ${unit} ${path}) <(du --apparent-size --si ${unit} ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; du --apparent-size --si ${unit} ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(du --apparent-size --si ${unit} ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file sizes ('${path}')"
     else
-        report_warn "unexpected file sizes ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        report_warn "unexpected file sizes ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -147,25 +153,27 @@ function expected_file_sizes {
 function expected_file_rows {
     local res;
 
-    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
 
     local path="$1"
-    [[ -d "${LG3_TEST_TRUTH}/${path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${path}"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
     [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
     shift
 
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
         path="${path}/${glob}"
+        truth_path="${truth_path}/${glob}"
     fi
-
+    
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}"; wc -l ${path}) <(wc -l ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; wc -l ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(wc -l ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file rows ('${path}')"
     else
-        report_warn "unexpected file rows ('${LG3_TEST_TRUTH}/${path}' != '${path}')"
+        report_warn "unexpected file rows ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}' != '${path}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -174,14 +182,20 @@ function expected_file_rows {
 function expected_file_content {
     local res;
 
-    [[ -d "${LG3_TEST_TRUTH}" ]] || error "No such folder: ${LG3_TEST_TRUTH}"
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
 
     local pathname="$1"
-    [[ -f "${LG3_TEST_TRUTH}/${pathname}" ]] || error "No such file: ${LG3_TEST_TRUTH}/${pathname}"
+    local truth_pathname=${pathname/${PROJECT}/LG3}
+    [[ -f "${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}" ]] || error "No such file: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}"
     [[ -f "${pathname}" ]] || { report_skip "No such file: ${pathname}"; return; }
     shift
 
-    res=$(diff -U 0 "${LG3_TEST_TRUTH}/${pathname}" "${pathname}")
+    local cols="$1"
+    if [ -z "${cols}" ]; then
+        res=$(diff -U 0 "${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}" "${pathname}")
+    else
+        res=$(diff -U 0 <(cut -d $'\t' -f "1-$cols" "${LG3_TEST_TRUTH}/${PATIENT}/${truth_pathname}") <(cut -d $'\t' -f "1-$cols" "${pathname}"))
+    fi
     if [ -z "${res}" ]; then
         report_ok "file content ('${pathname}')"
     else
@@ -190,6 +204,17 @@ function expected_file_content {
     fi
 }
 
+function time_range_of_files {
+    ## At this point, file timestamps is *not* a sufficient estimate on how
+    ## long each step took at, because they don't reflect when each step *started*.
+    ## For that, we need to add an initial file when the step starts.
+    ## Skipping for now. /HB 2018-10-01
+    return
+    files=$(find "$*" -type f -exec stat --format '%Y :%y %n' "{}" \; | sort -n | cut -d ' ' -f 2-3 | sed -E 's/(^:|[.].*)//g')
+    first=$(echo "${files}" | head -1)
+    last=$(echo "${files}" | tail -1)
+    echo "     Time range of files: ${first} -- ${last}"
+}
 
 #### Parse optional args
 while [ -n "$1" ]; do
@@ -201,13 +226,23 @@ while [ -n "$1" ]; do
     esac
 done
 
-PATIENT=${1:-Patient157t}
-
+PATIENT=${PATIENT:-$1}
 
 if [ "$action" == "setup" ]; then
     title "Setup"
-    report_ok "Project: ${PROJECT:?}"
-    report_ok "Patient: ${PATIENT:?}"
+    report_ok "PROJECT: ${PROJECT:?}"
+    report_ok "PATIENT: ${PATIENT} (required for 'lg3 test validate')"
+    if [[ -z "${CONV}" ]]; then
+        report_error "CONV: <not set>"
+    elif [[ -f "${CONV}" ]]; then
+        report_ok "CONV: ${CONV}"
+    else
+        report_error "CONV: ${CONV} (no such file)"
+    fi
+    SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f 1 | tr '\n' ' ')}
+    report_ok "  => SAMPLES: ${SAMPLES} (required by '_run_Recal')"
+    NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)}
+    report_ok "  => NORMAL: '${NORMAL}' (required by '_run_Recal')"
     if [[ -n "${EMAIL}" ]]; then
         report_ok "EMAIL: ${EMAIL}"
     else
@@ -249,84 +284,103 @@ if [ "$action" == "setup" ]; then
         report_error "Run scripts: ${path}/_run_* (no such files)"
     else
         for target in ${targets}; do
-	    file=$(basename "${target}")
+        file=$(basename "${target}")
             ln -fs "${target}" .
-	    if [ -f "${file}" ]; then
+            if [ -f "${file}" ]; then
                 report_ok "Run scripts: ${file}"
-	    else
+            else
                 report_error "Run scripts: ${file} (failed to link to '${target}')"
-	    fi
+            fi
         done
+    fi
+    RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
+    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
+	## Create R user library folder
+        "R_LIBS_USER=~/R/%p-library/%v ${RSCRIPT}" -e "dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)"
+	## Install missing package
+	"${RSCRIPT}" -e 'install.packages("RColorBrewer", repos = "http://cloud.r-project.org")'
+    fi
+    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
+        report_error "R packages: 'RColorBrewer' (failed to install)"
+    else
+        report_ok "R packages: 'RColorBrewer'"
     fi
     echo
 elif [ "$action" == "validate" ]; then
     title "Configuration"
-    report_ok "Project: ${PROJECT:?}"
-    report_ok "Patient: ${PATIENT:?}"
-    report_ok "Truth: ${LG3_TEST_TRUTH:?}"
+    report_ok "PROJECT=${PROJECT:?}"
+    report_ok "PATIENT=${PATIENT:?}"
+    report_ok "CONV=${CONV:?}"
+    report_ok "LG3_TEST_TRUTH=${LG3_TEST_TRUTH:?}"
+    [[ -f "${CONV}" ]] || { echo "File not found: ${CONV}"; exit 1; }
     echo
     
-    title "Trimmed FASTQ files"
+    title "Trimming of FASTQ Files"
     path=output/${PROJECT}/trim
     ## Backward compatibility
     if [ ! -d "${path}" ]; then path=output; fi
     if [ -d "${path}" ]; then
-        expected_file_tree "${path}" 'Z00*t-trim'
-        expected_file_sizes bytes "${path}" 'Z00*t-trim/*'
+        expected_file_tree "${path}" 'Z00*-trim'
+        expected_file_sizes bytes "${path}" 'Z00*-trim/*'
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
-    
-    title "BWA Aligned FASTQ files"
+    title "BWA Alignment of FASTQ Files"
     path=output/${PROJECT}/exomes
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
-        expected_file_sizes human "${path}" "Z00*t/*"
+        expected_file_sizes human "${path}" "Z00*/*"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
 
-    title "Recalibrated BAM files"
+    title "Recalibration of BAM Files"
     path=output/${PROJECT}/exomes_recal/${PATIENT}
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
         expected_file_sizes human "${path}" "germline/*"
         expected_file_sizes human "${path}" "*.bai"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
     
-    title "Pindel files"
+    title "Pindel Processing"
     path=output/${PROJECT}/pindel
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
         expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
     
-    title "MutDet files"
+    title "MutDet Processing"
     path=output/${PROJECT}/mutations/${PATIENT}_mutect
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
     echo
 
-    title "Mutation files"
+    title "Post-MutDet Processing"
     path=output/${PROJECT}/MAF
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "${PATIENT}_MAF/*"
         expected_file_sizes human "${path}" "${PATIENT}_plots/*"
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -335,7 +389,12 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
-        expected_file_content "${path}/${PATIENT}.R.mutations"
+        res=$(expected_file_content "${path}/${PATIENT}.R.mutations")
+	echo "${res}"
+	if [[ ${res} == *WARN* ]]; then
+            expected_file_content "${path}/${PATIENT}.R.mutations" 10
+	fi
+        time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi

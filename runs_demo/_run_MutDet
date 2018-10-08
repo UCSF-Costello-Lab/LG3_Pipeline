@@ -7,7 +7,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PATIENT=${PATIENT:-Patient157t}
@@ -35,6 +35,10 @@ SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
 
 echo -n "Submitting jobs for $PATIENT "
 date
+
+## Assert that input files exist
+D=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}
+[[ -d "${D}" ]] || { echo "No such folder: ${D}"; exit 1; }
 
 export QSUB_OPTS
 "${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}"

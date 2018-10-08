@@ -7,12 +7,8 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
-    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-/costellolab/data1/jocostello}
-else
-    LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-fi
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
 SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
@@ -35,6 +31,14 @@ echo "- NORMAL=${NORMAL:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
+## Assert that the patient file exists
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+ILIST=$(readlink -e "$ILIST")
+
+## Assert that NORMAL is one of the SAMPLES
+echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || { echo "ERROR: NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"; exit 1; }
+
+
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
@@ -46,9 +50,6 @@ fi
 echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
-ILIST=$(readlink -e "$ILIST")
 
 PBS=${LG3_HOME}/Recal_bigmem.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
@@ -78,6 +79,6 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N Recal_$PATIENT -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+qsub ${QSUB_OPTS} -N Rec_$PATIENT -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
