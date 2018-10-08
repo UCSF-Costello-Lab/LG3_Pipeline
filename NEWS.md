@@ -3,6 +3,10 @@
 ## Version 2018-10-08-9000 (develop version)
 
  * ...
+ 
+### DOCUMENTATION
+
+ * Add section on 'Contributors' to README.
 
 
 ## Version 2018-10-08

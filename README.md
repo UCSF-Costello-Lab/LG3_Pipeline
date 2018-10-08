@@ -217,6 +217,17 @@ The above folder is now where the LG3 Pipeline lives.  Environment variable `LG3
 export LG3_HOME=/path/to/LG3_Pipeline
 ```
 
+### Contributors
+
+The following people (in reverse chronological order) have contributed to the LG3 Pipeline code base over the years:
+
+* Henrik Bengtsson (2015-)
+* Ivan Smirnov (2014-)
+* Tali Mazor (2012-2017)
+* Brett Johnson (2012-2014)
+* Barry Taylor (2012-2013)
+* Jun Song (2010-2011)
+
 
 [LG3_Pipeline]: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 [TIPCC]: https://ucsf-ti.github.io/tipcc-web/
