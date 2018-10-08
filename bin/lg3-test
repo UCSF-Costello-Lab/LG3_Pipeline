@@ -301,9 +301,9 @@ if [ "$action" == "setup" ]; then
 	"${RSCRIPT}" -e 'install.packages("RColorBrewer", repos = "http://cloud.r-project.org")'
     fi
     if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
-        report_error "R package 'RColorBrewer' (failed to install)"
+        report_error "R packages: 'RColorBrewer' (failed to install)"
     else
-        report_ok "R package 'RColorBrewer'"
+        report_ok "R packages: 'RColorBrewer'"
     fi
     echo
 elif [ "$action" == "validate" ]; then
