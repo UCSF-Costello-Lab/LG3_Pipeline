@@ -46,7 +46,6 @@ CONV=$(readlink -e "$CONV")
 
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t}
-#SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
 
 help() {
     echo "Selectively delete LG3 pipeline output"
@@ -104,7 +103,7 @@ echo "Patient = ${PATIENT:?}"
 echo "Samples = ${SAMPLES:?}"
 
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-RAWDATA=/costellolab/data1/ismirnov/tmp
+TRIMDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/trim
 ALIGNDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes
 RECALDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal
 MUTDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/mutations
@@ -121,7 +120,7 @@ if ${TRIM} ; then
     for SAMPLE in ${SAMPLES:?}
     do
         echo -e "\\t${SAMPLE}"
-        D="${RAWDATA}/${SAMPLE}-trim"
+        D="${TRIMDATA}/${SAMPLE}-trim"
         du -h "${D}" || { echo "STOP"; exit 1; }
         echo -e "\\trm -rf ${D}"
         ${HOT} && rm -rf "${D}" 
