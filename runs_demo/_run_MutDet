@@ -10,7 +10,7 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
-PATIENT=${PATIENT:-Patient157t}
+PATIENT=${PATIENT:-Patient157t10}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
 
@@ -41,6 +41,6 @@ D=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}
 [[ -d "${D}" ]] || { echo "No such folder: ${D}"; exit 1; }
 
 export QSUB_OPTS
-"${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}"
+"${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}" || { echo "ERROR: ${SCRIPT} failed!"; exit 1; }
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
