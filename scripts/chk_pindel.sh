@@ -32,14 +32,16 @@ PROJECT=$1
 shift
 echo -e "Checking Pindel output for project ${PROJECT}"
 
-for patient in "$@"
+for PATIENT in "$@"
 do
-        WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/pindel/${patient}_pindel
+        WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/pindel/${PATIENT}_pindel
         ## Expected output:
-        OUT=$WORKDIR/${patient}.indels.filtered.anno.txt
+        OUT=$WORKDIR/${PATIENT}.indels.filtered.anno.txt
         if [ -s "$OUT" ]; then
-                echo -e "${patient}" "$OK"
+                echo -e "${PATIENT}" "$OK"
         else
-                echo -e "${patient}" "$ERR"
+                echo -e "${PATIENT}" "$ERR"
+					 exit 1
         fi
 done
+exit 0
