@@ -10,10 +10,10 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-EMAIL=${EMAIL:?}
-PATIENT=${PATIENT:-Patient157t}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
+PATIENT=${PATIENT:-Patient157t}
+EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -47,10 +47,10 @@ PBS=${LG3_HOME}/pindel_all.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
 ## Assert that input files exist
-D=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}
+D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 [[ -d "${D}" ]] || { echo "No such folder: ${D}"; exit 1; }
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},SAMPLE=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
+qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
