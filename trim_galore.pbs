@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -e _Trim_${PREFIX}.err
-#PBS -o _Trim_${PREFIX}.out
+#PBS -e _Trim_${SAMPLE}.err
+#PBS -o _Trim_${SAMPLE}.out
 #PBS -l nodes=1:ppn=1,vmem=4gb
 #PBS -m ae
 
@@ -21,7 +21,7 @@ echo "Input:"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PROJECT=${PROJECT:?}"
-echo "- PREFIX=${PREFIX:?}"
+echo "- SAMPLE=${SAMPLE:?}"
 echo "- QTY=${QTY:?}"
 echo "- TG=${TG}"
 echo "- JUNK=$JUNK"
@@ -64,7 +64,7 @@ mkdir -p "${LG3_OUTPUT_ROOT}" || { echo "Can't create destination directory ${LG
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}"; exit 1; }
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/trim" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}/trim"; exit 1; }
 
-WDIR=${LG3_SCRATCH_ROOT}/${PREFIX}-trim
+WDIR=${LG3_SCRATCH_ROOT}/${SAMPLE}-trim
 echo "WDIR=${WDIR}"
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
@@ -83,10 +83,10 @@ if [ "$QTY" -eq 20 ]; then
   QTY=""
 fi
 
-mv "${PREFIX}_R1_val_1.fq.gz" "${PREFIX}-trim${QTY}_R1.fastq.gz"
-mv "${PREFIX}_R2_val_2.fq.gz" "${PREFIX}-trim${QTY}_R2.fastq.gz"
-mv "${PREFIX}_R1.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R1.trimming_report.txt"
-mv "${PREFIX}_R2.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R2.trimming_report.txt"
+mv "${SAMPLE}_R1_val_1.fq.gz" "${SAMPLE}-trim${QTY}_R1.fastq.gz"
+mv "${SAMPLE}_R2_val_2.fq.gz" "${SAMPLE}-trim${QTY}_R2.fastq.gz"
+mv "${SAMPLE}_R1.fastq.gz_trimming_report.txt" "${SAMPLE}-trim${QTY}_R1.trimming_report.txt"
+mv "${SAMPLE}_R2.fastq.gz_trimming_report.txt" "${SAMPLE}-trim${QTY}_R2.trimming_report.txt"
 
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
@@ -96,8 +96,8 @@ cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
 echo "Removing directory (recursively): ${WDIR}"
 rm -rf "${WDIR}"
 
-echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim"
-ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim"
+echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
+ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
 
 echo "End of PBS script!"
 date

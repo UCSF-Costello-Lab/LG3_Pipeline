@@ -10,7 +10,9 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
 PROJECT=${PROJECT:-LG3}
-SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
+PATIENT=${PATIENT:-Patient157t10}
+CONV=${CONV:-patient_ID_conversions.tsv}
+SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
 EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
@@ -20,11 +22,13 @@ LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- PROJECT=${PROJECT:?}"
+echo "- PROJECT=${PATIENT:?}"
+echo "- CONV=${CONV:?}"
+echo "- SAMPLES=${SAMPLES:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- TG=${TG}"             ## optional
-echo "- SAMPLES=${SAMPLES:?}"
 
 QSUB_ENVVARS="JUNK=junk,LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 if [[ -n ${TG} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},TG=${TG}"; fi
@@ -46,21 +50,21 @@ echo "ETA ~4h"
 
 QTY=20
 
-for PREFIX in ${SAMPLES}
+for SAMPLE in ${SAMPLES}
 do
-   FASTQ1=${LG3_INPUT_ROOT}/${PREFIX}_R1.fastq.gz
-   FASTQ2=${LG3_INPUT_ROOT}/${PREFIX}_R2.fastq.gz
+   FASTQ1=${LG3_INPUT_ROOT}/${SAMPLE}_R1.fastq.gz
+   FASTQ2=${LG3_INPUT_ROOT}/${SAMPLE}_R2.fastq.gz
 
    ## Requires absolute path 
    FASTQ1=$(readlink -e "$FASTQ1")
    FASTQ2=$(readlink -e "$FASTQ2")
    
    if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
-      echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
+      echo "ERROR: Can't open $SAMPLE from ${LG3_INPUT_ROOT}/"
    else
-      echo "Submitting $PREFIX: quality $QTY ..."
+      echo "Submitting $SAMPLE: quality $QTY ..."
       # shellcheck disable=SC2086
-      qsub ${QSUB_OPTS} -N trim${QTY}_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},QTY=${QTY},PROJECT=${PROJECT}" "$PBS"
+      qsub ${QSUB_OPTS} -N trim${QTY}_$SAMPLE -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},SAMPLE=${SAMPLE},QTY=${QTY},PROJECT=${PROJECT}" "$PBS"
    fi
 done
 
