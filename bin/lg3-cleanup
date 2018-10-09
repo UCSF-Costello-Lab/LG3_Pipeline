@@ -103,7 +103,7 @@ echo "Project = ${PROJECT}"
 echo "Patient = ${PATIENT:?}"
 echo "Samples = ${SAMPLES:?}"
 
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-/costellolab/data1/jocostello}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 RAWDATA=/costellolab/data1/ismirnov/tmp
 ALIGNDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes
 RECALDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal

@@ -2,8 +2,7 @@
 
 [![Build Status](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline.svg?branch=develop)](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline)
 
-
-_Warning: Because of hardcoded paths and software dependencies, this software currently only runs on the UCSF [TIPCC] compute cluster!_
+_Warning: Because of hardcoded paths and software dependencies, this software currently only runs on the UCSF [TIPCC] compute cluster.  It is our long-term goal to make it run anywhere._
 
 
 ## What's new?
@@ -11,33 +10,18 @@ _Warning: Because of hardcoded paths and software dependencies, this software cu
 See [NEWS](NEWS.md) for the changlog.
 
 
-## TIPCC users do not have to install
+
+## Instructions
 
 The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, load the following module:
 
 ```sh
 $ module load CBC lg3
+$ lg3 --version
+2018-10-08
 ```
 
-See `module avail` for available versions.
-
-
-## Installation
-
-Clone the [LG3_Pipeline] repository and run the setup once, e.g.
-
-```sh
-$ cd /path/to/
-$ git clone https://github.com/UCSF-Costello-Lab/LG3_Pipeline.git
-$ cd LG3_Pipeline
-$ make setup
-```
-
-The above folder is now where the LG3 Pipeline lives.  Set environment `LG3_HOME` to point to this location, e.g.
-
-```sh
-export LG3_HOME=/path/to/LG3_Pipeline
-```
+See `module avail` for alternative versions.
 
 
 ## Run test example
@@ -66,10 +50,13 @@ The remaining parts of the test setup can be either be created automatically usi
 ```sh
 $ lg3 test setup
 *** Setup
-[OK] Project: LG3
-[OK] Patient: Patient157t
-[OK] EMAIL: henrik.bengtsson@gmail.com
-[OK] LG3_HOME: /home/shared/cbc/software_cbc/LG3_Pipeline-devel
+[OK] PROJECT: LG3
+[OK] PATIENT: Patient157t (required for 'lg3 test validate')
+[OK] CONV: patient_ID_conversions.tsv
+[OK]   => SAMPLES: Z00599t Z00600t Z00601t (required by '_run_Recal')
+[OK]   => NORMAL: 'Z00599t' (required by '_run_Recal')
+[OK] EMAIL: alice@example.org
+[OK] LG3_HOME: /home/shared/cbc/software_cbc/LG3_Pipeline
 [OK] LG3_OUTPUT_ROOT: output
 [OK] Patient TSV file: patient_ID_conversions.tsv
 [OK] Raw data folder: rawdata
@@ -82,21 +69,7 @@ $ lg3 test setup
 [OK] Run scripts: _run_Recal
 [OK] Run scripts: _run_Recal_pass2
 [OK] Run scripts: _run_Trim
-```
-
-To set it up manually, we want to create a `rawdata/` folder where the pipeline looks for the raw input data.  As above, we can either create it and copy our files over or we can point a symbolic link to an existing folder elsewhere on the file system.  For the test example, we will use:
-```sh
-$ ln -s /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata .
-```
-
-We also need a sample annotation file.  For the test example, we reuse the following:
-```sh
-$ cp ${LG3_HOME}/runs_demo/patient_ID_conversions.tsv .
-```
-
-Finally, we need to create a set up "run scripts".  For the test example, we can copy the built-in ones:
-```sh
-$ cp ${LG3_HOME}/runs_demo/_run_* .
+[OK] R packages: 'RColorBrewer'
 ```
 
 From the above, we should have a directory containing the following files and folders:
@@ -120,37 +93,17 @@ $ tree
 
 ### Running the tests
 
-**Importantly**, before starting, we need to set the following environment variables:
+**Importantly**, before starting, we need to set the `EMAIL` environment variables to an email address where job notifications are sent.
 ```sh
-export EMAIL=first.last@example.org     ## scheduler sent notifications here!
-export LG3_HOME=/path/to/LG3_Pipeline
-export LG3_OUTPUT_ROOT=output
-export PATH=${LG3_HOME}/bin:${PATH}     ## to use the 'lg3' command
+$ export EMAIL=alice@example.org
 ```
-These can all be set in your global `~/.bashrc` script or equivalently.
-
-If you're on the TIPCC cluster and loaded the lg3 module;
-```sh
-$ module load CBC lg3
-```
-then all you need to set is the `EMAIL` environment variable.
-
-
-_Oh, one more thing_:  We need to install the RColorBrewer packages in order for the `_run_PostMut` step to work, and we need it to be installed for the legacy version of R that is currently used by the pipeline.  To install this, do:
-
-```r
-$ /opt/R/R-latest/bin/R   ## the version of R used by the pipeline!
-[...]
-> if (!require("RColorBrewer")) install.packages("RColorBrewer", repos = "http://cloud.r-project.org")
-[...]
-> quit("no")
-$
-```
+This can preferably be set in your global `~/.bashrc` script.
 
 
 Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
+$ module load CBC lg3
 $ cd /path/to/lg3-ex
 $ ./_run_Trim                    ## ~20 minutes
 $ ./_run_Align_gz                ## ~1 hour
@@ -181,12 +134,12 @@ BWA Z00601t  OK
 Recal Z00599t  OK
 Recal Z00600t  OK
 Recal Z00601t  OK
-UG  OK 7581
+UG  OK 7579
 Germline Z00600t  OK
 Germline Z00601t  OK
 Pindel  OK 3
-Mutect Z00600t  OK 29
-Mutect Z00601t  OK 54
+Mutect Z00600t  OK 28
+Mutect Z00601t  OK 53
 MutCombine  OK 16
 MAF  OK
 LOH plots  OK
@@ -205,25 +158,21 @@ To validate that you get the expected results when running through the tests, ca
 
 ```
 $ lg3 test validate Patient157t
-*** Setup
-[OK] Project: LG3
-[OK] Patient: Patient157t
-[OK] Truth: /costellolab/data1/shared/LG3_Pipeline/example_data
+*** Configuration
+[OK] CONV=patient_ID_conversions.tsv
+[OK] LG3_TEST_TRUTH=/costellolab/data1/shared/LG3_Pipeline/example_data
 
 *** Trimming of FASTQ Files
-[OK] file tree ('output/Z00*t-trim')
-[OK] file sizes ('output/Z00*t-trim/*')
+[OK] file tree ('output/LG3/trim/Z00*-trim')
+[OK] file sizes ('output/LG3/trim/Z00*-trim/*')
 
 *** BWA Alignment of FASTQ Files
 [OK] file tree ('output/LG3/exomes')
-[OK] file sizes ('output/LG3/exomes/Z00*t/*')
+[OK] file sizes ('output/LG3/exomes/Z00*/*')
 
 *** Recalibration of BAM Files
 [OK] file tree ('output/LG3/exomes_recal/Patient157t')
-[WARN] unexpected file sizes ('/costellolab/data1/shared/LG3_Pipeline/example_data/truth/output/LG3/exomes_recal/Patient157t/*' != 'output/LG3/exomes_recal/Patient157t/*')
-@@ -13 +13 @@
--5.4K   output/LG3/exomes_recal/Patient157t/Z00599t.bwa.realigned.rmDups.recal.quality_distribution.pdf
-+5.3K   output/LG3/exomes_recal/Patient157t/Z00599t.bwa.realigned.rmDups.recal.quality_distribution.pdf
+[OK] file sizes ('output/LG3/exomes_recal/Patient157t/*')
 [OK] file sizes ('output/LG3/exomes_recal/Patient157t/germline/*')
 [OK] file sizes ('output/LG3/exomes_recal/Patient157t/*.bai')
 
@@ -245,8 +194,41 @@ $ lg3 test validate Patient157t
 [OK] file content ('output/LG3/MutInDel/Patient157t.R.mutations')
 ```
 
-As you see, you might get some minor differences, which is due to these tests being slightly to strict.  If you get all `OK` for the content of 'output/LG3/MutInDel/Patient157t.R.mutations', which contains the set of identified mutations, then you reproduced the expected results.
+_Comment:_ There might minor discrepancies, which is due to these tests of file sizes sometimes being slightly to strict.  Regardless, if you get all `OK` for the content of `output/LG3/MutInDel/Patient157t.R.mutations`, which contains the set of identified mutations, then you reproduced the expected results.
+
+
+
+## Appendix
+
+### Installation notes
+
+The pipeline is installed on the TIPCC cluster, by cloning the [LG3_Pipeline] git repository and running the setup once, i.e.
+
+```sh
+$ cd /path/to/
+$ git clone https://github.com/UCSF-Costello-Lab/LG3_Pipeline.git
+$ cd LG3_Pipeline
+$ make setup
+```
+
+The above folder is now where the LG3 Pipeline lives.  Environment variable `LG3_HOME` is set to point to this folder, e.g.
+
+```sh
+export LG3_HOME=/path/to/LG3_Pipeline
+```
+
+### Contributors
+
+The following people (in reverse chronological order) have contributed to the LG3 Pipeline code base over the years:
+
+* Henrik Bengtsson (2015-)
+* Ivan Smirnov (2014-)
+* Tali Mazor (2012-2017)
+* Brett Johnson (2012-2014)
+* Barry Taylor (2012-2013)
+* Jun Song (2010-2011)
 
 
 [LG3_Pipeline]: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 [TIPCC]: https://ucsf-ti.github.io/tipcc-web/
+[RColorBrewer]: https://cran.r-project.org/package=RColorBrewer
