@@ -1,4 +1,5 @@
 #!/bin/bash
+##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
 
 ### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal_pass2.pbs
 ### Output files
@@ -19,29 +20,60 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- PROJECT=${PROJECT}"
+  echo "PROJECT=${PROJECT}"
   echo "EMAIL=${EMAIL}"
   echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
 
-##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
+### Input
+echo "Input:"
+echo "- PROJECT=${PROJECT:?}"
+echo "- BAMS=${BAMS:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- NORMAL=${NORMAL:?}"
+echo "- ILIST=${ILIST:?}"
 
-date
-mkdir -p "${LG3_SCRATCH_ROOT}/${PATIENT}"
-cd "${LG3_SCRATCH_ROOT}/${PATIENT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}/${PATIENT}"; exit 1; }
+## Assert existance of input files
+[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
-"${LG3_HOME}/scripts/Recal_pass2.sh" "$BAMS" "$PATIENT" "$ILIST"
+module load CBC r/3.4.2
+echo -n "Checking R: "
+Rscript --version || { echo "ERROR: No Rscript is available!"; exit 1; }
+
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
+echo "Started $PROG on $DATE"
+echo "Using node(s): $NODES"
+
+## Assert existance of software
+SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
+[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
+SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
+[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
+
+DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
+
+DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
+mkdir -p "${DESTDIR2}" || { echo "Can't create destination directory ${DESTDIR2}"; exit 1; }
+
+WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
+mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
+cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+
+"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" || { echo "ERROR: ${SCRIPT_A} failed!"; exit 1; }
 
 cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
-mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
-cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR: cp from scratch failed!" ; exit 1 ; }
+echo "Cleaning ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
 echo "Making symlinks ..."
-cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || { echo "ERROR: failed to cd to ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"; exit 1; }
+cd "${DESTDIR}" || { echo "ERROR: failed to cd to ${DESTDIR}"; exit 1; }
 mk_links() {
   while read -r F
   do
@@ -52,14 +84,11 @@ mk_links() {
 grep -v recal ./*.bwa.realigned.rmDups.* | mk_links
 
 
-mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline"
-cd "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline" || { echo "ERROR: Failed to set working directory to ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline"; exit 1; }
+cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
 
-"${LG3_HOME}/scripts/Germline.sh" \
-      "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.bam" \
-      "${PATIENT}" "$ILIST"
-
-###${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
+{ time "${SCRIPT_B}" \
+		"${DESTDIR}/${NORMAL}.bwa.realigned.rmDups.bam" \
+      "${PATIENT}" "$ILIST"; } 2>&1 || { echo "ERROR: ${SCRIPT_B} failed"; exit 1; }
 
 echo "End of script!"
-date
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
