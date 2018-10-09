@@ -24,6 +24,7 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- PREFIX=${PREFIX:?}"
 echo "- QTY=${QTY:?}"
 echo "- TG=${TG}"
+echo "- JUNK=$JUNK"
 
 ## Assert existance of input files
 [[ -f "$FASTQ1" ]] || { echo "File not found: ${FASTQ1}"; exit 1; }
@@ -95,6 +96,7 @@ cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
 echo "Removing directory (recursively): ${WDIR}"
 rm -rf "${WDIR}"
 
+echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim"
 ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim"
 
 echo "End of PBS script!"
