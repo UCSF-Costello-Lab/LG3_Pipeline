@@ -45,7 +45,7 @@ echo "CONV=${CONV:?}"
 CONV=$(readlink -e "$CONV")
 
 PROJECT=${PROJECT:-LG3}
-PATIENT=${PATIENT:-Patient157t}
+PATIENT=${PATIENT:-Patient157t10}
 
 help() {
     echo "Selectively delete LG3 pipeline output"
