@@ -87,7 +87,7 @@ if $ALL ; then
     COMB=true
 fi
 
-PATIENTS=${*:-Patient157t}
+PATIENTS=${*:-Patient157t10}
 
 echo -e "Checking output for project ${PROJECT}"
 echo "Patient/samples table ${CONV}"
