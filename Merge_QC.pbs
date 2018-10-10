@@ -50,10 +50,10 @@ cd "${LG3_SCRATCH_ROOT}/${SAMPLE}" || { echo "ERROR: Failed to set working direc
 
 cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
-cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"; exit 1; }
+cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}" || { echo "ERROR: Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"; exit 1; }
 rm -rf "${LG3_SCRATCH_ROOT:?}/${SAMPLE}"
 
-echo "Output: ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge"
+echo "Output: ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}"
 echo "End of script!"
 date
 
