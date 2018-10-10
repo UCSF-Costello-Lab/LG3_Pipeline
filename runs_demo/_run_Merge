@@ -52,7 +52,7 @@ CNT=0
 for S in ${SAMPLES}
 do
    ((CNT++))
-   B=$D/${PATIENT}.before.merge/${S}.$SUFF
+   B=$D/${PATIENT}/${S}.$SUFF
    if [ ! -f "$B" ]; then
       echo "ABORT: Can't open $B !"
       exit 1
