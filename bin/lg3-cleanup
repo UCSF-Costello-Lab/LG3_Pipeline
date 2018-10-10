@@ -177,7 +177,7 @@ if ${COMB} ; then
     echo "========== Removing combined data for ${PATIENT:?} ..."
     echo -e "\\trm -f ${COMBDATA}/${PATIENT}.[sR]*"
     du -hc "${COMBDATA}/${PATIENT}."[sR]*
-    ${HOT} && rm -rf "${D}"
+    ${HOT} && rm -f "${COMBDATA}/${PATIENT}."[sR]*
 fi
 
 if ${MAF} ; then
