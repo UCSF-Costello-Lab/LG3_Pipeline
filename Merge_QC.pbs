@@ -1,9 +1,9 @@
 #!/bin/bash
 
-### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,PREFIX=sampleXX /path/to/Merge.pbs
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,SAMPLE=sampleXX /path/to/Merge.pbs
 ### Output files
-#PBS -e _MergeQC_${PREFIX}.err
-#PBS -o _MergeQC_${PREFIX}.out
+#PBS -e _MergeQC_${SAMPLE}.err
+#PBS -o _MergeQC_${SAMPLE}.out
 #PBS -l nodes=1:bigmem:ppn=6,vmem=40gb
 #PBS -m ae
 
@@ -37,21 +37,21 @@ fi
 ### Input
 echo "Input:"
 echo "- BAMS=${BAMS:?}"
-echo "- PREFIX=${PREFIX:?}"
+echo "- SAMPLE=${SAMPLE:?}"
 echo "- ILIST=${ILIST:?}"
 
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 date
-mkdir -p "${LG3_SCRATCH_ROOT}/${PREFIX}"
-cd "${LG3_SCRATCH_ROOT}/${PREFIX}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}/${PREFIX}"; exit 1; }
+mkdir -p "${LG3_SCRATCH_ROOT}/${SAMPLE}"
+cd "${LG3_SCRATCH_ROOT}/${SAMPLE}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}/${SAMPLE}"; exit 1; }
 
-"${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$PREFIX" "${ILIST}"
+"${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$SAMPLE" "${ILIST}"
 
 cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
-cp -a "${LG3_SCRATCH_ROOT}/${PREFIX}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${LG3_SCRATCH_ROOT}/${PREFIX}"; exit 1; }
-rm -rf "${LG3_SCRATCH_ROOT:?}/${PREFIX}"
+cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge" || { echo "ERROR: Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"; exit 1; }
+rm -rf "${LG3_SCRATCH_ROOT:?}/${SAMPLE}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}.before.merge"
 echo "End of script!"

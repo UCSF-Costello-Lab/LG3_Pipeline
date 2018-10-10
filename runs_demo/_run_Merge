@@ -66,4 +66,4 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N Merge_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},PREFIX=${SAMPLE},PATIENT=${PATIENT}" "$PBS"
+qsub ${QSUB_OPTS} -N Merge_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT}" "$PBS"
