@@ -60,7 +60,7 @@ D=$(readlink -e "$D") ## requires absolute path
 [[ -d "$D/${PATIENT}" ]] || { echo "Directory not found: ${D}/${PATIENT}"; exit 1; }
 
 echo "Renaming $D/${PATIENT} to $D/${PATIENT}.before.merge"
-mv "$D/${PATIENT}" "$D/${PATIENT}.before.merge"
+mv "$D/${PATIENT}" "$D/${PATIENT}.before.merge" || { echo "WARNING: No directory $D/${PATIENT}"; }
 
 SUFF=bwa.realigned.rmDups.recal.bam
 
