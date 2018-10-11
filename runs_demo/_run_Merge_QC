@@ -9,7 +9,7 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
+EMAIL=${EMAIL:-?}
 SAMPLE=${SAMPLE:-Y00600t10}
 SAMPLES=${SAMPLES:-Z00600t10 Z00601t10}
 PATIENT=${PATIENT:-Patient157t10}
