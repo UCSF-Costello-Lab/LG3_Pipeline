@@ -21,12 +21,9 @@
 
 ### BUG FIXES
 
-* Run script `_run_MutDet` and job script `Recal_bigmem.pbs` failed to detect
-  errors occurring in scripts they called and therefore also not exit with
-  exit code 1 on such errors.
-
-* Scripts `scripts/chk_mutdet.sh` and `scripts/chk_pindel.sh` did not exit
-  with exit code 1 on errors.
+* Some run scripts (`_run_MutDet`), job scripts (`Recal_bigmem.pbs`,
+  `MutDet_TvsN.pbs`, and `UG.pbs`), and scripts (`scripts/chk_mutdet.sh` and
+  `scripts/chk_pindel.sh`) did not catch errors and quit with exit code 1.
 
 
 ## Version 2018-10-08
