@@ -1,8 +1,8 @@
 #!/bin/bash
-### Usage: qsub -v SAMPLE=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.tsv /path/to/pindel_all.pbs
-#PBS -N ${SAMPLE}.pindel
-#PBS -e _Pindel_${SAMPLE}.err
-#PBS -o _Pindel_${SAMPLE}.out
+### Usage: qsub -v PATIENT=PatientXX,PROJECT=LG3orGBM,CONV=patient_ID_conversions.tsv /path/to/pindel_all.pbs
+#PBS -N ${PATIENT}.pindel
+#PBS -e _Pindel_${PATIENT}.err
+#PBS -o _Pindel_${PATIENT}.out
 #PBS -l nodes=1:ppn=6,vmem=12gb
 #PBS -m ae
 
@@ -44,7 +44,7 @@ LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}") ## Absolute path
 
 ### Input
 echo "Input:"
-echo "- SAMPLE=${SAMPLE}"
+echo "- PATIENT=${PATIENT}"
 echo "- PROJECT=${PROJECT}"
 echo "- CONV=${CONV}"
 
@@ -54,7 +54,7 @@ CONV=$(readlink -e "${CONV:?}") ## Absolute path
 #module load CBC cbc-shared
 
 echo "PINDEL"
-echo "Patient: ${SAMPLE}"
+echo "Patient: ${PATIENT}"
 echo "Project: ${PROJECT}"
 echo "Conversion File: ${CONV}"
 echo "----------------------------------"
@@ -85,7 +85,7 @@ echo "- TARGET=${TARGET:?}"
 [[ -f "$REF" ]]    || { echo "File not found: ${REF}"; exit 1; }
 [[ -f "$TARGET" ]] || { echo "File not found: ${TARGET}"; exit 1; }
 
-SCRATCH=${LG3_SCRATCH_ROOT}/${SAMPLE}_pindel
+SCRATCH=${LG3_SCRATCH_ROOT}/${PATIENT}_pindel
 mkdir -p "${SCRATCH}" || { echo "Can't create destination directory ${SCRATCH}"; exit 1; }
 
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
@@ -96,14 +96,14 @@ date
 echo -e "\\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
-"${SCRIPT_A}" "${SAMPLE}" "${PROJECT}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## set up scratch directory
 cd "${SCRATCH}" || { echo "ERROR: Failed to set working directory to ${SCRATCH}"; exit 1; }
 
 ## run pindel
 echo -e "\\n========= [Pindel] Run pindel"
-$PINDEL -f "$REF" -i "${WDIR}/${SAMPLE}.pindel.cfg" -c ALL -o "${SAMPLE}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$PINDEL -f "$REF" -i "${WDIR}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## move from scratch to project folder
 cd "$WDIR" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
@@ -112,23 +112,23 @@ rm -rf "$SCRATCH"
 
 ## convert to vcf
 echo -e "\\n========= [Pindel] Convert pindel to vcf"
-$PINDEL2VCF -P "${SAMPLE}_pindel/${SAMPLE}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf" -G  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+$PINDEL2VCF -P "${PATIENT}_pindel/${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}_pindel/${PATIENT}.pindel.vcf" -G  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## convert to tdt
 echo -e "\\n========= [Pindel] Convert vcf to tdt"
-"${PYTHON_SCRIPT_A}" "${SAMPLE}_pindel/${SAMPLE}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${PYTHON_SCRIPT_A}" "${PATIENT}_pindel/${PATIENT}.pindel.vcf"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## rename file
-cd "${SAMPLE}_pindel" || { echo "ERROR: Failed to set working directory to ${SAMPLE}_pindel"; exit 1; }
-mv "${SAMPLE}.pindel.vcf.tdt" "${SAMPLE}.indels"
+cd "${PATIENT}_pindel" || { echo "ERROR: Failed to set working directory to ${PATIENT}_pindel"; exit 1; }
+mv "${PATIENT}.pindel.vcf.tdt" "${PATIENT}.indels"
 
 ## filter pindel data
 echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"
-"${SCRIPT_B}" "${SAMPLE}.indels" "${PROJECT}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_B}" "${PATIENT}.indels" "${PROJECT}" "$TARGET"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\\n========= [Annotate] Annotate indels and apply annotation-based filters"
-"${SCRIPT_C}" "${SAMPLE}.indels" "${PROJECT}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
+"${SCRIPT_C}" "${PATIENT}.indels" "${PROJECT}"  || { echo "ABORT: error on line $LINENO" ; exit 1 ; }
 
 echo -ne "\\nEnd of script on "
 date

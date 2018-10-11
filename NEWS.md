@@ -1,5 +1,44 @@
 # LG3_Pipeline
 
+## Version 2018-10-11
+
+### SIGNIFICANT CHANGES
+
+* Run scripts now infer `SAMPLES` and `NORMAL` from the patient file (`CONV`)
+  given the `PATIENT` name.  It is no longer necessary to set environment
+  variables `SAMPLES` and `NORMAL` when running the pipeline. These variables
+  will become deprecated soon and later produce an error if specified.
+
+### DOCUMENTATION
+
+ * Add section on 'Contributors' to README.
+
+### SOFTWARE QUALITY
+
+ * HARMONIZATION: Standardizing variable names throughout all scripts.
+
+ * TESTS: Tests now defaults to using Patient157t10.
+ 
+ * TESTS: Added test set 'Patient157_t10_underscore' (sic!) containing FASTQ
+   files with additional underscores and `_R1`/_R2` suffixes in their names.
+   This test set is just a renamed copy of the existing 'Patient157t10' set.
+
+### BUG FIXES
+
+ * The pipeline did not support FASTQ file names with undercores (`_`) other
+   than the once indicating paired end reads `_R1` and `_R2`.  File names
+   with a suffix between `_R1`/`_R2` and `.fastq.gz` were also not supported.
+   Note that trimming drops any `_R1`/_R2` suffixes, e.g. trimming a FASTQ
+   file `Z00600_t10_AATCCGTC_L007_R1_001_HQ_paired.fastq.gz` produces a
+   trimmed FASTQ file `Z00601_t10_AATCCGTC_L007-trim_R1.fastq.gz`.
+
+ * Some run scripts (`_run_MutDet`), job scripts (`Recal_bigmem.pbs`,
+  `MutDet_TvsN.pbs`, and `UG.pbs`), and scripts (`scripts/chk_mutdet.sh` and
+  `scripts/chk_pindel.sh`) did not catch errors and quit with exit code 1.
+
+ * `lg3 test setup` incorrectly reportedd that the CONV file does not exist.
+ 
+
 ## Version 2018-10-08
 
 ### SIGNIFICANT CHANGES

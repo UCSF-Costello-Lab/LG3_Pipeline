@@ -3,7 +3,7 @@ pat <- args[1]
 proj <- args[2]
 conv <- args[3]
 
-wdir <- file.path(Sys.getenv("LG3_INPUT_ROOT", "/costellolab/data1/jocostello"), proj, "MAF")
+wdir <- file.path(Sys.getenv("LG3_INPUT_ROOT", "rawdata"), proj, "MAF")
 setwd(wdir)
  
 source(file.path(Sys.getenv("LG3_HOME", "/home/jocostello/shared/LG3_Pipeline"), "scripts/MAFplot_version3.R"))

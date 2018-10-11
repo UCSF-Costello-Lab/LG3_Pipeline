@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -e _Trim_${PREFIX}.err
-#PBS -o _Trim_${PREFIX}.out
+#PBS -e _Trim_${SAMPLE}.err
+#PBS -o _Trim_${SAMPLE}.out
 #PBS -l nodes=1:ppn=1,vmem=4gb
 #PBS -m ae
 
@@ -21,9 +21,10 @@ echo "Input:"
 echo "- FASTQ1=${FASTQ1:?}"
 echo "- FASTQ2=${FASTQ2:?}"
 echo "- PROJECT=${PROJECT:?}"
-echo "- PREFIX=${PREFIX:?}"
+echo "- SAMPLE=${SAMPLE:?}"
 echo "- QTY=${QTY:?}"
 echo "- TG=${TG}"
+echo "- JUNK=$JUNK"
 
 ## Assert existance of input files
 [[ -f "$FASTQ1" ]] || { echo "File not found: ${FASTQ1}"; exit 1; }
@@ -63,7 +64,7 @@ mkdir -p "${LG3_OUTPUT_ROOT}" || { echo "Can't create destination directory ${LG
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}"; exit 1; }
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/trim" || { echo "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}/trim"; exit 1; }
 
-WDIR=${LG3_SCRATCH_ROOT}/${PREFIX}-trim
+WDIR=${LG3_SCRATCH_ROOT}/${SAMPLE}-trim
 echo "WDIR=${WDIR}"
 mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
@@ -78,14 +79,21 @@ FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 rm "$FQ1" "$FQ2"
 
-if [ "$QTY" -eq 20 ]; then
-  QTY=""
-fi
+echo "Intermediate output files:"
+ls -laR
 
-mv "${PREFIX}_R1_val_1.fq.gz" "${PREFIX}-trim${QTY}_R1.fastq.gz"
-mv "${PREFIX}_R2_val_2.fq.gz" "${PREFIX}-trim${QTY}_R2.fastq.gz"
-mv "${PREFIX}_R1.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R1.trimming_report.txt"
-mv "${PREFIX}_R2.fastq.gz_trimming_report.txt" "${PREFIX}-trim${QTY}_R2.trimming_report.txt"
+echo "Moving files of interest to final destination:"
+if [ "$QTY" -eq 20 ]; then
+    SAMPLE_PREFIX=${SAMPLE}-trim
+else
+    SAMPLE_PREFIX=${SAMPLE}-trim${QTY}
+fi
+echo "- SAMPLE_PREFIX=${SAMPLE_PREFIX}"
+
+mv "${SAMPLE}_R1"*_val_1.fq.gz "${SAMPLE_PREFIX}_R1.fastq.gz" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R1.fastq.gz"; exit 1; }
+mv "${SAMPLE}_R2"*_val_2.fq.gz "${SAMPLE_PREFIX}_R2.fastq.gz" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R2.fastq.gz"; exit 1; }
+mv "${SAMPLE}_R1"*.fastq.gz_trimming_report.txt "${SAMPLE_PREFIX}_R1.trimming_report.txt" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R2.trimming_report.txt"; exit 1; }
+mv "${SAMPLE}_R2"*.fastq.gz_trimming_report.txt "${SAMPLE_PREFIX}_R2.trimming_report.txt" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R2.trimming_report.txt"; exit 1; }
 
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
@@ -95,7 +103,8 @@ cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
 echo "Removing directory (recursively): ${WDIR}"
 rm -rf "${WDIR}"
 
-ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim"
+echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
+ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
 
 echo "End of PBS script!"
 date

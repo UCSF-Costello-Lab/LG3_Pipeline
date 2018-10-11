@@ -10,7 +10,7 @@
 ###
 ### Examples:
 ###  lg3 test setup
-###  lg3 test validate Patient157t
+###  lg3 test validate Patient157t10
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
@@ -230,24 +230,6 @@ PATIENT=${PATIENT:-$1}
 
 if [ "$action" == "setup" ]; then
     title "Setup"
-    report_ok "PROJECT: ${PROJECT:?}"
-    report_ok "PATIENT: ${PATIENT} (required for 'lg3 test validate')"
-    if [[ -z "${CONV}" ]]; then
-        report_error "CONV: <not set>"
-    elif [[ -f "${CONV}" ]]; then
-        report_ok "CONV: ${CONV}"
-    else
-        report_error "CONV: ${CONV} (no such file)"
-    fi
-    SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f 1 | tr '\n' ' ')}
-    report_ok "  => SAMPLES: ${SAMPLES} (required by '_run_Recal')"
-    NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)}
-    report_ok "  => NORMAL: '${NORMAL}' (required by '_run_Recal')"
-    if [[ -n "${EMAIL}" ]]; then
-        report_ok "EMAIL: ${EMAIL}"
-    else
-        report_error "EMAIL: <not set>"
-    fi
     if [[ -z "${LG3_HOME}" ]]; then
         report_error "LG3_HOME: <not set>"
     elif [[ -d "${LG3_HOME}" ]]; then
@@ -255,29 +237,20 @@ if [ "$action" == "setup" ]; then
     else
         report_error "LG3_HOME: ${LG3_HOME} (non-existing folder)"
     fi
-    if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
-        report_error "LG3_OUTPUT_ROOT: <not set>"
-    elif [[ -d "${LG3_OUTPUT_ROOT}" ]]; then
-        report_ok "LG3_OUTPUT_ROOT: ${LG3_OUTPUT_ROOT}"
-    else
-        report_error "LG3_OUTPUT_ROOT: ${LG3_OUTPUT_ROOT} (non-existing folder)"
+
+    RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
+    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
+	## Create R user library folder
+        "R_LIBS_USER=~/R/%p-library/%v ${RSCRIPT}" -e "dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)"
+	## Install missing package
+	"${RSCRIPT}" -e 'install.packages("RColorBrewer", repos = "http://cloud.r-project.org")'
     fi
-    file=patient_ID_conversions.tsv
-    target=${LG3_HOME}/runs_demo/${file}
-    ln -fs "${target}" .
-    if [ -f "${file}" ]; then
-        report_ok "Patient TSV file: ${file}"
+    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
+        report_error "R packages: 'RColorBrewer' (failed to install)"
     else
-        report_error "Patient TSV file: ${file} (failed to link to '${target}')"
+        report_ok "R packages: 'RColorBrewer'"
     fi
-    dir=rawdata
-    target=/costellolab/data1/shared/LG3_Pipeline/example_data/${dir}
-    ln -fs "${target}" .
-    if [ -d "${dir}" ]; then
-        report_ok "Raw data folder: ${dir}"
-    else
-        report_error "Raw data folder: ${dir} (failed to link to '${target}')"
-    fi
+
     path=${LG3_HOME}/runs_demo
     targets=$(ls -1 "${path}"/_run_* 2> /dev/null)
     if [ -z "${targets}" ]; then
@@ -293,17 +266,50 @@ if [ "$action" == "setup" ]; then
             fi
         done
     fi
-    RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
-    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
-	## Create R user library folder
-        "R_LIBS_USER=~/R/%p-library/%v ${RSCRIPT}" -e "dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)"
-	## Install missing package
-	"${RSCRIPT}" -e 'install.packages("RColorBrewer", repos = "http://cloud.r-project.org")'
-    fi
-    if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
-        report_error "R packages: 'RColorBrewer' (failed to install)"
+    
+    if [[ -n "${EMAIL}" ]]; then
+        report_ok "EMAIL: ${EMAIL}"
     else
-        report_ok "R packages: 'RColorBrewer'"
+        report_error "EMAIL: <not set>"
+    fi
+
+    report_ok "PROJECT: ${PROJECT:?}"
+
+    report_ok "PATIENT: ${PATIENT} (required for 'lg3 test validate')"
+
+    [[ -n "${CONV}" ]] || report_error "CONV (patient TSV file): <not set>"
+    
+    target=${LG3_HOME}/runs_demo/${CONV}
+    [[ -r "${target}" ]] || report_error "CONV (patient TSV file): No such template file ${target}"
+    
+    ln -fs "${target}" .
+    if [[ -f "${CONV}" ]]; then
+        report_ok "CONV (patient TSV file): ${CONV}"
+    else
+        report_error "CONV (patient TSV file): ${CONV} (failed to link to '${target}')}"
+    fi
+    
+    if [[ -n "${PATIENT}" ]]; then
+	grep -qw "${PATIENT}" "${CONV}" || report_error "CONV: No entry with 'patient_ID' of value '${PATIENT}'"
+    fi
+    SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f 1 | tr '\n' ' ')}
+    report_ok "  => SAMPLES: ${SAMPLES} (required by '_run_Recal')"
+    NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)}
+    report_ok "  => NORMAL: '${NORMAL}' (required by '_run_Recal')"
+    dir=rawdata
+    target=${LG3_TEST_TRUTH}/${dir}
+    ln -fs "${target}" .
+    if [ -d "${dir}" ]; then
+        report_ok "Raw data folder: ${dir}"
+    else
+        report_error "Raw data folder: ${dir} (failed to link to '${target}')"
+    fi
+    if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then
+        report_error "LG3_OUTPUT_ROOT: <not set>"
+    elif [[ -d "${LG3_OUTPUT_ROOT}" ]]; then
+        report_ok "LG3_OUTPUT_ROOT: ${LG3_OUTPUT_ROOT}"
+    else
+        report_error "LG3_OUTPUT_ROOT: ${LG3_OUTPUT_ROOT} (non-existing folder)"
     fi
     echo
 elif [ "$action" == "validate" ]; then

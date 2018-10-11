@@ -11,16 +11,16 @@
 ###  lg3 --help
 ###  lg3 --version
 ###  lg3 status --help
-###  lg3 status --all Patient157t
+###  lg3 status --all Patient157t10
 ###  lg3 cleanup --help
 ###  lg3 test setup
-###  lg3 test validate Patient157t
+###  lg3 test validate Patient157t10
 ###
 ### Settings:
 ###  LG3_HOME={{LG3_HOME}}
 ###  EMAIL={{EMAIL}}
 ###
-### Version: 2018-10-08
+### Version: 2018-10-11
 ### Source: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 
 LG3_DIR=$(dirname "$(readlink -e "$0")")

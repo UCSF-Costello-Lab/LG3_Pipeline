@@ -10,7 +10,9 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PROJECT=${PROJECT:-LG3}
-SAMPLES=${SAMPLES:-Z00599t Z00600t Z00601t}
+PATIENT=${PATIENT:-Patient157t10}
+CONV=${CONV:-patient_ID_conversions.tsv}
+SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-false}
 EMAIL=${EMAIL:?}
 
@@ -24,6 +26,7 @@ echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- PROJECT=${PROJECT:?}"
+echo "- PATIENT=${PATIENT:?}"
 echo "- SAMPLES=${SAMPLES:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
@@ -43,28 +46,28 @@ PBS=${LG3_HOME}/Align_fastq.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
 
-for PREFIX in ${SAMPLES}
+for SAMPLE in ${SAMPLES}
 do
-  FASTQ1=${LG3_INPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim/${PREFIX}-trim_R1.fastq.gz
-  FASTQ2=${LG3_INPUT_ROOT}/${PROJECT}/trim/${PREFIX}-trim/${PREFIX}-trim_R2.fastq.gz
+  FASTQ1=${LG3_INPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim/${SAMPLE}-trim_R1.fastq.gz
+  FASTQ2=${LG3_INPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim/${SAMPLE}-trim_R2.fastq.gz
 
   ## Requires absolute path 
   FASTQ1=$(readlink -e "$FASTQ1")
   FASTQ2=$(readlink -e "$FASTQ2")
   
   ## Expected Location of aligned BAMs
-  ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${PREFIX}
+  ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${SAMPLE}
 
   if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
-    echo "ERROR: Can't open $PREFIX from ${LG3_INPUT_ROOT}/"
+    echo "ERROR: Can't open $SAMPLE from ${LG3_INPUT_ROOT}/"
   else
-    if [ -f "${ALIGNED}/${PREFIX}.trim.bwa.sorted.bam" ]; then
-      echo "WARNING: already aligned: $ALIGNED/${PREFIX}.trim.bwa.sorted.bam"
-      echo "Skipping $PREFIX ..."
+    if [ -f "${ALIGNED}/${SAMPLE}.trim.bwa.sorted.bam" ]; then
+      echo "WARNING: already aligned: $ALIGNED/${SAMPLE}.trim.bwa.sorted.bam"
+      echo "Skipping $SAMPLE ..."
     else
-      echo "Submitting $PREFIX ..."
+      echo "Submitting $SAMPLE ..."
       # shellcheck disable=SC2086
-      qsub ${QSUB_OPTS} -N Align_$PREFIX -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},PREFIX=${PREFIX},LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING},PROJECT=${PROJECT}" "${PBS}"
+      qsub ${QSUB_OPTS} -N Align_$SAMPLE -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},SAMPLE=${SAMPLE},LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING},PROJECT=${PROJECT}" "${PBS}"
     fi
   fi
 done

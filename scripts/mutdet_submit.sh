@@ -41,17 +41,17 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 
 ### Input
-patient=$1
-conv=$2
+PATIENT=$1
+CONV=$2
 PROJECT=$3
 echo "Input:"
-echo "- patient=${patient:?}"
-echo "- conv=${conv:?}"
 echo "- PROJECT=${PROJECT:?}"
-[[ -f "$conv" ]] || { echo "File not found: ${conv}"; exit 1; }
+echo "- CONV=${CONV:?}"
+echo "- PATIENT=${PATIENT:?}"
+[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
 
 if [ $# -ne 3 ]; then
-        echo "ERROR: please specify patient, conversion file and project!"
+        echo "ERROR: please specify patient, CONV file and project!"
         exit 1
 fi
 
@@ -69,13 +69,13 @@ echo "- INTERVAL=${INTERVAL:?}"
 PBS=${LG3_HOME}/MutDet_TvsN.pbs
 [[ -f "$PBS" ]] || { echo "File not found or not executable: ${PBS}"; exit 1; }
 
-WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${patient}_mutect
+WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
 mkdir -p "${WORKDIR}" || { echo "Can't create scratch directory ${WORKDIR}"; exit 1; }
 
 XMX=Xmx8g
 
 ## Pull out patient specific conversion info
-grep -w "${patient}" "${conv}" > "${patient}.temp.conversions.txt"
+grep -w "${PATIENT}" "${CONV}" > "${PATIENT}.temp.conversions.txt"
 
 ## Get normal ID
 while IFS=$'\t' read -r ID _ _ SAMP
@@ -84,7 +84,7 @@ do
                 normid=${ID}
                 break
         fi
-done < "${patient}.temp.conversions.txt"
+done < "${PATIENT}.temp.conversions.txt"
 
 ## Cycle through tumors and submit MUTECT jobs
 while IFS=$'\t' read -r ID _ _ SAMP
@@ -111,17 +111,17 @@ do
                 samp_label="TUM"
         fi
         ## Expected output:
-        OUT=$WORKDIR/${patient}.NOR-${normid}__${samp_label}-${ID}.annotated.mutations
+        OUT=$WORKDIR/${PATIENT}.NOR-${normid}__${samp_label}-${ID}.annotated.mutations
         if [ -s "$OUT" ]; then
                 echo "WARNING: file $OUT exists, skipping this job ... "
         else
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "Mut_${patient}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${patient},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "Mut_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
-done < "${patient}.temp.conversions.txt"
+done < "${PATIENT}.temp.conversions.txt"
 
-## Delete patient specific conversion file
-rm "${patient}.temp.conversions.txt"
+## Delete PATIENT specific conversion file
+rm "${PATIENT}.temp.conversions.txt"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

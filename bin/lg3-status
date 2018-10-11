@@ -19,7 +19,7 @@
 ###  --all             Check all outputs
 ###
 ### Examples:
-###  lg3 status --all Patient157t
+###  lg3 status --all Patient157t10
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
@@ -87,7 +87,7 @@ if $ALL ; then
     COMB=true
 fi
 
-PATIENTS=${*:-Patient157t}
+PATIENTS=${*:-Patient157t10}
 
 echo -e "Checking output for project ${PROJECT}"
 echo "Patient/samples table ${CONV}"
@@ -116,7 +116,8 @@ if $FQ ; then
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
-        OUT=${WORKDIR}/${ID}_R1.fastq.gz
+        OUTs=("${WORKDIR}/${ID}_R1"*.fastq.gz)
+        OUT=${OUTs[0]}
         if [ -s "$OUT" ]; then
             echo -e "Fastq $ID $OK"
         else

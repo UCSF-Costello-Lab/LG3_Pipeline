@@ -9,10 +9,10 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-EMAIL=${EMAIL:-ivan.smirnov@ucsf.edu}
-SAMPLE=${SAMPLE:-Y00600t}
-SAMPLES=${SAMPLES:-Z00600t Z00601t}
-PATIENT=${PATIENT:-Patient157t}
+EMAIL=${EMAIL:-?}
+SAMPLE=${SAMPLE:-Y00600t10}
+SAMPLES=${SAMPLES:-Z00600t10 Z00601t10}
+PATIENT=${PATIENT:-Patient157t10}
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 
 ## Requires absolute path
@@ -57,7 +57,7 @@ CNT=0
 for S in ${SAMPLES}
 do
    ((CNT++))
-   B=$D/${PATIENT}.before.merge/${S}.$SUFF
+   B=$D/${PATIENT}/${S}.$SUFF
    if [ ! -f "$B" ]; then
       echo "ABORT: Can't open $B !"
       exit 1
@@ -71,4 +71,4 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},PREFIX=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST}" "$PBS"
+qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST}" "$PBS"

@@ -1,4 +1,5 @@
 #!/bin/bash
+FAILED=false
 
 ### Configuration
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
@@ -27,15 +28,15 @@ if [ $# -lt 2 ]; then
 fi
 
 PROJECT=$1
-patient=$2
-conv=patient_ID_conversions.tsv
-WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${patient}_mutect
+PATIENT=$2
+CONV=patient_ID_conversions.tsv
+WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
 
-echo -e "Checking MuTect output for ${YEL}${patient}${NOC}, project ${PROJECT}"
-echo "conversion ${conv}"
+echo -e "Checking MuTect output for ${YEL}${PATIENT}${NOC}, project ${PROJECT}"
+echo "conversion ${CONV}"
 
 ## Pull out patient specific conversion info
-grep -w "${patient}" "${conv}" > "${patient}.temp.conversions.txt"
+grep -w "${PATIENT}" "${CONV}" > "${PATIENT}.temp.conversions.txt"
 
 ## Get normal ID
 while IFS=$'\t' read -r ID _ _ SAMP
@@ -44,7 +45,7 @@ do
                 normid=${ID}
                 break
         fi
-done < "${patient}.temp.conversions.txt"
+done < "${PATIENT}.temp.conversions.txt"
 
 ## Cycle through tumors and submit MUTECT jobs
 while IFS=$'\t' read -r ID _ _ SAMP
@@ -72,17 +73,24 @@ do
         fi
 
         ## Expected output:
-        OUT=$WORKDIR/${patient}.NOR-${normid}__${samp_label}-${ID}.annotated.mutations
+        OUT=$WORKDIR/${PATIENT}.NOR-${normid}__${samp_label}-${ID}.annotated.mutations
 OK="$GRN OK$NOC"
 ERR="$RED missing$NOC"
         if [ -s "$OUT" ]; then
                 echo -e "$ID $OK"
         else
                 echo -e "$ID $ERR"
+					 FAILED=true
         fi
 
-done < "${patient}.temp.conversions.txt"
+done < "${PATIENT}.temp.conversions.txt"
 
-## Delete patient specific conversion file
-rm "${patient}.temp.conversions.txt"
+## Delete PATIENT specific conversion file
+rm "${PATIENT}.temp.conversions.txt"
+
+if ${FAILED} ; then
+	exit 1
+else
+	exit 0
+fi
 

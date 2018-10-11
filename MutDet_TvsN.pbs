@@ -96,7 +96,7 @@ echo "WORKDIR=$WORKDIR"
   "${PATIENT}" \
   "${CONFIG}" \
   "${INTERVAL}" \
-  "$XMX"
+  "$XMX" || { echo "ERROR: MutDet failed"; exit 1; }
 
 echo "End of PBS script!"
 date

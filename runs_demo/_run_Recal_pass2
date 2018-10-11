@@ -10,11 +10,12 @@ LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PROJECT=${PROJECT:-LG3}
+CONV=${CONV:-patient_ID_conversions.tsv}
+PATIENT=${PATIENT:-Patient157t10}
+SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
+NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)}
+ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 EMAIL=${EMAIL:?}
-SAMPLES=${SAMPLES:-Z00599t Y00600t}
-NORMAL=${NORMAL:-Z00599t}
-PATIENT=${PATIENT:-Patient157t}
-ILIST=${ILIST:-resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -57,17 +58,18 @@ D=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 D=$(readlink -e "$D") ## requires absolute path
 
 [[ -d "$D/${PATIENT}" ]] || { echo "Directory not found: ${D}/${PATIENT}"; exit 1; }
+[[ -d "$D/${PATIENT}.before.merge" ]] && { echo "WARNING: Directory found: ${D}/${PATIENT}.before.merge"; }
 
 echo "Renaming $D/${PATIENT} to $D/${PATIENT}.before.merge"
-mv "$D/${PATIENT}" "$D/${PATIENT}.before.merge"
+mv "$D/${PATIENT}" "$D/${PATIENT}.before.merge" || { echo "WARNING: No directory $D/${PATIENT}"; }
 
 SUFF=bwa.realigned.rmDups.recal.bam
 
 CNT=0
-for PREFIX in ${SAMPLES}
+for SAMPLE in ${SAMPLES}
 do
    ((CNT++))
-   B=$D/${PATIENT}.before.merge/${PREFIX}.$SUFF
+   B=$D/${PATIENT}.before.merge/${SAMPLE}.$SUFF
    if [ ! -f "$B" ]; then
       echo "ABORT: Can't open $B !"
       exit 1

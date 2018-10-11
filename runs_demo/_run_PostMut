@@ -9,10 +9,10 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-EMAIL=${EMAIL:?}
-PATIENT=${PATIENT:-Patient157t}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
+PATIENT=${PATIENT:-Patient157t10}
+EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -50,8 +50,8 @@ SCRIPT_A=${LG3_HOME}/scripts/chk_pindel.sh
 SCRIPT_B=${LG3_HOME}/scripts/chk_mutdet.sh
 [[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
 
-"${SCRIPT_A}" "${PROJECT}" "${PATIENT}"
-"${SCRIPT_B}" "${PROJECT}" "${PATIENT}"
+"${SCRIPT_A}" "${PROJECT}" "${PATIENT}" || { echo "ERROR: ${SCRIPT_A} failed!"; exit 1; }
+"${SCRIPT_B}" "${PROJECT}" "${PATIENT}" || { echo "ERROR: ${SCRIPT_B} failed!"; exit 1; }
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
