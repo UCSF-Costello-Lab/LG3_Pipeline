@@ -2,11 +2,31 @@
 
 ## Version 2018-10-08-9000 (develop version)
 
- * ...
- 
+### SIGNIFICANT CHANGES
+
+* Run scripts now infer `SAMPLES` and `NORMAL` from the patient file (`CONV`)
+  given the `PATIENT` name.  It is no longer necessary to set environment
+  variables `SAMPLES` and `NORMAL` when running the pipeline. These variables
+  will become deprecated soon and later produce an error if specified.
+
 ### DOCUMENTATION
 
  * Add section on 'Contributors' to README.
+
+### SOFTWARE QUALITY
+
+ * HARMONIZATION: Standardizing variable names through scripts.
+
+ * TESTS: Tests now defaults to using Patient157t10.
+
+### BUG FIXES
+
+* Run script `_run_MutDet` and job script `Recal_bigmem.pbs` failed to detect
+  errors occurring in scripts they called and therefore also not exit with
+  exit code 1 on such errors.
+
+* Scripts `scripts/chk_mutdet.sh` and `scripts/chk_pindel.sh` did not exit
+  with exit code 1 on errors.
 
 
 ## Version 2018-10-08
