@@ -89,7 +89,7 @@ echo "------------------------------------------------------"
 ## Construct string with one or more '-I <bam>' elements
 inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 
-echo "[Recal_pass2] Merge BAM files..."
+echo -e "\\n[Recal_pass2] Merge BAM files..."
 # shellcheck disable=SC2086
 # Comment: Because how 'inputs' is created and used below
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -102,10 +102,10 @@ echo "[Recal_pass2] Merge BAM files..."
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Merge BAM files failed"; exit 1; }
 
-echo "[Recal_pass2] Index merged BAM file..."
+echo -e "\\n[Recal_pass2] Index merged BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || { echo "First indexing failed"; exit 1; }
 
-echo "[Recal_pass2] Create intervals for indel detection..."
+echo -e "\\n[Recal_pass2] Create intervals for indel detection..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
@@ -117,7 +117,7 @@ echo "[Recal_pass2] Create intervals for indel detection..."
         --input_file "${PATIENT}.merged.bam" \
         --out "${PATIENT}.merged.intervals"; } 2>&1 || { echo "GATK Interval creation failed"; exit 1; }
 
-echo "[Recal_pass2] Indel realignment..."
+echo -e "\\n[Recal_pass2] Indel realignment..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type IndelRealigner \
@@ -133,7 +133,7 @@ rm -f "${PATIENT}.merged.bam"
 rm -f "${PATIENT}.merged.bam.bai"
 rm -f "${PATIENT}.merged.intervals"
 
-echo "[Recal_pass2] Fix mate information..."
+echo -e "\\n[Recal_pass2] Fix mate information..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_SCRIPT_B}" \
         INPUT="${PATIENT}.merged.realigned.bam" \
@@ -147,7 +147,7 @@ echo "[Recal_pass2] Fix mate information..."
 rm -f "${PATIENT}.merged.realigned.bam"
 rm -f "${PATIENT}.merged.realigned.bai"
 
-echo "[Recal_pass2] Mark duplicates..."
+echo -e "\\n[Recal_pass2] Mark duplicates..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_SCRIPT_C}" \
         INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
@@ -161,10 +161,10 @@ echo "[Recal_pass2] Mark duplicates..."
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
-echo "[Recal_pass2] Index BAM file..."
+echo -e "\\t[Recal_pass2] Index BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || { echo "Second indexing failed"; exit 1; } 
 
-echo "[Recal_pass2] Split BAM files..."
+echo -e "\\n[Recal_pass2] Split BAM files..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
@@ -180,7 +180,7 @@ for i in temp_*.bam
 do
         base=${i##temp_}
         base=${base%%.bam}
-        echo "[Recal_pass2] Splitting off $base..."
+        echo -e "\\n[Recal_pass2] Splitting off $base..."
         { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups"; } 2>&1 || { echo "Sorting $base failed"; exit 1; }
         { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.bam"; } 2>&1 || { echo "Indexing $base failed"; exit 1; }        
         rm -f "$i"
@@ -196,10 +196,10 @@ do
         base=${i%%.bwa.realigned.rmDups.bam}
         echo "[QC] $base"
 
-        echo "[QC] Calculate flag statistics..."
+        echo -e "\\n[QC] Calculate flag statistics..."
         { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.flagstat"; } 2>&1
 
-        echo "[QC] Calculate hybrid selection metrics..."
+        echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_SCRIPT_D}" \
                 BAIT_INTERVALS="${ILIST}" \
@@ -211,7 +211,7 @@ do
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Calculate hybrid selection metrics failed"; exit 1; }
 
-        echo "[QC] Collect multiple QC metrics..."
+        echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
                 -jar  "${PICARD_SCRIPT_E}" \
                 INPUT="$i" \
