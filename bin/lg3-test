@@ -10,7 +10,7 @@
 ###
 ### Examples:
 ###  lg3 test setup
-###  lg3 test validate Patient157t
+###  lg3 test validate Patient157t10
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}

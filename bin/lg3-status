@@ -19,7 +19,7 @@
 ###  --all             Check all outputs
 ###
 ### Examples:
-###  lg3 status --all Patient157t
+###  lg3 status --all Patient157t10
 ###
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}

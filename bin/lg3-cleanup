@@ -22,8 +22,8 @@
 ###  --hot                 Delete the files (otherwise only a dry run)
 ###
 ### Examples:
-###  lg3 cleanup --patient=Patient157t --samples="Z00599t Z00600t Z00601t"
-###  lg3 cleanup --patient=Patient157t --recal --hot
+###  lg3 cleanup --patient=Patient157t10 --samples="Z00599t10 Z00600t10 Z00601t10"
+###  lg3 cleanup --patient=Patient157t10 --recal --hot
 ###
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")

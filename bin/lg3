@@ -11,10 +11,10 @@
 ###  lg3 --help
 ###  lg3 --version
 ###  lg3 status --help
-###  lg3 status --all Patient157t
+###  lg3 status --all Patient157t10
 ###  lg3 cleanup --help
 ###  lg3 test setup
-###  lg3 test validate Patient157t
+###  lg3 test validate Patient157t10
 ###
 ### Settings:
 ###  LG3_HOME={{LG3_HOME}}
