@@ -49,7 +49,7 @@ echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
+SCRIPT_A=${LG3_HOME}/scripts/Recal_pass2.sh
 [[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
 SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
 [[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }

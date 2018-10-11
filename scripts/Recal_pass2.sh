@@ -44,19 +44,19 @@ GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 
 #Input variables
 bamfiles=$1
-patientID=$2
+PATIENT=$2
 ILIST=$3
 
 ## Assert existance of input files
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
-TMP="${LG3_SCRATCH_ROOT}/${patientID}_tmp"
+TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"
 mkdir -p "$TMP" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
 
 echo "------------------------------------------------------"
 echo "[Recal_pass2] Merging recalibrated files"
 echo "------------------------------------------------------"
-echo "[Recal_pass2] Merge Group: $patientID"
+echo "[Recal_pass2] Merge Group: $PATIENT"
 echo "$bamfiles" | awk -F ":" '{for (i=1; i<=NF; i++) print "[Recal_pass2] Exome:"$i}'
 echo "------------------------------------------------------"
 
@@ -69,7 +69,7 @@ echo "[Recal_pass2] Merge BAM files..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$PICARD/MergeSamFiles.jar" \
         ${inputs} \
-        OUTPUT="${patientID}.merged.bam" \
+        OUTPUT="${PATIENT}.merged.bam" \
         SORT_ORDER=coordinate \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
@@ -77,7 +77,7 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         VALIDATION_STRINGENCY=SILENT || { echo "Merge BAM files failed"; exit 1; }
 
 echo "[Recal_pass2] Index new BAM file..."
-$SAMTOOLS index "${patientID}.merged.bam" || { echo "First indexing failed"; exit 1; }
+$SAMTOOLS index "${PATIENT}.merged.bam" || { echo "First indexing failed"; exit 1; }
 
 echo "[Recal_pass2] Create intervals for indel detection..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -88,8 +88,8 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         --known "$THOUSAND" \
         --num_threads "${ncores}" \
         --logging_level WARN \
-        --input_file "${patientID}.merged.bam" \
-        --out "${patientID}.merged.intervals" || { echo "Interval creation failed"; exit 1; }
+        --input_file "${PATIENT}.merged.bam" \
+        --out "${PATIENT}.merged.intervals" || { echo "Interval creation failed"; exit 1; }
 
 echo "[Recal_pass2] Indel realignment..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -99,56 +99,56 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         --knownAlleles "$THOUSAND" \
         --logging_level WARN \
         --consensusDeterminationModel USE_READS \
-        --input_file "${patientID}.merged.bam" \
-        --targetIntervals "${patientID}.merged.intervals" \
-        --out "${patientID}.merged.realigned.bam" || { echo "Indel realignment failed"; exit 1; }
+        --input_file "${PATIENT}.merged.bam" \
+        --targetIntervals "${PATIENT}.merged.intervals" \
+        --out "${PATIENT}.merged.realigned.bam" || { echo "Indel realignment failed"; exit 1; }
 
-rm -f "${patientID}.merged.bam"
-rm -f "${patientID}.merged.bam.bai"
-rm -f "${patientID}.merged.intervals"
+rm -f "${PATIENT}.merged.bam"
+rm -f "${PATIENT}.merged.bam.bai"
+rm -f "${PATIENT}.merged.intervals"
 
 echo "[Recal_pass2] Fix mate information..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$PICARD/FixMateInformation.jar" \
-        INPUT="${patientID}.merged.realigned.bam" \
-        OUTPUT="${patientID}.merged.realigned.mateFixed.bam" \
+        INPUT="${PATIENT}.merged.realigned.bam" \
+        OUTPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         SORT_ORDER=coordinate \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT || { echo "Verify mate information failed"; exit 1; } 
 
-rm -f "${patientID}.merged.realigned.bam"
-rm -f "${patientID}.merged.realigned.bai"
+rm -f "${PATIENT}.merged.realigned.bam"
+rm -f "${PATIENT}.merged.realigned.bai"
 
 echo "[Recal_pass2] Mark duplicates..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$PICARD/MarkDuplicates.jar" \
-        INPUT="${patientID}.merged.realigned.mateFixed.bam" \
-        OUTPUT="${patientID}.merged.realigned.rmDups.bam" \
-        METRICS_FILE="${patientID}.merged.realigned.mateFixed.metrics" \
+        INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
+        OUTPUT="${PATIENT}.merged.realigned.rmDups.bam" \
+        METRICS_FILE="${PATIENT}.merged.realigned.mateFixed.metrics" \
         REMOVE_DUPLICATES=TRUE \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=LENIENT || { echo "Mark duplicates failed"; exit 1; }
 
-rm -f "${patientID}.merged.realigned.mateFixed.bam"
+rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo "[Recal_pass2] Index BAM file..."
-$SAMTOOLS index "${patientID}.merged.realigned.rmDups.bam" || { echo "Second indexing failed"; exit 1; } 
+$SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam" || { echo "Second indexing failed"; exit 1; } 
 
 echo "[Recal_pass2] Split BAM files..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
         --logging_level WARN \
-        --input_file "${patientID}.merged.realigned.rmDups.bam" \
+        --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
         --outputRoot temp_ || { echo "Splitting BAM files failed"; exit 1; }
 
-rm -f "${patientID}.merged.realigned.rmDups.bam"
-rm -f "${patientID}.merged.realigned.rmDups.bam.bai"
-rm -f "${patientID}.merged.realigned.rmDups.bai"
+rm -f "${PATIENT}.merged.realigned.rmDups.bam"
+rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
+rm -f "${PATIENT}.merged.realigned.rmDups.bai"
 
 for i in temp_*.bam
 do
