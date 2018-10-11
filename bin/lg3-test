@@ -271,7 +271,7 @@ if [ "$action" == "setup" ]; then
         report_error "Patient TSV file: ${file} (failed to link to '${target}')"
     fi
     dir=rawdata
-    target=/costellolab/data1/shared/LG3_Pipeline/example_data/${dir}
+    target=${LG3_TEST_TRUTH}/${dir}
     ln -fs "${target}" .
     if [ -d "${dir}" ]; then
         report_ok "Raw data folder: ${dir}"
