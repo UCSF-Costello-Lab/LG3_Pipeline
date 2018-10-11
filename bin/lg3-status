@@ -116,7 +116,8 @@ if $FQ ; then
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
-        OUT=${WORKDIR}/${ID}_R1.fastq.gz
+        OUTs=("${WORKDIR}/${ID}_R1"*.fastq.gz)
+        OUT=${OUTs[0]}
         if [ -s "$OUT" ]; then
             echo -e "Fastq $ID $OK"
         else

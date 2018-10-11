@@ -8,3 +8,6 @@ Z00601t	SF9505	Patient157t	Recurrence1
 Z00599t10	SF9505N	Patient157t10	Normal
 Z00600t10	SF08647	Patient157t10	Primary
 Z00601t10	SF9505	Patient157t10	Recurrence1
+Z00599_t10_AATCCGTC_L007	SF9505N	Patient157_t10_underscore	Normal
+Z00600_t10_AATCCGTC_L007	SF08647	Patient157_t10_underscore	Primary
+Z00601_t10_AATCCGTC_L007	SF9505	Patient157_t10_underscore	Recurrence1
