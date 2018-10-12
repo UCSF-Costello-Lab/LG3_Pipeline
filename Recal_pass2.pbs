@@ -83,7 +83,7 @@ mk_links() {
     ln -sf "$F" "$L"
   done
 }
-grep -v recal ./*.bwa.realigned.rmDups.* | mk_links
+ls -1 ./*.bwa.realigned.rmDups.* | grep -v recal | mk_links
 
 
 cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
