@@ -79,14 +79,21 @@ FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 rm "$FQ1" "$FQ2"
 
-if [ "$QTY" -eq 20 ]; then
-  QTY=""
-fi
+echo "Intermediate output files:"
+ls -laR
 
-mv "${SAMPLE}_R1_val_1.fq.gz" "${SAMPLE}-trim${QTY}_R1.fastq.gz"
-mv "${SAMPLE}_R2_val_2.fq.gz" "${SAMPLE}-trim${QTY}_R2.fastq.gz"
-mv "${SAMPLE}_R1.fastq.gz_trimming_report.txt" "${SAMPLE}-trim${QTY}_R1.trimming_report.txt"
-mv "${SAMPLE}_R2.fastq.gz_trimming_report.txt" "${SAMPLE}-trim${QTY}_R2.trimming_report.txt"
+echo "Moving files of interest to final destination:"
+if [ "$QTY" -eq 20 ]; then
+    SAMPLE_PREFIX=${SAMPLE}-trim
+else
+    SAMPLE_PREFIX=${SAMPLE}-trim${QTY}
+fi
+echo "- SAMPLE_PREFIX=${SAMPLE_PREFIX}"
+
+mv "${SAMPLE}_R1"*_val_1.fq.gz "${SAMPLE_PREFIX}_R1.fastq.gz" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R1.fastq.gz"; exit 1; }
+mv "${SAMPLE}_R2"*_val_2.fq.gz "${SAMPLE_PREFIX}_R2.fastq.gz" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R2.fastq.gz"; exit 1; }
+mv "${SAMPLE}_R1"*.fastq.gz_trimming_report.txt "${SAMPLE_PREFIX}_R1.trimming_report.txt" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R2.trimming_report.txt"; exit 1; }
+mv "${SAMPLE}_R2"*.fastq.gz_trimming_report.txt "${SAMPLE_PREFIX}_R2.trimming_report.txt" || { echo "ERROR: Failed to copy ${SAMPLE_PREFIX}_R2.trimming_report.txt"; exit 1; }
 
 cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
 echo "Current working directory: ${PWD}"
