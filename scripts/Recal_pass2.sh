@@ -161,7 +161,7 @@ echo -e "\\n[Recal_pass2] Mark duplicates..."
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
-echo -e "\\t[Recal_pass2] Index BAM file..."
+echo -e "\\n[Recal_pass2] Index BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || { echo "Second indexing failed"; exit 1; } 
 
 echo -e "\\n[Recal_pass2] Split BAM files..."
@@ -180,8 +180,9 @@ for i in temp_*.bam
 do
         base=${i##temp_}
         base=${base%%.bam}
-        echo -e "\\n[Recal_pass2] Splitting off $base..."
+        echo -e "\\n[Recal_pass2] Sorting $base..."
         { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups"; } 2>&1 || { echo "Sorting $base failed"; exit 1; }
+        echo -e "\\n[Recal_pass2] Indexing $base..."
         { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.bam"; } 2>&1 || { echo "Indexing $base failed"; exit 1; }        
         rm -f "$i"
 done

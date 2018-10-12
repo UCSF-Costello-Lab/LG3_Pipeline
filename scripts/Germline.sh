@@ -30,11 +30,11 @@ fi
 
 ## Input
 nbamfile=$1
-patientID=$2
+PATIENT=$2
 ILIST=$3
 echo "Input:"
 echo "- nbamfile=${nbamfile:?}"
-echo "- patientID=${patientID:?}"
+echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
@@ -74,7 +74,7 @@ echo "- GATK=${GATK:?}"
 echo "-------------------------------------------------"
 echo "[Germline] Germline SNPs and relatedness"
 echo "-------------------------------------------------"
-echo "[Germline] Patient ID: $patientID"
+echo "[Germline] Patient ID: $PATIENT"
 echo "[Germline] Bam file directory: $bamdir"
 echo "[Germline] Normal Sample: $normalname"
 echo "-------------------------------------------------"
@@ -89,7 +89,7 @@ echo "$INPUTS"
 
         ### $JAVA -Xmx16g \
         ### -nct 3 -nt 8 \
-if [ ! -e "${patientID}.UG.snps.raw.vcf" ]; then
+if [ ! -e "${PATIENT}.UG.snps.raw.vcf" ]; then
         echo "[Germline] Running Unified Genotyper..."
         # shellcheck disable=SC2086
         # Comment: Because how INPUTS is created and used below
@@ -110,12 +110,12 @@ if [ ! -e "${patientID}.UG.snps.raw.vcf" ]; then
                 --standard_min_confidence_threshold_for_emitting 10.0 \
                 --min_base_quality_score 20 \
                 --output_mode EMIT_VARIANTS_ONLY \
-                --out "${patientID}.UG.snps.raw.vcf"; } 2>&1 || { echo "Unified Genotyper SNP calling failed"; exit 1; }
+                --out "${PATIENT}.UG.snps.raw.vcf"; } 2>&1 || { echo "Unified Genotyper SNP calling failed"; exit 1; }
 else
-        echo "[Germline] Found output ${patientID}.UG.snps.raw.vcf -- Skipping..."
+        echo "[Germline] Found output ${PATIENT}.UG.snps.raw.vcf -- Skipping..."
 fi
 
-if [ ! -e "${patientID}.UG.snps.annotated.vcf" ]; then
+if [ ! -e "${PATIENT}.UG.snps.annotated.vcf" ]; then
         echo "[Germline] Annotating Unified Genotyper SNPs..."
         # shellcheck disable=SC2086
         # Comment: Because how INPUTS is created and used below
@@ -126,8 +126,8 @@ if [ ! -e "${patientID}.UG.snps.annotated.vcf" ]; then
                 --reference_sequence "$REF" \
                 --dbsnp "$DBSNP" \
                 --logging_level WARN \
-                --intervals "${patientID}.UG.snps.raw.vcf" \
-                --variant "${patientID}.UG.snps.raw.vcf" \
+                --intervals "${PATIENT}.UG.snps.raw.vcf" \
+                --variant "${PATIENT}.UG.snps.raw.vcf" \
                 -baq CALCULATE_AS_NECESSARY \
                 --annotation QualByDepth \
                 --annotation RMSMappingQuality \
@@ -138,22 +138,22 @@ if [ ! -e "${patientID}.UG.snps.annotated.vcf" ]; then
                 --annotation HaplotypeScore \
                 --annotation ReadPosRankSumTest \
                 --annotation DepthOfCoverage \
-                --out "${patientID}.UG.snps.annotated.vcf"; } 2>&1 || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
+                --out "${PATIENT}.UG.snps.annotated.vcf"; } 2>&1 || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
 
-        rm -f "${patientID}.UG.snps.raw.vcf"
-        rm -f "${patientID}.UG.snps.raw.vcf.idx"
+        rm -f "${PATIENT}.UG.snps.raw.vcf"
+        rm -f "${PATIENT}.UG.snps.raw.vcf.idx"
 else
-   echo "[Germline] Found output ${patientID}.UG.snps.annotated.vcf -- Skipping..."
+   echo "[Germline] Found output ${PATIENT}.UG.snps.annotated.vcf -- Skipping..."
 fi
 
-if [ ! -e "${patientID}.UG.snps.vcf" ]; then
+if [ ! -e "${PATIENT}.UG.snps.vcf" ]; then
         echo "[Germline] Filtering Unified Genotyper SNPs..."
         { time $JAVA -Xmx64g \
                 -jar "$GATK" \
                 --analysis_type VariantFiltration \
                 --reference_sequence "$REF" \
                 --logging_level WARN \
-                --variant "${patientID}.UG.snps.annotated.vcf" \
+                --variant "${PATIENT}.UG.snps.annotated.vcf" \
                 -baq CALCULATE_AS_NECESSARY \
                 --clusterSize 3 \
                 --clusterWindowSize 10 \
@@ -169,12 +169,12 @@ if [ ! -e "${patientID}.UG.snps.vcf" ]; then
                 --filterName MQRankSumFilter \
                 --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
-                --out "${patientID}.UG.snps.vcf"; } 2>&1 || { echo "Unified Genotyper SNP filtration failed"; exit 1; }
+                --out "${PATIENT}.UG.snps.vcf"; } 2>&1 || { echo "Unified Genotyper SNP filtration failed"; exit 1; }
 
-        rm -f "${patientID}.UG.snps.annotated.vcf"
-        rm -f "${patientID}.UG.snps.annotated.vcf.idx"
+        rm -f "${PATIENT}.UG.snps.annotated.vcf"
+        rm -f "${PATIENT}.UG.snps.annotated.vcf.idx"
 else
-   echo "[Germline] Found output ${patientID}.UG.snps.vcf -- Skipping..."
+   echo "[Germline] Found output ${PATIENT}.UG.snps.vcf -- Skipping..."
 fi
 
 for i in ${bamdir}/*.bam
@@ -186,7 +186,7 @@ do
         if [ ! -e "${prefix}.germline" ]; then
                 echo "[Germline] Checking germline SNPs for sample relatedness: $tumorname vs $normalname"
                 $PYTHON "${PYTHON_SCRIPT_A}" \
-                        "${patientID}.UG.snps.vcf" \
+                        "${PATIENT}.UG.snps.vcf" \
                         "$normalname" \
                         "$tumorname" \
                         > "${prefix}.germline" || { echo "Germline analysis failed"; exit 1; }

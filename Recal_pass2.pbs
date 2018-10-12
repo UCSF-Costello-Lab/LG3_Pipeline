@@ -65,6 +65,7 @@ mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
 "${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" || { echo "ERROR: ${SCRIPT_A} failed!"; exit 1; }
+echo "${SCRIPT_A} done!"
 
 cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
 
@@ -78,6 +79,7 @@ mk_links() {
   while read -r F
   do
     L=${F/rmDups/rmDups.recal}
+    echo "ln -sf $F $L"
     ln -sf "$F" "$L"
   done
 }
