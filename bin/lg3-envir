@@ -1,0 +1,11 @@
+#!/bin/bash
+CURDIR=$(pwd -P)
+
+echo "Cur dir =$CURDIR"
+echo "LG3_HOME=$LG3_HOME"
+echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+echo "LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
+echo "PROJECT=$PROJECT"
+echo "CONV=$CONV"
+echo "PATIENT=$PATIENT"
+echo "SAMPLES=$SAMPLES"
