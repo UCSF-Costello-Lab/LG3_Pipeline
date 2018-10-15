@@ -2,16 +2,21 @@
 
 ## Version 2018-10-11-9000
 
-* ...
+### NEW FEATURES
+
+* Alignment jobs now require less memory by default (64 GiB RAM instead of
+  100 GiB), which should decreased the average default queuing time.
+
+### BUG FIXES
+
+* PBS scripts would only run on TIPCC compute nodes that support the legacy
+  PBS `bigmem` flag.  By removing this unnecessay `bigmem` requirement from
+  all PBS scripts, jobs can now run on all compute nodes that meet the core
+  and memory requirement specified by each PBS script (or is overridden in
+  the LG3 call).
 
 
 ## Version 2018-10-11
-
-### MINOR CHANGES
-
-* Removed PBS bigmem request from *.pbs files
-
-* Default vmem for Align_fastq.pbs changed from 100gb to 64gb
 
 ### SIGNIFICANT CHANGES
 
