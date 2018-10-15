@@ -9,6 +9,7 @@
 
 ### MINOR CHANGES
 
+* removed PBS bigmem request from *.pbs files
 * Default vmem for Align_fastq.pbs changed from 100gb to 64gb
 
 ### SIGNIFICANT CHANGES
