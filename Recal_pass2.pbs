@@ -83,7 +83,7 @@ mk_links() {
     ln -sf "$F" "$L"
   done
 }
-ls -1 --ignore="*recal*" --ignore="P*" --ignore="germline" | mk_links
+find . -maxdepth 1 -type f -name "*.bwa.realigned.rmDups.*" -not -name "*recal*" | mk_links
 
 
 cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
