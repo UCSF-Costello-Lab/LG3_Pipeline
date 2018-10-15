@@ -7,6 +7,10 @@
 
 ## Version 2018-10-11
 
+### MINOR CHANGES
+
+* Default vmem for Align_fastq.pbs changed from 100gb to 64gb
+
 ### SIGNIFICANT CHANGES
 
 * Run scripts now infer `SAMPLES` and `NORMAL` from the patient file (`CONV`)
