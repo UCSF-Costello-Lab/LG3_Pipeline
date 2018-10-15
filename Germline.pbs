@@ -4,7 +4,7 @@
 ### Output files
 #PBS -e _Germline_${PATIENT}.err
 #PBS -o _Germline_${PATIENT}.out
-#PBS -l nodes=1:bigmem:ppn=8,vmem=200gb
+#PBS -l nodes=1:ppn=8,vmem=200gb
 #PBS -m ae
 
 PROGRAM=${BASH_SOURCE[0]}

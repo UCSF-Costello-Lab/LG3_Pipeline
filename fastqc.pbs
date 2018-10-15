@@ -2,7 +2,7 @@
 
 #PBS -e _FQC_${PREF}.err
 #PBS -o _FQC_${PREF}.out
-#PBS -l nodes=1:bigmem:ppn=12,vmem=8gb
+#PBS -l nodes=1:ppn=12,vmem=8gb
 #PBS -m ae
 
 PROGRAM=${BASH_SOURCE[0]}

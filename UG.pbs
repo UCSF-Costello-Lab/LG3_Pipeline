@@ -3,7 +3,7 @@
 ### Output files
 #PBS -e _UG_${PAT}.err
 #PBS -o _UG_${PAT}.out
-#PBS -l nodes=1:bigmem:ppn=12
+#PBS -l nodes=1:ppn=12
 #PBS -m ae
 
 ### Configuration

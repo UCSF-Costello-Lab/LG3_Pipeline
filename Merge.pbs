@@ -4,7 +4,7 @@
 ### Output files
 #PBS -e _Merge_${SAMPLE}.err
 #PBS -o _Merge_${SAMPLE}.out
-#PBS -l nodes=1:bigmem:ppn=6,vmem=32gb
+#PBS -l nodes=1:ppn=6,vmem=32gb
 #PBS -m ae
 
 PROGRAM=${BASH_SOURCE[0]}

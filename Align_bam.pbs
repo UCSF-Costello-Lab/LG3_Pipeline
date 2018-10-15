@@ -4,7 +4,7 @@
 ### Output files
 #PBS -e Align_${PREFIX}.err
 #PBS -o Align_${PREFIX}.out
-#PBS -l nodes=1:bigmem:ppn=12
+#PBS -l nodes=1:ppn=12
 #PBS -m ae
 
 ### Configuration

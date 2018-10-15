@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -e _post_${PREFIX}.err
 #PBS -o _post_${PREFIX}.out
-#PBS -l nodes=1:bigmem:ppn=12,vmem=100gb
+#PBS -l nodes=1:ppn=12,vmem=100gb
 #PBS -m ae
 
 ### Configuration
