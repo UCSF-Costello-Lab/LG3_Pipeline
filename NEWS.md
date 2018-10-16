@@ -7,6 +7,11 @@
 * Alignment jobs now require less memory by default (64 GiB RAM instead of
   100 GiB), which should decreased the average default queuing time.
 
+### KNOWN ISSUES
+
+* Patient IDs must not contain underscores ('_') because the Pindel step
+  of the pipeline does not support that.
+
 ### BUG FIXES
 
 * PBS scripts would only run on TIPCC compute nodes that support the legacy
