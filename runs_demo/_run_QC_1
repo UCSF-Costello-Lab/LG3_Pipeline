@@ -1,0 +1,55 @@
+#!/bin/bash
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
+CONV=${CONV:-patient_ID_conversions.tsv}
+PATIENT=${PATIENT:-Patient157t10}
+MUTATIONFILE=${LG3_INPUT_ROOT}/${PROJECT}/MutInDel/${PATIENT}.snvs.indels.filtered.overlaps.txt
+BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
+
+## Requires absolute path
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+
+echo "Input: "
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- EMAIL=${EMAIL}"
+
+## Assert that the conversion file exists
+[[ -f "${CONV}" ]] || { echo "ERROR: File not found: ${CONV}"; exit 1; }
+CONV=$(readlink -e "${CONV}")
+echo "- CONV=${CONV}"
+
+## Assert that the mutation file exists
+[[ -f "${MUTATIONFILE}" ]] || { echo "ERROR: File not found: ${MUTATIONFILE}"; exit 1; }
+MUTATIONFILE=$(readlink -e "${MUTATIONFILE}")
+echo "- MUTATIONFILE=${MUTATIONFILE}"
+
+[[ -d "${BAMPATH}" ]] || { echo "ERROR: Directory not found: ${BAMPATH}"; exit 1; }
+BAMPATH=$(readlink -e "${BAMPATH}") ## requires absolute path
+echo "- BAMPATH=${BAMPATH}"
+
+ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || { echo "ERROR: No bam files found in ${BAMPATH}"; exit 1; }
+
+PBS=${LG3_HOME}/scripts/annotate_mutations_from_bam_vSH.sh
+[[ -x "${PBS}" ]] || { echo "ERROR: File not found or not an executable: ${PBS}"; exit 1; }
+
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
+
+PN=${PATIENT/Patient/Pat}
+qsub -l vmem=96gb -e "_QC1_${PATIENT}.err" -o "_QC1_${PATIENT}.out" -N "QC1_${PN}" -M "${EMAIL}" -m ae -v "${QSUB_ENVVARS},MUTATIONFILE=${MUTATIONFILE},CONV=${CONV},PATIENT=${PATIENT},PROJECT=${PROJECT},BAMPATH=${BAMPATH}" "${PBS}"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
