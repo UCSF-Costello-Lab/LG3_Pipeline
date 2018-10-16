@@ -7,6 +7,8 @@
 * Alignment jobs now require less memory by default (64 GiB RAM instead of
   100 GiB), which should decreased the average default queuing time.
 
+* Added `lg3 --news` for displaying the NEWS.md file in the terminal.
+
 ### KNOWN ISSUES
 
 * Patient IDs must not contain underscores ('_') because the Pindel step
