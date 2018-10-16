@@ -10,6 +10,7 @@
 ### Examples:
 ###  lg3 --help
 ###  lg3 --version
+###  lg3 --news
 ###  lg3 status --help
 ###  lg3 status --all Patient157t10
 ###  lg3 cleanup --help
@@ -69,6 +70,10 @@ version() {
     grep -E "^###[ ]*Version:[ ]*" "$0" | sed 's/###[ ]*Version:[ ]*//g'
 }
 
+news() {
+    less "${LG3_HOME}/NEWS.md"
+}
+
 help() {
     if [ $# -lt 1 ]; then
       local t
@@ -95,6 +100,9 @@ main() {
         exit 1
     elif [ "$1" == "--version" ]; then
         version
+        exit 1
+    elif [ "$1" == "--news" ]; then
+        news
         exit 1
     elif [ "$1" == "--tools" ]; then
         list_tools
