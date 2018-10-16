@@ -10,7 +10,8 @@
 ### KNOWN ISSUES
 
 * Patient IDs must not contain underscores ('_') because the Pindel step
-  of the pipeline does not support that.
+  of the pipeline does not support that.  All steps of the pipeline now
+  assert that patient IDs do no contain underscores.
 
 ### BUG FIXES
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+g
 ### Usage: qsub -N Job_Name -v FASTQ1=/path/to/read1.fastq,FASTQ2=/path/to/read2.fastq,PREFIX=Output_Prefix_ID_Number /path/to/Align_fastq.pbs
 ### Output files
 #PBS -e _Align_${PREFIX}.err

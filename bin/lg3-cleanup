@@ -102,6 +102,8 @@ echo "Project = ${PROJECT}"
 echo "Patient = ${PATIENT:?}"
 echo "Samples = ${SAMPLES:?}"
 
+[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 TRIMDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/trim
 ALIGNDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes

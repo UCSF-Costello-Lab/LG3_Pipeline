@@ -44,6 +44,7 @@ echo "Input:"
 echo "- patient_ID=${patient_ID:?}"
 echo "- proj=${proj:?}"
 echo "- patIDs=${patIDs:?}"
+[[ "${patient_ID}" == *[_]* ]] && { echo "ERROR: 'patient_ID' must not contain underscores: ${patient_ID}"; exit 1; }
 [[ -f "$patIDs" ]] || { echo "File not found: ${patIDs}"; exit 1; }
 
 python "${PYTHON_SCRIPT_A}" "${patient_ID}" "${proj}" "${patIDs}"

@@ -30,6 +30,8 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- SAMPLES=${SAMPLES:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
+[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 

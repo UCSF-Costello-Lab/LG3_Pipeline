@@ -275,7 +275,11 @@ if [ "$action" == "setup" ]; then
 
     report_ok "PROJECT: ${PROJECT:?}"
 
-    report_ok "PATIENT: ${PATIENT} (required for 'lg3 test validate')"
+    if [[ "${PATIENT}" == *[_]* ]]; then
+        report_error "PATIENT: ${PATIENT} (must not contain underscores)"
+    else
+        report_ok "PATIENT: ${PATIENT} (required for 'lg3 test validate')"
+    fi    
 
     [[ -n "${CONV}" ]] || report_error "CONV (patient TSV file): <not set>"
     

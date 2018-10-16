@@ -33,6 +33,8 @@ echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 echo "- EMAIL=${EMAIL}"
 
+[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+
 ## Assert that the patient file exists
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 ILIST=$(readlink -e "$ILIST")
