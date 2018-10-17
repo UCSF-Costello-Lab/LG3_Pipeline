@@ -18,7 +18,7 @@ The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, 
 ```sh
 $ module load CBC lg3
 $ lg3 --version
-2018-10-08
+2018-10-17
 ```
 
 See `module avail` for alternative versions.
@@ -48,18 +48,11 @@ In both cases, there will be a local `./output/` folder that the LG3 pipeline ca
 The remaining parts of the test setup can be either be created automatically using `lg3 test setup` (the `lg3` command is in `${LG3_HOME}/bin`), or manually as one would do when analyzing other data than the test data.  To set up the test automatically, use:
 
 ```sh
+$ export PATIENT=Patient157t10
 $ lg3 test setup
 *** Setup
-[OK] PROJECT: LG3
-[OK] PATIENT: Patient157t (required for 'lg3 test validate')
-[OK] CONV: patient_ID_conversions.tsv
-[OK]   => SAMPLES: Z00599t Z00600t Z00601t (required by '_run_Recal')
-[OK]   => NORMAL: 'Z00599t' (required by '_run_Recal')
-[OK] EMAIL: alice@example.org
-[OK] LG3_HOME: /home/shared/cbc/software_cbc/LG3_Pipeline
-[OK] LG3_OUTPUT_ROOT: output
-[OK] Patient TSV file: patient_ID_conversions.tsv
-[OK] Raw data folder: rawdata
+[OK] LG3_HOME: /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3
+[OK] R packages: 'RColorBrewer'
 [OK] Run scripts: _run_Align_gz
 [OK] Run scripts: _run_Merge
 [OK] Run scripts: _run_Merge_QC
@@ -69,7 +62,14 @@ $ lg3 test setup
 [OK] Run scripts: _run_Recal
 [OK] Run scripts: _run_Recal_pass2
 [OK] Run scripts: _run_Trim
-[OK] R packages: 'RColorBrewer'
+[OK] EMAIL: henrik.bengtsson@gmail.com
+[OK] PROJECT: LG3
+[OK] PATIENT: Patient157t10 (required for 'lg3 test validate')
+[OK] CONV (patient TSV file): patient_ID_conversions.tsv
+[OK]   => SAMPLES: Z00599t10 Z00600t10 Z00601t10  (required by '_run_Recal')
+[OK]   => NORMAL: 'Z00599t10' (required by '_run_Recal')
+[OK] Raw data folder: rawdata
+[OK] LG3_OUTPUT_ROOT: output
 ```
 
 From the above, we should have a directory containing the following files and folders:
@@ -77,17 +77,19 @@ From the above, we should have a directory containing the following files and fo
 $ tree
 .
 ├── output -> /another/drive/lg3-ex/output
-├── patient_ID_conversions.tsv
+├── patient_ID_conversions.tsv -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/patient_ID_conversions.tsv
 ├── rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
-├── _run_Align_gz
-├── _run_Merge
-├── _run_Merge_QC
-├── _run_MutDet
-├── _run_Pindel
-├── _run_PostMut
-├── _run_Recal
-├── _run_Recal_pass2
-└── _run_Trim
+├── _run_Align_gz -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Align_gz
+├── _run_Merge -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Merge
+├── _run_Merge_QC -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Merge_QC
+├── _run_MutDet -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_MutDet
+├── _run_Pindel -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Pindel
+├── _run_PostMut -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_PostMut
+├── _run_Recal -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Recal
+├── _run_Recal_pass2 -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Recal_pass2
+└── _run_Trim -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Trim
+
+2 directories, 10 files
 ```
 
 
@@ -103,8 +105,9 @@ This can preferably be set in your global `~/.bashrc` script.
 Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
-$ module load CBC lg3
 $ cd /path/to/lg3-ex
+$ module load CBC lg3
+$ export PATIENT=Patient157t10
 $ ./_run_Trim                    ## ~20 minutes
 $ ./_run_Align_gz                ## ~1 hour
 $ ./_run_Recal                   ## ~13-15 hours
@@ -116,31 +119,32 @@ _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_Mut
 
 Throughout all steps, you can check the current status using the `lg3 status` command.  Here is what the output looks like when all steps are complete:
 ```sh
-$ lg3 status --all Patient157t
-hecking output for project LG3
+$ export PATIENT=Patient157t10
+$ lg3 status --all $PATIENT
+Checking output for project LG3
 Patient/samples table patient_ID_conversions.tsv
 BAM suffix bwa.realigned.rmDups.recal.insert_size_metrics
-Patients Patient157t
-****** Checking Patient157t Normal: Z00599t
-Fastq Z00599t  OK
-Fastq Z00600t  OK
-Fastq Z00601t  OK
-Trim Z00599t  OK
-Trim Z00600t  OK
-Trim Z00601t  OK
-BWA Z00599t  OK
-BWA Z00600t  OK
-BWA Z00601t  OK
-Recal Z00599t  OK
-Recal Z00600t  OK
-Recal Z00601t  OK
-UG  OK 7579
-Germline Z00600t  OK
-Germline Z00601t  OK
-Pindel  OK 3
-Mutect Z00600t  OK 28
-Mutect Z00601t  OK 53
-MutCombine  OK 16
+Patients Patient157t10
+****** Checking Patient157t10 Normal: Z00599t10
+Fastq Z00599t10  OK
+Fastq Z00600t10  OK
+Fastq Z00601t10  OK
+Trim Z00599t10  OK
+Trim Z00600t10  OK
+Trim Z00601t10  OK
+BWA Z00599t10  OK
+BWA Z00600t10  OK
+BWA Z00601t10  OK
+Recal Z00599t10  OK
+Recal Z00600t10  OK
+Recal Z00601t10  OK
+UG  OK 7262
+Germline Z00600t10  OK
+Germline Z00601t10  OK
+Pindel  OK 0
+Mutect Z00600t10  OK 24
+Mutect Z00601t10  OK 29
+MutCombine  OK 6
 MAF  OK
 LOH plots  OK
 ```
@@ -148,7 +152,7 @@ LOH plots  OK
 Done!  All results are written to the `./output/` folder in different subdirectories.
 
 
-See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output looks like.  Particularly, the text file `./output/LG3/MutInDel/Patient157t.R.mutations` contain the identified multations.
+See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output looks like.  Particularly, the text file `./output/LG3/MutInDel/Patient157t10.R.mutations` contain the identified multations.
 
 
 
@@ -157,8 +161,13 @@ See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output l
 To validate that you get the expected results when running through the tests, call `lg3 test validate`.  Here is an example of the output when all steps are completed:
 
 ```
-$ lg3 test validate Patient157t
+$ export PATIENT=Patient157t10
+$ lg3 test validate $PATIENT
+
+lg3 test validate $PATIENT
 *** Configuration
+[OK] PROJECT=LG3
+[OK] PATIENT=Patient157-t10-underscore
 [OK] CONV=patient_ID_conversions.tsv
 [OK] LG3_TEST_TRUTH=/costellolab/data1/shared/LG3_Pipeline/example_data
 
@@ -171,30 +180,43 @@ $ lg3 test validate Patient157t
 [OK] file sizes ('output/LG3/exomes/Z00*/*')
 
 *** Recalibration of BAM Files
-[OK] file tree ('output/LG3/exomes_recal/Patient157t')
-[OK] file sizes ('output/LG3/exomes_recal/Patient157t/*')
-[OK] file sizes ('output/LG3/exomes_recal/Patient157t/germline/*')
-[OK] file sizes ('output/LG3/exomes_recal/Patient157t/*.bai')
+[WARN] unexpected file tree ('/costellolab/data1/shared/LG3_Pipeline/example_data/Patient157-t10-underscore/output/LG3/exomes_recal/Patient157-t10-underscore' != 'output/LG3/exomes_recal/Patient157-t10-underscore')
+@@ -2 +2,39 @@
+-└── germline
++├── germline
++│   ├── NOR-Z00599_t10_AATCCGTC_L007_vs_Z00600_t10_AATCCGTC_L007.germline
++│   ├── NOR-Z00599_t10_AATCCGTC_L007_vs_Z00601_t10_AATCCGTC_L007.germline
++2.1M   output/LG3/exomes_recal/Patient157-t10-underscore/germline
++8.8K   output/LG3/exomes_recal/Patient157-t10-underscore/Z00599_t10_AATCCGTC_L007.bwa.realigned.rmDups.recal.insert_size_metrics
++1.8K   output/LG3/exomes_recal/Patient157-t10-underscore/Z00600_t10_AATCCGTC_L007.bwa.realigned.rmDups.recal.hybrid_selection_metrics
++12K    output/LG3/exomes_recal/Patient157-t10-underscore/Z00600_t10_AATCCGTC_L007.bwa.realigned.rmDups.recal.insert_size_histogram.pdf
++8.4K   output/LG3/exomes_recal/Patient157-t10-underscore/Z00600_t10_AATCCGTC_L007.bwa.realigned.rmDups.recal.insert_size_metrics
+
+*** Recalibration of BAM Files
+[OK] file tree ('output/LG3/exomes_recal/Patient157t10')
+[OK] file sizes ('output/LG3/exomes_recal/Patient157t10/*')
+[OK] file sizes ('output/LG3/exomes_recal/Patient157t10/germline/*')
+[OK] file sizes ('output/LG3/exomes_recal/Patient157t10/*.bai')
 
 *** Pindel Processing
 [OK] file tree ('output/LG3/pindel')
-[OK] file rows ('output/LG3/pindel/Patient157t.pindel.cfg')
-[OK] file sizes ('output/LG3/pindel/Patient157t_pindel/*')
+[OK] file rows ('output/LG3/pindel/Patient157t10.pindel.cfg')
+[OK] file sizes ('output/LG3/pindel/Patient157t10_pindel/*')
 
 *** MutDet Processing
-[OK] file tree ('output/LG3/mutations/Patient157t_mutect')
-[OK] file sizes ('output/LG3/mutations/Patient157t_mutect/*')
+[OK] file tree ('output/LG3/mutations/Patient157t10_mutect')
+[OK] file sizes ('output/LG3/mutations/Patient157t10_mutect/*')
 
 *** Post-MutDet Processing
 [OK] file tree ('output/LG3/MAF')
-[OK] file sizes ('output/LG3/MAF/Patient157t_MAF/*')
-[OK] file sizes ('output/LG3/MAF/Patient157t_plots/*')
+[OK] file sizes ('output/LG3/MAF/Patient157t10_MAF/*')
+[OK] file sizes ('output/LG3/MAF/Patient157t10_plots/*')
 [OK] file tree ('output/LG3/MutInDel')
 [OK] file sizes ('output/LG3/MutInDel/*')
-[OK] file content ('output/LG3/MutInDel/Patient157t.R.mutations')
+[OK] file content ('output/LG3/MutInDel/Patient157t10.R.mutations')
 ```
 
-_Comment:_ There might minor discrepancies, which is due to these tests of file sizes sometimes being slightly to strict.  Regardless, if you get all `OK` for the content of `output/LG3/MutInDel/Patient157t.R.mutations`, which contains the set of identified mutations, then you reproduced the expected results.
+_Comment:_ There might minor discrepancies, which is due to these tests of file sizes sometimes being slightly to strict.  Regardless, if you get all `OK` for the content of `output/LG3/MutInDel/Patient157t10.R.mutations`, which contains the set of identified mutations, then you reproduced the expected results.
 
 
 

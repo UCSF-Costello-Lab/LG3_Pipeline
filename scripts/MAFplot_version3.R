@@ -36,7 +36,9 @@ loadMAF=function(pat) {
 
 plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA) {
         ## FIXME: Constants used
-        pathnameFAI <- file.path(Sys.getenv("LG3_HOME", "/home/jocostello/shared/LG3_Pipeline"), "resources/UCSC_HG19_Feb_2009/hg19.fa.fai")
+	lg3_home <- Sys.getenv("LG3_HOME")
+	if (!nzchar(lg3_home)) stop("'LG3_HOME' is not set")
+        pathnameFAI <- file.path(lg3_home, "resources/UCSC_HG19_Feb_2009/hg19.fa.fai")
 
         message("plotMAF() ...")
 	if(is.na(samp) | is.null(dd[[samp]])) {

@@ -1,5 +1,39 @@
 # LG3_Pipeline
 
+## Version 2018-10-17
+
+### SIGNIFICANT CHANGES
+
+* Environment variable 'LG3_HOME' must now be set.  If not set, an error
+  is produced.  It used to default to a Costello Lab specific location on
+  the TIPCC cluster.
+ 
+
+### NEW FEATURES
+
+* Alignment jobs now require less memory by default (64 GiB RAM instead of
+  100 GiB), which should decreased the average default queuing time.
+
+* Added `lg3 envir` for displaying current environment variables related
+  to the LG3 Pipeline.
+  
+* Added `lg3 --news` for displaying the NEWS.md file in the terminal.
+
+### KNOWN ISSUES
+
+* Patient IDs must not contain underscores ('_') because the Pindel step
+  of the pipeline does not support that.  All steps of the pipeline now
+  assert that patient IDs do no contain underscores.
+
+### BUG FIXES
+
+* PBS scripts would only run on TIPCC compute nodes that support the legacy
+  PBS `bigmem` flag.  By removing this unnecessay `bigmem` requirement from
+  all PBS scripts, jobs can now run on all compute nodes that meet the core
+  and memory requirement specified by each PBS script (or is overridden in
+  the LG3 call).
+
+
 ## Version 2018-10-11
 
 ### SIGNIFICANT CHANGES

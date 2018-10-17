@@ -71,6 +71,16 @@ def pindel_filter(filename, opts):
     else: print 'invalid svtype: %s' %(l[svtype])
     ## add two columns: 'patient_ID' and 'sample_type'
     pp = l[tum].split("_")
+
+    ## TROUBLESHOOTING: This where/why underscores in 'patient_ID' fails.
+    ## The code tries to split up the 'tumor_name' value (e.g.
+    ## 'Patient157_t10_underscore_Normal' and 'Patient157_t10_underscore_Primary')
+    ## into 'patient_ID' and 'sample_type' based on the assumption that they
+    ## are separated by an underscore ('_') and that underscore is the first
+    ## one in the 'tumor_name' string.  The currently implementation causes
+    ## 'patient_ID' to become 'Patient157' when we need 'Patient157_t10_underscore'.
+    ## /HB 2018-10-16
+    
     if (pp[0] not in pat_list): pat_list.append(pp[0])
     l.append(pp[0])
     l.append("_".join(pp[1:len(pp)]))

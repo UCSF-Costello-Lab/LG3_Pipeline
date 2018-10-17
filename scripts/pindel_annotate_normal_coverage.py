@@ -36,7 +36,7 @@ def pindel_annotate_normal_coverage(filename, projectname):
     norm_file = cfg_file.readline().split('\t')[0]
 ### Ivan
     cfg_file.close()
-    ## confirm norm_file still exists in this location - if not, try /data/
+    ## confirm norm_file still exists in this location - if not, try /data
     no_bam = False
     if not os.path.isfile(norm_file):
       norm_file = norm_file.replace("home","data",1)

@@ -2,7 +2,7 @@
 ### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
 #PBS -e _Recal_${PATIENT}.err
 #PBS -o _Recal_${PATIENT}.out
-#PBS -l nodes=1:bigmem:ppn=12,vmem=200gb
+#PBS -l nodes=1:ppn=12,vmem=200gb
 #PBS -m ae
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -12,7 +12,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
@@ -40,6 +40,8 @@ echo "- BAMS=${BAMS:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
+
+[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
 
 ## Assert existance of input files
 [[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }

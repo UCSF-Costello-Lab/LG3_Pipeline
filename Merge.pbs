@@ -4,7 +4,7 @@
 ### Output files
 #PBS -e _Merge_${SAMPLE}.err
 #PBS -o _Merge_${SAMPLE}.out
-#PBS -l nodes=1:bigmem:ppn=6,vmem=32gb
+#PBS -l nodes=1:ppn=6,vmem=32gb
 #PBS -m ae
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -14,7 +14,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
+LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
@@ -36,9 +36,12 @@ fi
 
 ### Input
 echo "Input:"
+echo "- PATIENT=${PATIENT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- SAMPLE=${SAMPLE:?}"
 #echo "- ILIST=${ILIST:?}"
+
+[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
 
 #[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
