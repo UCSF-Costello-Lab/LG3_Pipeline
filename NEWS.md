@@ -2,6 +2,13 @@
 
 ## Version 2018-10-11-9000
 
+### SIGNIFICANT CHANGES
+
+* Environment variable 'LG3_HOME' must now be set.  If not set, an error
+  is produced.  It used to default to a Costello Lab specific location on
+  the TIPCC cluster.
+ 
+
 ### NEW FEATURES
 
 * Alignment jobs now require less memory by default (64 GiB RAM instead of

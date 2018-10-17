@@ -23,10 +23,13 @@ check_misc:
 	@echo "Miscellaneous code inspections:"
 	@echo "- Assert no hardcoded email address"
 	@ ! grep -qE "[a-zA-Z]@[a-zA-Z]"  *.pbs runs_demo/_run_* scripts/*.sh
-	@echo "- Assert no /data/ paths"
+	@echo "- Assert no /data/.. paths"
 	@ ! grep -qE "[^a-zA-Z]/data/" *.pbs runs_demo/_run_* scripts/*.sh
-	@echo "- Assert no /costellolab/ paths"
+	@echo "- Assert no /costellolab/.. paths"
 	@ ! grep -qE "/costellolab/" *.pbs runs_demo/_run_* scripts/*.sh
+	@echo "- Assert no /home/jocostello/shared/LG3_Pipeline"
+	@ ! grep -qE "/home/jocostello/shared/LG3_Pipeline" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
+
 
 setup:
 	ln -fs $(LG3_HOME_HIDE)/resources .
