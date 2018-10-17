@@ -152,7 +152,7 @@ LOH plots  OK
 Done!  All results are written to the `./output/` folder in different subdirectories.
 
 
-See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output looks like.  Particularly, the text file `./output/LG3/MutInDel/Patient157t10.R.mutations` contain the identified multations.
+See [Demo_output.md](run_demo/Demo_output.md) for a summary of what the output looks like.  Particularly, the text file `./output/LG3/MutInDel/Patient157t10.R.mutations` contain the identified mutations.
 
 
 
