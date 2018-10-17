@@ -1,4 +1,11 @@
 #!/bin/bash
+#! /usr/bin/env bash
+### Display LG3 Pipeline Environment Variables
+###
+### Usage:
+###  lg3 envir
+###
+
 CURDIR=$(pwd -P)
 
 echo "Cur dir =$CURDIR"
