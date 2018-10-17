@@ -3,10 +3,13 @@ pat <- args[1]
 proj <- args[2]
 conv <- args[3]
 
+lg3_home <- Sys.getenv("LG3_HOME")
+if (!nzchar(lg3_home)) stop("'LG3_HOME' is not set")
+
 wdir <- file.path(Sys.getenv("LG3_INPUT_ROOT", "rawdata"), proj, "MAF")
 setwd(wdir)
- 
-source(file.path(Sys.getenv("LG3_HOME", stop("LG3_HOME is not set")), "scripts/MAFplot_version3.R"))
+
+source(file.path(lg3_home, "scripts/MAFplot_version3.R"))
 
 dd <- loadMAF(pat)
 
@@ -38,7 +41,7 @@ for(c in chrs) {
 }
 
 if(length(unique(dd[[pat]]$samp)) > 2) {
-  source(file.path(Sys.getenv("LG3_HOME", stop("LG3_HOME is not set")), "scripts/MAFplot_version3_grid.R"))
+  source(file.path(lg3_home, "scripts/MAFplot_version3_grid.R"))
   dd <- loadMAF(pat)
   for(c in chrs) {
 	cat("Grid plot for chr",c,"\n")
