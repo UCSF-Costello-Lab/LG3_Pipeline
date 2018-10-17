@@ -22,11 +22,11 @@ check_demo:
 check_misc:
 	@echo "Miscellaneous code inspections:"
 	@echo "- Assert no hardcoded email address"
-	@ ! grep -qE "[a-zA-Z]@[a-zA-Z]"  *.pbs runs_demo/_run_* scripts/*.sh
+	@ ! grep -qE "[a-zA-Z]@[a-zA-Z]"  *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
 	@echo "- Assert no /data/.. paths"
-	@ ! grep -qE "[^a-zA-Z]/data/" *.pbs runs_demo/_run_* scripts/*.sh
+	@ ! grep -qE "[^a-zA-Z]/data/" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
 	@echo "- Assert no /costellolab/.. paths"
-	@ ! grep -qE "/costellolab/" *.pbs runs_demo/_run_* scripts/*.sh
+	@ ! grep -qE "/costellolab/" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
 	@echo "- Assert no /home/jocostello/shared/LG3_Pipeline"
 	@ ! grep -qE "/home/jocostello/shared/LG3_Pipeline" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
 
