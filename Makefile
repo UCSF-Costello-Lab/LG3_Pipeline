@@ -29,6 +29,8 @@ check_misc:
 	@ ! grep -qE "/costellolab/" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
 	@echo "- Assert no /home/jocostello/shared/LG3_Pipeline"
 	@ ! grep -qE "/home/jocostello/shared/LG3_Pipeline" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
+	@echo "- Assert no /home/jocostello/.. paths"
+	@ ! grep -qE "[^a-zA-Z]/home/jocostello/" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
 
 
 setup:

@@ -23,7 +23,6 @@ def convert_patient_wig2bed(patient_ID, projectname, conversionfile):
   ## find all mutation files for this patient
   loc = os.environ["LG3_INPUT_ROOT"] + "/" + projectname + "/mutations/" + patient_ID + "_mutect/"
   print loc
-  #loc = "/home/jocostello/" + projectname + "/exomes/Mutations2/"
   allnot = glob.glob(loc + "NOR-" + normalA0 + "__*.snvs.coverage.mutect.wig")
   print allnot
   if len(allnot) == 0: print "ERROR: no files found for this patient: "
