@@ -10,10 +10,10 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:-?}
-SAMPLE=${SAMPLE:-Y00600t10}
-SAMPLES=${SAMPLES:-Z00600t10 Z00601t10}
+PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
-ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+SAMPLES=${SAMPLES:-Z00600t10 Z00601t10}
+SAMPLE=${SAMPLE:-Y00600t10}
 
 ## Requires absolute path
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -24,14 +24,14 @@ echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
-echo "- SAMPLE=${SAMPLE:?}"
-echo "- SAMPLES=${SAMPLES:?}"
+echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- SAMPLES=${SAMPLES:?}"
+echo "- SAMPLE=${SAMPLE:?}"
 
 [[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
 ## Override the qsub email address?
@@ -42,9 +42,6 @@ fi
 echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
-#TODO# ILIST=$(readlink -e "$ILIST")
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
 
 PBS=${LG3_HOME}/Merge_QC.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
@@ -73,4 +70,4 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST}" "$PBS"
+qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT}}" "$PBS"
