@@ -80,7 +80,7 @@ echo "[Germline] Normal Sample: $normalname"
 echo "-------------------------------------------------"
 
 ## Construct string with one or more '-I <bam>' elements
-INPUTS=$(for i in ${bamdir}/*.bam
+INPUTS=$(for i in ${bamdir}/*.bwa.realigned.rmDups.recal.bam
 do
         [[ -f "$i" ]] || { echo "File not found: ${i}"; exit 1; }
         echo -n "-I $i "
