@@ -79,7 +79,7 @@ mkdir -p "${WDIR}" || { echo "ERROR: Can't create destination directory ${WDIR}"
 cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
 
 echo "Copying recovered data from ${RECOVER_DIR} ..."
-cp -p ${RECOVER_DIR}/* . || { echo "ERROR cp!" ; exit 1 ; }
+cp -p "${RECOVER_DIR}/"* . || { echo "ERROR cp!" ; exit 1 ; }
 
 "${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" "$START" "$RECOVER_DIR" || { echo "ERROR: ${SCRIPT_A} failed"; exit 1; }
 
