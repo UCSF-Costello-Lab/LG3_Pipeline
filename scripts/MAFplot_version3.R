@@ -14,12 +14,12 @@ assertFile <- function(pathname) {
 ###
 loadMAF=function(pat) {
   message("loadMAF() ...")
-  files=dir(paste0(pat,"_MAF"),full.names=T,pattern="[.]txt")
+  files=dir(paste0(pat,"_MAF"),full.names=TRUE,pattern="[.]txt$")
   message("Files: ", paste(sQuote(files), collapse = ", "))
   dd=list()
   for(ff in files) {
     assertFile(ff)
-    d=read.table(ff,header=T,as.is=T,sep="\t")  ## read in a file: data.frame with columns "chromosome" "position" "MAF"
+    d=read.table(ff,header=TRUE,as.is=TRUE,sep="\t")  ## read in a file: data.frame with columns "chromosome" "position" "MAF"
     id=gsub("(^.*/|[.]MAF.*$)","",ff)  ## "^.*/" removes "MAF/"  and "[.]MAF.*$"  removes the ending ".MAF.txt"
     ptnt=strsplit(id,"[.]")[[1]][1]  ## separate id into patient...
     samp=strsplit(id,"[.]")[[1]][2]  ## ...and sample
@@ -88,7 +88,7 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA) {
 		}
 		### haven't gone through the code below this...
                 assertFile(pathnameFAI)
-		hg=read.table(pathnameFAI,header=F,as.is=T)[,1:2]
+		hg=read.table(pathnameFAI,header=FALSE,as.is=TRUE)[,1:2]
 		hg=cbind(hg,cumsum(hg[,2]/pad))
 		colnames(hg)=c("chrom","pos","absPos")
 		hg=hg[unique(d$chromosome),]
@@ -114,7 +114,7 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA) {
 	xlim=c(0,max(d$absPos[unlist(idx)]))  ## set appropriate x-axis limit, based on max position
 	ylim=c(-5,50)
 	lab=paste(samp,", chr",ch,sep="")
-	plot(0,0,type="n",xlim=xlim,ylim=ylim,main=lab,xlab="Genomic position (Mb)",ylab="Minor Allele Frequency",axes=F)
+	plot(0,0,type="n",xlim=xlim,ylim=ylim,main=lab,xlab="Genomic position (Mb)",ylab="Minor Allele Frequency",axes=FALSE)
 	## genome-wide specific labeling 
 	if(isGenome) {; # Plot chromosome markers legibility
 		for(i in seq(2,nrow(hg),by=2)) {

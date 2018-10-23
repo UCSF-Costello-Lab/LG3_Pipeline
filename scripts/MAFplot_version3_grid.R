@@ -13,11 +13,11 @@ assertFile <- function(pathname) {
 # Function to load MAF files for a particular patient
 ###
 loadMAF=function(pat) {
-  files=dir(paste0(pat,"_MAF"),full.names=T,pattern="[.]txt")
+  files=dir(paste0(pat, "_MAF"), full.names=TRUE, pattern="[.]txt$")
   dd=list()
   for(ff in files) {
     assertFile(ff)
-    d=read.table(ff,header=T,as.is=T,sep="\t")  ## read in a file: data.frame with columns "chromosome" "position" "MAF"
+    d=read.table(ff, header=TRUE, as.is=TRUE, sep="\t")  ## read in a file: data.frame with columns "chromosome" "position" "MAF"
     id=gsub("(^.*/|[.]MAF.*$)","",ff)  ## "^.*/" removes "MAF/"  and "[.]MAF.*$"  removes the ending ".MAF.txt"
     ptnt=strsplit(id,"[.]")[[1]][1]  ## separate id into patient...
     samp=strsplit(id,"[.]")[[1]][2]  ## ...and sample
@@ -78,7 +78,7 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
 		}
 		### haven't gone through the code below this...
                 assertFile(pathnameFAI)
-		hg=read.table(pathnameFAI,header=F,as.is=T)[,1:2]
+		hg=read.table(pathnameFAI, header=FALSE, as.is=TRUE)[,1:2]
 		hg=cbind(hg,cumsum(hg[,2]/pad))
 		colnames(hg)=c("chrom","pos","absPos")
 		hg=hg[unique(d$chromosome),]
@@ -110,7 +110,7 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
 	  col=brewer.pal(count, "Set3")
 	  cex.text <- 0.75; cex.pts <- 0.75; 
           for(i in 2:count) {
-	    plot(0,0,type="n",xlim=xlim,ylim=ylim,xlab="",ylab="",axes=F)
+	    plot(0,0,type="n",xlim=xlim,ylim=ylim,xlab="",ylab="",axes=FALSE)
             points(d$absPos[idx[[1]]], d$MAF[idx[[1]]], pch=pch, cex=cex, col=col[1])  ## plot normal
 	    points(d$absPos[idx[[i]]], d$MAF[idx[[i]]], pch=pch, cex=cex, col=col[i])  ## plot sample
 	    legend("bottomleft", c(types[1],types[i]), cex=cex.text, pt.cex=cex.pts, pch=pch, col=col[c(1,i)])
@@ -133,7 +133,7 @@ plotMAF=function(dd,convFILE,samp=NA,ch=NA,pos=NA,gene=NA,grid=FALSE) {
           }
           mtext(text=lab, outer=TRUE, line=1, side=3)
         } else {
-	  plot(0,0,type="n",xlim=xlim,ylim=ylim,main=lab,xlab="Genomic position (Mb)",ylab="Minor Allele Frequency",axes=F)
+	  plot(0,0,type="n",xlim=xlim,ylim=ylim,main=lab,xlab="Genomic position (Mb)",ylab="Minor Allele Frequency",axes=FALSE)
 	  ## genome-wide specific labeling 
 	  if(isGenome) {; # Plot chromosome markers legibility
 		  for(i in seq(2,nrow(hg),by=2)) {
