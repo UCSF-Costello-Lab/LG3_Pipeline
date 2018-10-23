@@ -18,7 +18,7 @@ data <- read.delim(infile, as.is = TRUE)
 alg <- which(data$algorithm == "SomaticIndelDetector")
 oj <- which(data$ourJudgment == "no")
 norm.alt <- which(data$Normal_alt_reads > 5 | data$Normal_alt_reads / (data$Normal_alt_reads + data$Normal_ref_reads) > 0.1)
-### norm.alt <- which(data[ , paste0(stfa, "_alt_reads")] > 5 | data[ , paste0(stfa, "_alt_reads")] / ( data[ , paste0(stfa, "_alt_reads")] + data[ , paste0(stfa, "_ref_reads")] ) > 0.1 )
+### norm.alt <- which(data[ , paste0(stfa, "_alt_reads")] > 5 | data[ , paste0(stfa, "_alt_reads")] / ( data[ , paste0(stfa, "_alt_reads")] + data[ , paste0(stfa, "_ref_reads")] ) > 0.1)
 toremove <- c(alg, oj, norm.alt)
 # toremove <- c(alg, oj)
 

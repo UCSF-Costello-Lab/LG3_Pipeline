@@ -85,7 +85,7 @@ plotMAF <- function(dd, convFILE, samp = NA, ch = NA, pos = NA, gene = NA, grid 
     hg <- cbind(hg, cumsum(hg[, 2] / pad))
     colnames(hg) <- c("chrom", "pos", "absPos")
     hg <- hg[unique(d$chromosome), ]
-    incr <- c(rep(0, sum(d$chromosome == 1)), hg$absPos[d$chromosome[d$chromosome > 1] - 1])
+    incr <- c(rep(0, times = sum(d$chromosome == 1)), hg$absPos[d$chromosome[d$chromosome > 1] - 1])
     d$absPos <- (d$position / pad) + incr
 
     ## plot a single chromosome
@@ -111,7 +111,7 @@ plotMAF <- function(dd, convFILE, samp = NA, ch = NA, pos = NA, gene = NA, grid 
 
   if (grid & !isGenome) {
     griddim <- c(3, ceiling((count - 1) / 3))
-    par(mfrow = griddim, oma = c(1, 1, 2, 1), mai = c(rep(0.25, 4)))
+    par(mfrow = griddim, oma = c(1, 1, 2, 1), mai = c(rep(0.25, times = 4L)))
     col <- brewer.pal(count, "Set3")
     cex.text <- 0.75
     cex.pts <- 0.75
@@ -133,7 +133,7 @@ plotMAF <- function(dd, convFILE, samp = NA, ch = NA, pos = NA, gene = NA, grid 
       ## label x-axis for chromosome-only plots
       if (!isGenome) {
         xlim <- round(xlim)
-        xs <- seq(xlim[1], xlim[2], length = 6)
+        xs <- seq(xlim[1], xlim[2], length.out = 6L)
         axis(1, at = xs, cex.axis = 0.8)
       }
     }
@@ -179,7 +179,7 @@ plotMAF <- function(dd, convFILE, samp = NA, ch = NA, pos = NA, gene = NA, grid 
     ## label x-axis for chromosome-only plots
     if (!isGenome) {
       xlim <- round(xlim)
-      xs <- seq(xlim[1], xlim[2], length = 6)
+      xs <- seq(xlim[1], xlim[2], length.out = 6L)
       axis(1, at = xs, cex.axis = 0.8)
     }
   }

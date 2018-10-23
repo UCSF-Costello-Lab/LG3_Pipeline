@@ -95,7 +95,7 @@ plotMAF <- function(dd, convFILE, samp = NA, ch = NA, pos = NA, gene = NA) {
     hg <- cbind(hg, cumsum(hg[, 2] / pad))
     colnames(hg) <- c("chrom", "pos", "absPos")
     hg <- hg[unique(d$chromosome), ]
-    incr <- c(rep(0, sum(d$chromosome == 1)), hg$absPos[d$chromosome[d$chromosome > 1] - 1])
+    incr <- c(rep(0, times = sum(d$chromosome == 1)), hg$absPos[d$chromosome[d$chromosome > 1] - 1])
     d$absPos <- (d$position / pad) + incr
     str(d)
     ## plot a single chromosome
@@ -163,7 +163,7 @@ plotMAF <- function(dd, convFILE, samp = NA, ch = NA, pos = NA, gene = NA) {
   ## label x-axis for chromosome-only plots
   if (!isGenome) {
     xlim <- round(xlim)
-    xs <- seq(xlim[1], xlim[2], length = 6)
+    xs <- seq(xlim[1], xlim[2], length.out = 6L)
     axis(1, at = xs, cex.axis = 0.8)
   }
   message("plotMAF() ... done")
