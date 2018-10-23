@@ -17,7 +17,7 @@ check_sh:
 	shellcheck -x scripts/*.sh
 
 check_r:
-	@Rscript -e "for (f in dir('scripts', pattern = '[.]R$$', full.names = TRUE)) tryCatch(parse(f), error = function(ex) stop('Failed to parse R file: ', f, call. = FALSE))"
+	@!(which Rscript &> /dev/null) || Rscript -e "for (f in dir('scripts', pattern = '[.]R$$', full.names = TRUE)) { tryCatch(parse(f), error = function(ex) stop('Failed to parse R file: ', f, call. = FALSE)) }"
 
 check_demo:
 	shellcheck runs_demo/_run_*
