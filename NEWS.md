@@ -2,7 +2,10 @@
 
 ## Version 2018-10-17-9000 (develop version)
 
-* ...
+### BUG FIXES
+
+* The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
+  line 6: PROJECT: parameter null or not set".
 
 
 ## Version 2018-10-17
