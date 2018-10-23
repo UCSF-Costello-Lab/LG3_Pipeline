@@ -50,8 +50,8 @@ echo "$bamfiles" | awk -F ":" '{for (i=1; i<=NF; i++) print "[Merge] Exome:"$i}'
 echo "[Merge] Intervals: $ilist"
 echo "------------------------------------------------------"
 
-## Construct string with one or more '-I <bam>' elements
-inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
+## Construct string with one or more '-I "<bam>"' elements
+inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT=\""$i"\" "}')
 
 echo "[Merge] Merge BAM files..."
 # shellcheck disable=SC2086

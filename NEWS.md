@@ -2,6 +2,11 @@
 
 ## Version 2018-10-17-9000 (develop version)
 
+### SOFTWARE QUALITY
+
+* ROBUSTNESS: Now quoting `-I <file>` or `INPUT=<file>` options, which
+  theoretically allows for file names containing spaces.
+
 ### BUG FIXES
 
 * The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
