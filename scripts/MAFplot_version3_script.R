@@ -14,13 +14,13 @@ source(file.path(lg3_home, "scripts/MAFplot_version3.R"))
 dd <- loadMAF(pat)
 
 ##### modified by Ivan
-chrs = unique(dd[[pat]]$chromosome)
-chrs.num = length(chrs)
+chrs <- unique(dd[[pat]]$chromosome)
+chrs.num <- length(chrs)
 ## standardize chromosome notation (1-24, no "chr")
-chrs = gsub("chr", "", chrs)
-chrs[chrs == "X"] = 23
-chrs[chrs == "Y"] = 24
-chrs = as.numeric(as.vector(chrs))
+chrs <- gsub("chr", "", chrs)
+chrs[chrs == "X"] <- 23
+chrs[chrs == "Y"] <- 24
+chrs <- as.numeric(as.vector(chrs))
 cat("Found ", chrs.num, "chromosomes\n")
 print(chrs)
 
