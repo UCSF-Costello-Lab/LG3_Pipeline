@@ -23,6 +23,8 @@ check_misc:
 	@echo "Miscellaneous code inspections:"
 	@echo "- Assert no hardcoded email address"
 	@ ! grep -qE "[a-zA-Z]@[a-zA-Z]"  *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} bin/lg3*
+	@echo "- Assert no hardcoded /LG3/ project paths"
+	@ ! grep -qE "/LG3/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} 
 	@echo "- Assert no /data/.. paths"
 	@ ! grep -qE "[^a-zA-Z]/data/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} bin/lg3*
 	@echo "- Assert no /costellolab/.. paths"
