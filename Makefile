@@ -22,15 +22,15 @@ check_demo:
 check_misc:
 	@echo "Miscellaneous code inspections:"
 	@echo "- Assert no hardcoded email address"
-	@ ! grep -qE "[a-zA-Z]@[a-zA-Z]"  *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py bin/lg3*
+	@ ! grep -qE "[a-zA-Z]@[a-zA-Z]"  *.pbs runs_demo/_run_* scripts/*.{py,R,sh} bin/lg3*
 	@echo "- Assert no /data/.. paths"
-	@ ! grep -qE "[^a-zA-Z]/data/" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py bin/lg3*
+	@ ! grep -qE "[^a-zA-Z]/data/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} bin/lg3*
 	@echo "- Assert no /costellolab/.. paths"
-	@ ! grep -qE "/costellolab/" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py
+	@ ! grep -qE "/costellolab/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh}
 	@echo "- Assert no /home/jocostello/shared/LG3_Pipeline"
-	@ ! grep -qE "/home/jocostello/shared/LG3_Pipeline" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py bin/lg3*
+	@ ! grep -qE "/home/jocostello/shared/LG3_Pipeline" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} bin/lg3*
 	@echo "- Assert no /home/jocostello/.. paths"
-	@ ! grep -qE "[^a-zA-Z]/home/jocostello/" *.pbs runs_demo/_run_* scripts/*.sh scripts/*.R scripts/*.py bin/lg3*
+	@ ! grep -qE "[^a-zA-Z]/home/jocostello/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} bin/lg3*
 
 
 setup:
