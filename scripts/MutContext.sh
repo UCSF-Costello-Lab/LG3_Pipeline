@@ -36,8 +36,7 @@ ANNO_AGILENT="${LG3_HOME}/resources/Agilent_SureSelect_HumanAllExon50Mb.exonic_a
 CALCULATE="${LG3_HOME}/scripts/CalculateMutationRates.py"
 GENOME="${LG3_HOME}/resources/hg19.2bit"
 
-export PYTHONPATH=/songlab/cmclean/code/vendor/Python-2.7.2:/home/jssong/lib/:/opt/ghmm/lib/python2.6/site-packages:/opt/local/lib/python2.6/site-packages/:/songlab/cmclean/code/py/:${LG3_HOME}/
-export PATH=${PATH}:/songlab/cmclean/bin/x86_64
+export PYTHONPATH=/home/jssong/lib/:/opt/local/lib/python2.6/site-packages/:${LG3_HOME}/
 
 if [ ! -e "${prefix}.mutation_context" ]; then
         echo "[MutContext] Converting MuTect WIG to BED3..."
