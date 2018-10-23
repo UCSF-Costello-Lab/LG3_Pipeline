@@ -46,7 +46,7 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 PBS=${LG3_HOME}/Merge.pbs
 [[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
 
-D=${LG3_INPUT_ROOT}/LG3/exomes_recal
+D=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 [[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
 D=$(readlink -e "$D") ## requires absolute path
 

@@ -1,6 +1,6 @@
 #### R script: mutations_annotate_intersected_coverage.R
 ### INPUTS:
-## 1. output of multiIntersectedBed (from /.../LG3/python/convert_patient_wig2bed.py)
+## 1. output of multiIntersectedBed (from /.../LG3_TOOLS/python/convert_patient_wig2bed.py)
 ## 2. mutation list (*filtered.overlaps.txt)
 ## 3. output file name
 ### FUNCTION:

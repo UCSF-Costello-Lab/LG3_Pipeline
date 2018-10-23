@@ -39,7 +39,7 @@ echo -n "Submitting jobs for $PATIENT "
 date
 
 ## Assert that input files exist
-D=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}
+D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 [[ -d "${D}" ]] || { echo "No such folder: ${D}"; exit 1; }
 
 export QSUB_OPTS

@@ -7,6 +7,9 @@
 * The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
   line 6: PROJECT: parameter null or not set".
 
+* Run scripts `_run_MutDet`, `_run_Merge`, and `_run_Merge_QC` would fail
+  if previous step used a `PROJECT` other than the default 'LG3'.
+  
 
 ## Version 2018-10-17
 

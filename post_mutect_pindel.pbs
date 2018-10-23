@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=${LG3_OUTPUT_ROOT}/LG3/exome/patient_ID_conversions.tsv /path/to/pindel_all.pbs
+### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=${LG3_OUTPUT_ROOT}/${PROJECT}/exome/patient_ID_conversions.tsv /path/to/pindel_all.pbs
 #PBS -N ${PATIENT}.comb
 #PBS -e _PostMut_${PATIENT}.err
 #PBS -o _PostMut_${PATIENT}.out
