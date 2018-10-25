@@ -7,6 +7,11 @@
 * ROBUSTNESS: Now quoting `-I <file>` or `INPUT=<file>` options, which
   theoretically allows for file names containing spaces.
 
+### NEW FEATURES
+
+* Now ./_run_MutDet reports on the 'NORMAL', 'TUMOR', and 'TYPE' inferred
+  from the 'CONV' file and the 'PATIENT' name.
+
 ### BUG FIXES
 
 * The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
@@ -14,7 +19,10 @@
 
 * Run scripts `_run_MutDet`, `_run_Merge`, and `_run_Merge_QC` would fail
   if previous step used a `PROJECT` other than the default 'LG3'.
-  
+
+* Pipeline would not support tab-delimited patient files with Microsoft
+  Windows-style line endings, i.e. CRLF (`\r\n`) line endings.
+
 
 ## Version 2018-10-17
 
@@ -24,7 +32,6 @@
   is produced.  It used to default to a Costello Lab specific location on
   the TIPCC cluster.
  
-
 ### NEW FEATURES
 
 * Alignment jobs now require less memory by default (64 GiB RAM instead of
