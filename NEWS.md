@@ -1,5 +1,13 @@
 # LG3_Pipeline
 
+## Version 2018-10-17-patched
+
+### NEW FEATURES
+
+* Now ./_run_MutDet reports on the 'NORMAL', 'TUMOR', and 'TYPE' inferred
+  from the 'CONV' file and the 'PATIENT' name.
+
+
 ## Version 2018-10-17
 
 ### SIGNIFICANT CHANGES
@@ -8,7 +16,6 @@
   is produced.  It used to default to a Costello Lab specific location on
   the TIPCC cluster.
  
-
 ### NEW FEATURES
 
 * Alignment jobs now require less memory by default (64 GiB RAM instead of
