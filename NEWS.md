@@ -7,6 +7,11 @@
 * Now ./_run_MutDet reports on the 'NORMAL', 'TUMOR', and 'TYPE' inferred
   from the 'CONV' file and the 'PATIENT' name.
 
+### BUG FIXES:
+
+* Pipeline would not support tab-delimited patient files with Microsoft
+  Windows-style line endings, i.e. CRLF (`\r\n`) line endings.
+
 
 ## Version 2018-10-17
 
