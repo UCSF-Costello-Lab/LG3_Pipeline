@@ -88,7 +88,7 @@ do
         fi
 done < "${PATIENT}.temp.conversions.txt"
 
-echo "- NORMAL='${normid}'"
+echo "- NORMAL='${normid:?}'"
 
 ## Cycle through tumors and submit MUTECT jobs
 while IFS=$'\t' read -r ID _ _ SAMP
@@ -115,8 +115,8 @@ do
                 samp_label="TUM"
         fi
 
-        echo "- TUMOR='${ID}'"
-        echo "- TYPE='${samp_label}'"
+        echo "- TUMOR='${ID:?}'"
+        echo "- TYPE='${samp_label:?}'"
 	
         ## Expected output:
         OUT=$WORKDIR/${PATIENT}.NOR-${normid}__${samp_label}-${ID}.annotated.mutations
