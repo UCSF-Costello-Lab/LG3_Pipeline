@@ -24,6 +24,8 @@
 * Pipeline would not support tab-delimited patient files with Microsoft
   Windows-style line endings, i.e. CRLF (`\r\n`) line endings.
 
+* `scripts/chk_mutdet.sh` did not acknowledge environment variable 'CONV'.
+
 
 ## Version 2018-10-17
 

@@ -29,7 +29,7 @@ fi
 
 PROJECT=$1
 PATIENT=$2
-CONV=patient_ID_conversions.tsv
+CONV=${CONV:-patient_ID_conversions.tsv}
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
 
 echo -e "Checking MuTect output for ${YEL}${PATIENT}${NOC}, project ${PROJECT}"
