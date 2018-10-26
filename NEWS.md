@@ -10,7 +10,8 @@
 ### NEW FEATURES
 
 * Now ./_run_MutDet reports on the 'NORMAL', 'TUMOR', and 'TYPE' inferred
-  from the 'CONV' file and the 'PATIENT' name.
+  from the 'CONV' file and the 'PATIENT' name, and asserts that such
+  entries actually exists in the 'CONV' file.
 
 ### BUG FIXES
 
