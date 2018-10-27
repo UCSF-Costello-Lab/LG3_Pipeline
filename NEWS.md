@@ -2,11 +2,6 @@
 
 ## Version 2018-10-17-9000 (develop version)
 
-### SOFTWARE QUALITY
-
-* ROBUSTNESS: Now quoting `-I <file>` options, which theoretically allows
-  for file names containing spaces.
-
 ### NEW FEATURES
 
 * Now ./_run_MutDet reports on the 'NORMAL', 'TUMOR', and 'TYPE' inferred
@@ -17,7 +12,8 @@
 
 * It appears not to be possible to quote `INPUT` filenames for Picard, i.e.
   we cannot use `INPUT="<file>"` but have to stick with `INPUT=<file>`.
-  This means that those input file names must not have spaces.
+  This means that those input file names must not have spaces.  GATK has
+  the same limitation on its `-I <file>` option.
 
 ### BUG FIXES
 
