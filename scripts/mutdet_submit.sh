@@ -74,8 +74,10 @@ mkdir -p "${WORKDIR}" || { echo "Can't create scratch directory ${WORKDIR}"; exi
 
 XMX=Xmx8g
 
+echo "Patient information inferred from PATIENT and CONV:"
+
 ## Pull out patient specific conversion info
-grep -w "${PATIENT}" "${CONV}" > "${PATIENT}.temp.conversions.txt"
+grep -w "${PATIENT}" "${CONV}" | tr -d '\r' > "${PATIENT}.temp.conversions.txt"
 
 ## Get normal ID
 while IFS=$'\t' read -r ID _ _ SAMP
@@ -85,6 +87,8 @@ do
                 break
         fi
 done < "${PATIENT}.temp.conversions.txt"
+
+echo "- normid='${normid:?}'"
 
 ## Cycle through tumors and submit MUTECT jobs
 while IFS=$'\t' read -r ID _ _ SAMP
@@ -110,6 +114,10 @@ do
         else
                 samp_label="TUM"
         fi
+
+        echo "- ID='${ID:?}'"
+        echo "- samp_label='${samp_label:?}'"
+	
         ## Expected output:
         OUT=$WORKDIR/${PATIENT}.NOR-${normid}__${samp_label}-${ID}.annotated.mutations
         if [ -s "$OUT" ]; then

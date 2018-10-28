@@ -12,7 +12,6 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 CONV=${CONV:-patient_ID_conversions.tsv}
-SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-false}
 EMAIL=${EMAIL:?}
 
@@ -23,14 +22,18 @@ LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
-echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+#echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
-echo "- SAMPLES=${SAMPLES:?}"
+echo "- CONV=${CONV:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 [[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+
+SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
+echo "- SAMPLES=${SAMPLES:?}"
+
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"

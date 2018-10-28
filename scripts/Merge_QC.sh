@@ -3,7 +3,6 @@
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-PROJECT=${PROJECT:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
@@ -51,7 +50,7 @@ echo "$bamfiles" | awk -F ":" '{for (i=1; i<=NF; i++) print "[Merge] Exome:"$i}'
 echo "[Merge] Intervals: $ilist"
 echo "------------------------------------------------------"
 
-## Construct string with one or more '-I <bam>' elements
+## Construct string with one or more '-I "<bam>"' elements
 inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 
 echo "[Merge] Merge BAM files..."

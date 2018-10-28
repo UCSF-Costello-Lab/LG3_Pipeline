@@ -94,7 +94,7 @@ ls -lrt "${WDIR}"
 cp -r -p "${WDIR}" "${DEST}/"
 
 echo "Content of ${DEST}:"
-ls -lrt "${DEST}"
+ls -lrt "${DEST}/${SAMPLE}"*
 
 rm -rf "${WDIR:?}"
 

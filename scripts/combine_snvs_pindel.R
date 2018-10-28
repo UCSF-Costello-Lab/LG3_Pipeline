@@ -11,12 +11,10 @@ args <- commandArgs(trailingOnly = TRUE)
 assertFile(args[1])
 assertFile(args[2])
 
-snvs <- read.delim(args[1], as.is=TRUE)
-indels <- read.delim(args[2], as.is=TRUE)
+snvs <- read.delim(args[1], as.is = TRUE)
+indels <- read.delim(args[2], as.is = TRUE)
 
-both <- merge(snvs, indels, all=TRUE)
+both <- merge(snvs, indels, all = TRUE)
 names(both)[1] <- "#gene"
 
-write.table(both, file=args[3], quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
-
-
+write.table(both, file = args[3], quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)

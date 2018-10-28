@@ -1,14 +1,42 @@
 # LG3_Pipeline
 
+## Version 2018-10-27
+
+### NEW FEATURES
+
+* Now ./_run_MutDet reports on the 'NORMAL', 'TUMOR', and 'TYPE' inferred
+  from the 'CONV' file and the 'PATIENT' name, and asserts that such
+  entries actually exist in the 'CONV' file.
+
+### KNOWN ISSUES
+
+* It appears not to be possible to quote `INPUT` filenames for Picard, i.e.
+  we cannot use `INPUT="<file>"` but have to stick with `INPUT=<file>`.
+  This means that those input file names must not have spaces.  GATK has
+  the same limitation on its `-I <file>` option.
+
+### BUG FIXES
+
+* The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
+  line 6: PROJECT: parameter null or not set".
+
+* Run scripts `_run_MutDet`, `_run_Merge`, and `_run_Merge_QC` would fail
+  if previous step used a `PROJECT` other than the default 'LG3'.
+
+* Pipeline would not support tab-delimited patient files with Microsoft
+  Windows-style line endings, i.e. CRLF (`\r\n`) line endings.
+
+* `scripts/chk_mutdet.sh` did not acknowledge environment variable 'CONV'.
+
+
 ## Version 2018-10-17
 
 ### SIGNIFICANT CHANGES
 
-* Environment variable 'LG3_HOME' must now be set.  If not set, an error
+* Environment variable `LG3_HOME` must now be set.  If not set, an error
   is produced.  It used to default to a Costello Lab specific location on
   the TIPCC cluster.
  
-
 ### NEW FEATURES
 
 * Alignment jobs now require less memory by default (64 GiB RAM instead of
@@ -21,14 +49,14 @@
 
 ### KNOWN ISSUES
 
-* Patient IDs must not contain underscores ('_') because the Pindel step
+* Patient IDs must not contain underscores (`_`) because the Pindel step
   of the pipeline does not support that.  All steps of the pipeline now
   assert that patient IDs do no contain underscores.
 
 ### BUG FIXES
 
 * PBS scripts would only run on TIPCC compute nodes that support the legacy
-  PBS `bigmem` flag.  By removing this unnecessay `bigmem` requirement from
+  PBS `bigmem` flag.  By removing this unnecessary `bigmem` requirement from
   all PBS scripts, jobs can now run on all compute nodes that meet the core
   and memory requirement specified by each PBS script (or is overridden in
   the LG3 call).
@@ -45,7 +73,7 @@
 
 ### DOCUMENTATION
 
- * Add section on 'Contributors' to README.
+ * Add section on 'Contributors' to the README.
 
 ### SOFTWARE QUALITY
 
@@ -59,10 +87,10 @@
 
 ### BUG FIXES
 
- * The pipeline did not support FASTQ file names with undercores (`_`) other
+ * The pipeline did not support FASTQ file names with underscores (`_`) other
    than the once indicating paired end reads `_R1` and `_R2`.  File names
    with a suffix between `_R1`/`_R2` and `.fastq.gz` were also not supported.
-   Note that trimming drops any `_R1`/_R2` suffixes, e.g. trimming a FASTQ
+   Note that trimming drops any `_R1/_R2` suffixes, e.g. trimming a FASTQ
    file `Z00600_t10_AATCCGTC_L007_R1_001_HQ_paired.fastq.gz` produces a
    trimmed FASTQ file `Z00601_t10_AATCCGTC_L007-trim_R1.fastq.gz`.
 
@@ -70,7 +98,7 @@
   `MutDet_TvsN.pbs`, and `UG.pbs`), and scripts (`scripts/chk_mutdet.sh` and
   `scripts/chk_pindel.sh`) did not catch errors and quit with exit code 1.
 
- * `lg3 test setup` incorrectly reportedd that the CONV file does not exist.
+ * `lg3 test setup` incorrectly reported that the CONV file does not exist.
  
 
 ## Version 2018-10-08
