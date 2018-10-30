@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function error {
-    echo -e "$*";
+    echo -e "ERROR: $*";
     exit 1;
 }
 
