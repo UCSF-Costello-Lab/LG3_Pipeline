@@ -100,8 +100,8 @@ echo "Current working directory: ${PWD}"
 
 cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
 
-echo "Removing directory (recursively): ${WDIR}"
-rm -rf "${WDIR}"
+echo "Removing directory (recursively): ${LG3_SCRATCH_ROOT}"
+rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
 ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
