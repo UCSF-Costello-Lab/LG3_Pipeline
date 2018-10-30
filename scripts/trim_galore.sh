@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -35,9 +38,7 @@ LEN=20
 STRINGENCY=1
 
 if [ $# -lt 2 ]; then
-        echo "Run trim_galore in paired mode on gzipped fastq files using Illumina universal adapter"
-        echo "Usage: $0 [ -quality=$QTY -length=$LEN -stringency=$STRINGENCY] 1.fastq.gz 2.fastq.gz"
-        exit 1
+    error "Run trim_galore in paired mode on gzipped fastq files using Illumina universal adapter\nUsage: $0 [ -quality=$QTY -length=$LEN -stringency=$STRINGENCY] 1.fastq.gz 2.fastq.gz"
 fi
 
 #### Parse optional args
@@ -46,7 +47,7 @@ case $1 in
     -q*=*) QTY=${1#*=};shift 1;;
     -l*=*) LEN=${1#*=};shift 1;;
     -s*=*) STRINGENCY=${1#*=};shift 1;;
-    -*) echo "error: no such option $1";exit 1;;
+    -*) error "No such option $1";;
     *)  break;;
 esac
 done
@@ -63,22 +64,20 @@ echo "QTY=${QTY:?}"
 echo "STRINGENCY=${STRINGENCY:?} (ignored; always STRINGENCY=1)"
 
 ## Assert existance of input files
-[[ -f "$FQ1" ]] || { echo "File not found: ${FQ1}"; exit 1; }
-[[ -f "$FQ2" ]] || { echo "File not found: ${FQ2}"; exit 1; }
+[[ -f "$FQ1" ]] || error "File not found: ${FQ1}"
+[[ -f "$FQ2" ]] || error "File not found: ${FQ2}"
 
 echo "Software:"
 echo "- TG=${TG:?}"
 echo "- CUTADAPT=${CUTADAPT:?}"
-[[ -x "$TG" ]] || { echo "Not an executable: ${TG}"; exit 1; }
+[[ -x "$TG" ]] || error "Not an executable: ${TG}"
 
-if [ ! -r "$FQ1" ] || [ ! -r "$FQ2" ]; then
-        echo "[trim_galore] ERROR: Can't open $FQ1 or $FQ2 !"
-        exit 1
-fi
+[[ -r "${FQ1}" ]] || error "[trim_galore] Can't open ${FQ1}"
+[[ -r "${FQ2}" ]] || error "[trim_galore] Can't open ${FQ2}"
 
 ### Default: --length 20 --quality 20 --stringency 1
 ### --fastqc
-time $TG --paired --quality "$QTY" --length "$LEN" --stringency 1 --path_to_cutadapt "$CUTADAPT" --illumina "$FQ1" "$FQ2" || { echo "[trim_galore] ERROR: trim_galore FAILED"; exit 1; }
+time $TG --paired --quality "$QTY" --length "$LEN" --stringency 1 --path_to_cutadapt "$CUTADAPT" --illumina "$FQ1" "$FQ2" || error "[trim_galore] trim_galore FAILED"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
 

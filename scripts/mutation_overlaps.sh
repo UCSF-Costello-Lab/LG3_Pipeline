@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -40,7 +43,7 @@ echo "- mutfile=${mutfile:?}"
 echo "- patient=${patient:?}"
 echo "- outfile=${outfile:?}"
 
-python "${LG3_HOME}/scripts/mutation_overlaps.py" "${mutfile}" "${patient}" "${outfile}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/mutation_overlaps.py" "${mutfile}" "${patient}" "${outfile}" || error "Error on line $LINENO in $PROG"
 
 awk -F'\t' '{print $NF}' "${outfile}" | sort | uniq -c
 

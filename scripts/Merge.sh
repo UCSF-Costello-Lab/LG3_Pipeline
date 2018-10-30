@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
@@ -61,10 +64,10 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT || { echo "Merge BAM files failed"; exit 1; }
+        VALIDATION_STRINGENCY=SILENT || error "Merge BAM files failed"
 
 echo "[Merge] Index new BAM file..."
-$SAMTOOLS index "${prefix}.merged.bam" || { echo "First indexing failed"; exit 1; }
+$SAMTOOLS index "${prefix}.merged.bam" || error "First indexing failed"
 
 
 echo "[Merge] Coordinate-sort and enforce read group assignments..."
@@ -81,18 +84,18 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=LENIENT || { echo "Sort failed"; exit 1; }
+        VALIDATION_STRINGENCY=LENIENT || error "Sort failed"
 
 rm -f "${prefix}.merged.bam"
 rm -f "${prefix}.merged.bam.bai"
 
 echo "[Merge] Convert SAM to BAM..."
-$SAMTOOLS view -bS "${prefix}.merged.sorted.sam" > "${prefix}.merged.sorted.bam" || { echo "BAM conversion failed"; exit 1; }
+$SAMTOOLS view -bS "${prefix}.merged.sorted.sam" > "${prefix}.merged.sorted.bam" || error "BAM conversion failed"
 
 rm -f "${prefix}.merged.sorted.sam"
 
 echo "[Merge] Index the BAM file..."
-$SAMTOOLS index "${prefix}.merged.sorted.bam" || { echo "BAM indexing failed"; exit 1; }
+$SAMTOOLS index "${prefix}.merged.sorted.bam" || error "BAM indexing failed"
 
 echo "[Merge] make symbolic link for downstream compatibility..."
 ln -sf "${prefix}.merged.sorted.bam" "${prefix}.bwa.realigned.rmDups.recal.bam"

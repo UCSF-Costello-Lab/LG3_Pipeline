@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -33,14 +36,14 @@ echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 echo "- EMAIL=${EMAIL}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
 ## Assert that the patient file exists
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
 ILIST=$(readlink -e "$ILIST")
 
 ## Assert that NORMAL is one of the SAMPLES
-echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || { echo "ERROR: NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"; exit 1; }
+echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || error "NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"
 
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
@@ -56,10 +59,10 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Recal_bigmem.pbs
-[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+[[ -f "$PBS" ]] || error "File not found: ${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes
-[[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
+[[ -d "$D" ]] || error "Directory not found: ${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 
@@ -70,10 +73,7 @@ for SAMPLE in ${SAMPLES}
 do
    ((CNT++))
    B=$D/${SAMPLE}/${SAMPLE}.$SUFF
-   if [ ! -f "$B" ]; then
-      echo "ABORT: Can't open $B !"
-      exit 1
-   fi
+   [[ -f "${B}" ]] || error "File not found: ${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
 done

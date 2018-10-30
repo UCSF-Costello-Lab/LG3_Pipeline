@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -43,9 +46,9 @@ echo "References:"
 echo "- REF=${REF:?}"
 echo "- THOUSAND=${THOUSAND:?}"
 echo "- DBSNP=${DBSNP:?}"
-[[ -f "$REF" ]]      || { echo "File not found: ${REF}"; exit 1; }
-[[ -f "$THOUSAND" ]] || { echo "File not found: ${THOUSAND}"; exit 1; }
-[[ -f "$DBSNP" ]]    || { echo "File not found: ${DBSNP}"; exit 1; }
+[[ -f "$REF" ]]      || error "File not found: ${REF}"
+[[ -f "$THOUSAND" ]] || error "File not found: ${THOUSAND}"
+[[ -f "$DBSNP" ]]    || error "File not found: ${DBSNP}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
@@ -65,15 +68,15 @@ echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]            || { echo "Not an executable: ${JAVA}"; exit 1; }
-[[ -x "$SAMTOOLS" ]]        || { echo "Not an executable: ${SAMTOOLS}"; exit 1; }
-[[ -f "$GATK" ]]            || { echo "File not found: ${GATK}"; exit 1; }
-[[ -d "$PICARD_HOME" ]]     || { echo "File not found: ${PICARD_HOME}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_A" ]] || { echo "File not found: ${PICARD_SCRIPT_A}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_B" ]] || { echo "File not found: ${PICARD_SCRIPT_B}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_C" ]] || { echo "File not found: ${PICARD_SCRIPT_C}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_D" ]] || { echo "File not found: ${PICARD_SCRIPT_D}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_E" ]] || { echo "File not found: ${PICARD_SCRIPT_E}"; exit 1; }
+[[ -x "$JAVA" ]]            || error "Not an executable: ${JAVA}"
+[[ -x "$SAMTOOLS" ]]        || error "Not an executable: ${SAMTOOLS}"
+[[ -f "$GATK" ]]            || error "File not found: ${GATK}"
+[[ -d "$PICARD_HOME" ]]     || error "File not found: ${PICARD_HOME}"
+[[ -f "$PICARD_SCRIPT_A" ]] || error "File not found: ${PICARD_SCRIPT_A}"
+[[ -f "$PICARD_SCRIPT_B" ]] || error "File not found: ${PICARD_SCRIPT_B}"
+[[ -f "$PICARD_SCRIPT_C" ]] || error "File not found: ${PICARD_SCRIPT_C}"
+[[ -f "$PICARD_SCRIPT_D" ]] || error "File not found: ${PICARD_SCRIPT_D}"
+[[ -f "$PICARD_SCRIPT_E" ]] || error "File not found: ${PICARD_SCRIPT_E}"
 
 
 ## Input
@@ -86,11 +89,11 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"
-mkdir -p "${TMP}" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
+mkdir -p "${TMP}" || error "Can't create scratch directory ${TMP}"
 
 echo "------------------------------------------------------"
 echo "[Recal] Base quality recalibration (bigmem version)"
@@ -115,10 +118,10 @@ echo -e "\\n[Recal] Merge BAM files..."
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Merge BAM files failed"; exit 1; }
+        VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Merge BAM files failed"
 
 echo -e "\\n[Recal] Index new BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || { echo "First indexing failed"; exit 1; }
+{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
 
 echo -e "\\n[Recal] Create intervals for indel detection..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -130,7 +133,7 @@ echo -e "\\n[Recal] Create intervals for indel detection..."
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${PATIENT}.merged.bam" \
-        --out "${PATIENT}.merged.intervals"; } 2>&1 || { echo "Interval creation failed"; exit 1; }
+        --out "${PATIENT}.merged.intervals"; } 2>&1 || error "Interval creation failed"
 
 echo -e "\\n[Recal] Indel realignment..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -142,7 +145,7 @@ echo -e "\\n[Recal] Indel realignment..."
         --consensusDeterminationModel USE_READS \
         --input_file "${PATIENT}.merged.bam" \
         --targetIntervals "${PATIENT}.merged.intervals" \
-        --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || { echo "Indel realignment failed"; exit 1; }
+        --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || error "Indel realignment failed"
 
 rm -f "${PATIENT}.merged.bam"
 rm -f "${PATIENT}.merged.bam.bai"
@@ -157,7 +160,7 @@ echo -e "\\n[Recal] Fix mate information..."
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Verify mate information failed"; exit 1; } 
+        VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Verify mate information failed"
 
 rm -f "${PATIENT}.merged.realigned.bam"
 rm -f "${PATIENT}.merged.realigned.bai"
@@ -172,12 +175,12 @@ echo -e "\\n[Recal] Mark duplicates..."
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=LENIENT; } 2>&1 || { echo "Mark duplicates failed"; exit 1; }
+        VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo -e "\\n[Recal] Index BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || { echo "Second indexing failed"; exit 1; } 
+{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
 
 ### Job crushed at -Xmx8g, increase!
 echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
@@ -194,7 +197,7 @@ echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
         --covariate MappingQualityCovariate \
         --standard_covs \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
-        --recal_file "${PATIENT}.merged.realigned.rmDups.csv"; } 2>&1 || { echo "CountCovariates failed"; exit 1; }
+        --recal_file "${PATIENT}.merged.realigned.rmDups.csv"; } 2>&1 || error "CountCovariates failed"
 
 echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -204,14 +207,14 @@ echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
         --baq RECALCULATE \
         --recal_file "${PATIENT}.merged.realigned.rmDups.csv" \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
-        --out "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || { echo "TableRecalibration failed"; exit 1; }
+        --out "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "TableRecalibration failed"
 
 rm -f "${PATIENT}.merged.realigned.rmDups.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
 rm -f "${PATIENT}.merged.realigned.rmDups.csv"
 
 echo -e "\\n[Recal] Index BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || { echo "Third indexing failed"; exit 1; } 
+{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "Third indexing failed"
 
 echo -e "\\n[Recal] Split BAM files..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -219,7 +222,7 @@ echo -e "\\n[Recal] Split BAM files..."
         --reference_sequence "$REF" \
         --logging_level WARN \
         --input_file "${PATIENT}.merged.realigned.rmDups.recal.bam" \
-        --outputRoot temp_; } 2>&1 || { echo "Splitting BAM files failed"; exit 1; }
+        --outputRoot temp_; } 2>&1 || error "Splitting BAM files failed"
 
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai"
@@ -230,8 +233,8 @@ do
         base=${i##temp_}
         base=${base%%.bam}
         echo -e "\\n[Recal] Splitting off $base..."
-        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || { echo "Sorting $base failed"; exit 1; }
-        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || { echo "Indexing $base failed"; exit 1; }        
+        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || error "Sorting $base failed"
+        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || error "Indexing $base failed"
         rm -f "$i"
 done
 
@@ -260,7 +263,7 @@ do
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Calculate hybrid selection metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -271,7 +274,7 @@ do
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Collect multiple QC metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Collect multiple QC metrics failed"
         echo "------------------------------------------------------"
 done
 

@@ -7,6 +7,9 @@
 #PBS -l nodes=1:ppn=6,vmem=32gb
 #PBS -m ae
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -40,20 +43,20 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- SAMPLE=${SAMPLE:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
 date
 
 WDIR=${LG3_SCRATCH_ROOT}/${SAMPLE}
-mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+mkdir -p "${WDIR}" || error "Can't create scratch directory ${WDIR}"
+cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 echo "Current working directory: ${PWD}"
 
 "${LG3_HOME}/scripts/Merge.sh" "$BAMS" "$SAMPLE"
 
-cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
-cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || { echo "ERROR: Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"; exit 1; }
+cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || error "Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"
 rm -rf "${LG3_SCRATCH_ROOT:?}/${SAMPLE}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"

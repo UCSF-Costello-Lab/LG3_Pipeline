@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -38,8 +41,8 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
-[[ -f "$nbamfile" ]] || { echo "File not found: ${nbamfile}"; exit 1; }
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+[[ -f "$nbamfile" ]] || error "File not found: ${nbamfile}"
+[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
 
 normalname=${nbamfile##*/}
 normalname=${normalname%%.bwa*}
@@ -51,8 +54,8 @@ DBSNP=${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf
 echo "References:"
 echo "- REF=${REF:?}"
 echo "- DBSNP=${DBSNP:?}"
-[[ -f "$REF" ]]      || { echo "File not found: ${REF}"; exit 1; }
-[[ -f "$DBSNP" ]]    || { echo "File not found: ${DBSNP}"; exit 1; }
+[[ -f "$REF" ]]      || error "File not found: ${REF}"
+[[ -f "$DBSNP" ]]    || error "File not found: ${DBSNP}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
@@ -65,10 +68,10 @@ echo "- PYTHON=${PYTHON:?}"
 echo "- GATK=${GATK:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]            || { echo "Not an executable: ${JAVA}"; exit 1; }
-[[ -x "$PYTHON" ]]          || { echo "Not an executable: ${PYTHON}"; exit 1; }
-[[ -f "$GATK" ]]            || { echo "File not found: ${GATK}"; exit 1; }
-[[ -f "$PYTHON_SCRIPT_A" ]] || { echo "File not found: ${PYTHON_SCRIPT_A}"; exit 1; }
+[[ -x "$JAVA" ]]            || error "Not an executable: ${JAVA}"
+[[ -x "$PYTHON" ]]          || error "Not an executable: ${PYTHON}"
+[[ -f "$GATK" ]]            || error "File not found: ${GATK}"
+[[ -f "$PYTHON_SCRIPT_A" ]] || error "File not found: ${PYTHON_SCRIPT_A}"
 
 
 echo "-------------------------------------------------"
@@ -82,7 +85,7 @@ echo "-------------------------------------------------"
 ## Construct string with one or more '-I <bam>' elements
 INPUTS=$(for i in ${bamdir}/*.bwa.realigned.rmDups.recal.bam
 do
-        [[ -f "$i" ]] || { echo "File not found: ${i}"; exit 1; }
+        [[ -f "$i" ]] || error "File not found: ${i}"
         echo -n "-I $i "
 done)
 echo "$INPUTS"
@@ -110,7 +113,7 @@ if [ ! -e "${PATIENT}.UG.snps.raw.vcf" ]; then
                 --standard_min_confidence_threshold_for_emitting 10.0 \
                 --min_base_quality_score 20 \
                 --output_mode EMIT_VARIANTS_ONLY \
-                --out "${PATIENT}.UG.snps.raw.vcf"; } 2>&1 || { echo "Unified Genotyper SNP calling failed"; exit 1; }
+                --out "${PATIENT}.UG.snps.raw.vcf"; } 2>&1 || error "Unified Genotyper SNP calling failed"
 else
         echo "[Germline] Found output ${PATIENT}.UG.snps.raw.vcf -- Skipping..."
 fi
@@ -138,7 +141,7 @@ if [ ! -e "${PATIENT}.UG.snps.annotated.vcf" ]; then
                 --annotation HaplotypeScore \
                 --annotation ReadPosRankSumTest \
                 --annotation DepthOfCoverage \
-                --out "${PATIENT}.UG.snps.annotated.vcf"; } 2>&1 || { echo "Unified Genotyper SNP annotation failed"; exit 1; }
+                --out "${PATIENT}.UG.snps.annotated.vcf"; } 2>&1 || error "Unified Genotyper SNP annotation failed"
 
         rm -f "${PATIENT}.UG.snps.raw.vcf"
         rm -f "${PATIENT}.UG.snps.raw.vcf.idx"
@@ -169,7 +172,7 @@ if [ ! -e "${PATIENT}.UG.snps.vcf" ]; then
                 --filterName MQRankSumFilter \
                 --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
-                --out "${PATIENT}.UG.snps.vcf"; } 2>&1 || { echo "Unified Genotyper SNP filtration failed"; exit 1; }
+                --out "${PATIENT}.UG.snps.vcf"; } 2>&1 || error "Unified Genotyper SNP filtration failed"
 
         rm -f "${PATIENT}.UG.snps.annotated.vcf"
         rm -f "${PATIENT}.UG.snps.annotated.vcf.idx"
@@ -189,7 +192,7 @@ do
                         "${PATIENT}.UG.snps.vcf" \
                         "$normalname" \
                         "$tumorname" \
-                        > "${prefix}.germline" || { echo "Germline analysis failed"; exit 1; }
+                        > "${prefix}.germline" || error "Germline analysis failed"
         else
                 echo "[Germline] ${prefix}.germline already exists, skipping analysis"
         fi

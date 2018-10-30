@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -27,22 +30,22 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
-[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
+[[ -f "$CONV" ]] || error "File not found: ${CONV}"
 CONV=$(readlink -e "$CONV")
 
 SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
-[[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
+[[ -x "$SCRIPT" ]] || error "File not found or not an executable: ${SCRIPT}"
 
 echo -n "Submitting jobs for $PATIENT "
 date
 
 ## Assert that input files exist
 D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-[[ -d "${D}" ]] || { echo "No such folder: ${D}"; exit 1; }
+[[ -d "${D}" ]] || error "No such folder: ${D}"
 
 export QSUB_OPTS
-"${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}" || { echo "ERROR: ${SCRIPT} failed!"; exit 1; }
+"${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}" || error "${SCRIPT} failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

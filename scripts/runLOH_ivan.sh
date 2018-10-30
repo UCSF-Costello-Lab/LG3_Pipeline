@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -42,7 +45,7 @@ echo "Settings:"
 echo " - patient=${patient:?}"
 echo " - project=${project:?}"
 echo " - conversionfile=${conversionfile:?}"
-[[ -f "$conversionfile" ]] || { echo "File not found: ${conversionfile}"; exit 1; }
+[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
 
 
 ### Software
@@ -50,24 +53,24 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 PYTHON_SCRIPT_A=${LG3_HOME}/scripts/runMAF.py
 RSCRIPT_A=${LG3_HOME}/scripts/MAFplot_version3_script.R
-[[ -x "$RSCRIPT_BIN" ]] || { echo "File not found or not an executable: ${RSCRIPT_BIN}"; exit 1; }
-[[ -f "$RSCRIPT_A" ]] || { echo "File not found: ${RSCRIPT_A}"; exit 1; }
-[[ -f "$PYTHON_SCRIPT_A" ]] || { echo "File not found: ${PYTHON_SCRIPT_A}"; exit 1; }
+[[ -x "$RSCRIPT_BIN" ]] || error "File not found or not an executable: ${RSCRIPT_BIN}"
+[[ -f "$RSCRIPT_A" ]] || error "File not found: ${RSCRIPT_A}"
+[[ -f "$PYTHON_SCRIPT_A" ]] || error "File not found: ${PYTHON_SCRIPT_A}"
 
 
 MAF=${LG3_OUTPUT_ROOT}/${project:?}/MAF
-mkdir -p "${MAF}" || { echo "Can't create destination directory ${MAF}"; exit 1; }
+mkdir -p "${MAF}" || error "Can't create destination directory ${MAF}"
 
 WDIR=${MAF}/${patient}_MAF
-mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR [$PROG:$LINENO]: Failed to set working directory to ${WDIR}"; exit 1; }
+mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+cd "${WDIR}" || error "Error [$PROG:$LINENO]: Failed to set working directory to ${WDIR}"
 
-python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || { echo "ABORT: Error in $LINENO $PROG"; exit 1; }
+python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || error "ABORT: Error in $LINENO $PROG"
 OK $LINENO
 
 OUTDIR=${MAF}/${patient}_plots
-mkdir -p "${OUTDIR}" || { echo "Can't create destination directory ${OUTDIR}"; exit 1; }
-"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || { echo "ABORT: Error in $LINENO $PROG"; exit 1; }
+mkdir -p "${OUTDIR}" || error "Can't create destination directory ${OUTDIR}"
+"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || error "ABORT: Error in $LINENO $PROG"
 OK $LINENO
 
 echo "Finished"
