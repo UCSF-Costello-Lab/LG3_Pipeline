@@ -80,7 +80,7 @@ cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
 
-echo "Cleaning ${LG3_SCRATCH_ROOT} ..."
+echo "Cleaning: rm  ${LG3_SCRATCH_ROOT}/${PATIENT} ..."
 rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
 cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
@@ -88,6 +88,9 @@ cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2
 { time "${SCRIPT_B}" \
       "${DESTDIR}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
       "${PATIENT}" "$ILIST"; } 2>&1 || { echo "ERROR: ${SCRIPT_B} failed"; exit 1; }
+
+echo "Cleaning: rm  ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo -n "End of script! "
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
