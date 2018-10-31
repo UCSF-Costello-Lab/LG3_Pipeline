@@ -75,3 +75,20 @@ function warn {
     fi
     echo -e "${yellow}WARNING: $*${reset}"
 }
+
+
+function assert_file_exists {
+    file=$1
+    [[ -f "${file}" ]] || error "File not found: '${file}' (working directory '${PWD}')"
+}
+
+function assert_file_executable {
+    file=$1
+    assert_file_exist "${file}"
+    [[ -x "${file}" ]] || error "File exists but is not executable: '${file}' (working directory '${PWD}')"
+}
+
+function assert_directory_exists {
+    dir=$1
+    [[ -d "${dir}" ]] || error "Directory not found: '${dir}' (working directory '${PWD}')"
+}
