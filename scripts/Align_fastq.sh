@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -41,7 +44,7 @@ BWA_INDEX=${LG3_HOME}/resources/bwa_indices/hg19.bwa
 echo "References:"
 echo "- BWA_INDEX=${BWA_INDEX:?}"
 BWA_INDEX_HOME=$(dirname "${BWA_INDEX}")
-[[ -d "$BWA_INDEX_HOME" ]] || { echo "Folder not found: ${BWA_INDEX_HOME}"; exit 1; }
+[[ -d "$BWA_INDEX_HOME" ]] || error "Folder not found: ${BWA_INDEX_HOME}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
@@ -61,13 +64,13 @@ echo "- BWA=${BWA:?}"
 echo "- SAMTOOLS=${SAMTOOLS:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]     || { echo "Not an executable: ${JAVA}"; exit 1; }
-[[ -x "$PYTHON" ]]   || { echo "Not an executable: ${PYTHON}"; exit 1; }
-[[ -x "$BWA" ]]      || { echo "Not an executable: ${BWA}"; exit 1; }
-[[ -x "$SAMTOOLS" ]] || { echo "Not an executable: ${SAMTOOLS}"; exit 1; }
-[[ -f "$PYTHON_SCRIPT" ]] || { echo "File not found: ${PYTHON_SCRIPT}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_A" ]] || { echo "File not found: ${PICARD_SCRIPT_A}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_B" ]] || { echo "File not found: ${PICARD_SCRIPT_B}"; exit 1; }
+[[ -x "$JAVA" ]]     || error "Not an executable: ${JAVA}"
+[[ -x "$PYTHON" ]]   || error "Not an executable: ${PYTHON}"
+[[ -x "$BWA" ]]      || error "Not an executable: ${BWA}"
+[[ -x "$SAMTOOLS" ]] || error "Not an executable: ${SAMTOOLS}"
+[[ -f "$PYTHON_SCRIPT" ]] || error "File not found: ${PYTHON_SCRIPT}"
+[[ -f "$PICARD_SCRIPT_A" ]] || error "File not found: ${PICARD_SCRIPT_A}"
+[[ -f "$PICARD_SCRIPT_B" ]] || error "File not found: ${PICARD_SCRIPT_B}"
 
 ### Input
 pl="Illumina"
@@ -83,12 +86,12 @@ echo "- pl=${pl:?} (hard coded)"
 echo "- pu=${pu:?} (hard coded)"
 
 ## Assert existance of input files
-[[ -f "$fastq1" ]] || { echo "File not found: ${fastq1}"; exit 1; }
-[[ -f "$fastq2" ]] || { echo "File not found: ${fastq2}"; exit 1; }
+[[ -f "$fastq1" ]] || error "File not found: ${fastq1}"
+[[ -f "$fastq2" ]] || error "File not found: ${fastq2}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/$SAMPLE/tmp"
-mkdir -p "${TMP}" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
+mkdir -p "${TMP}" || error "Can't create scratch directory ${TMP}"
 
 echo "-------------------------------------------------"
 echo "[Align] BWA alignment!"
@@ -103,11 +106,11 @@ echo "-------------------------------------------------"
 if [[ "${LG3_CHASTITY_FILTERING}" == "true" ]]; then
   echo "[Align] Removing chastity filtered first-in-pair reads..."
   $PYTHON "${PYTHON_SCRIPT}" "$fastq1" \
-          > "${SAMPLE}.read1.QC.fastq" || { echo "Chastity filtering read1 failed"; exit 1; }
+          > "${SAMPLE}.read1.QC.fastq" || error "Chastity filtering read1 failed"
 
   echo "[Align] Removing chastity filtered second-in-pair reads..."
   $PYTHON "${PYTHON_SCRIPT}" "$fastq2" \
-          > "${SAMPLE}.read2.QC.fastq" || { echo "Chastity filtering read2 failed"; exit 1; }
+          > "${SAMPLE}.read2.QC.fastq" || error "Chastity filtering read2 failed"
 else
   echo "[Align] Skipping chastity filtered (faked by a verbatim copy) ..."
   zcat "$fastq1" > "${SAMPLE}.read1.QC.fastq"
@@ -116,15 +119,15 @@ fi
 
 echo "[Align] Align first-in-pair reads..."
 $BWA aln -t "${ncores}" "$BWA_INDEX" "${SAMPLE}.read1.QC.fastq" \
-  > "${SAMPLE}.read1.sai" 2> "__${SAMPLE}_read1.log" || { echo "BWA alignment failed"; exit 1; }
+  > "${SAMPLE}.read1.sai" 2> "__${SAMPLE}_read1.log" || error "BWA alignment failed"
 
 echo "[Align] Align second-in-pair reads..."
 $BWA aln -t "${ncores}" "$BWA_INDEX" "${SAMPLE}.read2.QC.fastq" \
-  > "${SAMPLE}.read2.sai" 2> "__${SAMPLE}_read2.log" || { echo "BWA alignment failed"; exit 1; }
+  > "${SAMPLE}.read2.sai" 2> "__${SAMPLE}_read2.log" || error "BWA alignment failed"
 
 echo "[Align] Pair aligned reads..."
 $BWA sampe "$BWA_INDEX" "${SAMPLE}.read1.sai" "${SAMPLE}.read2.sai" \
-  "${SAMPLE}.read1.QC.fastq" "${SAMPLE}.read2.QC.fastq" > "${SAMPLE}.bwa.sam" 2>> "__${SAMPLE}.sampe.log" || { echo "BWA sampe failed"; exit 1; }
+  "${SAMPLE}.read1.QC.fastq" "${SAMPLE}.read2.QC.fastq" > "${SAMPLE}.bwa.sam" 2>> "__${SAMPLE}.sampe.log" || error "BWA sampe failed"
 
 rm -f "${SAMPLE}.read1.QC.fastq"
 rm -f "${SAMPLE}.read2.QC.fastq"
@@ -137,7 +140,7 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT || { echo "Verify mate information failed"; exit 1; } 
+        VALIDATION_STRINGENCY=SILENT || error "Verify mate information failed"
 
 echo "[Align] Coordinate-sort and enforce read group assignments..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
@@ -153,13 +156,13 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=LENIENT || { echo "Sort failed"; exit 1; }
+        VALIDATION_STRINGENCY=LENIENT || error "Sort failed"
 
 echo "[Align] Convert SAM to BAM..."
-$SAMTOOLS view -bS "${SAMPLE}.bwa.sorted.sam" > "${SAMPLE}.trim.bwa.sorted.bam" || { echo "BAM conversion failed"; exit 1; }
+$SAMTOOLS view -bS "${SAMPLE}.bwa.sorted.sam" > "${SAMPLE}.trim.bwa.sorted.bam" || error "BAM conversion failed"
 
 echo "[Align] Index the BAM file..."
-$SAMTOOLS index "${SAMPLE}.trim.bwa.sorted.bam" || { echo "BAM indexing failed"; exit 1; }
+$SAMTOOLS index "${SAMPLE}.trim.bwa.sorted.bam" || error "BAM indexing failed"
 
 echo "[Align] Clean up..."
 rm -f "__${SAMPLE}"*.log

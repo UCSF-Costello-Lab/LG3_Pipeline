@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
@@ -24,8 +27,7 @@ OK="$GRN OK$NOC"
 ERR="$RED missing$NOC"
 
 if [ $# -lt 2 ]; then
-        echo "ERROR: please specify project and at least one patient!"
-        exit 1
+    error "Please specify project and at least one patient!"
 fi
 
 PROJECT=$1
@@ -41,7 +43,7 @@ do
                 echo -e "${PATIENT}" "$OK"
         else
                 echo -e "${PATIENT}" "$ERR"
-					 exit 1
+		error "${PATIENT} failed"
         fi
 done
-exit 0
+

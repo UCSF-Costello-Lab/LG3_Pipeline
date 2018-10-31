@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -45,9 +48,9 @@ echo "References:"
 echo "- REF=${REF:?}"
 echo "- THOUSAND=${THOUSAND:?}"
 echo "- DBSNP=${DBSNP:?}"
-[[ -f "$REF" ]]      || { echo "ERROR: File not found: ${REF}"; exit 1; }
-[[ -f "$THOUSAND" ]] || { echo "ERROR: File not found: ${THOUSAND}"; exit 1; }
-[[ -f "$DBSNP" ]]    || { echo "ERROR: File not found: ${DBSNP}"; exit 1; }
+[[ -f "$REF" ]]      || error "File not found: ${REF}"
+[[ -f "$THOUSAND" ]] || error "File not found: ${THOUSAND}"
+[[ -f "$DBSNP" ]]    || error "File not found: ${DBSNP}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
@@ -67,15 +70,15 @@ echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]            || { echo "ERROR: Not an executable: ${JAVA}"; exit 1; }
-[[ -x "$SAMTOOLS" ]]        || { echo "ERROR: Not an executable: ${SAMTOOLS}"; exit 1; }
-[[ -f "$GATK" ]]            || { echo "ERROR: File not found: ${GATK}"; exit 1; }
-[[ -d "$PICARD_HOME" ]]     || { echo "ERROR: File not found: ${PICARD_HOME}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_A" ]] || { echo "ERROR: File not found: ${PICARD_SCRIPT_A}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_B" ]] || { echo "ERROR: File not found: ${PICARD_SCRIPT_B}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_C" ]] || { echo "ERROR: File not found: ${PICARD_SCRIPT_C}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_D" ]] || { echo "ERROR: File not found: ${PICARD_SCRIPT_D}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_E" ]] || { echo "ERROR: File not found: ${PICARD_SCRIPT_E}"; exit 1; }
+[[ -x "$JAVA" ]]            || error "Not an executable: ${JAVA}"
+[[ -x "$SAMTOOLS" ]]        || error "Not an executable: ${SAMTOOLS}"
+[[ -f "$GATK" ]]            || error "File not found: ${GATK}"
+[[ -d "$PICARD_HOME" ]]     || error "File not found: ${PICARD_HOME}"
+[[ -f "$PICARD_SCRIPT_A" ]] || error "File not found: ${PICARD_SCRIPT_A}"
+[[ -f "$PICARD_SCRIPT_B" ]] || error "File not found: ${PICARD_SCRIPT_B}"
+[[ -f "$PICARD_SCRIPT_C" ]] || error "File not found: ${PICARD_SCRIPT_C}"
+[[ -f "$PICARD_SCRIPT_D" ]] || error "File not found: ${PICARD_SCRIPT_D}"
+[[ -f "$PICARD_SCRIPT_E" ]] || error "File not found: ${PICARD_SCRIPT_E}"
 
 
 ## Input
@@ -92,11 +95,11 @@ echo "- START=${START:?}"
 echo "- RECOVER_DIR=${RECOVER_DIR:?}"
 
 ## Assert existance of input files
-[[ -f "$ILIST" ]] || { echo "ERROR: File not found: ${ILIST}"; exit 1; }
+[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"
-mkdir -p "${TMP}" || { echo "ERROR: Can't create scratch directory ${TMP}"; exit 1; }
+mkdir -p "${TMP}" || error "Can't create scratch directory ${TMP}"
 
 echo "------------------------------------------------------"
 echo "[Recal] Base quality recalibration (step in version)"
@@ -122,21 +125,21 @@ if [ ${STEP} -ge "${START}" ]; then
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "ERROR: Merge BAM files failed"; exit 1; }
+        VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Merge BAM files failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
-	[[ -f "${PATIENT}.merged.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.bam"; exit 1; }
+	[[ -f "${PATIENT}.merged.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam"
 	echo -e "\\n[Recal step ${STEP}] Index merged BAM file..."
-	{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || { echo "ERROR: First indexing failed"; exit 1; }
+	{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Create intervals for indel detection..."
-	[[ -f "${PATIENT}.merged.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.bam"; exit 1; }
-	[[ -f "${PATIENT}.merged.bam.bai" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.bam.bai"; exit 1; }
+	[[ -f "${PATIENT}.merged.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam"
+	[[ -f "${PATIENT}.merged.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam.bai"
 	{ time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
@@ -146,15 +149,15 @@ if [ ${STEP} -ge "${START}" ]; then
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${PATIENT}.merged.bam" \
-        --out "${PATIENT}.merged.intervals"; } 2>&1 || { echo "ERROR: Interval creation failed"; exit 1; }
+        --out "${PATIENT}.merged.intervals"; } 2>&1 || error "Interval creation failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Indel realignment..."
-   [[ -f "${PATIENT}.merged.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.bam"; exit 1; }
-   [[ -f "${PATIENT}.merged.bam.bai" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.bam.bai"; exit 1; }
-   [[ -f "${PATIENT}.merged.intervals" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.intervals"; exit 1; }
+   [[ -f "${PATIENT}.merged.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam"
+   [[ -f "${PATIENT}.merged.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam.bai"
+   [[ -f "${PATIENT}.merged.intervals" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.intervals"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type IndelRealigner \
@@ -164,7 +167,7 @@ if [ ${STEP} -ge "${START}" ]; then
         --consensusDeterminationModel USE_READS \
         --input_file "${PATIENT}.merged.bam" \
         --targetIntervals "${PATIENT}.merged.intervals" \
-        --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || { echo "ERROR: Indel realignment failed"; exit 1; }
+        --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || error "Indel realignment failed"
 	rm -f "${PATIENT}.merged.bam"
 	rm -f "${PATIENT}.merged.bam.bai"
 	rm -f "${PATIENT}.merged.intervals"
@@ -173,7 +176,7 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Fix mate information..."
-   [[ -f "${PATIENT}.merged.realigned.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.bam"; exit 1; }
+   [[ -f "${PATIENT}.merged.realigned.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.bam"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_SCRIPT_B}" \
         INPUT="${PATIENT}.merged.realigned.bam" \
@@ -182,7 +185,7 @@ if [ ${STEP} -ge "${START}" ]; then
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "ERROR: Verify mate information failed"; exit 1; } 
+        VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Verify mate information failed"
 	rm -f "${PATIENT}.merged.realigned.bam"
 	rm -f "${PATIENT}.merged.realigned.bai"
 fi
@@ -190,7 +193,7 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Mark duplicates..."
-   [[ -f "${PATIENT}.merged.realigned.mateFixed.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.mateFixed.bam"; exit 1; }
+   [[ -f "${PATIENT}.merged.realigned.mateFixed.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.mateFixed.bam"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_SCRIPT_C}" \
         INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
@@ -200,22 +203,22 @@ if [ ${STEP} -ge "${START}" ]; then
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=LENIENT; } 2>&1 || { echo "ERROR: Mark duplicates failed"; exit 1; }
+        VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
 	rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Index BAM file..."
-   [[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"; exit 1; }
-	{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || { echo "ERROR: Second indexing failed"; exit 1; } 
+   [[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"
+	{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Base-quality recalibration: Count covariates..."
-   [[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"; exit 1; }
-   [[ -f "${PATIENT}.merged.realigned.rmDups.bam.bai" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam.bai"; exit 1; }
+   [[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"
+   [[ -f "${PATIENT}.merged.realigned.rmDups.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam.bai"
 	{ time $JAVA -Xmx128g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type CountCovariates \
         --reference_sequence "$REF" \
@@ -229,15 +232,15 @@ if [ ${STEP} -ge "${START}" ]; then
         --covariate MappingQualityCovariate \
         --standard_covs \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
-        --recal_file "${PATIENT}.merged.realigned.rmDups.csv"; } 2>&1 || { echo "ERROR: CountCovariates failed"; exit 1; }
+        --recal_file "${PATIENT}.merged.realigned.rmDups.csv"; } 2>&1 || error "CountCovariates failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Base-quality recalibration: Table Recalibration..."
-	[[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"; exit 1; }	
-	[[ -f "${PATIENT}.merged.realigned.rmDups.bam.bai" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam.bai"; exit 1; }	
-	[[ -f "${PATIENT}.merged.realigned.rmDups.csv" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.csv"; exit 1; }	
+	[[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"	
+	[[ -f "${PATIENT}.merged.realigned.rmDups.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam.bai"	
+	[[ -f "${PATIENT}.merged.realigned.rmDups.csv" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.csv"	
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type TableRecalibration \
         --reference_sequence "$REF" \
@@ -245,7 +248,7 @@ if [ ${STEP} -ge "${START}" ]; then
         --baq RECALCULATE \
         --recal_file "${PATIENT}.merged.realigned.rmDups.csv" \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
-        --out "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || { echo "ERROR: TableRecalibration failed"; exit 1; }
+        --out "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "TableRecalibration failed"
 	rm -f "${PATIENT}.merged.realigned.rmDups.bam"
 	rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
 	rm -f "${PATIENT}.merged.realigned.rmDups.csv"
@@ -254,21 +257,21 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Index BAM file..."
-	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam"; exit 1; }	
-	{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || { echo "ERROR: Third indexing failed"; exit 1; } 
+	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam"	
+	{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "Third indexing failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Split BAM files..."
-	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam"; exit 1; }	
-	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai" ]] || { echo "ERROR on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam.bai"; exit 1; }	
+	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam"	
+	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam.bai"	
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
         --logging_level WARN \
         --input_file "${PATIENT}.merged.realigned.rmDups.recal.bam" \
-        --outputRoot temp_; } 2>&1 || { echo "ERROR: Splitting BAM files failed"; exit 1; }
+        --outputRoot temp_; } 2>&1 || error "Splitting BAM files failed"
 
 	rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam"
 	rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai"
@@ -279,14 +282,14 @@ STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
    echo -e "\\n[Recal step ${STEP}] Sort and index splitted BAM files..."
 	echo "Input:"
-	ls -s temp_*.bam || { echo "ERROR step ${STEP}: no input."; exit 1; }
+	ls -s temp_*.bam || error "Error step ${STEP}: no input."
 	for i in temp_*.bam
 	do
         base=${i##temp_}
         base=${base%%.bam}
         echo -e "\\n[Recal] processing $base..."
-        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || { echo "ERROR: Sorting $base failed"; exit 1; }
-        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || { echo "ERROR: Indexing $base failed"; exit 1; }        
+        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || error "Sorting $base failed"
+        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || error "Indexing $base failed"
         rm -f "$i"
 done
 fi
@@ -318,7 +321,7 @@ if [ ${STEP} -ge "${START}" ]; then
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "ERROR: Calculate hybrid selection metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -329,7 +332,7 @@ if [ ${STEP} -ge "${START}" ]; then
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "ERROR: Collect multiple QC metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Collect multiple QC metrics failed"
 	done
    echo "------------------------------------------------------"
 fi

@@ -8,6 +8,9 @@
 #PBS -l nodes=1:ppn=12,vmem=200gb
 #PBS -m ae
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
@@ -36,12 +39,12 @@ echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
 module load CBC r/3.4.2
 echo -n "Checking R: "
-Rscript --version || { echo "ERROR: No Rscript is available!"; exit 1; }
+Rscript --version || error "Rscript executable is not available"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
@@ -50,31 +53,31 @@ echo "Using node(s): $NODES"
 
 ## Assert existance of software
 SCRIPT_A=${LG3_HOME}/scripts/Recal_pass2.sh
-[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
+[[ -x "$SCRIPT_A" ]] || error "File not found or not an executable: ${SCRIPT_A}"
 SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
-[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
+[[ -x "$SCRIPT_B" ]] || error "File not found or not an executable: ${SCRIPT_B}"
 
 DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
+mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"
 
 DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
-mkdir -p "${DESTDIR2}" || { echo "Can't create destination directory ${DESTDIR2}"; exit 1; }
+mkdir -p "${DESTDIR2}" || error "Can't create destination directory ${DESTDIR2}"
 
 WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
-mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
-"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" || { echo "ERROR: ${SCRIPT_A} failed!"; exit 1; }
+"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" || error "${SCRIPT_A} failed!"
 echo "${SCRIPT_A} done!"
 
-cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
-cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR: cp from scratch failed!" ; exit 1 ; }
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp from scratch failed"
 echo "Cleaning ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
 echo "Making symlinks ..."
-cd "${DESTDIR}" || { echo "ERROR: failed to cd to ${DESTDIR}"; exit 1; }
+cd "${DESTDIR}" || error "Failed to cd to ${DESTDIR}"
 mk_links() {
   while read -r F
   do
@@ -86,11 +89,11 @@ mk_links() {
 find . -maxdepth 1 -type f -name "*.bwa.realigned.rmDups.*" -not -name "*recal*" | mk_links
 
 
-cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
+cd "${DESTDIR2}" || error "Failed to set working directory to ${DESTDIR2}"
 
 { time "${SCRIPT_B}" \
-		"${DESTDIR}/${NORMAL}.bwa.realigned.rmDups.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || { echo "ERROR: ${SCRIPT_B} failed"; exit 1; }
+      "${DESTDIR}/${NORMAL}.bwa.realigned.rmDups.bam" \
+      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SCRIPT_B} failed"
 
 echo "End of script!"
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

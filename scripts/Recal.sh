@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -76,10 +79,10 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT || { echo "Merge BAM files failed"; exit 1; }
+        VALIDATION_STRINGENCY=SILENT || error "Merge BAM files failed"
 
 echo "[Recal] Index new BAM file..."
-$SAMTOOLS index "${patientID}.merged.bam" || { echo "First indexing failed"; exit 1; }
+$SAMTOOLS index "${patientID}.merged.bam" || error "First indexing failed"
 
 echo "[Recal] Create intervals for indel detection..."
 $JAVA -Xmx4g -Djava.io.tmpdir="${TMP}" \
@@ -90,7 +93,7 @@ $JAVA -Xmx4g -Djava.io.tmpdir="${TMP}" \
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${patientID}.merged.bam" \
-        --out "${patientID}.merged.intervals" || { echo "Interval creation failed"; exit 1; }
+        --out "${patientID}.merged.intervals" || error "Interval creation failed"
 
 echo "[Recal] Indel realignment..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -102,7 +105,7 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         --consensusDeterminationModel USE_READS \
         --input_file "${patientID}.merged.bam" \
         --targetIntervals "${patientID}.merged.intervals" \
-        --out "${patientID}.merged.realigned.bam" || { echo "Indel realignment failed"; exit 1; }
+        --out "${patientID}.merged.realigned.bam" || error "Indel realignment failed"
 
 rm -f "${patientID}.merged.bam"
 rm -f "${patientID}.merged.bam.bai"
@@ -117,7 +120,7 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT || { echo "Verify mate information failed"; exit 1; } 
+        VALIDATION_STRINGENCY=SILENT || error "Verify mate information failed"
 
 rm -f "${patientID}.merged.realigned.bam"
 rm -f "${patientID}.merged.realigned.bai"
@@ -132,12 +135,12 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=LENIENT || { echo "Mark duplicates failed"; exit 1; }
+        VALIDATION_STRINGENCY=LENIENT || error "Mark duplicates failed"
 
 rm -f "${patientID}.merged.realigned.mateFixed.bam"
 
 echo "[Recal] Index BAM file..."
-$SAMTOOLS index "${patientID}.merged.realigned.rmDups.bam" || { echo "Second indexing failed"; exit 1; } 
+$SAMTOOLS index "${patientID}.merged.realigned.rmDups.bam" || error "Second indexing failed"
 
 echo "[Recal] Base-quality recalibration: Count covariates..."
 $JAVA -Xmx4g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -153,7 +156,7 @@ $JAVA -Xmx4g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --covariate MappingQualityCovariate \
         --standard_covs \
         --input_file "${patientID}.merged.realigned.rmDups.bam" \
-        --recal_file "${patientID}.merged.realigned.rmDups.csv" || { echo "First CountCovariates failed"; exit 1; }
+        --recal_file "${patientID}.merged.realigned.rmDups.csv" || error "First CountCovariates failed"
 
 echo "[Recal] Base-quality recalibration: Table Recalibration..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -163,14 +166,14 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --baq RECALCULATE \
         --recal_file "${patientID}.merged.realigned.rmDups.csv" \
         --input_file "${patientID}.merged.realigned.rmDups.bam" \
-        --out "${patientID}.merged.realigned.rmDups.recal.bam" || { echo "TableRecalibration failed"; exit 1; }
+        --out "${patientID}.merged.realigned.rmDups.recal.bam" || error "TableRecalibration failed"
 
 rm -f "${patientID}.merged.realigned.rmDups.bam"
 rm -f "${patientID}.merged.realigned.rmDups.bam.bai"
 rm -f "${patientID}.merged.realigned.rmDups.csv"
 
 echo "[Recal] Index BAM file..."
-$SAMTOOLS index "${patientID}.merged.realigned.rmDups.recal.bam" || { echo "Third indexing failed"; exit 1; } 
+$SAMTOOLS index "${patientID}.merged.realigned.rmDups.recal.bam" || error "Third indexing failed"
 
 echo "[Recal] Split BAM files..."
 $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -178,7 +181,7 @@ $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --reference_sequence "$REF" \
         --logging_level WARN \
         --input_file "${patientID}.merged.realigned.rmDups.recal.bam" \
-        --outputRoot temp_ || { echo "Splitting BAM files failed"; exit 1; }
+        --outputRoot temp_ || error "Splitting BAM files failed"
 
 rm -f "${patientID}.merged.realigned.rmDups.recal.bam"
 rm -f "${patientID}.merged.realigned.rmDups.recal.bam.bai"
@@ -189,8 +192,8 @@ do
         base=${i##temp_}
         base=${base%%.bam}
         echo "[Recal] Splitting off $base..."
-        $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal" || { echo "Sorting $base failed"; exit 1; }
-        $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam" || { echo "Indexing $base failed"; exit 1; }        
+        $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal" || error "Sorting $base failed"
+        $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam" || error "Indexing $base failed"
         rm -f "$i"
 done
 
@@ -217,7 +220,7 @@ do
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT || { echo "Calculate hybrid selection metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT || error "Calculate hybrid selection metrics failed"
 
         echo "[QC] Collect multiple QC metrics..."
         $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -228,7 +231,7 @@ do
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT || { echo "Collect multiple QC metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT || error "Collect multiple QC metrics failed"
         echo "------------------------------------------------------"
 done
 

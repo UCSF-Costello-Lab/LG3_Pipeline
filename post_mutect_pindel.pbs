@@ -7,6 +7,9 @@
 #PBS -l nodes=1:ppn=1,vmem=32gb
 #PBS -m ae
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -43,7 +46,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- CONV=${CONV:?}"
 fi
 
-[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
+[[ -f "$CONV" ]] || error "File not found: ${CONV}"
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
 
@@ -72,51 +75,51 @@ SCRIPT_D=${LG3_HOME}/scripts/mutation_overlaps.sh
 SCRIPT_E=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh
 SCRIPT_F=${LG3_HOME}/scripts/runLOH_ivan.sh
 
-[[ -x "$RSCRIPT_BIN" ]] || { echo "File not found or not an executable: ${RSCRIPT_BIN}"; exit 1; }
-[[ -f "$RSCRIPT_A" ]] || { echo "File not found: ${RSCRIPT_A}"; exit 1; }
-[[ -f "$RSCRIPT_B" ]] || { echo "File not found: ${RSCRIPT_B}"; exit 1; }
-[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
-[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
-[[ -x "$SCRIPT_C" ]] || { echo "File not found or not an executable: ${SCRIPT_C}"; exit 1; }
-[[ -x "$SCRIPT_D" ]] || { echo "File not found or not an executable: ${SCRIPT_D}"; exit 1; }
-[[ -x "$SCRIPT_E" ]] || { echo "File not found or not an executable: ${SCRIPT_E}"; exit 1; }
-[[ -x "$SCRIPT_F" ]] || { echo "File not found or not an executable: ${SCRIPT_F}"; exit 1; }
+[[ -x "$RSCRIPT_BIN" ]] || error "File not found or not an executable: ${RSCRIPT_BIN}"
+[[ -f "$RSCRIPT_A" ]] || error "File not found: ${RSCRIPT_A}"
+[[ -f "$RSCRIPT_B" ]] || error "File not found: ${RSCRIPT_B}"
+[[ -x "$SCRIPT_A" ]] || error "File not found or not an executable: ${SCRIPT_A}"
+[[ -x "$SCRIPT_B" ]] || error "File not found or not an executable: ${SCRIPT_B}"
+[[ -x "$SCRIPT_C" ]] || error "File not found or not an executable: ${SCRIPT_C}"
+[[ -x "$SCRIPT_D" ]] || error "File not found or not an executable: ${SCRIPT_D}"
+[[ -x "$SCRIPT_E" ]] || error "File not found or not an executable: ${SCRIPT_E}"
+[[ -x "$SCRIPT_F" ]] || error "File not found or not an executable: ${SCRIPT_F}"
 
 
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
-mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR [$PROG:$LINENO]: Failed to set working directory to ${WDIR}"; exit 1; }
+mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+cd "${WDIR}" || error "[$PROG:$LINENO]: Failed to set working directory to ${WDIR}"
 
 echo -e "\\n************ Cat all SNV files per patient"
-"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -e "\\n************ Annotate mutations from aligned bam files"
-"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJECT}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJECT}" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -e "\\n************ Convert library IDs to patient IDs"
-"${SCRIPT_C}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_C}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -e "\\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
-"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -e "\\n************ Combine indels and snvs into one file"
-"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -e "\\n************ Calculate mutation overlaps"
-"${SCRIPT_D}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_D}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -e "\\n************ Annotate with shared coverage"
-"${SCRIPT_E}" "${PATIENT}" "${PROJECT}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_E}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -e "\\n************ Generate MAF files & LOH plots"
-"${SCRIPT_F}" "${PATIENT}" "${PROJECT}" "${CONV}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+"${SCRIPT_F}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "Error on line $LINENO in $PROG"
 OK "$LINENO"
 
 echo -ne "\\n************ End of script "

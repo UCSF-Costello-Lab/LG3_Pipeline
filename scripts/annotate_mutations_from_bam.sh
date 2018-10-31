@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -38,13 +41,13 @@ echo "Input:"
 echo " - conversionfile=${conversionfile:?}"
 echo " - patient=${patient:?}"
 echo " - project=${project:?}"
-[[ -f "$conversionfile" ]] || { echo "File not found: ${conversionfile}"; exit 1; }
+[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
 
 PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## run annotation code
-python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${patient}.snvs" "${conversionfile}" "${patient}" "${project}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${patient}.snvs" "${conversionfile}" "${patient}" "${project}" || error "Error on line $LINENO in $PROG"
 
 ## remove intermediate files
 rm -f "${patient}.snvs."*Q.txt

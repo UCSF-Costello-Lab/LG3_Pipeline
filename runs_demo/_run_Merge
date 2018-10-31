@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -29,7 +32,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- SAMPLES=${SAMPLES:?}"
 echo "- SAMPLE=${SAMPLE:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},PROJECT=${PROJECT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
@@ -44,10 +47,10 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Merge.pbs
-[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+[[ -f "$PBS" ]] || error "File not found: ${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
-[[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
+[[ -d "$D" ]] || error "Directory not found: ${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 SUFF=bwa.realigned.rmDups.recal.bam
@@ -57,10 +60,7 @@ for S in ${SAMPLES}
 do
    ((CNT++))
    B=$D/${PATIENT}/${S}.$SUFF
-   if [ ! -f "$B" ]; then
-      echo "ABORT: Can't open $B !"
-      exit 1
-   fi
+   [[ -f "${B}" ]] || error "No such file: ${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
 done

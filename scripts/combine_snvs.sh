@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -39,9 +42,9 @@ echo "Settings:"
 echo " - patient=${patient:?}"
 echo " - project=${project:?}"
 echo " - conversionfile=${conversionfile:?}"
-[[ -f "$conversionfile" ]] || { echo "File not found: ${conversionfile}"; exit 1; }
+[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
 
-python "${LG3_HOME}/scripts/combine_snvs.py" "${patient}" "${project}" "${conversionfile}" "${patient}.snvs" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/combine_snvs.py" "${patient}" "${project}" "${conversionfile}" "${patient}.snvs" || error "Error on line $LINENO in $PROG"
 
 echo "Finished"
 

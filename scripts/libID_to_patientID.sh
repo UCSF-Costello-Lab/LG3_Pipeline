@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -40,12 +43,12 @@ echo "- conversionfile=${conversionfile:?}"
 echo "- patient=${patient:?}"
 echo "- mutfile=${mutfile:?}"
 echo "- outfile=${outfile:?}"
-[[ -f "$mutfile" ]] || { echo "File not found: ${mutfile}"; exit 1; }
-[[ -f "$conversionfile" ]] || { echo "File not found: ${conversionfile}"; exit 1; }
+[[ -f "$mutfile" ]] || error "File not found: ${mutfile}"
+[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
 
 echo "Warning ! Using Conversion file $conversionfile !!!"
 
-python "${LG3_HOME}/scripts/libID_to_patientID.py" "${mutfile}" "${patient}" "${outfile}" "${conversionfile}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/libID_to_patientID.py" "${mutfile}" "${patient}" "${outfile}" "${conversionfile}" || error "Error on line $LINENO in $PROG"
 
 echo "$PROG Finished"
 
