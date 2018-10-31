@@ -11,6 +11,7 @@ function term_colors {
     [[ -z "${what}" ]] && what=1
     
     if [[ "${action}" == "enable" && -t "${what}" ]]; then
+	## ANSI foreground colors
 	black=$(tput setaf 0)
 	red=$(tput setaf 1)
 	green=$(tput setaf 2)
@@ -20,15 +21,9 @@ function term_colors {
 	cyan=$(tput setaf 6)
 	white=$(tput setaf 7)
 
-	gray=$(tput setaf 8)
-	bright_red=$(tput setaf 9)
-	bright_green=$(tput setaf 10)
-	bright_yellow=$(tput setaf 11)
-	bright_blue=$(tput setaf 12)
-	bright_magenta=$(tput setaf 13)
-	bright_cyan=$(tput setaf 14)
-	bright_white=$(tput setaf 15)
-
+	## Text modes
+	bold=$(tput bold)
+	dim=$(tput dim)
 	reset=$(tput sgr0)
     else
 	export black=
@@ -40,14 +35,8 @@ function term_colors {
 	export cyan=
 	export white=
 
-	export gray=
-	export bright_red=
-	export bright_green=
-	export bright_yellow=
-	export bright_blue=
-	export bright_magenta=
-	export bright_cyan=
-	export bright_white=
+	export bold=
+	export dim=
 
 	export reset=
     fi
@@ -59,9 +48,10 @@ function error {
     
     if [[ -t 1 ]]; then
 	red=$(tput setaf 1)
+	bold=$(tput bold)
         reset=$(tput sgr0)
     fi
-    echo -e "${red}ERROR: $*${reset}"
+    echo -e "${red}${bold}ERROR${reset}: $*"
     exit 1
 }
 
@@ -70,10 +60,11 @@ function warn {
     local reset
     
     if [[ -t 1 ]]; then
-	yellow=$(tput setaf 1)
+	yellow=$(tput setaf 3)
+	bold=$(tput bold)
         reset=$(tput sgr0)
     fi
-    echo -e "${yellow}WARNING: $*${reset}"
+    echo -e "${yellow}${bold}WARNING${reset}: $*"
 }
 
 
