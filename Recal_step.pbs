@@ -97,6 +97,8 @@ mkdir -p "${WDIR2}" || error "Can't create destination directory ${WDIR2}"
 
 cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
 
+[[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+
 { time "${SCRIPT_B}" \
       "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
       "${PATIENT}" "$ILIST"; } 2>&1 || error "${SCRIPT_B} failed"
