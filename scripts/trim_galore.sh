@@ -38,7 +38,7 @@ LEN=20
 STRINGENCY=1
 
 if [ $# -lt 2 ]; then
-    error "Run trim_galore in paired mode on gzipped fastq files using Illumina universal adapter\nUsage: $0 [ -quality=$QTY -length=$LEN -stringency=$STRINGENCY] 1.fastq.gz 2.fastq.gz"
+    error "Run trim_galore in paired mode on gzipped fastq files using Illumina universal adapter\\nUsage: $0 [ -quality=$QTY -length=$LEN -stringency=$STRINGENCY] 1.fastq.gz 2.fastq.gz"
 fi
 
 #### Parse optional args
