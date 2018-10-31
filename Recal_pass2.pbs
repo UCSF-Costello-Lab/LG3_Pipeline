@@ -73,8 +73,6 @@ echo "${SCRIPT_A} done!"
 cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp from scratch failed"
-echo "Cleaning ${LG3_SCRATCH_ROOT} ..."
-rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
 
 echo "Making symlinks ..."
 cd "${DESTDIR}" || error "Failed to cd to ${DESTDIR}"
@@ -88,12 +86,22 @@ mk_links() {
 }
 find . -maxdepth 1 -type f -name "*.bwa.realigned.rmDups.*" -not -name "*recal*" | mk_links
 
+echo "Starting germline analysis ..."
+WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
 
-cd "${DESTDIR2}" || error "Failed to set working directory to ${DESTDIR2}"
+mkdir -p "${WDIR2}" || error "Can't create destination directory ${WDIR2}"
+
+cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
+
+[[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
 { time "${SCRIPT_B}" \
-      "${DESTDIR}/${NORMAL}.bwa.realigned.rmDups.bam" \
+      "../${NORMAL}.bwa.realigned.rmDups.bam" \
       "${PATIENT}" "$ILIST"; } 2>&1 || error "${SCRIPT_B} failed"
 
-echo "End of script!"
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
+
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
