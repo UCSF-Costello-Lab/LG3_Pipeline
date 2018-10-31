@@ -51,7 +51,7 @@ function error {
 	bold=$(tput bold)
         reset=$(tput sgr0)
     fi
-    echo -e "${red}${bold}ERROR${reset}: $*"
+    echo -e "${red}${bold}ERROR on line ${BASH_LINENO[0]}${reset}: $*"
     exit 1
 }
 
@@ -64,5 +64,5 @@ function warn {
 	bold=$(tput bold)
         reset=$(tput sgr0)
     fi
-    echo -e "${yellow}${bold}WARNING${reset}: $*"
+    echo -e "${yellow}${bold}WARNING on line ${BASH_LINENO[0]}${reset}: $*"
 }
