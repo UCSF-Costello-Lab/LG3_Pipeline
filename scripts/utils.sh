@@ -75,7 +75,7 @@ function assert_file_exists {
 
 function assert_file_executable {
     file=$1
-    assert_file_exist "${file}"
+    assert_file_exists "${file}"
     [[ -x "${file}" ]] || error "File exists but is not executable: '${file}' (working directory '${PWD}')"
 }
 

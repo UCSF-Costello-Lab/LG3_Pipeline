@@ -51,7 +51,7 @@ echo "Input:"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 echo "- PATIENT=${PATIENT:?}"
-[[ -f "$CONV" ]] || error "File not found: ${CONV}"
+assert_file_exists "${CONV}"
 
 if [ $# -ne 3 ]; then
     error "Please specify patient, CONV file and project!"
@@ -63,13 +63,13 @@ INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 echo "References:"
 echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
-[[ -f "$CONFIG" ]] || error "File not found: ${CONFIG}"
-[[ -f "$INTERVAL" ]] || error "File not found: ${INTERVAL}"
+assert_file_exists "${CONFIG}"
+assert_file_exists "${INTERVAL}"
 
 
 ## Software
 PBS=${LG3_HOME}/MutDet_TvsN.pbs
-[[ -f "$PBS" ]] || error "File not found or not executable: ${PBS}"
+assert_file_exists "${PBS}"
 
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
 mkdir -p "${WORKDIR}" || error "Can't create scratch directory ${WORKDIR}"

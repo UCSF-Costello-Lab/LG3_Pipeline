@@ -42,7 +42,7 @@ echo "Settings:"
 echo " - patient=${patient:?}"
 echo " - project=${project:?}"
 echo " - conversionfile=${conversionfile:?}"
-[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
+assert_file_exists "${conversionfile}"
 
 python "${LG3_HOME}/scripts/combine_snvs.py" "${patient}" "${project}" "${conversionfile}" "${patient}.snvs" || error "Error on line $LINENO in $PROG"
 

@@ -41,7 +41,7 @@ echo "Input:"
 echo " - conversionfile=${conversionfile:?}"
 echo " - patient=${patient:?}"
 echo " - project=${project:?}"
-[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
+assert_file_exists "${conversionfile}"
 
 PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user

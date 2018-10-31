@@ -51,7 +51,7 @@ echo "- RECOVER_DIR=${RECOVER_DIR:?}"
 [[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
 ## Assert existance of input files
-[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
+assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
 module load CBC r/3.4.2
@@ -66,10 +66,9 @@ echo "Using node(s): $NODES"
 
 ## Assert existance of software
 SCRIPT_A=${LG3_HOME}/scripts/Recal_step.sh
-[[ -x "$SCRIPT_A" ]] || error "File not found or not an executable: ${SCRIPT_A}"
-
 SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
-[[ -x "$SCRIPT_B" ]] || error "File not found or not an executable: ${SCRIPT_B}"
+assert_file_executable "${SCRIPT_A}"
+assert_file_executable "${SCRIPT_B}"
 
 DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"

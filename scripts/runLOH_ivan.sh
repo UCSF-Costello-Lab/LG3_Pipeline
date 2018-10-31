@@ -45,7 +45,7 @@ echo "Settings:"
 echo " - patient=${patient:?}"
 echo " - project=${project:?}"
 echo " - conversionfile=${conversionfile:?}"
-[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
+assert_file_exists "${conversionfile}"
 
 
 ### Software
@@ -53,9 +53,9 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 PYTHON_SCRIPT_A=${LG3_HOME}/scripts/runMAF.py
 RSCRIPT_A=${LG3_HOME}/scripts/MAFplot_version3_script.R
-[[ -x "$RSCRIPT_BIN" ]] || error "File not found or not an executable: ${RSCRIPT_BIN}"
-[[ -f "$RSCRIPT_A" ]] || error "File not found: ${RSCRIPT_A}"
-[[ -f "$PYTHON_SCRIPT_A" ]] || error "File not found: ${PYTHON_SCRIPT_A}"
+assert_file_executable "${RSCRIPT_BIN}"
+assert_file_exists "${RSCRIPT_A}"
+assert_file_exists "${PYTHON_SCRIPT_A}"
 
 
 MAF=${LG3_OUTPUT_ROOT}/${project:?}/MAF

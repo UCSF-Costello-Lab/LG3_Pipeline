@@ -43,8 +43,8 @@ echo "- conversionfile=${conversionfile:?}"
 echo "- patient=${patient:?}"
 echo "- mutfile=${mutfile:?}"
 echo "- outfile=${outfile:?}"
-[[ -f "$mutfile" ]] || error "File not found: ${mutfile}"
-[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
+assert_file_exists "${mutfile}"
+assert_file_exists "${conversionfile}"
 
 echo "Warning ! Using Conversion file $conversionfile !!!"
 

@@ -44,7 +44,7 @@ BWA_INDEX=${LG3_HOME}/resources/bwa_indices/hg19.bwa
 echo "References:"
 echo "- BWA_INDEX=${BWA_INDEX:?}"
 BWA_INDEX_HOME=$(dirname "${BWA_INDEX}")
-[[ -d "$BWA_INDEX_HOME" ]] || error "Folder not found: ${BWA_INDEX_HOME}"
+assert_directory_exists "${BWA_INDEX_HOME}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
@@ -64,13 +64,13 @@ echo "- BWA=${BWA:?}"
 echo "- SAMTOOLS=${SAMTOOLS:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]     || error "Not an executable: ${JAVA}"
-[[ -x "$PYTHON" ]]   || error "Not an executable: ${PYTHON}"
-[[ -x "$BWA" ]]      || error "Not an executable: ${BWA}"
-[[ -x "$SAMTOOLS" ]] || error "Not an executable: ${SAMTOOLS}"
-[[ -f "$PYTHON_SCRIPT" ]] || error "File not found: ${PYTHON_SCRIPT}"
-[[ -f "$PICARD_SCRIPT_A" ]] || error "File not found: ${PICARD_SCRIPT_A}"
-[[ -f "$PICARD_SCRIPT_B" ]] || error "File not found: ${PICARD_SCRIPT_B}"
+assert_file_executable "${JAVA}"
+assert_file_executable "${PYTHON}"
+assert_file_executable "${BWA}"
+assert_file_executable "${SAMTOOLS}"
+assert_file_exists "${PYTHON_SCRIPT}"
+assert_file_exists "${PICARD_SCRIPT_A}"
+assert_file_exists "${PICARD_SCRIPT_B}"
 
 ### Input
 pl="Illumina"
@@ -86,8 +86,8 @@ echo "- pl=${pl:?} (hard coded)"
 echo "- pu=${pu:?} (hard coded)"
 
 ## Assert existance of input files
-[[ -f "$fastq1" ]] || error "File not found: ${fastq1}"
-[[ -f "$fastq2" ]] || error "File not found: ${fastq2}"
+assert_file_exists "${fastq1}"
+assert_file_exists "${fastq2}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/$SAMPLE/tmp"

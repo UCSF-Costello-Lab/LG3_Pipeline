@@ -43,7 +43,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- hostname=$(hostname)"
 fi
 
-[[ -d "$LG3_INPUT_ROOT" ]] || error "Folder not found: ${LG3_INPUT_ROOT}"
+assert_directory_exists "${LG3_INPUT_ROOT}"
 LG3_INPUT_ROOT=$(readlink -e "${LG3_INPUT_ROOT:?}") ## Absolute path
 
 ### Input
@@ -58,15 +58,15 @@ echo "- XMX=${XMX:?}"
 echo "- WORKDIR=${WORKDIR:?}"
 [[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 BAMDIR=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
-[[ -d "$BAMDIR" ]] || error "Folder not found: ${BAMDIR}"
-[[ -f "$CONFIG" ]] || error "File not found: ${CONFIG}"
-[[ -f "$INTERVAL" ]] || error "File not found: ${INTERVAL}"
+assert_directory_exists "${BAMDIR}"
+assert_file_exists "${CONFIG}"
+assert_file_exists "${INTERVAL}"
 CONFIG=$(readlink -e "${CONFIG:?}") ## Absolute path
 INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 
 ### Software
 SCRIPT=${LG3_HOME}/scripts/MutDet.sh
-[[ -x "$SCRIPT" ]] || error "File not found or not executable: ${SCRIPT}"
+assert_file_executable "${SCRIPT}"
 
 mkdir -p "${WORKDIR}" || error "Can't create scratch directory ${WORKDIR}"
 cd "${WORKDIR}" || error "Failed to set working directory to ${WORKDIR}"
@@ -76,8 +76,8 @@ echo "*** Working directory: $WORKDIR"
 BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
 BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
 
-[[ -f "${BAMN}" ]] || error "Normal BAM file not found: ${BAMN}"
-[[ -f "${BAMT}" ]] || error "Tumor BAM file not found: ${BAMT}"
+assert_file_exists "${BAMN}"
+assert_file_exists "${BAMT}"
 
 echo -n "Starting MutDet job on "
 date

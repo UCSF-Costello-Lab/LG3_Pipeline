@@ -51,7 +51,7 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Align_fastq.pbs
-[[ -f "$PBS" ]] || error "File not found: ${PBS}"
+assert_file_exists "${PBS}"
 
 
 for SAMPLE in ${SAMPLES}

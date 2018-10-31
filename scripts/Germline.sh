@@ -41,8 +41,8 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
-[[ -f "$nbamfile" ]] || error "File not found: ${nbamfile}"
-[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
+assert_file_exists "${nbamfile}"
+assert_file_exists "${ILIST}"
 
 normalname=${nbamfile##*/}
 normalname=${normalname%%.bwa*}
@@ -54,8 +54,8 @@ DBSNP=${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf
 echo "References:"
 echo "- REF=${REF:?}"
 echo "- DBSNP=${DBSNP:?}"
-[[ -f "$REF" ]]      || error "File not found: ${REF}"
-[[ -f "$DBSNP" ]]    || error "File not found: ${DBSNP}"
+assert_file_exists "${REF}"
+assert_file_exists "${DBSNP}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
@@ -68,10 +68,10 @@ echo "- PYTHON=${PYTHON:?}"
 echo "- GATK=${GATK:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]            || error "Not an executable: ${JAVA}"
-[[ -x "$PYTHON" ]]          || error "Not an executable: ${PYTHON}"
-[[ -f "$GATK" ]]            || error "File not found: ${GATK}"
-[[ -f "$PYTHON_SCRIPT_A" ]] || error "File not found: ${PYTHON_SCRIPT_A}"
+assert_file_executable "${JAVA}"
+assert_file_executable "${PYTHON}"
+assert_file_exists "${GATK}"
+assert_file_exists "${PYTHON_SCRIPT_A}"
 
 
 echo "-------------------------------------------------"
@@ -85,7 +85,7 @@ echo "-------------------------------------------------"
 ## Construct string with one or more '-I <bam>' elements
 INPUTS=$(for i in ${bamdir}/*.bwa.realigned.rmDups.recal.bam
 do
-        [[ -f "$i" ]] || error "File not found: ${i}"
+        assert_file_exists "${i}"
         echo -n "-I $i "
 done)
 echo "$INPUTS"

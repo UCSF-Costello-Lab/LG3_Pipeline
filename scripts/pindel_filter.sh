@@ -36,8 +36,8 @@ fi
 
 BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools
 PYTHON_SCRIPT_A=${LG3_HOME}/scripts/pindel_filter.py
-[[ -x "$BEDTOOLS" ]] || error "File not found: ${BEDTOOLS}"
-[[ -f "$PYTHON_SCRIPT_A" ]] || error "File not found: ${PYTHON_SCRIPT_A}"
+assert_file_executable "${BEDTOOLS}"
+assert_file_exists "${PYTHON_SCRIPT_A}"
 
 datafile=$1
 #proj=$2
@@ -46,7 +46,7 @@ echo "Input:"
 echo "- datafile=${datafile:?}"
 echo "- interval=${interval:?}"
 
-[[ -f "$datafile" ]] || error "File not found: ${datafile}"
+assert_file_exists "${datafile}"
 
 ### filter indels
 python "${PYTHON_SCRIPT_A}" "${datafile}"

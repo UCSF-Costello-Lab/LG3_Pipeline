@@ -48,9 +48,9 @@ echo "References:"
 echo "- REF=${REF:?}"
 echo "- THOUSAND=${THOUSAND:?}"
 echo "- DBSNP=${DBSNP:?}"
-[[ -f "$REF" ]]      || error "File not found: ${REF}"
-[[ -f "$THOUSAND" ]] || error "File not found: ${THOUSAND}"
-[[ -f "$DBSNP" ]]    || error "File not found: ${DBSNP}"
+assert_file_exits "${REF}"
+assert_file_exits "${THOUSAND}"
+assert_file_exits "${DBSNP}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
@@ -70,15 +70,15 @@ echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]            || error "Not an executable: ${JAVA}"
-[[ -x "$SAMTOOLS" ]]        || error "Not an executable: ${SAMTOOLS}"
-[[ -f "$GATK" ]]            || error "File not found: ${GATK}"
-[[ -d "$PICARD_HOME" ]]     || error "File not found: ${PICARD_HOME}"
-[[ -f "$PICARD_SCRIPT_A" ]] || error "File not found: ${PICARD_SCRIPT_A}"
-[[ -f "$PICARD_SCRIPT_B" ]] || error "File not found: ${PICARD_SCRIPT_B}"
-[[ -f "$PICARD_SCRIPT_C" ]] || error "File not found: ${PICARD_SCRIPT_C}"
-[[ -f "$PICARD_SCRIPT_D" ]] || error "File not found: ${PICARD_SCRIPT_D}"
-[[ -f "$PICARD_SCRIPT_E" ]] || error "File not found: ${PICARD_SCRIPT_E}"
+assert_file_executable "${JAVA}"
+assert_file_executable "${SAMTOOLS}"
+assert_directory_exists "${PICARD_HOME}"
+assert_file_exists "${GATK}"
+assert_file_exists "${PICARD_SCRIPT_A}"
+assert_file_exists "${PICARD_SCRIPT_B}"
+assert_file_exists "${PICARD_SCRIPT_C}"
+assert_file_exists "${PICARD_SCRIPT_D}"
+assert_file_exists "${PICARD_SCRIPT_E}"
 
 
 ## Input
@@ -95,7 +95,7 @@ echo "- START=${START:?}"
 echo "- RECOVER_DIR=${RECOVER_DIR:?}"
 
 ## Assert existance of input files
-[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
+assert_file_exists "${ILIST}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"

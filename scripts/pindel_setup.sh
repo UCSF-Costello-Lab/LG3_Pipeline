@@ -38,7 +38,7 @@ fi
 #
 
 PYTHON_SCRIPT_A=${LG3_HOME}/scripts/pindel_setup.py
-[[ -f "$PYTHON_SCRIPT_A" ]] || error "File not found: ${PYTHON_SCRIPT_A}"
+assert_file_exists "${PYTHON_SCRIPT_A}"
 
 patient_ID=$1
 proj=$2
@@ -48,7 +48,7 @@ echo "- patient_ID=${patient_ID:?}"
 echo "- proj=${proj:?}"
 echo "- patIDs=${patIDs:?}"
 [[ "${patient_ID}" == *[_]* ]] && error "'patient_ID' must not contain underscores: ${patient_ID}"
-[[ -f "$patIDs" ]] || error "File not found: ${patIDs}"
+assert_file_exists "${patIDs}"
 
 python "${PYTHON_SCRIPT_A}" "${patient_ID}" "${proj}" "${patIDs}"
 
