@@ -3,6 +3,12 @@
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME}/scripts/utils.sh"
 
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 FAILED=false
 
 ### Configuration
@@ -96,5 +102,10 @@ done < "${PATIENT}.temp.conversions.txt"
 ## Delete PATIENT specific conversion file
 rm "${PATIENT}.temp.conversions.txt"
 
-[[ ${FAILED} ]] && error "Script failed"
+${FAILED} && error "Script failed"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
+
+
+
 
