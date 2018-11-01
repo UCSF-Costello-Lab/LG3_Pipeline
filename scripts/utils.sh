@@ -83,13 +83,11 @@ function error {
     EXIT_VALUE=${EXIT_VALUE:-1}
 
     ## Parse arguments
-    msg=
     while [ -n "$1" ]; do
         case "$1" in
-            --debug) DEBUG=true; shift;;
             --dryrun) EXIT_ON_ERROR=false; shift;;
             --value=*) EXIT_VALUE="${1/--value=/}"; shift;;
-            *) msg="$*"; break;;
+            *) break;;
         esac
     done
 
@@ -110,7 +108,7 @@ function error {
     fi
 
     if [[ -n "${ON_ERROR}" ]]; then
-	if [[ $(type -t ${ON_ERROR}) == "function" ]]; then
+	if [[ $(type -t "${ON_ERROR}") == "function" ]]; then
             ${ON_ERROR}
 	fi
     fi
@@ -121,7 +119,7 @@ function error {
 	exit "${EXIT_VALUE}"
     fi
 
-    printf "${reset}"
+    printf "%s" "${reset}"
 }
 
 function warn {

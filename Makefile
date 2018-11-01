@@ -6,7 +6,10 @@ LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 
 .PHONY: test
 
-check: check_misc check_pbs check_sh check_r check_demo
+check: check_misc check_pbs check_sh check_r check_demo check_tests
+
+check_tests:
+	shellcheck -x tests/*.sh
 
 check_pbs:
 	shellcheck -x *.pbs
