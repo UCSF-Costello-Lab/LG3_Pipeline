@@ -63,14 +63,14 @@ mkdir -p "${MAF}" || error "Can't create destination directory ${MAF}"
 
 WDIR=${MAF}/${patient}_MAF
 mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
-cd "${WDIR}" || error "Error [$PROG:$LINENO]: Failed to set working directory to ${WDIR}"
+cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
-python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || error "ABORT: Error in $LINENO $PROG"
+python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || error "${PYTHON_SCRIPT_A} failed"
 OK $LINENO
 
 OUTDIR=${MAF}/${patient}_plots
 mkdir -p "${OUTDIR}" || error "Can't create destination directory ${OUTDIR}"
-"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || error "ABORT: Error in $LINENO $PROG"
+"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${patient}" "${project}" "${conversionfile}" || error "${RSCRIPT_A} failed"
 OK $LINENO
 
 echo "Finished"

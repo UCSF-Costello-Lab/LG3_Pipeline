@@ -28,11 +28,6 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
-#
-##
-#
-PROG=$(basename "$0")
-
 ### Input
 patient=$1
 project=$2
@@ -57,8 +52,8 @@ assert_file_exists "${PYTHON_SCRIPT_A}"
 MUT=${LG3_OUTPUT_ROOT}/${project:?}/mutations/${patient}_mutect
 MUT2=${LG3_OUTPUT_ROOT}/${project:?}/MutInDel
 
-python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}"  || error "Error on line $LINENO in $PROG"
+python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}"  || error "${PYTHON_SCRIPT_A} failed"
 
-"${RSCRIPT_BIN}" "${RSCRIPT_A}" "$MUT/${patient}.mutect.coverage.intersect.bed" "$MUT2/${patient}.snvs.indels.filtered.overlaps.txt" "$MUT2/${patient}.R.mutations"  || error "Error on line $LINENO in $PROG"
+"${RSCRIPT_BIN}" "${RSCRIPT_A}" "$MUT/${patient}.mutect.coverage.intersect.bed" "$MUT2/${patient}.snvs.indels.filtered.overlaps.txt" "$MUT2/${patient}.R.mutations"  || error "${RSCRIPT_A} failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

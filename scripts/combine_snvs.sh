@@ -28,10 +28,6 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
-#
-##
-#
-PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ### Input
@@ -44,7 +40,7 @@ echo " - project=${project:?}"
 echo " - conversionfile=${conversionfile:?}"
 assert_file_exists "${conversionfile}"
 
-python "${LG3_HOME}/scripts/combine_snvs.py" "${patient}" "${project}" "${conversionfile}" "${patient}.snvs" || error "Error on line $LINENO in $PROG"
+python "${LG3_HOME}/scripts/combine_snvs.py" "${patient}" "${project}" "${conversionfile}" "${patient}.snvs" || error "combine_snvs.py failed"
 
 echo "Finished"
 

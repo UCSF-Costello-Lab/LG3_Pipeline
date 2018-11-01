@@ -43,7 +43,7 @@ echo "- mutfile=${mutfile:?}"
 echo "- patient=${patient:?}"
 echo "- outfile=${outfile:?}"
 
-python "${LG3_HOME}/scripts/mutation_overlaps.py" "${mutfile}" "${patient}" "${outfile}" || error "Error on line $LINENO in $PROG"
+python "${LG3_HOME}/scripts/mutation_overlaps.py" "${mutfile}" "${patient}" "${outfile}" || error "mutation_overlaps.py failed"
 
 awk -F'\t' '{print $NF}' "${outfile}" | sort | uniq -c
 

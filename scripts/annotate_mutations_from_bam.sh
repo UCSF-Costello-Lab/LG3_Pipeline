@@ -43,11 +43,10 @@ echo " - patient=${patient:?}"
 echo " - project=${project:?}"
 assert_file_exists "${conversionfile}"
 
-PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## run annotation code
-python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${patient}.snvs" "${conversionfile}" "${patient}" "${project}" || error "Error on line $LINENO in $PROG"
+python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${patient}.snvs" "${conversionfile}" "${patient}" "${project}" || error "annotate_mutations_from_bam.py failed"
 
 ## remove intermediate files
 rm -f "${patient}.snvs."*Q.txt

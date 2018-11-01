@@ -48,7 +48,7 @@ assert_file_exists "${conversionfile}"
 
 echo "Warning ! Using Conversion file $conversionfile !!!"
 
-python "${LG3_HOME}/scripts/libID_to_patientID.py" "${mutfile}" "${patient}" "${outfile}" "${conversionfile}" || error "Error on line $LINENO in $PROG"
+python "${LG3_HOME}/scripts/libID_to_patientID.py" "${mutfile}" "${patient}" "${outfile}" "${conversionfile}" || error "libID_to_patientID.py failed"
 
 echo "$PROG Finished"
 
