@@ -103,7 +103,7 @@ function error {
     if ${TRACEBACK_ON_ERROR}; then
        echo -e "${gray}Traceback:"
        for ((ii = 1; ii < "${#BASH_LINENO[@]}"; ii++ )); do
-           printf "%d: %s() on line #%s in %s\n" "$ii" "${FUNCNAME[$ii]}" "${BASH_LINENO[$((ii-1))]}" "${BASH_SOURCE[$ii]}"
+           printf "%d: %s() on line #%s in %s\\n" "$ii" "${FUNCNAME[$ii]}" "${BASH_LINENO[$((ii-1))]}" "${BASH_SOURCE[$ii]}"
        done
     fi
 
