@@ -2,7 +2,11 @@
 
 ## Version 2018-10-27-9000 (develop version)
 
-* ...
+### NEW FEATURES
+
+* Errors produced by the pipeline itself do now also output traceback
+  information showing the function, line number, and script pathname
+  call stack.
 
 
 ## Version 2018-10-27
