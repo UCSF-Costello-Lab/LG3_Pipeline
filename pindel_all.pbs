@@ -103,14 +103,14 @@ date
 echo -e "\\n========= [Setup] Make pindel cfg file in $WDIR"
 cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
-"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "Error on line $LINENO"
+"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${SCRIPT_A} failed"
 
 ## set up scratch directory
 cd "${SCRATCH}" || error "Failed to set working directory to ${SCRATCH}"
 
 ## run pindel
 echo -e "\\n========= [Pindel] Run pindel"
-$PINDEL -f "$REF" -i "${WDIR}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "Error on line $LINENO"
+${PINDEL} -f "$REF" -i "${WDIR}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "${PINDEL} failed"
 
 ## move from scratch to project folder
 cd "$WDIR" || error "Failed to set working directory to ${WDIR}"
@@ -119,11 +119,11 @@ rm -rf "$SCRATCH"
 
 ## convert to vcf
 echo -e "\\n========= [Pindel] Convert pindel to vcf"
-$PINDEL2VCF -P "${PATIENT}_pindel/${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}_pindel/${PATIENT}.pindel.vcf" -G  || error "Error on line $LINENO"
+${PINDEL2VCF} -P "${PATIENT}_pindel/${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}_pindel/${PATIENT}.pindel.vcf" -G  || error "${PINDEL2VCF} failed"
 
 ## convert to tdt
 echo -e "\\n========= [Pindel] Convert vcf to tdt"
-"${PYTHON_SCRIPT_A}" "${PATIENT}_pindel/${PATIENT}.pindel.vcf"  || error "Error on line $LINENO"
+"${PYTHON_SCRIPT_A}" "${PATIENT}_pindel/${PATIENT}.pindel.vcf"  || error "${PYTHON_SCRIPT_A} failed"
 
 ## rename file
 cd "${PATIENT}_pindel" || error "Failed to set working directory to ${PATIENT}_pindel"
@@ -131,13 +131,10 @@ mv "${PATIENT}.pindel.vcf.tdt" "${PATIENT}.indels"
 
 ## filter pindel data
 echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"
-"${SCRIPT_B}" "${PATIENT}.indels" "${PROJECT}" "$TARGET"  || error "Error on line $LINENO"
+"${SCRIPT_B}" "${PATIENT}.indels" "${PROJECT}" "$TARGET"  || error "${SCRIPT_B} failed"
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\\n========= [Annotate] Annotate indels and apply annotation-based filters"
-"${SCRIPT_C}" "${PATIENT}.indels" "${PROJECT}"  || error "Error on line $LINENO"
-
-echo -ne "\\nEnd of script on "
-date
+"${SCRIPT_C}" "${PATIENT}.indels" "${PROJECT}"  || error "${SCRIPT_C} failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
