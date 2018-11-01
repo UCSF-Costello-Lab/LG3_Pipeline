@@ -52,7 +52,7 @@ CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
 PROG=$(basename "$0")
 OK() {
-        echo "OK: line $1 in $PROG"
+        echo "OK: line ${BASH_LINENO[0]} in $PROG"
 }
 
 echo -n "Mutation filtering & combining "
@@ -88,41 +88,38 @@ assert_file_executable "${SCRIPT_F}"
 
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
 mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
-cd "${WDIR}" || error "[$PROG:$LINENO]: Failed to set working directory to ${WDIR}"
+cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
 echo -e "\\n************ Cat all SNV files per patient"
-"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
+"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SCRIPT_A} failed"
+OK 
 
 echo -e "\\n************ Annotate mutations from aligned bam files"
-"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJECT}" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
+"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJECT}" || error "${SCRIPT_B} failed"
+OK
 
 echo -e "\\n************ Convert library IDs to patient IDs"
-"${SCRIPT_C}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
+"${SCRIPT_C}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || error "${SCRIPT_C} failed"
+OK
 
 echo -e "\\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
-"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
+"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || error "${RSCRIPT_A} failed"
+OK 
 
 echo -e "\\n************ Combine indels and snvs into one file"
-"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
+"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || error "${RSCRIPT_B} failed"
+OK 
 
 echo -e "\\n************ Calculate mutation overlaps"
-"${SCRIPT_D}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
+"${SCRIPT_D}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || error "${SCRIPT_D} failed"
+OK 
 
 echo -e "\\n************ Annotate with shared coverage"
-"${SCRIPT_E}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
+"${SCRIPT_E}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SCRIPT_E} failed"
+OK
 
 echo -e "\\n************ Generate MAF files & LOH plots"
-"${SCRIPT_F}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "Error on line $LINENO in $PROG"
-OK "$LINENO"
-
-echo -ne "\\n************ End of script "
-date
+"${SCRIPT_F}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SCRIPT_F} failed"
+OK
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

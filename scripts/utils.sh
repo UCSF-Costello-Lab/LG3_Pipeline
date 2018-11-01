@@ -132,7 +132,7 @@ function warn {
 	bold=$(tput bold)
         reset=$(tput sgr0)
     fi
-    echo -e "${yellow}${bold}WARNING${reset}: $*"
+    echo -e "${yellow}${bold}WARNING on line ${BASH_LINENO[0]}${reset}: $*"
 }
 
 
