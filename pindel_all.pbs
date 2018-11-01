@@ -135,5 +135,6 @@ echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "[Pindel] Output is in ${WDIR}"
+ls -l "${WDIR}/${PATIENT}"*
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
