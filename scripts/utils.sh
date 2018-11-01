@@ -125,12 +125,25 @@ function error {
 function warn {
     local yellow
     local reset
+    
+    TRACEBACK_ON_WARN=${TRACEBACK_ON_WARN:-false}
+    
     if [[ -t 1 ]]; then
 	yellow=$(tput setaf 3)
 	bold=$(tput bold)
         reset=$(tput sgr0)
     fi
-    echo -e "${yellow}${bold}WARNING on line ${BASH_LINENO[0]}${reset}: $*"
+    
+    echo -e "${yellow}${bold}WARNING${reset}: $*"
+    
+    if ${TRACEBACK_ON_WARN}; then
+       echo -e "${gray}Traceback:"
+       for ((ii = 1; ii < "${#BASH_LINENO[@]}"; ii++ )); do
+           printf "%d: %s() on line #%s in %s\\n" "$ii" "${FUNCNAME[$ii]}" "${BASH_LINENO[$((ii-1))]}" "${BASH_SOURCE[$ii]}"
+       done
+    fi
+    
+    printf "%s" "${reset}"
 }
 
 
