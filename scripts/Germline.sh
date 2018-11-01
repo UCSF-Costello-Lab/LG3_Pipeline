@@ -204,7 +204,7 @@ if [ -e "NOR-${normalname}_vs_${normalname}.germline" ]; then
 fi
 
 echo "[Germline] Results:"
-grep Tumor *.germline
+grep Tumor -- *.germline
 
 echo "[Germline] Finished!"
 echo "-------------------------------------------------"
