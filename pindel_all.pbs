@@ -41,18 +41,19 @@ if [[ $LG3_DEBUG ]]; then
   echo "- ncores=$ncores"
 fi
 
-[[ -d "$LG3_INPUT_ROOT" ]] || error "Folder not found: ${LG3_INPUT_ROOT}"
-[[ -d "$LG3_OUTPUT_ROOT" ]] || error "Folder not found: ${LG3_OUTPUT_ROOT}"
+assert_directory_exists "${LG3_INPUT_ROOT}"
+assert_directory_exists "${LG3_OUTPUT_ROOT}"
 LG3_INPUT_ROOT=$(readlink -e "${LG3_INPUT_ROOT}") ## Absolute path
 LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}") ## Absolute path
 
 ### Input
 echo "Input:"
-echo "- PATIENT=${PATIENT}"
-echo "- PROJECT=${PROJECT}"
-echo "- CONV=${CONV}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- CONV=${CONV:?}"
 
 [[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
 ### Include in .bashrc!!!
@@ -63,8 +64,6 @@ echo "Patient: ${PATIENT}"
 echo "Project: ${PROJECT}"
 echo "Conversion File: ${CONV}"
 echo "----------------------------------"
-
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
 PINDEL=${LG3_HOME}/tools/pindel024t/pindel
 PINDEL2VCF=${LG3_HOME}/tools/pindel024t/pindel2vcf
@@ -77,20 +76,20 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-13
 echo "Software:"
 echo "- PINDEL=${PINDEL:?}"
 echo "- PINDEL2VCF=${PINDEL2VCF:?}"
-[[ -x "$PINDEL" ]] || error "File not found or not an executable: ${PINDEL}"
-[[ -x "$PINDEL2VCF" ]] || error "File not found or not an executable: ${PINDEL2VCF}"
-[[ -x "$SCRIPT_A" ]] || error "File not found or not an executable: ${SCRIPT_A}"
-[[ -x "$SCRIPT_B" ]] || error "File not found or not an executable: ${SCRIPT_B}"
-[[ -x "$SCRIPT_C" ]] || error "File not found or not an executable: ${SCRIPT_C}"
-[[ -x "$PYTHON_SCRIPT_A" ]] || error "File not found or not an executable: ${PYTHON_SCRIPT_A}"
+assert_file_executable "${PINDEL}"
+assert_file_executable "${PINDEL2VCF}"
+assert_file_executable "${SCRIPT_A}"
+assert_file_executable "${SCRIPT_B}"
+assert_file_executable "${SCRIPT_C}"
+assert_file_executable "${PYTHON_SCRIPT_A}"
 
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 TARGET=${LG3_HOME}/resources/All_exome_targets.extended_200bp.bed
 echo "References:"
 echo "- REF=${REF:?}"
 echo "- TARGET=${TARGET:?}"
-[[ -f "$REF" ]]    || error "File not found: ${REF}"
-[[ -f "$TARGET" ]] || error "File not found: ${TARGET}"
+assert_file_exists "${REF}"
+assert_file_exists "${TARGET}"
 
 SCRATCH=${LG3_SCRATCH_ROOT}/${PATIENT}_pindel
 mkdir -p "${SCRATCH}" || error "Can't create destination directory ${SCRATCH}"

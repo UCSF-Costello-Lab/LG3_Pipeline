@@ -32,18 +32,18 @@ echo "- CONV=${CONV:?}"
 
 [[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
-[[ -f "$CONV" ]] || error "File not found: ${CONV}"
+assert_file_exists "${CONV}"
 CONV=$(readlink -e "$CONV")
 
 SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
-[[ -x "$SCRIPT" ]] || error "File not found or not an executable: ${SCRIPT}"
+assert_file_executable "${SCRIPT}"
 
 echo -n "Submitting jobs for $PATIENT "
 date
 
 ## Assert that input files exist
 D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-[[ -d "${D}" ]] || error "No such folder: ${D}"
+assert_directory_exists "${D}"
 
 export QSUB_OPTS
 "${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}" || error "${SCRIPT} failed"

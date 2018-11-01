@@ -44,16 +44,16 @@ echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
-[[ -f "$CONV" ]] || error "File not found: ${CONV}"
+assert_file_exists "${CONV}"
 
 PBS=${LG3_HOME}/post_mutect_pindel.pbs
-[[ -f "$PBS" ]] || error "File not found: ${PBS}"
+assert_file_exists "${PBS}"
 
 SCRIPT_A=${LG3_HOME}/scripts/chk_pindel.sh
-[[ -x "$SCRIPT_A" ]] || error "File not found or not an executable: ${SCRIPT_A}"
+assert_file_executable "${SCRIPT_A}"
 
 SCRIPT_B=${LG3_HOME}/scripts/chk_mutdet.sh
-[[ -x "$SCRIPT_B" ]] || error "File not found or not an executable: ${SCRIPT_B}"
+assert_file_executable "${SCRIPT_B}"
 
 "${SCRIPT_A}" "${PROJECT}" "${PATIENT}" || error "${SCRIPT_A} failed"
 "${SCRIPT_B}" "${PROJECT}" "${PATIENT}" || error "${SCRIPT_B} failed"

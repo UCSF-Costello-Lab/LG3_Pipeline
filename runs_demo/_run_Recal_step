@@ -21,7 +21,7 @@ NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 START=${START:-1}
 RECOVER_DIR=output/${PROJECT}/exomes_recal/${PATIENT}.recover
-[[ -d "${RECOVER_DIR}" ]] || error "Recover directory not found: ${RECOVER_DIR}"
+assert_directory_exists "${RECOVER_DIR}"
 RECOVER_DIR=$(readlink -e "${RECOVER_DIR}") ## requires absolute path
 
 
@@ -45,7 +45,7 @@ echo "- START=${START:?}"
 [[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
 ## Assert that the patient file exists
-[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
+assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "$ILIST")
 
 ## Assert that NORMAL is one of the SAMPLES
@@ -65,10 +65,10 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Recal_step.pbs
-[[ -f "$PBS" ]] || error "File not found: ${PBS}"
+assert_file_exists "${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes
-[[ -d "$D" ]] || error "Directory not found: ${D}"
+assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 
@@ -79,7 +79,7 @@ for SAMPLE in ${SAMPLES}
 do
    ((CNT++))
    B=$D/${SAMPLE}/${SAMPLE}.$SUFF
-   [[ -f "${B}" ]] || error "File not found: ${B}"
+   assert_file_exists "${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
 done

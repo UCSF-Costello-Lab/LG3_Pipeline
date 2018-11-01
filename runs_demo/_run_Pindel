@@ -45,15 +45,15 @@ echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
-[[ -f "$CONV" ]] || error "File not found: ${CONV}"
+assert_file_exists "${CONV}"
 CONV=$(readlink -e "$CONV")
 
 PBS=${LG3_HOME}/pindel_all.pbs
-[[ -f "$PBS" ]] || error "File not found: ${PBS}"
+assert_file_exists "${PBS}"
 
 ## Assert that input files exist
 D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-[[ -d "${D}" ]] || error "No such folder: ${D}"
+assert_directory_exists "${D}"
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"

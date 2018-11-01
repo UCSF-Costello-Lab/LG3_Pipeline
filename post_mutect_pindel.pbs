@@ -46,7 +46,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- CONV=${CONV:?}"
 fi
 
-[[ -f "$CONV" ]] || error "File not found: ${CONV}"
+assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
 
@@ -75,15 +75,15 @@ SCRIPT_D=${LG3_HOME}/scripts/mutation_overlaps.sh
 SCRIPT_E=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh
 SCRIPT_F=${LG3_HOME}/scripts/runLOH_ivan.sh
 
-[[ -x "$RSCRIPT_BIN" ]] || error "File not found or not an executable: ${RSCRIPT_BIN}"
-[[ -f "$RSCRIPT_A" ]] || error "File not found: ${RSCRIPT_A}"
-[[ -f "$RSCRIPT_B" ]] || error "File not found: ${RSCRIPT_B}"
-[[ -x "$SCRIPT_A" ]] || error "File not found or not an executable: ${SCRIPT_A}"
-[[ -x "$SCRIPT_B" ]] || error "File not found or not an executable: ${SCRIPT_B}"
-[[ -x "$SCRIPT_C" ]] || error "File not found or not an executable: ${SCRIPT_C}"
-[[ -x "$SCRIPT_D" ]] || error "File not found or not an executable: ${SCRIPT_D}"
-[[ -x "$SCRIPT_E" ]] || error "File not found or not an executable: ${SCRIPT_E}"
-[[ -x "$SCRIPT_F" ]] || error "File not found or not an executable: ${SCRIPT_F}"
+assert_file_executable "${RSCRIPT_BIN}"
+assert_file_exists "${RSCRIPT_A}"
+assert_file_exists "${RSCRIPT_B}"
+assert_file_executable "${SCRIPT_A}"
+assert_file_executable "${SCRIPT_B}"
+assert_file_executable "${SCRIPT_C}"
+assert_file_executable "${SCRIPT_D}"
+assert_file_executable "${SCRIPT_E}"
+assert_file_executable "${SCRIPT_F}"
 
 
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel

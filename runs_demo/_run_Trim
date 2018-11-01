@@ -49,7 +49,7 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/trim_galore.pbs
-[[ -f "$PBS" ]] || error "File not found: ${PBS}"
+assert_file_exists "${PBS}"
 
 echo "ETA ~4h"
 

@@ -40,6 +40,10 @@ check_misc:
 #	@ ! grep -qE "exit " --include=\*.pbs --include=runs_demo/_run_\* --include=scripts/\*.{py,R,sh} --include=FilterMutations/\*.{py,sh}
 
 
+test:
+	${LG3_HOME}/tests/error.sh
+	${LG3_HOME}/tests/warn.sh
+
 setup:
 	ln -fs $(LG3_HOME_HIDE)/resources .
 	ln -fs $(LG3_HOME_HIDE)/tools .

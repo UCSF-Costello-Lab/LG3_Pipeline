@@ -39,7 +39,7 @@ echo "- EMAIL=${EMAIL}"
 [[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
 
 ## Assert that the patient file exists
-[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
+assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "$ILIST")
 
 ## Assert that NORMAL is one of the SAMPLES
@@ -59,10 +59,10 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Recal_bigmem.pbs
-[[ -f "$PBS" ]] || error "File not found: ${PBS}"
+assert_file_exists "${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes
-[[ -d "$D" ]] || error "Directory not found: ${D}"
+assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 
@@ -73,7 +73,7 @@ for SAMPLE in ${SAMPLES}
 do
    ((CNT++))
    B=$D/${SAMPLE}/${SAMPLE}.$SUFF
-   [[ -f "${B}" ]] || error "File not found: ${B}"
+   assert_file_exists "${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
 done

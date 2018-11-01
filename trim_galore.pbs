@@ -30,8 +30,8 @@ echo "- TG=${TG}"
 echo "- JUNK=$JUNK"
 
 ## Assert existance of input files
-[[ -f "$FASTQ1" ]] || error "File not found: ${FASTQ1}"
-[[ -f "$FASTQ2" ]] || error "File not found: ${FASTQ2}"
+assert_file_exists "${FASTQ1}"
+assert_file_exists "${FASTQ2}"
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -61,7 +61,7 @@ echo "Using node(s): $NODES"
 
 ## Assert existance of software
 SCRIPT=${LG3_HOME}/scripts/trim_galore.sh
-[[ -x "$SCRIPT" ]] || error "File not found or not an executable: ${SCRIPT}"
+assert_file_executable "${SCRIPT}"
 
 mkdir -p "${LG3_OUTPUT_ROOT}" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}"
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}"

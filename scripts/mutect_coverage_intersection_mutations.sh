@@ -41,23 +41,21 @@ echo "Input:"
 echo " - patient=${patient:?}"
 echo " - project=${project:?}"
 echo " - conversionfile=${conversionfile:?}"
-[[ -f "$conversionfile" ]] || error "File not found: ${conversionfile}"
+assert_file_exists "${conversionfile}"
 
 ### Software
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 RSCRIPT_A=${LG3_HOME}/scripts/mutations_annotate_intersected_coverage.R
 PYTHON_SCRIPT_A=${LG3_HOME}/scripts/convert_patient_wig2bed.py
-[[ -x "$RSCRIPT_BIN" ]] || error "File not found or not an executable: ${RSCRIPT_BIN}"
-[[ -f "$RSCRIPT_A" ]] || error "File not found: ${RSCRIPT_A}"
-[[ -f "$PYTHON_SCRIPT_A" ]] || error "File not found: ${PYTHON_SCRIPT_A}"
+assert_file_executable "${RSCRIPT_BIN}"
+assert_file_exists "${RSCRIPT_A}"
+assert_file_exists "${PYTHON_SCRIPT_A}"
 
 
 ### FIXME: Are these input or output folders?
 MUT=${LG3_OUTPUT_ROOT}/${project:?}/mutations/${patient}_mutect
 MUT2=${LG3_OUTPUT_ROOT}/${project:?}/MutInDel
-#[[ -d "$MUT" ]] || error "Folder not found: ${MUT}"
-#[[ -d "$MUT2" ]] || error "Folder not found: ${MUT2}"
 
 python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}"  || error "Error on line $LINENO in $PROG"
 

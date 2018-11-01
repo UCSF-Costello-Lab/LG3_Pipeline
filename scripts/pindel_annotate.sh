@@ -44,12 +44,12 @@ echo "Input:"
 echo "- datafile=${datafile:?}"
 echo "- proj=${proj:?}"
 
-[[ -f "$datafile" ]] || error "File not found: ${datafile}"
+assert_file_exists "${datafile}"
 
 BIN=${LG3_HOME}/scripts
 ANNOVAR=${LG3_HOME}/AnnoVar
-[[ -d "$BIN" ]] || error "Directory not found: ${BIN}"
-[[ -d "$ANNOVAR" ]] || error "Directory not found: ${ANNOVAR}"
+assert_directory_exists "${BIN}"
+assert_directory_exists "${ANNOVAR}"
 
 KINASEDATA="${LG3_HOME}/resources/all_human_kinases.txt"
 COSMICDATA="${LG3_HOME}/resources/CosmicMutantExport_v58_150312.tsv"
@@ -64,11 +64,11 @@ echo "- CANCERDATA=${CANCERDATA:?}"
 echo "- CONVERT=${CONVERT:?}"
 echo "- ANNDB=${ANNDB:?}"
 
-[[ -f "$KINASEDATA" ]] || error "File not found: ${KINASEDATA}"
-[[ -f "$COSMICDATA" ]] || error "File not found: ${COSMICDATA}"
-[[ -f "$CANCERDATA" ]] || error "File not found: ${CANCERDATA}"
-[[ -f "$CONVERT" ]] || error "File not found: ${CONVERT}"
-[[ -d "$ANNDB" ]] || error "Directory not found: ${ANNDB}"
+assert_file_exists "${KINASEDATA}"
+assert_file_exists "${COSMICDATA}"
+assert_file_exists "${CANCERDATA}"
+assert_file_exists "${CONVERT}"
+assert_directory_exists "${ANNDB}"
 
 echo -n "Started $PROG on "
 date

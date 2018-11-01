@@ -29,7 +29,7 @@ fi
 #
 
 if [ $# -ne 3 ]; then
-    error "Coord-sort and fix read group assignments\nUsage: $0 in.bam out.bam prefix"
+    error "Coord-sort and fix read group assignments\\nUsage: $0 in.bam out.bam prefix"
 fi
 
 TMP="${LG3_SCRATCH_ROOT}/$prefix/tmp"

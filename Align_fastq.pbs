@@ -46,8 +46,8 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 ## Assert existance of input files
-[[ -f "$FASTQ1" ]] || error "File not found: ${FASTQ1}"
-[[ -f "$FASTQ2" ]] || error "File not found: ${FASTQ2}"
+assert_file_exists "${FASTQ1}"
+assert_file_exists "${FASTQ2}"
 
 FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
 FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
@@ -60,7 +60,7 @@ echo "Using node(s): $NODES"
 
 ## Assert existance of software
 SCRIPT=${LG3_HOME}/scripts/Align_fastq.sh
-[[ -x "$SCRIPT" ]] || error "File not found or not an executable: ${SCRIPT}"
+assert_file_executable "${SCRIPT}"
 
 DEST="${LG3_OUTPUT_ROOT}/${PROJECT}/exomes"
 mkdir -p "${DEST}" || error "Can't create destination directory ${DEST}"

@@ -47,10 +47,10 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Merge.pbs
-[[ -f "$PBS" ]] || error "File not found: ${PBS}"
+assert_file_exists "${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
-[[ -d "$D" ]] || error "Directory not found: ${D}"
+assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 SUFF=bwa.realigned.rmDups.recal.bam
@@ -60,7 +60,7 @@ for S in ${SAMPLES}
 do
    ((CNT++))
    B=$D/${PATIENT}/${S}.$SUFF
-   [[ -f "${B}" ]] || error "No such file: ${B}"
+   assert_file_exists "${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
 done

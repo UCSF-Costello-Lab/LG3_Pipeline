@@ -57,10 +57,10 @@ echo "- ILIST=${ILIST:?}"
 echo "- XMX=${XMX:?}"
 
 ## Assert existance of input files
-[[ -f "$nbamfile" ]] || error "File not found: ${nbamfile}"
-[[ -f "$tbamfile" ]] || error "File not found: ${tbamfile}"
-[[ -f "$CONFIG" ]] || error "File not found: ${CONFIG}"
-[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
+assert_file_exists "${nbamfile}"
+assert_file_exists "${tbamfile}"
+assert_file_exists "${CONFIG}"
+assert_file_exists "${ILIST}"
 
 normalname=${nbamfile##*/}
 normalname=${normalname%%.bwa*}
@@ -84,12 +84,12 @@ echo "- FILTER=${FILTER:?}"
 echo "- REORDER=${REORDER:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]   || error "Not an executable: ${JAVA}"
-[[ -x "$PYTHON" ]] || error "Not an executable: ${PYTHON}"
-[[ -f "$GATK" ]]   || error "File not found: ${GATK}"
-[[ -f "$MUTECT" ]] || error "File not found: ${MUTECT}"
-[[ -f "$FILTER" ]] || error "File not found: ${FILTER}"
-[[ -f "$REORDER" ]] || error "File not found: ${REORDER}"
+assert_file_executable "${JAVA}"
+assert_file_executable "${PYTHON}"
+assert_file_exists "${GATK}"
+assert_file_exists "${MUTECT}"
+assert_file_exists "${FILTER}"
+assert_file_exists "${REORDER}"
 
 ### References
 REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
@@ -109,13 +109,13 @@ echo "- COSMICDATA=${COSMICDATA}"
 echo "- CANCERDATA=${CANCERDATA}"
 
 ## Assert existance of files
-[[ -f "${REF}" ]]        || error "File not found: ${REF}"
-[[ -f "${DBSNP}" ]]      || error "File not found: ${DBSNP}"
-[[ -f "${REORDER}" ]]    || error "File not found: ${REORDER}"
-[[ -f "${CONVERT}" ]]    || error "File not found: ${CONVERT}"
-[[ -f "${KINASEDATA}" ]] || error "File not found: ${KINASEDATA}"
-[[ -f "${COSMICDATA}" ]] || error "File not found: ${COSMICDATA}"
-[[ -f "${CANCERDATA}" ]] || error "File not found: ${CANCERDATA}"
+assert_file_exists "${REF}"
+assert_file_exists "${DBSNP}"
+assert_file_exists "${REORDER}"
+assert_file_exists "${CONVERT}"
+assert_file_exists "${KINASEDATA}"
+assert_file_exists "${COSMICDATA}"
+assert_file_exists "${CANCERDATA}"
 
 
 TMP="${LG3_SCRATCH_ROOT}"

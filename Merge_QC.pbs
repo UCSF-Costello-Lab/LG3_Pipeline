@@ -45,7 +45,7 @@ echo "- SAMPLE=${SAMPLE:?}"
 echo "- ILIST=${ILIST:?}"
 
 [[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
-[[ -f "$ILIST" ]] || error "File not found: ${ILIST}"
+assert_file_exists "${ILIST}"
 
 date
 mkdir -p "${LG3_SCRATCH_ROOT}/${SAMPLE}"
