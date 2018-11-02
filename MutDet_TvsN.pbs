@@ -68,16 +68,15 @@ INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 SCRIPT=${LG3_HOME}/scripts/MutDet.sh
 assert_file_executable "${SCRIPT}"
 
-mkdir -p "${WORKDIR}" || error "Can't create scratch directory ${WORKDIR}"
-cd "${WORKDIR}" || error "Failed to set working directory to ${WORKDIR}"
-echo "*** Working directory: $WORKDIR"
-
-### For Recal
 BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
 BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
 
 assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
+
+SCRATCH="${LG3_SCRATCH_ROOT}/${PATIENT}_mutect"
+mkdir -p "${SCRATCH}" || error "Can't create scratch directory ${SCRATCH}"
+cd "${SCRATCH}" || error "Failed to set scratch directory to ${SCRATCH}"
 
 echo -n "Starting MutDet job on "
 date
@@ -89,6 +88,7 @@ echo "Config = $CONFIG"
 echo "Interval = $INTERVAL"
 echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
+echo "SCRATCH=${SCRATCH}"
 
 "${SCRIPT}" \
   "$BAMN" \
@@ -98,6 +98,13 @@ echo "WORKDIR=$WORKDIR"
   "${CONFIG}" \
   "${INTERVAL}" \
   "$XMX" || error "MutDet failed"
+
+mkdir -p "${WORKDIR}" || error "Can't create output directory ${WORKDIR}"
+echo "Copy results from ${SCRATCH} to ${WORKDIR}"
+cp -p "${SCRATCH}"/* "${WORKDIR}" || error "Fail to copy results to ${WORKDIR}"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "End of PBS script!"
 date
