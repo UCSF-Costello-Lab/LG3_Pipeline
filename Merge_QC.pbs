@@ -56,6 +56,8 @@ cd "${LG3_SCRATCH_ROOT}/${SAMPLE}" || error "Failed to set working directory to 
 cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
 cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || error "Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT:?}/${SAMPLE}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
