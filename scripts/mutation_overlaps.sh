@@ -35,18 +35,16 @@ PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## Input
-mutfile=$1
-patient=$2
-outfile=$3
+MUTFILE=$1
+PATIENT=$2
+OUTFILE=$3
 echo "Input:"
-echo "- mutfile=${mutfile:?}"
-echo "- patient=${patient:?}"
-echo "- outfile=${outfile:?}"
+echo "- MUTFILE=${MUTFILE:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- OUTFILE=${OUTFILE:?}"
 
-python "${LG3_HOME}/scripts/mutation_overlaps.py" "${mutfile}" "${patient}" "${outfile}" || error "mutation_overlaps.py failed"
+python "${LG3_HOME}/scripts/mutation_overlaps.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" || error "mutation_overlaps.py failed"
 
-awk -F'\t' '{print $NF}' "${outfile}" | sort | uniq -c
-
-echo "$PROG Finished"
+awk -F'\t' '{print $NF}' "${OUTFILE}" | sort | uniq -c
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

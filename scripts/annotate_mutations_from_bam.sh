@@ -21,7 +21,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -34,22 +33,22 @@ fi
 
 
 ## Input
-conversionfile=$1
-patient=$2
-project=$3
+CONV=$1
+PATIENT=$2
+PROJECT=$3
 echo "Input:"
-echo " - conversionfile=${conversionfile:?}"
-echo " - patient=${patient:?}"
-echo " - project=${project:?}"
-assert_file_exists "${conversionfile}"
+echo " - CONV=${CONV:?}"
+echo " - PATIENT=${PATIENT:?}"
+echo " - PROJECT=${PROJECT:?}"
+assert_file_exists "${CONV}"
 
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## run annotation code
-python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${patient}.snvs" "${conversionfile}" "${patient}" "${project}" || error "annotate_mutations_from_bam.py failed"
+python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${PATIENT}.snvs" "${CONV}" "${PATIENT}" "${PROJECT}" || error "annotate_mutations_from_bam.py failed"
 
 ## remove intermediate files
-rm -f "${patient}.snvs."*Q.txt
+rm -f "${PATIENT}.snvs."*Q.txt
 
 echo "Finished"
 
