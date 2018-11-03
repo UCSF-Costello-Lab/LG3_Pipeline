@@ -2,15 +2,15 @@
 
 ## Version 2018-10-27-9000 (develop version)
 
-### BUG FIXES
-
-* All scripts are now cleaning scratch space in the end of the run.
-
 ### NEW FEATURES
 
 * Errors produced by the pipeline itself do now also output traceback
   information showing the function, line number, and script pathname
   call stack.
+
+### BUG FIXES
+
+* All scripts are now cleaning scratch space in the end of the run.
 
 
 ## Version 2018-10-27
