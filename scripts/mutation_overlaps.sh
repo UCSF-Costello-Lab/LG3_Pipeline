@@ -28,10 +28,6 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
-#
-##
-#
-PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## Input
