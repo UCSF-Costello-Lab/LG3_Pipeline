@@ -102,7 +102,7 @@ date
 echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 
 "${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${SCRIPT_A} failed"
-assert_file_exists ${PATIENT}.pindel.cfg
+assert_file_exists "${PATIENT}.pindel.cfg"
 
 ## run pindel
 echo -e "\\n========= [Pindel] Run pindel"

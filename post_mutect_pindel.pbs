@@ -128,7 +128,7 @@ OK
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
 mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
 
-cp -p * "${WDIR}" || error "cp results to ${WDIR}"
+cp -p ./* "${WDIR}" || error "cp results to ${WDIR}"
 
 echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT}"
