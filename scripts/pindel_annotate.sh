@@ -35,7 +35,7 @@ fi
 #
 PROG=$(basename "$0")
 OK() {
-        echo "OK: line $1 in $PROG"
+        echo "OK: line ${BASH_LINENO[0]} in $PROG"
 }
 
 datafile=$1
@@ -47,15 +47,15 @@ echo "- proj=${proj:?}"
 assert_file_exists "${datafile}"
 
 BIN=${LG3_HOME}/scripts
-ANNOVAR=${LG3_HOME}/AnnoVar
+ANNOVAR_HOME=${LG3_HOME}/AnnoVar
 assert_directory_exists "${BIN}"
-assert_directory_exists "${ANNOVAR}"
+assert_directory_exists "${ANNOVAR_HOME}"
 
 KINASEDATA="${LG3_HOME}/resources/all_human_kinases.txt"
 COSMICDATA="${LG3_HOME}/resources/CosmicMutantExport_v58_150312.tsv"
 CANCERDATA="${LG3_HOME}/resources/SangerCancerGeneCensus_2012-03-15.txt"
 CONVERT="${LG3_HOME}/resources/RefSeq.Entrez.txt"
-ANNDB=${LG3_HOME}/AnnoVar/hg19db/
+ANNDB=${ANNOVAR_HOME}/hg19db/
 
 echo "References:"
 echo "- KINASEDATA=${KINASEDATA:?}"
@@ -75,47 +75,47 @@ date
 
 ### run AnnoVar
 echo "================= [Annotate] run annovar"
-"$ANNOVAR/annotate_variation.pl" -filter -dbtype 1000g2010nov_all -buildver hg19 "${datafile}.filter.intersect" "$ANNDB" || error "annotate_variation.pl failed"
-OK $LINENO
+"$ANNOVAR_HOME/annotate_variation.pl" -filter -dbtype 1000g2010nov_all -buildver hg19 "${datafile}.filter.intersect" "$ANNDB" || error "annotate_variation.pl failed"
+OK 
 awk -F '\t' '{for(i=3;i<=NF;i++) {printf $i"\t";} print $1}' "${datafile}.filter.intersect.hg19_ALL.sites.2010_11_dropped" > "${datafile}.tmp11"
 awk -F '\t' '{for(i=1;i<=NF;i++) {printf $i"\t";} print ""}' "${datafile}.filter.intersect.hg19_ALL.sites.2010_11_filtered" > "${datafile}.tmp12"
 cat "${datafile}.tmp11" "${datafile}.tmp12" > "${datafile}.tmp1"
 
-"$ANNOVAR/annotate_variation.pl" -filter -dbtype 1000g2011may_all -buildver hg19 "${datafile}.tmp1" "$ANNDB" || error "annotate_variation.pl failed"
-OK $LINENO
+"$ANNOVAR_HOME/annotate_variation.pl" -filter -dbtype 1000g2011may_all -buildver hg19 "${datafile}.tmp1" "$ANNDB" || error "annotate_variation.pl failed"
+OK 
 awk -F '\t' '{for(i=3;i<=NF;i++) {printf $i"\t";} print $1}' "${datafile}.tmp1.hg19_ALL.sites.2011_05_dropped" > "${datafile}.tmp21"
 awk -F '\t' '{for(i=1;i<=NF;i++) {printf $i"\t";} print ""}' "${datafile}.tmp1.hg19_ALL.sites.2011_05_filtered" > "${datafile}.tmp22"
 cat "${datafile}.tmp21" "${datafile}.tmp22" > "${datafile}.tmp2"
 
-"$ANNOVAR/annotate_variation.pl" -filter -dbtype snp132 -buildver hg19 "${datafile}.tmp2" "$ANNDB" || error "annotate_variation.pl failed"
-OK $LINENO
+"$ANNOVAR_HOME/annotate_variation.pl" -filter -dbtype snp132 -buildver hg19 "${datafile}.tmp2" "$ANNDB" || error "annotate_variation.pl failed"
+OK 
 awk -F '\t' '{for(i=3;i<=NF;i++) {printf $i"\t";} print $1"_"$2}' "${datafile}.tmp2.hg19_snp132_dropped" > "${datafile}.tmp31"
 awk -F '\t' '{for(i=1;i<=NF;i++) {printf $i"\t";} print ""}' "${datafile}.tmp2.hg19_snp132_filtered" > "${datafile}.tmp32"
 cat "${datafile}.tmp31" "${datafile}.tmp32" > "${datafile}.tmp3"
 
-"$ANNOVAR/annotate_variation.pl" --geneanno --buildver hg19 --outfile "${datafile}.filter.intersect.anno" "${datafile}.tmp3" "$ANNDB" || error "annotate_variation.pl failed"
-OK $LINENO
+"$ANNOVAR_HOME/annotate_variation.pl" --geneanno --buildver hg19 --outfile "${datafile}.filter.intersect.anno" "${datafile}.tmp3" "$ANNDB" || error "annotate_variation.pl failed"
+OK 
 
 ### clean up AnnoVar exonic data, put into final mutation table format
 echo "================= [Annotate] reformat annovar"
 "$BIN/pindel_reformat_annovar.py" "${datafile}.filter.intersect.anno" "${datafile}.filter" || error "pindel_reformat_annovar.py failed"
-OK $LINENO
+OK 
 
 ### annotate with normal coverage
 echo "================= [Annotate] annotate with normal coverage"
 "$BIN/pindel_annotate_normal_coverage.py" "${datafile}.filter.intersect.anno.muts" "${proj}" || error "pindel_annotate_normal_coverage.py failed"
-OK $LINENO
+OK 
 
 ## annotate with Kinase & Cosmic & Sanger Cancer Gene
 echo "================= [Annotate] annotate with cosmic, kinase, sanger cancer gene list"
 "$BIN/annotation_COSMIC.py" "${datafile}.filter.intersect.anno.muts.norm.txt" "$COSMICDATA" > "${datafile}.filter.intersect.anno.muts.tmp1" || error "annotation_COSMIC.py failed"
-OK $LINENO
+OK 
 
 "$BIN/annotation_KINASE.py" "${datafile}.filter.intersect.anno.muts.tmp1" "$KINASEDATA" > "${datafile}.filter.intersect.anno.muts.tmp2" || error "annotation_KINASE.py failed"
-OK $LINENO
+OK 
 
 "$BIN/annotation_CANCER.py"  "${datafile}.filter.intersect.anno.muts.tmp2" "$CANCERDATA" "$CONVERT" >  "${datafile}.filter.intersect.anno.muts.norm.anno.txt" || error "annotation_CANCER.py failed"
-OK $LINENO
+OK 
 
 ## remove indels with <14 reads of raw coverage in the normal
 echo "================= [Annotate] remove indels with <14 reads in normal"

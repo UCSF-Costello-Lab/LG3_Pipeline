@@ -51,8 +51,8 @@ PICARD_SCRIPT_D=${PICARD_HOME}/CalculateHsMetrics.jar
 PICARD_SCRIPT_E=${PICARD_HOME}/CollectMultipleMetrics.jar
 
 echo "Software:"
-echo "- JAVA=${JAVA:?}"
-echo "- SAMTOOLS=${SAMTOOLS:?}"
+echo "- Java=${JAVA:?}"
+echo "- samtools=${SAMTOOLS:?}"
 echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
 

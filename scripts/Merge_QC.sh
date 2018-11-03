@@ -33,7 +33,7 @@ export PATH=/opt/R/R-latest/bin:$PATH
 pl="Illumina"
 pu="Exome"
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PICARD=${LG3_HOME}/tools/picard-tools-1.64
+PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 
@@ -60,7 +60,7 @@ echo "[Merge] Merge BAM files..."
 # shellcheck disable=SC2086
 # Comment: Because how 'inputs' is created and used below
 $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
-        -jar "$PICARD/MergeSamFiles.jar" \
+        -jar "$PICARD_HOME/MergeSamFiles.jar" \
         ${inputs} \
         OUTPUT="${prefix}.merged.bam" \
         SORT_ORDER=coordinate \
@@ -75,7 +75,7 @@ $SAMTOOLS index "${prefix}.merged.bam" || error "First indexing failed"
 
 echo "[Merge] Coordinate-sort and enforce read group assignments..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
-        -jar "$PICARD/AddOrReplaceReadGroups.jar" \
+        -jar "$PICARD_HOME/AddOrReplaceReadGroups.jar" \
         INPUT="${prefix}.merged.bam" \
         OUTPUT="${prefix}.merged.sorted.sam" \
         SORT_ORDER=coordinate \
