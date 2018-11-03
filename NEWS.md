@@ -2,6 +2,10 @@
 
 ## Version 2018-10-27-9000 (develop version)
 
+### BUG FIXES
+
+* All scripts are now cleaning scratch space in the end of the run.
+
 ### NEW FEATURES
 
 * Errors produced by the pipeline itself do now also output traceback
@@ -25,8 +29,6 @@
   the same limitation on its `-I <file>` option.
 
 ### BUG FIXES
-
-* All scripts are now cleaning scratch space in the end of the run.
 
 * The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
   line 6: PROJECT: parameter null or not set".
