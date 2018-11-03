@@ -26,6 +26,8 @@
 
 ### BUG FIXES
 
+* All scripts are now cleaning scratch space in the end of the run.
+
 * The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
   line 6: PROJECT: parameter null or not set".
 
