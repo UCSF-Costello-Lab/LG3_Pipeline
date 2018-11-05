@@ -52,9 +52,9 @@ echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SH_RECAL_P2=${LG3_HOME}/scripts/Recal_pass2.sh
+SH_RECAL_PASS2=${LG3_HOME}/scripts/Recal_pass2.sh
 SH_GERMLINE=${LG3_HOME}/scripts/Germline.sh
-assert_file_executable "${SH_RECAL_P2}"
+assert_file_executable "${SH_RECAL_PASS2}"
 assert_file_executable "${SH_GERMLINE}"
 
 DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
@@ -67,8 +67,8 @@ WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
 mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
 cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
-"${SH_RECAL_P2}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL_P2} failed!"
-echo "${SH_RECAL_P2} done!"
+"${SH_RECAL_PASS2}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL_PASS2} failed!"
+echo "${SH_RECAL_PASS2} done!"
 
 cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 

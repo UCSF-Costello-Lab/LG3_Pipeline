@@ -53,9 +53,9 @@ BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
-PYTHON_REMOVEQCGZ=${LG3_HOME}/scripts/removeQCgz.py
+PYTHON_REMOVEQC_GZ=${LG3_HOME}/scripts/removeQCgz.py
 PICARD_FIXMATEINFO=${LG3_HOME}/tools/picard-tools-1.64/FixMateInformation.jar
-PICARD_ADDORREPLACERG=${LG3_HOME}/tools/picard-tools-1.64/AddOrReplaceReadGroups.jar
+PICARD_ADD_OR_REPLACE_RG=${LG3_HOME}/tools/picard-tools-1.64/AddOrReplaceReadGroups.jar
 
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
@@ -68,9 +68,9 @@ assert_file_executable "${JAVA}"
 assert_file_executable "${PYTHON}"
 assert_file_executable "${BWA}"
 assert_file_executable "${SAMTOOLS}"
-assert_file_exists "${PYTHON_REMOVEQCGZ}"
+assert_file_exists "${PYTHON_REMOVEQC_GZ}"
 assert_file_exists "${PICARD_FIXMATEINFO}"
-assert_file_exists "${PICARD_ADDORREPLACERG}"
+assert_file_exists "${PICARD_ADD_OR_REPLACE_RG}"
 
 ### Input
 pl="Illumina"
@@ -105,11 +105,11 @@ echo "-------------------------------------------------"
 
 if [[ "${LG3_CHASTITY_FILTERING}" == "true" ]]; then
   echo "[Align] Removing chastity filtered first-in-pair reads..."
-  $PYTHON "${PYTHON_REMOVEQCGZ}" "$fastq1" \
+  $PYTHON "${PYTHON_REMOVEQC_GZ}" "$fastq1" \
           > "${SAMPLE}.read1.QC.fastq" || error "Chastity filtering read1 failed"
 
   echo "[Align] Removing chastity filtered second-in-pair reads..."
-  $PYTHON "${PYTHON_REMOVEQCGZ}" "$fastq2" \
+  $PYTHON "${PYTHON_REMOVEQC_GZ}" "$fastq2" \
           > "${SAMPLE}.read2.QC.fastq" || error "Chastity filtering read2 failed"
 else
   echo "[Align] Skipping chastity filtered (faked by a verbatim copy) ..."
@@ -144,7 +144,7 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
 
 echo "[Align] Coordinate-sort and enforce read group assignments..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_ADDORREPLACERG}" \
+        -jar "${PICARD_ADD_OR_REPLACE_RG}" \
         INPUT="${SAMPLE}.bwa.mateFixed.sam" \
         OUTPUT="${SAMPLE}.bwa.sorted.sam" \
         SORT_ORDER=coordinate \
