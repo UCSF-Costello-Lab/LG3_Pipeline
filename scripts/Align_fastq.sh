@@ -53,9 +53,9 @@ BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
-PYTHON_SCRIPT=${LG3_HOME}/scripts/removeQCgz.py
-PICARD_SCRIPT_A=${LG3_HOME}/tools/picard-tools-1.64/FixMateInformation.jar
-PICARD_SCRIPT_B=${LG3_HOME}/tools/picard-tools-1.64/AddOrReplaceReadGroups.jar
+PYTHON_REMOVEQCGZ=${LG3_HOME}/scripts/removeQCgz.py
+PICARD_FIXMATEINFO=${LG3_HOME}/tools/picard-tools-1.64/FixMateInformation.jar
+PICARD_ADDORREPLACERG=${LG3_HOME}/tools/picard-tools-1.64/AddOrReplaceReadGroups.jar
 
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
@@ -68,9 +68,9 @@ assert_file_executable "${JAVA}"
 assert_file_executable "${PYTHON}"
 assert_file_executable "${BWA}"
 assert_file_executable "${SAMTOOLS}"
-assert_file_exists "${PYTHON_SCRIPT}"
-assert_file_exists "${PICARD_SCRIPT_A}"
-assert_file_exists "${PICARD_SCRIPT_B}"
+assert_file_exists "${PYTHON_REMOVEQCGZ}"
+assert_file_exists "${PICARD_FIXMATEINFO}"
+assert_file_exists "${PICARD_ADDORREPLACERG}"
 
 ### Input
 pl="Illumina"
@@ -105,11 +105,11 @@ echo "-------------------------------------------------"
 
 if [[ "${LG3_CHASTITY_FILTERING}" == "true" ]]; then
   echo "[Align] Removing chastity filtered first-in-pair reads..."
-  $PYTHON "${PYTHON_SCRIPT}" "$fastq1" \
+  $PYTHON "${PYTHON_REMOVEQCGZ}" "$fastq1" \
           > "${SAMPLE}.read1.QC.fastq" || error "Chastity filtering read1 failed"
 
   echo "[Align] Removing chastity filtered second-in-pair reads..."
-  $PYTHON "${PYTHON_SCRIPT}" "$fastq2" \
+  $PYTHON "${PYTHON_REMOVEQCGZ}" "$fastq2" \
           > "${SAMPLE}.read2.QC.fastq" || error "Chastity filtering read2 failed"
 else
   echo "[Align] Skipping chastity filtered (faked by a verbatim copy) ..."
@@ -134,7 +134,7 @@ rm -f "${SAMPLE}.read2.QC.fastq"
 
 echo "[Align] Verify mate information..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_A}" \
+        -jar "${PICARD_FIXMATEINFO}" \
         INPUT="${SAMPLE}.bwa.sam" \
         OUTPUT="${SAMPLE}.bwa.mateFixed.sam" \
         TMP_DIR="${TMP}" \
@@ -144,7 +144,7 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
 
 echo "[Align] Coordinate-sort and enforce read group assignments..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_B}" \
+        -jar "${PICARD_ADDORREPLACERG}" \
         INPUT="${SAMPLE}.bwa.mateFixed.sam" \
         OUTPUT="${SAMPLE}.bwa.sorted.sam" \
         SORT_ORDER=coordinate \

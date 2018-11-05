@@ -35,8 +35,8 @@ echo "- CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 CONV=$(readlink -e "$CONV")
 
-SCRIPT=${LG3_HOME}/scripts/mutdet_submit.sh
-assert_file_executable "${SCRIPT}"
+SH_MUTDET_SUBMIT=${LG3_HOME}/scripts/mutdet_submit.sh
+assert_file_executable "${SH_MUTDET_SUBMIT}"
 
 echo -n "Submitting jobs for $PATIENT "
 date
@@ -46,6 +46,6 @@ D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 assert_directory_exists "${D}"
 
 export QSUB_OPTS
-"${SCRIPT}" "${PATIENT}" "${CONV}" "${PROJECT}" || error "${SCRIPT} failed"
+"${SH_MUTDET_SUBMIT}" "${PATIENT}" "${CONV}" "${PROJECT}" || error "${SH_MUTDET_SUBMIT} failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

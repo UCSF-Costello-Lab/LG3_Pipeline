@@ -61,7 +61,7 @@ assert_file_exists "${DBSNP}"
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
 GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/vcf_germline.py
+PYTHON_VCF_GERMLINE=${LG3_HOME}/scripts/vcf_germline.py
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
 echo "- PYTHON=${PYTHON:?}"
@@ -71,7 +71,7 @@ echo "- GATK=${GATK:?}"
 assert_file_executable "${JAVA}"
 assert_file_executable "${PYTHON}"
 assert_file_exists "${GATK}"
-assert_file_exists "${PYTHON_SCRIPT_A}"
+assert_file_exists "${PYTHON_VCF_GERMLINE}"
 
 
 echo "-------------------------------------------------"
@@ -188,7 +188,7 @@ do
 
         if [ ! -e "${prefix}.germline" ]; then
                 echo "[Germline] Checking germline SNPs for sample relatedness: $tumorname vs $normalname"
-                $PYTHON "${PYTHON_SCRIPT_A}" \
+                $PYTHON "${PYTHON_VCF_GERMLINE}" \
                         "${PATIENT}.UG.snps.vcf" \
                         "$normalname" \
                         "$tumorname" \

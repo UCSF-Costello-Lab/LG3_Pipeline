@@ -61,11 +61,11 @@ echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
-assert_file_executable "${SCRIPT_A}"
+SH_RECAL=${LG3_HOME}/scripts/Recal_bigmem.sh
+assert_file_executable "${SH_RECAL}"
 
-SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
-assert_file_executable "${SCRIPT_B}"
+SH_GERMLINE=${LG3_HOME}/scripts/Germline.sh
+assert_file_executable "${SH_GERMLINE}"
 
 DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"
@@ -77,7 +77,7 @@ WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
 mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
 cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
-"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" || error "${SCRIPT_A} failed"
+"${SH_RECAL}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL} failed"
 
 cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
@@ -92,9 +92,9 @@ cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
 
 [[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
-{ time "${SCRIPT_B}" \
+{ time "${SH_GERMLINE}" \
       "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SCRIPT_B} failed"
+      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SH_GERMLINE} failed"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
 
