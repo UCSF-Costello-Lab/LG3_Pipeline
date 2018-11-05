@@ -45,7 +45,6 @@ date
 D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 assert_directory_exists "${D}"
 
-export QSUB_OPTS
 "${SH_MUTDET_SUBMIT}" "${PATIENT}" "${CONV}" "${PROJECT}" || error "${SH_MUTDET_SUBMIT} failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
