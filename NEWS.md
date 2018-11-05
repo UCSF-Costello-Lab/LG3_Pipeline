@@ -8,6 +8,10 @@
   information showing the function, line number, and script pathname
   call stack.
 
+### SOFTWARE QUALITY
+
+* Using more informative names on variables used for script filenames.
+
 ### BUG FIXES
 
 * All scripts are now cleaning scratch space in the end of the run.
