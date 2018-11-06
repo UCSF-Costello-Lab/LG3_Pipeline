@@ -75,7 +75,8 @@ assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
 
 SCRATCH="${LG3_SCRATCH_ROOT}/${PATIENT}_mutect"
-make_change_dir "${SCRATCH}"
+mkdir -p "${SCRATCH}" || error "Can't create scratch directory ${SCRATCH}"
+cd "${SCRATCH}" || error "Failed to set scratch directory to ${SCRATCH}"
 
 echo -n "Starting MutDet job on "
 date

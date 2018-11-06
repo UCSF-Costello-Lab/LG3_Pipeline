@@ -92,8 +92,10 @@ assert_file_exists "${TARGET}"
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
 mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
 
-make_change_dir "${LG3_SCRATCH_ROOT}"
-make_dir "${PATIENT}_pindel"
+## set up scratch directory
+mkdir -p "${LG3_SCRATCH_ROOT}/${PATIENT}_pindel" || error "Can't create scratch directory ${LG3_SCRATCH_ROOT}/${PATIENT}_pindel"
+
+cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
 ## setup pindel cfg file
 date

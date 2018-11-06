@@ -48,7 +48,8 @@ assert_patient_name "${PATIENT}"
 assert_file_exists "${ILIST}"
 
 date
-make_change_dir "${LG3_SCRATCH_ROOT}/${SAMPLE}"
+mkdir -p "${LG3_SCRATCH_ROOT}/${SAMPLE}"
+cd "${LG3_SCRATCH_ROOT}/${SAMPLE}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}/${SAMPLE}"
 
 "${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$SAMPLE" "${ILIST}"
 

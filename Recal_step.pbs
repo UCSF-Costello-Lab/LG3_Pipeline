@@ -76,7 +76,9 @@ mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"
 DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
 mkdir -p "${DESTDIR2}" || error "Can't create destination directory ${DESTDIR2}"
 
-make_change_dir "${LG3_SCRATCH_ROOT}/${PATIENT}"
+WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
+mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
 echo "Copying recovered data from ${RECOVER_DIR} ..."
 cp -p "${RECOVER_DIR}/"* . || error "cp!"
@@ -88,7 +90,11 @@ cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRA
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp 1"
 
 echo "Starting germline analysis ..."
-make_change_dir "${LG3_SCRATCH_ROOT}/${PATIENT}/germline"
+WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline 
+
+mkdir -p "${WDIR2}" || error "Can't create destination directory ${WDIR2}"
+
+cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
 
 [[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
