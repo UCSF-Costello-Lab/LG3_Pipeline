@@ -196,5 +196,5 @@ function make_dir {
 
 function make_change_dir {
     make_dir "$1"
-    chdir "$1"
+    change_dir "$1"
 }
