@@ -33,7 +33,7 @@ echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- TG=${TG}"             ## optional
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 
 QSUB_ENVVARS="JUNK=junk,LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 if [[ -n ${TG} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},TG=${TG}"; fi

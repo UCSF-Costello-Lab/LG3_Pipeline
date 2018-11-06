@@ -52,7 +52,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
 

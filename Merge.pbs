@@ -43,7 +43,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- SAMPLE=${SAMPLE:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 
 date
 

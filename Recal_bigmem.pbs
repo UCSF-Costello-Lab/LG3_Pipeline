@@ -44,7 +44,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 
 ## Assert existance of input files
 assert_file_exists "${ILIST}"

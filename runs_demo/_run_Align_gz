@@ -32,7 +32,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- CONV=${CONV:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 
 SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
 echo "- SAMPLES=${SAMPLES:?}"

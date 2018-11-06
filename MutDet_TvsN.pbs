@@ -56,7 +56,7 @@ echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 echo "- XMX=${XMX:?}"
 echo "- WORKDIR=${WORKDIR:?}"
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 BAMDIR=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 assert_directory_exists "${BAMDIR}"
 assert_file_exists "${CONFIG}"

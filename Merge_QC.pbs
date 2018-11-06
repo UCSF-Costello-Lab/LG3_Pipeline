@@ -44,7 +44,7 @@ echo "- BAMS=${BAMS:?}"
 echo "- SAMPLE=${SAMPLE:?}"
 echo "- ILIST=${ILIST:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 assert_file_exists "${ILIST}"
 
 date

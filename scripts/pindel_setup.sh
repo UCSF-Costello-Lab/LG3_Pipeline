@@ -47,7 +47,8 @@ echo "Input:"
 echo "- patient_ID=${patient_ID:?}"
 echo "- proj=${proj:?}"
 echo "- patIDs=${patIDs:?}"
-[[ "${patient_ID}" == *[_]* ]] && error "'patient_ID' must not contain underscores: ${patient_ID}"
+
+assert_patient_name "${patient_ID}"
 assert_file_exists "${patIDs}"
 
 python "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"

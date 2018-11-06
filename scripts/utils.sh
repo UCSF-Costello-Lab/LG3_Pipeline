@@ -170,3 +170,11 @@ function assert_directory_exists {
     [[ -n "$1" ]] || error "Directory name must be non-empty: '$1'"
     [[ -d "$1" ]] || error "No such directory: '$1' (working directory '${PWD}')"
 }
+
+## Usage: assert_patient_name "${PATIENT}"
+function assert_patient_name {
+    [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
+    [[ -n "$1" ]] || error "Patient name must be non-empty: '$1'"
+    [[ "$1" == *[_]* ]] && error "Patient name must not contain underscores: $1"
+}
+

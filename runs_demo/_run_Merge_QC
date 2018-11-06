@@ -32,7 +32,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- SAMPLES=${SAMPLES:?}"
 echo "- SAMPLE=${SAMPLE:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
