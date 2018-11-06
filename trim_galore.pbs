@@ -68,10 +68,7 @@ mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || error "Can't create destination dire
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/trim" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
 
 WDIR=${LG3_SCRATCH_ROOT}/${SAMPLE}-trim
-echo "WDIR=${WDIR}"
-mkdir -p "${WDIR}" || error "Can't create scratch directory ${WDIR}"
-cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
-echo "Current working directory: ${PWD}"
+make_change_dir "${WDIR}"
 
 cp "$FASTQ1" .
 cp "$FASTQ2" .

@@ -63,9 +63,7 @@ mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"
 DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
 mkdir -p "${DESTDIR2}" || error "Can't create destination directory ${DESTDIR2}"
 
-WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
-mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
-cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
+make_change_dir "${LG3_SCRATCH_ROOT}/${PATIENT}"
 
 "${SH_RECAL_PASS2}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL_PASS2} failed!"
 echo "${SH_RECAL_PASS2} done!"
@@ -87,11 +85,7 @@ mk_links() {
 find . -maxdepth 1 -type f -name "*.bwa.realigned.rmDups.*" -not -name "*recal*" | mk_links
 
 echo "Starting germline analysis ..."
-WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
-
-mkdir -p "${WDIR2}" || error "Can't create destination directory ${WDIR2}"
-
-cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
+make_change_dir "${LG3_SCRATCH_ROOT}/${PATIENT}/germline"
 
 [[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
