@@ -178,3 +178,22 @@ function assert_patient_name {
     [[ "$1" == *[_]* ]] && error "Patient name must not contain underscores: $1"
 }
 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# NAVIGATION
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+function change_dir {
+    opwd=${PWD}
+    assert_directory_exists "$1"
+    cd "$1" || error "Failed to set working directory to $1"
+    echo "New working directory: '$1' (was '${opwd}')"
+}
+
+function make_dir {
+    mkdir -p "$1" || error "Failed to create new working directory $1"
+}
+
+function make_change_dir {
+    make_dir "$1"
+    change_dir "$1"
+}
