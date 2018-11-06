@@ -117,6 +117,14 @@ $ ./_run_PostMut                 ## ~5 minutes
 
 _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_MutDet`, which can be ran in parallel (as soon as `_run_Recal` has finished).
 
+_Tip:_ Each step of the pipeline is submitted to the Torque/PBS scheduler requesting a default number of cores (`nodes=1:ppn=...`) and amount of memory (`vmem=...`).  For now, you need to follow the source code to see what these defaults are.  You can override the defaults via environment variable `QSUB_OPTS`, e.g.
+```sh
+QSUB_OPTS="-l nodes=1:ppn=6 -l vmem=32gb" ./_run_Align_gz
+```
+
+
+### Checking progress and status
+
 Throughout all steps, you can check the current status using the `lg3 status` command.  Here is what the output looks like when all steps are complete:
 ```sh
 $ export PATIENT=Patient157t10
