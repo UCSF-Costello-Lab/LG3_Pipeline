@@ -114,6 +114,7 @@ if [ ! -e "${PATIENT}.UG.snps.raw.vcf" ]; then
                 --min_base_quality_score 20 \
                 --output_mode EMIT_VARIANTS_ONLY \
                 --out "${PATIENT}.UG.snps.raw.vcf"; } 2>&1 || error "Unified Genotyper SNP calling failed"
+		  assert_file_exists "${PATIENT}.UG.snps.raw.vcf"
 else
         echo "[Germline] Found output ${PATIENT}.UG.snps.raw.vcf -- Skipping..."
 fi
@@ -142,6 +143,7 @@ if [ ! -e "${PATIENT}.UG.snps.annotated.vcf" ]; then
                 --annotation ReadPosRankSumTest \
                 --annotation DepthOfCoverage \
                 --out "${PATIENT}.UG.snps.annotated.vcf"; } 2>&1 || error "Unified Genotyper SNP annotation failed"
+		  assert_file_exists "${PATIENT}.UG.snps.annotated.vcf"
 
         rm -f "${PATIENT}.UG.snps.raw.vcf"
         rm -f "${PATIENT}.UG.snps.raw.vcf.idx"
@@ -173,6 +175,7 @@ if [ ! -e "${PATIENT}.UG.snps.vcf" ]; then
                 --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
                 --out "${PATIENT}.UG.snps.vcf"; } 2>&1 || error "Unified Genotyper SNP filtration failed"
+		  assert_file_exists "${PATIENT}.UG.snps.vcf"
 
         rm -f "${PATIENT}.UG.snps.annotated.vcf"
         rm -f "${PATIENT}.UG.snps.annotated.vcf.idx"
@@ -188,11 +191,12 @@ do
 
         if [ ! -e "${prefix}.germline" ]; then
                 echo "[Germline] Checking germline SNPs for sample relatedness: $tumorname vs $normalname"
-                $PYTHON "${PYTHON_VCF_GERMLINE}" \
-                        "${PATIENT}.UG.snps.vcf" \
-                        "$normalname" \
-                        "$tumorname" \
-                        > "${prefix}.germline" || error "Germline analysis failed"
+              $PYTHON "${PYTHON_VCF_GERMLINE}" \
+                    "${PATIENT}.UG.snps.vcf" \
+                    "$normalname" \
+                    "$tumorname" \
+                     > "${prefix}.germline" || error "Germline analysis failed"
+		  			assert_file_exists "${prefix}.germline"
         else
                 echo "[Germline] ${prefix}.germline already exists, skipping analysis"
         fi

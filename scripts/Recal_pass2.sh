@@ -103,9 +103,11 @@ echo -e "\\n[Recal_pass2] Merge BAM files..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Merge BAM files failed"
+assert_file_exists "${PATIENT}.merged.bam"
 
 echo -e "\\n[Recal_pass2] Index merged BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
+assert_file_exists "${PATIENT}.merged.bam.bai"
 
 echo -e "\\n[Recal_pass2] Create intervals for indel detection..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -118,6 +120,7 @@ echo -e "\\n[Recal_pass2] Create intervals for indel detection..."
         --logging_level WARN \
         --input_file "${PATIENT}.merged.bam" \
         --out "${PATIENT}.merged.intervals"; } 2>&1 || error "GATK Interval creation failed"
+assert_file_exists "${PATIENT}.merged.intervals"
 
 echo -e "\\n[Recal_pass2] Indel realignment..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -130,6 +133,7 @@ echo -e "\\n[Recal_pass2] Indel realignment..."
         --input_file "${PATIENT}.merged.bam" \
         --targetIntervals "${PATIENT}.merged.intervals" \
         --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || error "GATK Indel realignment failed"
+assert_file_exists "${PATIENT}.merged.realigned.bam"
 
 rm -f "${PATIENT}.merged.bam"
 rm -f "${PATIENT}.merged.bam.bai"
@@ -145,6 +149,7 @@ echo -e "\\n[Recal_pass2] Fix mate information..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Picard verify mate information failed"
+assert_file_exists "${PATIENT}.merged.realigned.mateFixed.bam"
 
 rm -f "${PATIENT}.merged.realigned.bam"
 rm -f "${PATIENT}.merged.realigned.bai"
@@ -160,11 +165,13 @@ echo -e "\\n[Recal_pass2] Mark duplicates..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo -e "\\n[Recal_pass2] Index BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 
 echo -e "\\n[Recal_pass2] Split BAM files..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -184,8 +191,11 @@ do
         base=${base%%.bam}
         echo -e "\\n[Recal_pass2] Sorting $base..."
         { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups"; } 2>&1 || error "Sorting $base failed"
+		  assert_file_exists "${base}.bwa.realigned.rmDups.bam"
+
         echo -e "\\n[Recal_pass2] Indexing $base..."
         { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.bam"; } 2>&1 || error "Indexing $base failed"
+		  assert_file_exists "${base}.bwa.realigned.rmDups.bam.bai"
         rm -f "$i"
 done
 
@@ -201,6 +211,7 @@ do
 
         echo -e "\\n[QC] Calculate flag statistics..."
         { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.flagstat"; } 2>&1
+		  assert_file_exists "${base}.bwa.realigned.rmDups.flagstat"
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -213,6 +224,7 @@ do
                 VERBOSITY=WARNING \
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
+			assert_file_exists "${base}.bwa.realigned.rmDups.hybrid_selection_metrics"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -224,6 +236,11 @@ do
                 VERBOSITY=WARNING \
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Collect multiple QC metrics failed"
+        echo "------------------------------------------------------"
+        for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
+        do
+            assert_file_exists  "${base}.bwa.realigned.rmDups.recal.${EXT}"
+        done
         echo "------------------------------------------------------"
 done
 

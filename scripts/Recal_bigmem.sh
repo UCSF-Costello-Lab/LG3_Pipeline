@@ -118,9 +118,11 @@ echo -e "\\n[Recal] Merge BAM files..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Merge BAM files failed"
+assert_file_exists "${PATIENT}.merged.bam"
 
 echo -e "\\n[Recal] Index new BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
+assert_file_exists "${PATIENT}.merged.bam.bai"
 
 echo -e "\\n[Recal] Create intervals for indel detection..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -133,6 +135,7 @@ echo -e "\\n[Recal] Create intervals for indel detection..."
         --logging_level WARN \
         --input_file "${PATIENT}.merged.bam" \
         --out "${PATIENT}.merged.intervals"; } 2>&1 || error "Interval creation failed"
+assert_file_exists "${PATIENT}.merged.intervals"
 
 echo -e "\\n[Recal] Indel realignment..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -145,6 +148,7 @@ echo -e "\\n[Recal] Indel realignment..."
         --input_file "${PATIENT}.merged.bam" \
         --targetIntervals "${PATIENT}.merged.intervals" \
         --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || error "Indel realignment failed"
+assert_file_exists "${PATIENT}.merged.realigned.bam"
 
 rm -f "${PATIENT}.merged.bam"
 rm -f "${PATIENT}.merged.bam.bai"
@@ -160,6 +164,7 @@ echo -e "\\n[Recal] Fix mate information..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Verify mate information failed"
+assert_file_exists "${PATIENT}.merged.realigned.mateFixed.bam"
 
 rm -f "${PATIENT}.merged.realigned.bam"
 rm -f "${PATIENT}.merged.realigned.bai"
@@ -175,11 +180,13 @@ echo -e "\\n[Recal] Mark duplicates..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo -e "\\n[Recal] Index BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 
 ### Job crushed at -Xmx8g, increase!
 echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
@@ -197,6 +204,7 @@ echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
         --standard_covs \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
         --recal_file "${PATIENT}.merged.realigned.rmDups.csv"; } 2>&1 || error "CountCovariates failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.csv"
 
 echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -207,6 +215,7 @@ echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
         --recal_file "${PATIENT}.merged.realigned.rmDups.csv" \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
         --out "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "TableRecalibration failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bam"
 
 rm -f "${PATIENT}.merged.realigned.rmDups.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
@@ -214,6 +223,7 @@ rm -f "${PATIENT}.merged.realigned.rmDups.csv"
 
 echo -e "\\n[Recal] Index BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "Third indexing failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bam.bai"
 
 echo -e "\\n[Recal] Split BAM files..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -222,6 +232,7 @@ echo -e "\\n[Recal] Split BAM files..."
         --logging_level WARN \
         --input_file "${PATIENT}.merged.realigned.rmDups.recal.bam" \
         --outputRoot temp_; } 2>&1 || error "Splitting BAM files failed"
+#assert_file_exists temp_*.bam ??
 
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai"
@@ -232,8 +243,14 @@ do
         base=${i##temp_}
         base=${base%%.bam}
         echo -e "\\n[Recal] Splitting off $base..."
+
+		  echo "[Recal] sorting ${base}.bwa.realigned.rmDups.recal.bam"
         { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || error "Sorting $base failed"
+		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam"
+
+		  echo "[Recal] indexing ${base}.bwa.realigned.rmDups.recal.bam"
         { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || error "Indexing $base failed"
+		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam.bai"
         rm -f "$i"
 done
 
@@ -251,6 +268,7 @@ do
 
         echo -e "\\n[QC] Calculate flag statistics..."
         { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat"; } 2>&1
+		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.flagstat"
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -263,6 +281,7 @@ do
                 VERBOSITY=WARNING \
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
+		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -274,6 +293,10 @@ do
                 VERBOSITY=WARNING \
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Collect multiple QC metrics failed"
+		  for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
+		  do
+		      assert_file_exists  "${base}.bwa.realigned.rmDups.recal.${EXT}"
+		  done
         echo "------------------------------------------------------"
 done
 
