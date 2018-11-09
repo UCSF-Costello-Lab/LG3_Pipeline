@@ -26,10 +26,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
-
-#
-##
-#
 PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
@@ -46,6 +42,7 @@ assert_file_exists "${MUTFILE}"
 assert_file_exists "${CONV}"
 
 python "${LG3_HOME}/scripts/libID_to_patientID.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" "${CONV}" || error "libID_to_patientID.py failed"
+assert_file_exists "${OUTFILE}"
 
 echo "$PROG Finished"
 

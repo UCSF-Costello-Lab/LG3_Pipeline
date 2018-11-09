@@ -40,6 +40,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- OUTFILE=${OUTFILE:?}"
 
 python "${LG3_HOME}/scripts/mutation_overlaps.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" || error "mutation_overlaps.py failed"
+assert_file_exists "${OUTFILE}"
 
 awk -F'\t' '{print $NF}' "${OUTFILE}" | sort | uniq -c
 

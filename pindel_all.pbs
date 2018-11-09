@@ -105,20 +105,27 @@ echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 assert_file_exists "${PATIENT}.pindel.cfg"
 
 ## run pindel
+cd "${PATIENT}_pindel" || error "Failed to set working directory to ${PATIENT}_pindel"
 echo -e "\\n========= [Pindel] Run pindel"
-${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}_pindel/${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "${PINDEL} failed"
+
+${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "${PINDEL} failed"
+for EXT in CloseEndMapped BP LI INV TD D SI
+do
+	assert_file_exists "${PATIENT}.pindel_${EXT}"
+done
 
 ## convert to vcf
 echo -e "\\n========= [Pindel] Convert pindel to vcf"
-${PINDEL2VCF} -P "${PATIENT}_pindel/${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}_pindel/${PATIENT}.pindel.vcf" -G  || error "${PINDEL2VCF} failed"
+${PINDEL2VCF} -P "${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}.pindel.vcf" -G  || error "${PINDEL2VCF} failed"
+assert_file_exists "${PATIENT}.pindel.vcf"
 
 ## convert to tdt
 echo -e "\\n========= [Pindel] Convert vcf to tdt"
-"${PYTHON_VCF2TDT}" "${PATIENT}_pindel/${PATIENT}.pindel.vcf"  || error "${PYTHON_VCF2TDT} failed"
+"${PYTHON_VCF2TDT}" "${PATIENT}.pindel.vcf"  || error "${PYTHON_VCF2TDT} failed"
+assert_file_exists "${PATIENT}.pindel.vcf.tdt"
 
-## rename file
-cd "${PATIENT}_pindel" || error "Failed to set working directory to ${PATIENT}_pindel"
 mv "${PATIENT}.pindel.vcf.tdt" "${PATIENT}.indels"
+assert_file_exists "${PATIENT}.indels"
 
 ## filter pindel data
 echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"

@@ -150,7 +150,8 @@ if [ ! -e "${prefix}.snvs.raw.mutect.txt" ]; then
                 -baq CALCULATE_AS_NECESSARY \
                 --out "${prefix}.snvs.raw.mutect.txt" \
                 --coverage_file "${prefix}.snvs.coverage.mutect.wig"; } 2>&1 || error "muTect failed"
-                echo "Done"
+		  assert_file_exists "${prefix}.snvs.raw.mutect.txt"
+        echo "Done"
 else
         echo "[MutDet] Found MuTect output, skipping ..."
 fi
@@ -172,7 +173,8 @@ if [ ! -e "${prefix}.indels.raw.vcf" ]; then
                 --window_size 350 \
                 --filter_expressions "N_COV<8||T_COV<14||T_INDEL_F<0.1||T_INDEL_CF<0.7" \
                 --out "${prefix}.indels.raw.vcf"; } 2>&1 || error "Indel detection failed"
-                echo "Done"
+			assert_file_exists "${prefix}.indels.raw.vcf"
+         echo "Done"
 else
         echo "[MutDet] Found Somatic Indel Detector output, skipping ..."
 fi
@@ -192,7 +194,8 @@ if [ ! -e "${prefix}.indels.annotated.vcf" ]; then
                 --dbsnp "$DBSNP" \
                 --group StandardAnnotation \
                 --out "${prefix}.indels.annotated.vcf"; } 2>&1 || error "Indel annotation failed"
-                echo "Done"
+			assert_file_exists "${prefix}.indels.annotated.vcf"
+         echo "Done"
 else
         echo "[MutDet] Found InDel Annotation output, skipping ..."
 fi
@@ -204,6 +207,7 @@ if [ ! -e "${prefix}.mutations" ]; then
                 "$tumorname" \
                 "$normalname" \
                 > "${prefix}.indels.annotated.temp.vcf"; } 2>&1 || error "Reordering failed"
+			assert_file_exists "${prefix}.indels.annotated.temp.vcf"
         echo "Done"
         wc -l "${prefix}.indels.annotated.temp.vcf"
 
@@ -215,6 +219,7 @@ if [ ! -e "${prefix}.mutations" ]; then
                 "${prefix}.snvs.raw.mutect.txt" \
                 "${prefix}.indels.annotated.temp.vcf" \
                 "${prefix}.mutations"; } 2>&1 || error "Filtering failed"
+			assert_file_exists "${prefix}.mutations"
         echo "Done"
 
         rm -f "${prefix}.indels.annotated.temp.vcf"
@@ -237,6 +242,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
         { time $PYTHON "${LG3_HOME}/scripts/annotation_BED_forUG.py" \
                 "${prefix}.mutations" \
                 > "${patientID}.${prefix}.temp.bed"; } 2>&1 || error "Bed file creation failed"
+			assert_file_exists "${patientID}.${prefix}.temp.bed"
         wc -l "${patientID}.${prefix}.temp.bed"
 
         echo "[Annotate] Generate Unified Genotyper data..."
@@ -258,6 +264,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 --min_base_quality_score 20 \
                 --output_mode EMIT_VARIANTS_ONLY \
                 --out "${patientID}.${prefix}.UG.snps.raw.vcf"; } 2>&1 || error "Unified Genotyper SNP calling failed"
+			assert_file_exists "${patientID}.${prefix}.UG.snps.raw.vcf"
 
         rm -f "${patientID}.${prefix}.temp.bed"
         wc -l "${patientID}.${prefix}.UG.snps.raw.vcf"
@@ -284,6 +291,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 --annotation ReadPosRankSumTest \
                 --annotation DepthOfCoverage \
                 --out "${patientID}.${prefix}.UG.snps.annotated.vcf"; } 2>&1 || error "Unified Genotyper SNP annotation failed"
+			assert_file_exists "${patientID}.${prefix}.UG.snps.annotated.vcf"
 
         rm -f "${patientID}.${prefix}.UG.snps.raw.vcf"
         rm -f "${patientID}.${prefix}.UG.snps.raw.vcf.idx"
@@ -310,6 +318,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
                 --out "${patientID}.${prefix}.UG.snps.filtered.vcf"; } 2>&1 || error "Unified Genotyper SNP filtration failed"
+			assert_file_exists "${patientID}.${prefix}.UG.snps.filtered.vcf"
 
         rm -f "${patientID}.${prefix}.UG.snps.annotated.vcf"
         rm -f "${patientID}.${prefix}.UG.snps.annotated.vcf.idx"
@@ -320,6 +329,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 "${prefix}.mutations" \
                 "${patientID}.${prefix}.UG.snps.filtered.vcf" \
                 > "${patientID}.${prefix}.temp1.mutations"; } 2>&1 || error "Unified Genotyper annotation failed"
+			assert_file_exists "${patientID}.${prefix}.temp1.mutations"
         wc -l "${patientID}.${prefix}.temp1.mutations"
 
         rm -f "${patientID}.${prefix}.UG.snps.filtered.vcf"
@@ -330,6 +340,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 "${patientID}.${prefix}.temp1.mutations" \
                 "$COSMICDATA" \
                 > "${patientID}.${prefix}.temp2.mutations"; } 2>&1 || error "COSMIC annotation failed"
+			assert_file_exists "${patientID}.${prefix}.temp2.mutations"
         wc -l "${patientID}.${prefix}.temp2.mutations"
 
         rm -f "${patientID}.${prefix}.temp1.mutations"
@@ -339,6 +350,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 "${patientID}.${prefix}.temp2.mutations" \
                 "$KINASEDATA" \
                 > "${patientID}.${prefix}.temp3.mutations"; } 2>&1 || error "Kinase gene annotation failed"
+			assert_file_exists "${patientID}.${prefix}.temp3.mutations"
         wc -l "${patientID}.${prefix}.temp3.mutations"
 
         rm -f "${patientID}.${prefix}.temp2.mutations"
@@ -349,6 +361,7 @@ if [ ! -e "${patientID}.${prefix}.annotated.mutations" ]; then
                 "$CANCERDATA" \
                 "$CONVERT" \
                 > "${patientID}.${prefix}.annotated.mutations"; } 2>&1 || error "Cancer gene annotation failed"
+			assert_file_exists "${patientID}.${prefix}.annotated.mutations"
         wc -l "${patientID}.${prefix}.annotated.mutations"
 
         rm -f "${patientID}.${prefix}.temp3.mutations"
@@ -359,7 +372,5 @@ else
 fi
 
 echo "-------------------------------------------------"
-echo -n "All done! "
-date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

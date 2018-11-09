@@ -53,6 +53,7 @@ MUT=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
 MUT2=.
 
 python "${PYTHON_CONV_PAT_WIG2BED}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${PYTHON_CONV_PAT_WIG2BED} failed"
+assert_file_exists  "$MUT/${PATIENT}.mutect.coverage.intersect.bed"
 
 "${RSCRIPT_BIN}" "${R_MUT_ANN_INTERSECTED_COV}" "$MUT/${PATIENT}.mutect.coverage.intersect.bed" "$MUT2/${PATIENT}.snvs.indels.filtered.overlaps.txt" "$MUT2/${PATIENT}.R.mutations"  || error "${R_MUT_ANN_INTERSECTED_COV} failed"
 

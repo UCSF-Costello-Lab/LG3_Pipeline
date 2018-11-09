@@ -40,5 +40,6 @@ echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 
 python "${LG3_HOME}/scripts/combine_snvs.py" "${PATIENT}" "${PROJECT}" "${CONV}" "${PATIENT}.snvs" || error "combine_snvs.py failed"
+assert_file_exists "${PATIENT}.snvs"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

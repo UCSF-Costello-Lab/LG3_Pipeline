@@ -77,21 +77,39 @@ date
 echo "================= [Annotate] run annovar"
 "$ANNOVAR_HOME/annotate_variation.pl" -filter -dbtype 1000g2010nov_all -buildver hg19 "${datafile}.filter.intersect" "$ANNDB" || error "annotate_variation.pl failed"
 OK 
+
 awk -F '\t' '{for(i=3;i<=NF;i++) {printf $i"\t";} print $1}' "${datafile}.filter.intersect.hg19_ALL.sites.2010_11_dropped" > "${datafile}.tmp11"
+assert_file_exists "${datafile}.tmp11"
+
 awk -F '\t' '{for(i=1;i<=NF;i++) {printf $i"\t";} print ""}' "${datafile}.filter.intersect.hg19_ALL.sites.2010_11_filtered" > "${datafile}.tmp12"
+assert_file_exists "${datafile}.tmp12"
+
 cat "${datafile}.tmp11" "${datafile}.tmp12" > "${datafile}.tmp1"
+assert_file_exists "${datafile}.tmp1"
 
 "$ANNOVAR_HOME/annotate_variation.pl" -filter -dbtype 1000g2011may_all -buildver hg19 "${datafile}.tmp1" "$ANNDB" || error "annotate_variation.pl failed"
 OK 
+
 awk -F '\t' '{for(i=3;i<=NF;i++) {printf $i"\t";} print $1}' "${datafile}.tmp1.hg19_ALL.sites.2011_05_dropped" > "${datafile}.tmp21"
+assert_file_exists "${datafile}.tmp21"
+
 awk -F '\t' '{for(i=1;i<=NF;i++) {printf $i"\t";} print ""}' "${datafile}.tmp1.hg19_ALL.sites.2011_05_filtered" > "${datafile}.tmp22"
+assert_file_exists "${datafile}.tmp22"
+
 cat "${datafile}.tmp21" "${datafile}.tmp22" > "${datafile}.tmp2"
+assert_file_exists "${datafile}.tmp2"
 
 "$ANNOVAR_HOME/annotate_variation.pl" -filter -dbtype snp132 -buildver hg19 "${datafile}.tmp2" "$ANNDB" || error "annotate_variation.pl failed"
 OK 
+
 awk -F '\t' '{for(i=3;i<=NF;i++) {printf $i"\t";} print $1"_"$2}' "${datafile}.tmp2.hg19_snp132_dropped" > "${datafile}.tmp31"
+assert_file_exists "${datafile}.tmp31"
+
 awk -F '\t' '{for(i=1;i<=NF;i++) {printf $i"\t";} print ""}' "${datafile}.tmp2.hg19_snp132_filtered" > "${datafile}.tmp32"
+assert_file_exists "${datafile}.tmp32"
+
 cat "${datafile}.tmp31" "${datafile}.tmp32" > "${datafile}.tmp3"
+assert_file_exists "${datafile}.tmp3"
 
 "$ANNOVAR_HOME/annotate_variation.pl" --geneanno --buildver hg19 --outfile "${datafile}.filter.intersect.anno" "${datafile}.tmp3" "$ANNDB" || error "annotate_variation.pl failed"
 OK 
@@ -109,18 +127,22 @@ OK
 ## annotate with Kinase & Cosmic & Sanger Cancer Gene
 echo "================= [Annotate] annotate with cosmic, kinase, sanger cancer gene list"
 "$BIN/annotation_COSMIC.py" "${datafile}.filter.intersect.anno.muts.norm.txt" "$COSMICDATA" > "${datafile}.filter.intersect.anno.muts.tmp1" || error "annotation_COSMIC.py failed"
+assert_file_exists "${datafile}.filter.intersect.anno.muts.tmp1"
 OK 
 
 "$BIN/annotation_KINASE.py" "${datafile}.filter.intersect.anno.muts.tmp1" "$KINASEDATA" > "${datafile}.filter.intersect.anno.muts.tmp2" || error "annotation_KINASE.py failed"
+assert_file_exists "${datafile}.filter.intersect.anno.muts.tmp2"
 OK 
 
 "$BIN/annotation_CANCER.py"  "${datafile}.filter.intersect.anno.muts.tmp2" "$CANCERDATA" "$CONVERT" >  "${datafile}.filter.intersect.anno.muts.norm.anno.txt" || error "annotation_CANCER.py failed"
+assert_file_exists "${datafile}.filter.intersect.anno.muts.norm.anno.txt"
 OK 
 
 ## remove indels with <14 reads of raw coverage in the normal
 echo "================= [Annotate] remove indels with <14 reads in normal"
-#cat "${datafile}.filter.intersect.anno.muts.norm.anno.txt" | awk -F'\t' '{if($21>=14) print}' > "${datafile}.filtered.anno.txt"
 awk -F'\t' '{if($21>=14) print}' "${datafile}.filter.intersect.anno.muts.norm.anno.txt" > "${datafile}.filtered.anno.txt"
+assert_file_exists "${datafile}.filtered.anno.txt"
+OK
 
 ### clean up intermediate files
 echo "================= [Annotate] delete intermediate files"

@@ -26,12 +26,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
-
-#
-##
-#
-
-
 ## Input
 CONV=$1
 PATIENT=$2

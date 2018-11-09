@@ -50,8 +50,10 @@ assert_file_exists "${datafile}"
 
 ### filter indels
 python "${PYTHON_PINDEL_FILTER}" "${datafile}"
+assert_file_exists "${datafile}.filter"
 
 ### intersect with target sequence
 "${BEDTOOLS}" intersect -a "${datafile}.filter" -b "${interval}" -wa > "${datafile}.filter.intersect"
+assert_file_exists "${datafile}.filter.intersect"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
