@@ -87,7 +87,6 @@ echo "- bamfiles=${bamfiles:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
-## Assert existance of input files
 assert_file_exists "${ILIST}"
 
 
@@ -118,10 +117,12 @@ echo -e "\\n[Recal] Merge BAM files..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Merge BAM files failed"
+
 assert_file_exists "${PATIENT}.merged.bam"
 
 echo -e "\\n[Recal] Index new BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
+
 assert_file_exists "${PATIENT}.merged.bam.bai"
 
 echo -e "\\n[Recal] Create intervals for indel detection..."
@@ -135,6 +136,7 @@ echo -e "\\n[Recal] Create intervals for indel detection..."
         --logging_level WARN \
         --input_file "${PATIENT}.merged.bam" \
         --out "${PATIENT}.merged.intervals"; } 2>&1 || error "Interval creation failed"
+
 assert_file_exists "${PATIENT}.merged.intervals"
 
 echo -e "\\n[Recal] Indel realignment..."
@@ -148,6 +150,7 @@ echo -e "\\n[Recal] Indel realignment..."
         --input_file "${PATIENT}.merged.bam" \
         --targetIntervals "${PATIENT}.merged.intervals" \
         --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || error "Indel realignment failed"
+
 assert_file_exists "${PATIENT}.merged.realigned.bam"
 
 rm -f "${PATIENT}.merged.bam"
@@ -164,6 +167,7 @@ echo -e "\\n[Recal] Fix mate information..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Verify mate information failed"
+
 assert_file_exists "${PATIENT}.merged.realigned.mateFixed.bam"
 
 rm -f "${PATIENT}.merged.realigned.bam"
@@ -180,12 +184,14 @@ echo -e "\\n[Recal] Mark duplicates..."
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
+
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo -e "\\n[Recal] Index BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 
 ### Job crushed at -Xmx8g, increase!
@@ -204,6 +210,7 @@ echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
         --standard_covs \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
         --recal_file "${PATIENT}.merged.realigned.rmDups.csv"; } 2>&1 || error "CountCovariates failed"
+
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.csv"
 
 echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
@@ -215,15 +222,13 @@ echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
         --recal_file "${PATIENT}.merged.realigned.rmDups.csv" \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
         --out "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "TableRecalibration failed"
+
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bam"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bai"
 
 rm -f "${PATIENT}.merged.realigned.rmDups.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
 rm -f "${PATIENT}.merged.realigned.rmDups.csv"
-
-echo -e "\\n[Recal] Index BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "Third indexing failed"
-assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bam.bai"
 
 echo -e "\\n[Recal] Split BAM files..."
 { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -235,7 +240,6 @@ echo -e "\\n[Recal] Split BAM files..."
 #assert_file_exists temp_*.bam ??
 
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam"
-rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai"
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bai"
 
 for i in temp_*.bam
@@ -268,6 +272,7 @@ do
 
         echo -e "\\n[QC] Calculate flag statistics..."
         { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat"; } 2>&1
+
 		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.flagstat"
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
@@ -281,6 +286,7 @@ do
                 VERBOSITY=WARNING \
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
+
 		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
@@ -300,8 +306,6 @@ do
         echo "------------------------------------------------------"
 done
 
-echo -ne "\\n[QC] Finished! "
-date
-echo "-------------------------------------------------"
+echo -e "\\n[QC] Finished! "
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
