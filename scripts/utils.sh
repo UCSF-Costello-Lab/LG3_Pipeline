@@ -157,6 +157,13 @@ function assert_file_exists {
     [[ -f "$1" ]] || error "No such file: '$1' (working directory '${PWD}')"
 }
 
+function assert_link_exists {
+    [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
+    [[ -n "$1" ]] || error "File name must be non-empty: '$1'"
+    [[ -L "$1" ]] || error "File is not a link: '$1' (working directory '${PWD}')"
+    [[ -e "$1" ]] || error "Link is broken: '$1' (working directory '${PWD}')"
+}
+
 ## Usage: assert_file_executable /path/to/file
 function assert_file_executable {
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
