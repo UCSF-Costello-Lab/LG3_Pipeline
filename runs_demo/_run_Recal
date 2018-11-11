@@ -58,7 +58,7 @@ echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
-PBS=${LG3_HOME}/Recal_bigmem.pbs
+PBS=${LG3_HOME}/Recal.pbs
 assert_file_exists "${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes
