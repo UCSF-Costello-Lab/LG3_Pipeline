@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -31,13 +34,13 @@ echo "- NORMAL=${NORMAL:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+assert_patient_name "${PATIENT}"
 
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "$ILIST")
 
 ## Assert that NORMAL is one of the SAMPLES
-echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || { echo "ERROR: NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"; exit 1; }
+echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || error "NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"
 
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
@@ -53,13 +56,13 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Recal_pass2.pbs
-[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+assert_file_exists "${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
-[[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
+assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
-[[ -d "$D/${PATIENT}" ]] || { echo "Directory not found: ${D}/${PATIENT}"; exit 1; }
+assert_directory_exists "${D}/${PATIENT}"
 [[ -d "$D/${PATIENT}.before.merge" ]] && { echo "WARNING: Directory found: ${D}/${PATIENT}.before.merge"; }
 
 echo "Renaming $D/${PATIENT} to $D/${PATIENT}.before.merge"
@@ -72,10 +75,7 @@ for SAMPLE in ${SAMPLES}
 do
    ((CNT++))
    B=$D/${PATIENT}.before.merge/${SAMPLE}.$SUFF
-   if [ ! -f "$B" ]; then
-      echo "ABORT: Can't open $B !"
-      exit 1
-   fi
+   assert_file_exists "${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
 done

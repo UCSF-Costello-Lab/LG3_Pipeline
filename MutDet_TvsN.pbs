@@ -10,6 +10,9 @@
 #PBS -l nodes=1:ppn=4,vmem=64g
 #PBS -m ae
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -40,7 +43,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- hostname=$(hostname)"
 fi
 
-[[ -d "$LG3_INPUT_ROOT" ]] || { echo "Folder not found: ${LG3_INPUT_ROOT}"; exit 1; }
+assert_directory_exists "${LG3_INPUT_ROOT}"
 LG3_INPUT_ROOT=$(readlink -e "${LG3_INPUT_ROOT:?}") ## Absolute path
 
 ### Input
@@ -53,32 +56,28 @@ echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 echo "- XMX=${XMX:?}"
 echo "- WORKDIR=${WORKDIR:?}"
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+assert_patient_name "${PATIENT}"
 BAMDIR=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
-[[ -d "$BAMDIR" ]] || { echo "Folder not found: ${BAMDIR}"; exit 1; }
-[[ -f "$CONFIG" ]] || { echo "File not found: ${CONFIG}"; exit 1; }
-[[ -f "$INTERVAL" ]] || { echo "File not found: ${INTERVAL}"; exit 1; }
+assert_directory_exists "${BAMDIR}"
+assert_file_exists "${CONFIG}"
+assert_file_exists "${INTERVAL}"
 CONFIG=$(readlink -e "${CONFIG:?}") ## Absolute path
 INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 
 ### Software
-SCRIPT=${LG3_HOME}/scripts/MutDet.sh
-[[ -x "$SCRIPT" ]] || { echo "File not found or not executable: ${SCRIPT}"; exit 1; }
+SH_MUTDET=${LG3_HOME}/scripts/MutDet.sh
+assert_file_executable "${SH_MUTDET}"
 
-mkdir -p "${WORKDIR}" || { echo "Can't create scratch directory ${WORKDIR}"; exit 1; }
-cd "${WORKDIR}" || { echo "ERROR: Failed to set working directory to ${WORKDIR}"; exit 1; }
-echo "*** Working directory: $WORKDIR"
-
-### For Recal
 BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
 BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
 
-if [ ! -f "$BAMN" ] || [ ! -f "$BAMT" ]; then
-  echo "ERROR: BAM file(s) not found"
-  echo "Expected Normal: $BAMN"
-  echo "Expected Tumor: $BAMT"
-  exit 1
-fi
+assert_file_exists "${BAMN}"
+assert_file_exists "${BAMT}"
+
+SCRATCH="${LG3_SCRATCH_ROOT}/${PATIENT}_mutect"
+mkdir -p "${SCRATCH}" || error "Can't create scratch directory ${SCRATCH}"
+cd "${SCRATCH}" || error "Failed to set scratch directory to ${SCRATCH}"
+
 echo -n "Starting MutDet job on "
 date
 echo "Patient = $PATIENT"
@@ -89,15 +88,23 @@ echo "Config = $CONFIG"
 echo "Interval = $INTERVAL"
 echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
+echo "SCRATCH=${SCRATCH}"
 
-"${SCRIPT}" \
+"${SH_MUTDET}" \
   "$BAMN" \
   "$BAMT" \
   "NOR-${NORMAL}__${TYPE}-${TUMOR}" \
   "${PATIENT}" \
   "${CONFIG}" \
   "${INTERVAL}" \
-  "$XMX" || { echo "ERROR: MutDet failed"; exit 1; }
+  "$XMX" || error "MutDet failed"
+
+mkdir -p "${WORKDIR}" || error "Can't create output directory ${WORKDIR}"
+echo "Copy results from ${SCRATCH} to ${WORKDIR}"
+cp -p "${SCRATCH}"/* "${WORKDIR}" || error "Fail to copy results to ${WORKDIR}"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "End of PBS script!"
 date

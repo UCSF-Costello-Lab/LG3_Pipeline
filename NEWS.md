@@ -1,5 +1,25 @@
 # LG3_Pipeline
 
+## Version 2018-11-12
+
+### NEW FEATURES
+
+* Errors produced by the pipeline itself do now also output traceback
+  information showing the function, line number, and script pathname
+  call stack.
+
+### SOFTWARE QUALITY
+
+* Using more informative names on variables used for script filenames.
+
+* Earlier detection of errors by asserting that expected output files are
+  produced after each internal call of the pipeline finishes.
+
+### BUG FIXES
+
+* All scripts are now cleaning scratch space in the end of the run.
+
+
 ## Version 2018-10-27
 
 ### NEW FEATURES

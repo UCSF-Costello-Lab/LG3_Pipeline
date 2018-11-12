@@ -7,6 +7,9 @@
 #PBS -l nodes=1:ppn=6,vmem=40gb
 #PBS -m ae
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -41,18 +44,20 @@ echo "- BAMS=${BAMS:?}"
 echo "- SAMPLE=${SAMPLE:?}"
 echo "- ILIST=${ILIST:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+assert_patient_name "${PATIENT}"
+assert_file_exists "${ILIST}"
 
 date
 mkdir -p "${LG3_SCRATCH_ROOT}/${SAMPLE}"
-cd "${LG3_SCRATCH_ROOT}/${SAMPLE}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}/${SAMPLE}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}/${SAMPLE}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}/${SAMPLE}"
 
 "${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$SAMPLE" "${ILIST}"
 
-cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
-cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || { echo "ERROR: Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"; exit 1; }
+cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || error "Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT:?}/${SAMPLE}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"

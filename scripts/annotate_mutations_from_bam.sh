@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -18,36 +21,28 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
-
-#
-##
-#
-
-
 ## Input
-conversionfile=$1
-patient=$2
-project=$3
+CONV=$1
+PATIENT=$2
+PROJECT=$3
 echo "Input:"
-echo " - conversionfile=${conversionfile:?}"
-echo " - patient=${patient:?}"
-echo " - project=${project:?}"
-[[ -f "$conversionfile" ]] || { echo "File not found: ${conversionfile}"; exit 1; }
+echo " - CONV=${CONV:?}"
+echo " - PATIENT=${PATIENT:?}"
+echo " - PROJECT=${PROJECT:?}"
+assert_file_exists "${CONV}"
 
-PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## run annotation code
-python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${patient}.snvs" "${conversionfile}" "${patient}" "${project}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${PATIENT}.snvs" "${CONV}" "${PATIENT}" "${PROJECT}" || error "annotate_mutations_from_bam.py failed"
 
 ## remove intermediate files
-rm -f "${patient}.snvs."*Q.txt
+rm -f "${PATIENT}.snvs."*Q.txt
 
 echo "Finished"
 

@@ -1,4 +1,14 @@
 #!/bin/bash
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 FAILED=false
 
 ### Configuration
@@ -23,8 +33,7 @@ YEL='\033[0;33m'
 NOC='\033[0m'
 
 if [ $# -lt 2 ]; then
-        echo "ERROR: please specify project and patient!"
-        exit 1
+    error "please specify project and patient!"
 fi
 
 PROJECT=$1
@@ -85,7 +94,7 @@ ERR="$RED missing$NOC"
                 echo -e "$ID $OK"
         else
                 echo -e "$ID $ERR"
-					 FAILED=true
+                FAILED=true
         fi
 
 done < "${PATIENT}.temp.conversions.txt"
@@ -93,9 +102,10 @@ done < "${PATIENT}.temp.conversions.txt"
 ## Delete PATIENT specific conversion file
 rm "${PATIENT}.temp.conversions.txt"
 
-if ${FAILED} ; then
-	exit 1
-else
-	exit 0
-fi
+${FAILED} && error "Script failed"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
+
+
+
 

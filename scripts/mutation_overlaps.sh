@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -25,25 +28,20 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
-#
-##
-#
-PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## Input
-mutfile=$1
-patient=$2
-outfile=$3
+MUTFILE=$1
+PATIENT=$2
+OUTFILE=$3
 echo "Input:"
-echo "- mutfile=${mutfile:?}"
-echo "- patient=${patient:?}"
-echo "- outfile=${outfile:?}"
+echo "- MUTFILE=${MUTFILE:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- OUTFILE=${OUTFILE:?}"
 
-python "${LG3_HOME}/scripts/mutation_overlaps.py" "${mutfile}" "${patient}" "${outfile}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/mutation_overlaps.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" || error "mutation_overlaps.py failed"
+assert_file_exists "${OUTFILE}"
 
-awk -F'\t' '{print $NF}' "${outfile}" | sort | uniq -c
-
-echo "$PROG Finished"
+awk -F'\t' '{print $NF}' "${OUTFILE}" | sort | uniq -c
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

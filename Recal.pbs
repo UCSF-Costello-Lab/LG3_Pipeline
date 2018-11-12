@@ -5,6 +5,9 @@
 #PBS -l nodes=1:ppn=12,vmem=200gb
 #PBS -m ae
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -41,16 +44,16 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+assert_patient_name "${PATIENT}"
 
 ## Assert existance of input files
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
 module load CBC r/3.4.2
 
 echo -n "Checking R: "
-Rscript --version || { echo "ERROR: No Rscript is available!"; exit 1; }
+Rscript --version || error "No Rscript is available!"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
@@ -58,36 +61,44 @@ echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SCRIPT_A=${LG3_HOME}/scripts/Recal_bigmem.sh
-[[ -x "$SCRIPT_A" ]] || { echo "File not found or not an executable: ${SCRIPT_A}"; exit 1; }
+SH_RECAL=${LG3_HOME}/scripts/Recal.sh
+assert_file_executable "${SH_RECAL}"
 
-SCRIPT_B=${LG3_HOME}/scripts/Germline.sh
-[[ -x "$SCRIPT_B" ]] || { echo "File not found or not an executable: ${SCRIPT_B}"; exit 1; }
+SH_GERMLINE=${LG3_HOME}/scripts/Germline.sh
+assert_file_executable "${SH_GERMLINE}"
 
 DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-mkdir -p "${DESTDIR}" || { echo "Can't create destination directory ${DESTDIR}"; exit 1; }
+mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"
 
 DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
-mkdir -p "${DESTDIR2}" || { echo "Can't create destination directory ${DESTDIR2}"; exit 1; }
+mkdir -p "${DESTDIR2}" || error "Can't create destination directory ${DESTDIR2}"
 
 WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
-mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 
-"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" || { echo "ERROR: ${SCRIPT_A} failed"; exit 1; }
+"${SH_RECAL}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL} failed"
 
-cd "${LG3_SCRATCH_ROOT}" || { echo "ERROR: Failed to set working directory to ${LG3_SCRATCH_ROOT}"; exit 1; }
+cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
 
-cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || { echo "ERROR cp!" ; exit 1 ; }
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp 1"
 
-echo "Cleaning ${LG3_SCRATCH_ROOT} ..."
-rm -rf "${LG3_SCRATCH_ROOT:?}/${PATIENT}"
+echo "Starting germline analysis ..."
+WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
 
-cd "${DESTDIR2}" || { echo "ERROR: Failed to set working directory to ${DESTDIR2}"; exit 1; }
+mkdir -p "${WDIR2}" || error "Can't create destination directory ${WDIR2}"
 
-{ time "${SCRIPT_B}" \
-      "${DESTDIR}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || { echo "ERROR: ${SCRIPT_B} failed"; exit 1; }
+cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
 
-echo -n "End of script! "
+[[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+
+{ time "${SH_GERMLINE}" \
+      "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SH_GERMLINE} failed"
+
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
+
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

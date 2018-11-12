@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -34,8 +37,8 @@ fi
 ##
 #
 
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/pindel_setup.py
-[[ -f "$PYTHON_SCRIPT_A" ]] || { echo "File not found: ${PYTHON_SCRIPT_A}"; exit 1; }
+PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
+assert_file_exists "${PYTHON_PINDEL_SETUP}"
 
 patient_ID=$1
 proj=$2
@@ -44,9 +47,10 @@ echo "Input:"
 echo "- patient_ID=${patient_ID:?}"
 echo "- proj=${proj:?}"
 echo "- patIDs=${patIDs:?}"
-[[ "${patient_ID}" == *[_]* ]] && { echo "ERROR: 'patient_ID' must not contain underscores: ${patient_ID}"; exit 1; }
-[[ -f "$patIDs" ]] || { echo "File not found: ${patIDs}"; exit 1; }
 
-python "${PYTHON_SCRIPT_A}" "${patient_ID}" "${proj}" "${patIDs}"
+assert_patient_name "${patient_ID}"
+assert_file_exists "${patIDs}"
+
+python "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

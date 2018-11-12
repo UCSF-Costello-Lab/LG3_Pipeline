@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -11,7 +14,7 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+#LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -21,7 +24,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=$EMAIL"
-  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
+ # echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
 fi
@@ -48,11 +51,10 @@ echo "Input:"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 echo "- PATIENT=${PATIENT:?}"
-[[ -f "$CONV" ]] || { echo "File not found: ${CONV}"; exit 1; }
+assert_file_exists "${CONV}"
 
 if [ $# -ne 3 ]; then
-        echo "ERROR: please specify patient, CONV file and project!"
-        exit 1
+    error "Please specify patient, CONV file and project!"
 fi
 
 ## References
@@ -61,16 +63,17 @@ INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 echo "References:"
 echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
-[[ -f "$CONFIG" ]] || { echo "File not found: ${CONFIG}"; exit 1; }
-[[ -f "$INTERVAL" ]] || { echo "File not found: ${INTERVAL}"; exit 1; }
+assert_file_exists "${CONFIG}"
+assert_file_exists "${INTERVAL}"
 
 
 ## Software
 PBS=${LG3_HOME}/MutDet_TvsN.pbs
-[[ -f "$PBS" ]] || { echo "File not found or not executable: ${PBS}"; exit 1; }
+assert_file_exists "${PBS}"
 
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
-mkdir -p "${WORKDIR}" || { echo "Can't create scratch directory ${WORKDIR}"; exit 1; }
+mkdir -p "${WORKDIR}" || error "Can't create scratch directory ${WORKDIR}"
+WORKDIR=$(readlink -e "${WORKDIR:?}") ## Absolute path
 
 XMX=Xmx8g
 

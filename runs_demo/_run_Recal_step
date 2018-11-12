@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -18,7 +21,7 @@ NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 START=${START:-1}
 RECOVER_DIR=output/${PROJECT}/exomes_recal/${PATIENT}.recover
-[[ -d "${RECOVER_DIR}" ]] || { echo "ERROR: Recover directory not found: ${RECOVER_DIR}"; exit 1; }
+assert_directory_exists "${RECOVER_DIR}"
 RECOVER_DIR=$(readlink -e "${RECOVER_DIR}") ## requires absolute path
 
 
@@ -39,14 +42,14 @@ echo "- ILIST=${ILIST:?}"
 echo "- EMAIL=${EMAIL}"
 echo "- START=${START:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+assert_patient_name "${PATIENT}"
 
 ## Assert that the patient file exists
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "$ILIST")
 
 ## Assert that NORMAL is one of the SAMPLES
-echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || { echo "ERROR: NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"; exit 1; }
+echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || error "NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"
 
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
@@ -62,10 +65,10 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Recal_step.pbs
-[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+assert_file_exists "${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes
-[[ -d "$D" ]] || { echo "Directory not found: ${D}"; exit 1; }
+assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 
@@ -76,10 +79,7 @@ for SAMPLE in ${SAMPLES}
 do
    ((CNT++))
    B=$D/${SAMPLE}/${SAMPLE}.$SUFF
-   if [ ! -f "$B" ]; then
-      echo "ABORT: Can't open $B !"
-      exit 1
-   fi
+   assert_file_exists "${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
 done

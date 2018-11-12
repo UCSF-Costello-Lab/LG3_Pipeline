@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -32,9 +35,9 @@ fi
 #
 
 BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/pindel_filter.py
-[[ -x "$BEDTOOLS" ]] || { echo "File not found: ${BEDTOOLS}"; exit 1; }
-[[ -f "$PYTHON_SCRIPT_A" ]] || { echo "File not found: ${PYTHON_SCRIPT_A}"; exit 1; }
+PYTHON_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.py
+assert_file_executable "${BEDTOOLS}"
+assert_file_exists "${PYTHON_PINDEL_FILTER}"
 
 datafile=$1
 #proj=$2
@@ -43,12 +46,14 @@ echo "Input:"
 echo "- datafile=${datafile:?}"
 echo "- interval=${interval:?}"
 
-[[ -f "$datafile" ]] || { echo "File not found: ${datafile}"; exit 1; }
+assert_file_exists "${datafile}"
 
 ### filter indels
-python "${PYTHON_SCRIPT_A}" "${datafile}"
+python "${PYTHON_PINDEL_FILTER}" "${datafile}"
+assert_file_exists "${datafile}.filter"
 
 ### intersect with target sequence
 "${BEDTOOLS}" intersect -a "${datafile}.filter" -b "${interval}" -wa > "${datafile}.filter.intersect"
+assert_file_exists "${datafile}.filter.intersect"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

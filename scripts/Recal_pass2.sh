@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -33,37 +36,36 @@ THOUSAND=${LG3_HOME}/resources/1000G_biallelic.indels.hg19.sorted.vcf
 echo "References:"
 echo "- REF=${REF:?}"
 echo "- THOUSAND=${THOUSAND:?}"
-[[ -f "$REF" ]]      || { echo "File not found: ${REF}"; exit 1; }
-[[ -f "$THOUSAND" ]] || { echo "File not found: ${THOUSAND}"; exit 1; }
+assert_file_exists "${REF}"
+assert_file_exists "${THOUSAND}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
 PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
-PICARD_SCRIPT_A=${PICARD_HOME}/MergeSamFiles.jar
-PICARD_SCRIPT_B=${PICARD_HOME}/FixMateInformation.jar
-PICARD_SCRIPT_C=${PICARD_HOME}/MarkDuplicates.jar
-PICARD_SCRIPT_D=${PICARD_HOME}/CalculateHsMetrics.jar
-PICARD_SCRIPT_E=${PICARD_HOME}/CollectMultipleMetrics.jar
+PICARD_MERGESAMFILES=${PICARD_HOME}/MergeSamFiles.jar
+PICARD_FIXMATEINFO=${PICARD_HOME}/FixMateInformation.jar
+PICARD_MARKDUPS=${PICARD_HOME}/MarkDuplicates.jar
+PICARD_HSMETRICS=${PICARD_HOME}/CalculateHsMetrics.jar
+PICARD_MULTIMETRICS=${PICARD_HOME}/CollectMultipleMetrics.jar
 
 echo "Software:"
-echo "- JAVA=${JAVA:?}"
-echo "- SAMTOOLS=${SAMTOOLS:?}"
+echo "- Java=${JAVA:?}"
+echo "- samtools=${SAMTOOLS:?}"
 echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
 
 ## Assert existance of software
-[[ -x "$JAVA" ]]            || { echo "Not an executable: ${JAVA}"; exit 1; }
-[[ -x "$SAMTOOLS" ]]        || { echo "Not an executable: ${SAMTOOLS}"; exit 1; }
-[[ -f "$GATK" ]]            || { echo "File not found: ${GATK}"; exit 1; }
-[[ -d "$PICARD_HOME" ]]     || { echo "File not found: ${PICARD_HOME}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_A" ]] || { echo "File not found: ${PICARD_SCRIPT_A}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_B" ]] || { echo "File not found: ${PICARD_SCRIPT_B}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_C" ]] || { echo "File not found: ${PICARD_SCRIPT_C}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_D" ]] || { echo "File not found: ${PICARD_SCRIPT_D}"; exit 1; }
-[[ -f "$PICARD_SCRIPT_E" ]] || { echo "File not found: ${PICARD_SCRIPT_E}"; exit 1; }
-
+assert_file_executable "${JAVA}"
+assert_file_executable "${SAMTOOLS}"
+assert_directory_exists "${PICARD_HOME}"
+assert_file_exists "${GATK}"
+assert_file_exists "${PICARD_MERGESAMFILES}"
+assert_file_exists "${PICARD_FIXMATEINFO}"
+assert_file_exists "${PICARD_MARKDUPS}"
+assert_file_exists "${PICARD_HSMETRICS}"
+assert_file_exists "${PICARD_MULTIMETRICS}"
 
 #Input 
 bamfiles=$1
@@ -76,10 +78,10 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
 ## Assert existance of input files
-[[ -f "$ILIST" ]] || { echo "File not found: ${ILIST}"; exit 1; }
+assert_file_exists "${ILIST}"
 
 TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"
-mkdir -p "$TMP" || { echo "Can't create scratch directory ${TMP}"; exit 1; }
+mkdir -p "$TMP" || error "Can't create scratch directory ${TMP}"
 
 echo "------------------------------------------------------"
 echo "[Recal_pass2] Merge Group: $PATIENT"
@@ -93,17 +95,19 @@ echo -e "\\n[Recal_pass2] Merge BAM files..."
 # shellcheck disable=SC2086
 # Comment: Because how 'inputs' is created and used below
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_A}" \
+        -jar "${PICARD_MERGESAMFILES}" \
         ${inputs} \
         OUTPUT="${PATIENT}.merged.bam" \
         SORT_ORDER=coordinate \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Merge BAM files failed"; exit 1; }
+        VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Merge BAM files failed"
+assert_file_exists "${PATIENT}.merged.bam"
 
 echo -e "\\n[Recal_pass2] Index merged BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || { echo "First indexing failed"; exit 1; }
+{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
+assert_file_exists "${PATIENT}.merged.bam.bai"
 
 echo -e "\\n[Recal_pass2] Create intervals for indel detection..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -115,7 +119,8 @@ echo -e "\\n[Recal_pass2] Create intervals for indel detection..."
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${PATIENT}.merged.bam" \
-        --out "${PATIENT}.merged.intervals"; } 2>&1 || { echo "GATK Interval creation failed"; exit 1; }
+        --out "${PATIENT}.merged.intervals"; } 2>&1 || error "GATK Interval creation failed"
+assert_file_exists "${PATIENT}.merged.intervals"
 
 echo -e "\\n[Recal_pass2] Indel realignment..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
@@ -127,7 +132,8 @@ echo -e "\\n[Recal_pass2] Indel realignment..."
         --consensusDeterminationModel USE_READS \
         --input_file "${PATIENT}.merged.bam" \
         --targetIntervals "${PATIENT}.merged.intervals" \
-        --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || { echo "GATK Indel realignment failed"; exit 1; }
+        --out "${PATIENT}.merged.realigned.bam"; } 2>&1 || error "GATK Indel realignment failed"
+assert_file_exists "${PATIENT}.merged.realigned.bam"
 
 rm -f "${PATIENT}.merged.bam"
 rm -f "${PATIENT}.merged.bam.bai"
@@ -135,21 +141,22 @@ rm -f "${PATIENT}.merged.intervals"
 
 echo -e "\\n[Recal_pass2] Fix mate information..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_B}" \
+        -jar "${PICARD_FIXMATEINFO}" \
         INPUT="${PATIENT}.merged.realigned.bam" \
         OUTPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         SORT_ORDER=coordinate \
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Picard verify mate information failed"; exit 1; } 
+        VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Picard verify mate information failed"
+assert_file_exists "${PATIENT}.merged.realigned.mateFixed.bam"
 
 rm -f "${PATIENT}.merged.realigned.bam"
 rm -f "${PATIENT}.merged.realigned.bai"
 
 echo -e "\\n[Recal_pass2] Mark duplicates..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_C}" \
+        -jar "${PICARD_MARKDUPS}" \
         INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         OUTPUT="${PATIENT}.merged.realigned.rmDups.bam" \
         METRICS_FILE="${PATIENT}.merged.realigned.mateFixed.metrics" \
@@ -157,12 +164,14 @@ echo -e "\\n[Recal_pass2] Mark duplicates..."
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
-        VALIDATION_STRINGENCY=LENIENT; } 2>&1 || { echo "Mark duplicates failed"; exit 1; }
+        VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo -e "\\n[Recal_pass2] Index BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || { echo "Second indexing failed"; exit 1; } 
+{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 
 echo -e "\\n[Recal_pass2] Split BAM files..."
 { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
@@ -170,7 +179,7 @@ echo -e "\\n[Recal_pass2] Split BAM files..."
         --reference_sequence "$REF" \
         --logging_level WARN \
         --input_file "${PATIENT}.merged.realigned.rmDups.bam" \
-        --outputRoot temp_; } 2>&1 || { echo "Splitting BAM files failed"; exit 1; }
+        --outputRoot temp_; } 2>&1 || error "Splitting BAM files failed"
 
 rm -f "${PATIENT}.merged.realigned.rmDups.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
@@ -181,9 +190,12 @@ do
         base=${i##temp_}
         base=${base%%.bam}
         echo -e "\\n[Recal_pass2] Sorting $base..."
-        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups"; } 2>&1 || { echo "Sorting $base failed"; exit 1; }
+        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups"; } 2>&1 || error "Sorting $base failed"
+		  assert_file_exists "${base}.bwa.realigned.rmDups.bam"
+
         echo -e "\\n[Recal_pass2] Indexing $base..."
-        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.bam"; } 2>&1 || { echo "Indexing $base failed"; exit 1; }        
+        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.bam"; } 2>&1 || error "Indexing $base failed"
+		  assert_file_exists "${base}.bwa.realigned.rmDups.bam.bai"
         rm -f "$i"
 done
 
@@ -199,10 +211,11 @@ do
 
         echo -e "\\n[QC] Calculate flag statistics..."
         { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.flagstat"; } 2>&1
+		  assert_file_exists "${base}.bwa.realigned.rmDups.flagstat"
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
-                -jar "${PICARD_SCRIPT_D}" \
+                -jar "${PICARD_HSMETRICS}" \
                 BAIT_INTERVALS="${ILIST}" \
                 TARGET_INTERVALS="${ILIST}" \
                 INPUT="$i" \
@@ -210,18 +223,24 @@ do
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Calculate hybrid selection metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
+			assert_file_exists "${base}.bwa.realigned.rmDups.hybrid_selection_metrics"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
-                -jar  "${PICARD_SCRIPT_E}" \
+                -jar  "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups" \
                 REFERENCE_SEQUENCE="${REF}" \
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
-                VALIDATION_STRINGENCY=SILENT; } 2>&1 || { echo "Collect multiple QC metrics failed"; exit 1; }
+                VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Collect multiple QC metrics failed"
+        echo "------------------------------------------------------"
+        for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
+        do
+            assert_file_exists  "${base}.bwa.realigned.rmDups.recal.${EXT}"
+        done
         echo "------------------------------------------------------"
 done
 

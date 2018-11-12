@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -18,34 +21,28 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
-
-#
-##
-#
 PROG=$(basename "$0")
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
-conversionfile=$1
-patient=$2
-mutfile=$3
-outfile=$4
+CONV=$1
+PATIENT=$2
+MUTFILE=$3
+OUTFILE=$4
 echo "Input:"
-echo "- conversionfile=${conversionfile:?}"
-echo "- patient=${patient:?}"
-echo "- mutfile=${mutfile:?}"
-echo "- outfile=${outfile:?}"
-[[ -f "$mutfile" ]] || { echo "File not found: ${mutfile}"; exit 1; }
-[[ -f "$conversionfile" ]] || { echo "File not found: ${conversionfile}"; exit 1; }
+echo "- CONV=${CONV:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- MUTFILE=${MUTFILE:?}"
+echo "- OUTFILE=${OUTFILE:?}"
+assert_file_exists "${MUTFILE}"
+assert_file_exists "${CONV}"
 
-echo "Warning ! Using Conversion file $conversionfile !!!"
-
-python "${LG3_HOME}/scripts/libID_to_patientID.py" "${mutfile}" "${patient}" "${outfile}" "${conversionfile}" || { echo "ABORT: ERROR on line $LINENO in $PROG "; exit 1; }
+python "${LG3_HOME}/scripts/libID_to_patientID.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" "${CONV}" || error "libID_to_patientID.py failed"
+assert_file_exists "${OUTFILE}"
 
 echo "$PROG Finished"
 

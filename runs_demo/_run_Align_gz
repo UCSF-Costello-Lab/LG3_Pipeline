@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -29,7 +32,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- CONV=${CONV:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
-[[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+assert_patient_name "${PATIENT}"
 
 SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
 echo "- SAMPLES=${SAMPLES:?}"
@@ -48,7 +51,7 @@ echo "- QSUB_OPTS=${QSUB_OPTS}"
 echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Align_fastq.pbs
-[[ -f "$PBS" ]] || { echo "File not found: ${PBS}"; exit 1; }
+assert_file_exists "${PBS}"
 
 
 for SAMPLE in ${SAMPLES}
@@ -64,11 +67,10 @@ do
   ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${SAMPLE}
 
   if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
-    echo "ERROR: Can't open $SAMPLE from ${LG3_INPUT_ROOT}/"
+    warn "Can't open $SAMPLE from ${LG3_INPUT_ROOT}/"
   else
     if [ -f "${ALIGNED}/${SAMPLE}.trim.bwa.sorted.bam" ]; then
-      echo "WARNING: already aligned: $ALIGNED/${SAMPLE}.trim.bwa.sorted.bam"
-      echo "Skipping $SAMPLE ..."
+      warn "${SAMPLE} is aligned (${ALIGNED}/${SAMPLE}.trim.bwa.sorted.bam). Skipping ..."
     else
       echo "Submitting $SAMPLE ..."
       # shellcheck disable=SC2086

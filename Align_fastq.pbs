@@ -6,6 +6,9 @@
 #PBS -l nodes=1:ppn=12,vmem=64gb
 #PBS -m ae
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
@@ -43,8 +46,8 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 ## Assert existance of input files
-[[ -f "$FASTQ1" ]] || { echo "File not found: ${FASTQ1}"; exit 1; }
-[[ -f "$FASTQ2" ]] || { echo "File not found: ${FASTQ2}"; exit 1; }
+assert_file_exists "${FASTQ1}"
+assert_file_exists "${FASTQ2}"
 
 FASTQ1=$(readlink -e "${FASTQ1:?}") ## Absolute path
 FASTQ2=$(readlink -e "${FASTQ2:?}") ## Absolute path
@@ -56,15 +59,15 @@ echo "Started $PROG on $DATE as $USER"
 echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SCRIPT=${LG3_HOME}/scripts/Align_fastq.sh
-[[ -x "$SCRIPT" ]] || { echo "File not found or not an executable: ${SCRIPT}"; exit 1; }
+SH_ALIGN_FASTQ=${LG3_HOME}/scripts/Align_fastq.sh
+assert_file_executable "${SH_ALIGN_FASTQ}"
 
 DEST="${LG3_OUTPUT_ROOT}/${PROJECT}/exomes"
-mkdir -p "${DEST}" || { echo "Can't create destination directory ${DEST}"; exit 1; }
+mkdir -p "${DEST}" || error "Can't create destination directory ${DEST}"
 
 WDIR=${LG3_SCRATCH_ROOT}/${SAMPLE}
-mkdir -p "${WDIR}" || { echo "Can't create scratch directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+mkdir -p "${WDIR}" || error "Can't create scratch directory ${WDIR}"
+cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
 echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" "$FASTQ2" .
@@ -75,7 +78,7 @@ ls -lrt
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
-"${SCRIPT}" "$FQ1" "$FQ2" "$SAMPLE" || { echo "ERROR: ${SCRIPT} FAILED"; exit 1; }
+"${SH_ALIGN_FASTQ}" "$FQ1" "$FQ2" "$SAMPLE" || error "${SH_ALIGN_FASTQ} FAILED"
 
 echo "Content of ${PWD}:"
 ls -lrt
@@ -85,7 +88,7 @@ rm "$FQ1" "$FQ2"
 echo "Content of ${PWD}:"
 ls -lrt
 
-cd "${OPWD}" || { echo "ERROR: Failed to set working directory to .."; exit 1; }
+cd "${OPWD}" || error "Failed to set working directory to .."
 echo "Current working directory: ${PWD}"
 
 echo "Content of ${WDIR}:"
@@ -96,7 +99,8 @@ cp -r -p "${WDIR}" "${DEST}/"
 echo "Content of ${DEST}:"
 ls -lrt "${DEST}/${SAMPLE}"*
 
-rm -rf "${WDIR:?}"
+echo "Cleanup: rm ${LG3_SCRATCH_ROOT}"
+rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "End of script!"
 date
