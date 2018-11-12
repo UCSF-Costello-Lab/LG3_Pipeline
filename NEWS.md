@@ -12,6 +12,9 @@
 
 * Using more informative names on variables used for script filenames.
 
+* Earlier detection of errors by asserting that expected output files are
+  produced after each internal call of the pipeline finishes.
+
 ### BUG FIXES
 
 * All scripts are now cleaning scratch space in the end of the run.
