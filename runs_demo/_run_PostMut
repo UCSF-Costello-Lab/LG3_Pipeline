@@ -30,7 +30,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
@@ -49,14 +49,14 @@ assert_file_exists "${CONV}"
 PBS=${LG3_HOME}/post_mutect_pindel.pbs
 assert_file_exists "${PBS}"
 
-SCRIPT_A=${LG3_HOME}/scripts/chk_pindel.sh
-assert_file_executable "${SCRIPT_A}"
+SH_CHK_PINDEL=${LG3_HOME}/scripts/chk_pindel.sh
+assert_file_executable "${SH_CHK_PINDEL}"
 
-SCRIPT_B=${LG3_HOME}/scripts/chk_mutdet.sh
-assert_file_executable "${SCRIPT_B}"
+SH_CHK_MUTDET=${LG3_HOME}/scripts/chk_mutdet.sh
+assert_file_executable "${SH_CHK_MUTDET}"
 
-"${SCRIPT_A}" "${PROJECT}" "${PATIENT}" || error "${SCRIPT_A} failed"
-"${SCRIPT_B}" "${PROJECT}" "${PATIENT}" || error "${SCRIPT_B} failed"
+"${SH_CHK_PINDEL}" "${PROJECT}" "${PATIENT}" || error "${SH_CHK_PINDEL} failed"
+"${SH_CHK_MUTDET}" "${PROJECT}" "${PATIENT}" || error "${SH_CHK_MUTDET} failed"
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"

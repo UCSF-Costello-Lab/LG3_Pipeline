@@ -52,7 +52,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
@@ -64,10 +64,10 @@ echo "----------------------------------"
 
 PINDEL=${LG3_HOME}/tools/pindel024t/pindel
 PINDEL2VCF=${LG3_HOME}/tools/pindel024t/pindel2vcf
-SCRIPT_A=${LG3_HOME}/scripts/pindel_setup.sh
-SCRIPT_B=${LG3_HOME}/scripts/pindel_filter.sh
-SCRIPT_C=${LG3_HOME}/scripts/pindel_annotate.sh
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/vcf2tdt.py
+SH_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.sh
+SH_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.sh
+SH_PINDEL_ANNOTATE=${LG3_HOME}/scripts/pindel_annotate.sh
+PYTHON_VCF2TDT=${LG3_HOME}/scripts/vcf2tdt.py
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-13
 
 echo "Software:"
@@ -75,10 +75,10 @@ echo "- PINDEL=${PINDEL:?}"
 echo "- PINDEL2VCF=${PINDEL2VCF:?}"
 assert_file_executable "${PINDEL}"
 assert_file_executable "${PINDEL2VCF}"
-assert_file_executable "${SCRIPT_A}"
-assert_file_executable "${SCRIPT_B}"
-assert_file_executable "${SCRIPT_C}"
-assert_file_executable "${PYTHON_SCRIPT_A}"
+assert_file_executable "${SH_PINDEL_SETUP}"
+assert_file_executable "${SH_PINDEL_FILTER}"
+assert_file_executable "${SH_PINDEL_ANNOTATE}"
+assert_file_executable "${PYTHON_VCF2TDT}"
 
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 TARGET=${LG3_HOME}/resources/All_exome_targets.extended_200bp.bed
@@ -101,32 +101,39 @@ cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRA
 date
 echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 
-"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${SCRIPT_A} failed"
-assert_file_exists ${PATIENT}.pindel.cfg
+"${SH_PINDEL_SETUP}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${SH_PINDEL_SETUP} failed"
+assert_file_exists "${PATIENT}.pindel.cfg"
 
 ## run pindel
+cd "${PATIENT}_pindel" || error "Failed to set working directory to ${PATIENT}_pindel"
 echo -e "\\n========= [Pindel] Run pindel"
-${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}_pindel/${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "${PINDEL} failed"
+
+${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "${PINDEL} failed"
+for EXT in CloseEndMapped BP LI INV TD D SI
+do
+	assert_file_exists "${PATIENT}.pindel_${EXT}"
+done
 
 ## convert to vcf
 echo -e "\\n========= [Pindel] Convert pindel to vcf"
-${PINDEL2VCF} -P "${PATIENT}_pindel/${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}_pindel/${PATIENT}.pindel.vcf" -G  || error "${PINDEL2VCF} failed"
+${PINDEL2VCF} -P "${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}.pindel.vcf" -G  || error "${PINDEL2VCF} failed"
+assert_file_exists "${PATIENT}.pindel.vcf"
 
 ## convert to tdt
 echo -e "\\n========= [Pindel] Convert vcf to tdt"
-"${PYTHON_SCRIPT_A}" "${PATIENT}_pindel/${PATIENT}.pindel.vcf"  || error "${PYTHON_SCRIPT_A} failed"
+"${PYTHON_VCF2TDT}" "${PATIENT}.pindel.vcf"  || error "${PYTHON_VCF2TDT} failed"
+assert_file_exists "${PATIENT}.pindel.vcf.tdt"
 
-## rename file
-cd "${PATIENT}_pindel" || error "Failed to set working directory to ${PATIENT}_pindel"
 mv "${PATIENT}.pindel.vcf.tdt" "${PATIENT}.indels"
+assert_file_exists "${PATIENT}.indels"
 
 ## filter pindel data
 echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"
-"${SCRIPT_B}" "${PATIENT}.indels" "${PROJECT}" "$TARGET"  || error "${SCRIPT_B} failed"
+"${SH_PINDEL_FILTER}" "${PATIENT}.indels" "${PROJECT}" "$TARGET"  || error "${SH_PINDEL_FILTER} failed"
 
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\\n========= [Annotate] Annotate indels and apply annotation-based filters"
-"${SCRIPT_C}" "${PATIENT}.indels" "${PROJECT}"  || error "${SCRIPT_C} failed"
+"${SH_PINDEL_ANNOTATE}" "${PATIENT}.indels" "${PROJECT}"  || error "${SH_PINDEL_ANNOTATE} failed"
 
 ## move from scratch to project folder
 cp -r "${LG3_SCRATCH_ROOT}"/* "${WDIR}"

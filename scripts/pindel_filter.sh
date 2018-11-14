@@ -35,9 +35,9 @@ fi
 #
 
 BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/pindel_filter.py
+PYTHON_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.py
 assert_file_executable "${BEDTOOLS}"
-assert_file_exists "${PYTHON_SCRIPT_A}"
+assert_file_exists "${PYTHON_PINDEL_FILTER}"
 
 datafile=$1
 #proj=$2
@@ -49,9 +49,11 @@ echo "- interval=${interval:?}"
 assert_file_exists "${datafile}"
 
 ### filter indels
-python "${PYTHON_SCRIPT_A}" "${datafile}"
+python "${PYTHON_PINDEL_FILTER}" "${datafile}"
+assert_file_exists "${datafile}.filter"
 
 ### intersect with target sequence
 "${BEDTOOLS}" intersect -a "${datafile}.filter" -b "${interval}" -wa > "${datafile}.filter.intersect"
+assert_file_exists "${datafile}.filter.intersect"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

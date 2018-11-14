@@ -21,7 +21,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
@@ -31,17 +30,16 @@ fi
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ### Input
-patient=$1
-project=$2
-conversionfile=$3
+PATIENT=$1
+PROJECT=$2
+CONV=$3
 echo "Settings:"
-echo " - patient=${patient:?}"
-echo " - project=${project:?}"
-echo " - conversionfile=${conversionfile:?}"
-assert_file_exists "${conversionfile}"
+echo " - PATIENT=${PATIENT:?}"
+echo " - PROJECT=${PROJECT:?}"
+echo " - CONV=${CONV:?}"
+assert_file_exists "${CONV}"
 
-python "${LG3_HOME}/scripts/combine_snvs.py" "${patient}" "${project}" "${conversionfile}" "${patient}.snvs" || error "combine_snvs.py failed"
-
-echo "Finished"
+python "${LG3_HOME}/scripts/combine_snvs.py" "${PATIENT}" "${PROJECT}" "${CONV}" "${PATIENT}.snvs" || error "combine_snvs.py failed"
+assert_file_exists "${PATIENT}.snvs"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

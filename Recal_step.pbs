@@ -48,7 +48,7 @@ echo "- ILIST=${ILIST:?}"
 echo "- START=${START:?}"
 echo "- RECOVER_DIR=${RECOVER_DIR:?}"
 
-[[ "${PATIENT}" == *[_]* ]] && error "'PATIENT' must not contain underscores: ${PATIENT}"
+assert_patient_name "${PATIENT}"
 
 ## Assert existance of input files
 assert_file_exists "${ILIST}"

@@ -61,7 +61,7 @@ assert_file_exists "${DBSNP}"
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
 GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/vcf_germline.py
+PYTHON_VCF_GERMLINE=${LG3_HOME}/scripts/vcf_germline.py
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
 echo "- PYTHON=${PYTHON:?}"
@@ -71,7 +71,7 @@ echo "- GATK=${GATK:?}"
 assert_file_executable "${JAVA}"
 assert_file_executable "${PYTHON}"
 assert_file_exists "${GATK}"
-assert_file_exists "${PYTHON_SCRIPT_A}"
+assert_file_exists "${PYTHON_VCF_GERMLINE}"
 
 
 echo "-------------------------------------------------"
@@ -114,6 +114,7 @@ if [ ! -e "${PATIENT}.UG.snps.raw.vcf" ]; then
                 --min_base_quality_score 20 \
                 --output_mode EMIT_VARIANTS_ONLY \
                 --out "${PATIENT}.UG.snps.raw.vcf"; } 2>&1 || error "Unified Genotyper SNP calling failed"
+		  assert_file_exists "${PATIENT}.UG.snps.raw.vcf"
 else
         echo "[Germline] Found output ${PATIENT}.UG.snps.raw.vcf -- Skipping..."
 fi
@@ -142,6 +143,7 @@ if [ ! -e "${PATIENT}.UG.snps.annotated.vcf" ]; then
                 --annotation ReadPosRankSumTest \
                 --annotation DepthOfCoverage \
                 --out "${PATIENT}.UG.snps.annotated.vcf"; } 2>&1 || error "Unified Genotyper SNP annotation failed"
+		  assert_file_exists "${PATIENT}.UG.snps.annotated.vcf"
 
         rm -f "${PATIENT}.UG.snps.raw.vcf"
         rm -f "${PATIENT}.UG.snps.raw.vcf.idx"
@@ -173,6 +175,7 @@ if [ ! -e "${PATIENT}.UG.snps.vcf" ]; then
                 --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
                 --out "${PATIENT}.UG.snps.vcf"; } 2>&1 || error "Unified Genotyper SNP filtration failed"
+		  assert_file_exists "${PATIENT}.UG.snps.vcf"
 
         rm -f "${PATIENT}.UG.snps.annotated.vcf"
         rm -f "${PATIENT}.UG.snps.annotated.vcf.idx"
@@ -188,11 +191,12 @@ do
 
         if [ ! -e "${prefix}.germline" ]; then
                 echo "[Germline] Checking germline SNPs for sample relatedness: $tumorname vs $normalname"
-                $PYTHON "${PYTHON_SCRIPT_A}" \
-                        "${PATIENT}.UG.snps.vcf" \
-                        "$normalname" \
-                        "$tumorname" \
-                        > "${prefix}.germline" || error "Germline analysis failed"
+              $PYTHON "${PYTHON_VCF_GERMLINE}" \
+                    "${PATIENT}.UG.snps.vcf" \
+                    "$normalname" \
+                    "$tumorname" \
+                     > "${prefix}.germline" || error "Germline analysis failed"
+		  			assert_file_exists "${prefix}.germline"
         else
                 echo "[Germline] ${prefix}.germline already exists, skipping analysis"
         fi

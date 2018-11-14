@@ -21,7 +21,7 @@
 ###  LG3_HOME={{LG3_HOME}}
 ###  EMAIL={{EMAIL}}
 ###
-### Version: 2018-10-27-9000
+### Version: 2018-11-12-9000
 ### Source: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 
 LG3_DIR=$(dirname "$(readlink -e "$0")")
@@ -67,7 +67,16 @@ function table_of_tools {
 }
 
 version() {
-    grep -E "^###[ ]*Version:[ ]*" "$0" | sed 's/###[ ]*Version:[ ]*//g'
+    local ver
+    ver=$(grep -E "^###[ ]*Version:[ ]*" "$0" | sed 's/###[ ]*Version:[ ]*//g')
+    ## Develop version?
+    if ! (( $(echo "$ver" | grep -q -E "[-]9[0-9][0-9][0-9]") )); then
+	if [ -d "${LG3_HOME}/.git" ] && ! (( $(which git &> /dev/null) )); then
+	    commit=$(cd "$LG3_HOME" || return; git rev-parse --short HEAD)
+            ver="$ver (commit ${commit})"
+	fi
+    fi
+    echo "$ver"
 }
 
 news() {

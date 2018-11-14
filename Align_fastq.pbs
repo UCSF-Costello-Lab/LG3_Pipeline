@@ -59,8 +59,8 @@ echo "Started $PROG on $DATE as $USER"
 echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SCRIPT=${LG3_HOME}/scripts/Align_fastq.sh
-assert_file_executable "${SCRIPT}"
+SH_ALIGN_FASTQ=${LG3_HOME}/scripts/Align_fastq.sh
+assert_file_executable "${SH_ALIGN_FASTQ}"
 
 DEST="${LG3_OUTPUT_ROOT}/${PROJECT}/exomes"
 mkdir -p "${DEST}" || error "Can't create destination directory ${DEST}"
@@ -78,7 +78,7 @@ ls -lrt
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
-"${SCRIPT}" "$FQ1" "$FQ2" "$SAMPLE" || error "${SCRIPT} FAILED"
+"${SH_ALIGN_FASTQ}" "$FQ1" "$FQ2" "$SAMPLE" || error "${SH_ALIGN_FASTQ} FAILED"
 
 echo "Content of ${PWD}:"
 ls -lrt

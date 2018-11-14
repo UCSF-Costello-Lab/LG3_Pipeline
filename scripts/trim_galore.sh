@@ -37,8 +37,8 @@ QTY=20
 LEN=20
 STRINGENCY=1
 
-if [ $# -lt 2 ]; then
-    error "Run trim_galore in paired mode on gzipped fastq files using Illumina universal adapter\\nUsage: $0 [ -quality=$QTY -length=$LEN -stringency=$STRINGENCY] 1.fastq.gz 2.fastq.gz"
+if [ $# -lt 3 ]; then
+    error "Run trim_galore in paired mode on gzipped fastq files using Illumina universal adapter\\nUsage: $0 [ -quality=$QTY -length=$LEN -stringency=$STRINGENCY] 1.fastq.gz 2.fastq.gz sampleID"
 fi
 
 #### Parse optional args
@@ -54,6 +54,7 @@ done
 
 FQ1=$1
 FQ2=$2
+SAMPLE=$3
 
 ### Input
 echo "Input:"
@@ -78,6 +79,12 @@ assert_file_executable "${TG}"
 ### Default: --length 20 --quality 20 --stringency 1
 ### --fastqc
 time $TG --paired --quality "$QTY" --length "$LEN" --stringency 1 --path_to_cutadapt "$CUTADAPT" --illumina "$FQ1" "$FQ2" || error "[trim_galore] trim_galore FAILED"
+
+## Assert existance of output files
+assert_file_exists "${SAMPLE}_R1"*_val_1.fq.gz
+assert_file_exists "${SAMPLE}_R2"*_val_2.fq.gz
+assert_file_exists "${SAMPLE}_R1"*.fastq.gz_trimming_report.txt
+assert_file_exists "${SAMPLE}_R2"*.fastq.gz_trimming_report.txt
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
 

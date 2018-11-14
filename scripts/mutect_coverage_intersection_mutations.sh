@@ -29,31 +29,32 @@ fi
 
 
 ### Input
-patient=$1
-project=$2
-conversionfile=$3
+PATIENT=$1
+PROJECT=$2
+CONV=$3
 echo "Input:"
-echo " - patient=${patient:?}"
-echo " - project=${project:?}"
-echo " - conversionfile=${conversionfile:?}"
-assert_file_exists "${conversionfile}"
+echo " - PATIENT=${PATIENT:?}"
+echo " - PROJECT=${PROJECT:?}"
+echo " - CONV=${CONV:?}"
+assert_file_exists "${CONV}"
 
 ### Software
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
-RSCRIPT_A=${LG3_HOME}/scripts/mutations_annotate_intersected_coverage.R
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/convert_patient_wig2bed.py
+R_MUT_ANN_INTERSECTED_COV=${LG3_HOME}/scripts/mutations_annotate_intersected_coverage.R
+PYTHON_CONV_PAT_WIG2BED=${LG3_HOME}/scripts/convert_patient_wig2bed.py
 assert_file_executable "${RSCRIPT_BIN}"
-assert_file_exists "${RSCRIPT_A}"
-assert_file_exists "${PYTHON_SCRIPT_A}"
+assert_file_exists "${R_MUT_ANN_INTERSECTED_COV}"
+assert_file_exists "${PYTHON_CONV_PAT_WIG2BED}"
 
 
 ### FIXME: Are these input or output folders?
-MUT=${LG3_OUTPUT_ROOT}/${project:?}/mutations/${patient}_mutect
-MUT2=${LG3_OUTPUT_ROOT}/${project:?}/MutInDel
+MUT=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
+MUT2=.
 
-python "${PYTHON_SCRIPT_A}" "${patient}" "${project}" "${conversionfile}"  || error "${PYTHON_SCRIPT_A} failed"
+python "${PYTHON_CONV_PAT_WIG2BED}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${PYTHON_CONV_PAT_WIG2BED} failed"
+assert_file_exists  "$MUT/${PATIENT}.mutect.coverage.intersect.bed"
 
-"${RSCRIPT_BIN}" "${RSCRIPT_A}" "$MUT/${patient}.mutect.coverage.intersect.bed" "$MUT2/${patient}.snvs.indels.filtered.overlaps.txt" "$MUT2/${patient}.R.mutations"  || error "${RSCRIPT_A} failed"
+"${RSCRIPT_BIN}" "${R_MUT_ANN_INTERSECTED_COV}" "$MUT/${PATIENT}.mutect.coverage.intersect.bed" "$MUT2/${PATIENT}.snvs.indels.filtered.overlaps.txt" "$MUT2/${PATIENT}.R.mutations"  || error "${R_MUT_ANN_INTERSECTED_COV} failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

@@ -24,6 +24,7 @@ CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157}
 EMAIL=${EMAIL:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -37,13 +38,15 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
-  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
+  echo "- LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT}"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- PATIENT=${PATIENT:?}"
   echo "- PROJECT=${PROJECT:?}"
   echo "- CONV=${CONV:?}"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- hostname=$(hostname)"
 fi
 
 assert_file_exists "${CONV}"
@@ -66,60 +69,68 @@ echo "----------------------------------"
 
 ### Software
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
-RSCRIPT_A=${LG3_HOME}/scripts/MutDet_filter.R
-RSCRIPT_B=${LG3_HOME}/scripts/combine_snvs_pindel.R
-SCRIPT_A=${LG3_HOME}/scripts/combine_snvs.sh
-SCRIPT_B=${LG3_HOME}/scripts/annotate_mutations_from_bam.sh
-SCRIPT_C=${LG3_HOME}/scripts/libID_to_patientID.sh
-SCRIPT_D=${LG3_HOME}/scripts/mutation_overlaps.sh
-SCRIPT_E=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh
-SCRIPT_F=${LG3_HOME}/scripts/runLOH_ivan.sh
+R_MUTDET_FILTER=${LG3_HOME}/scripts/MutDet_filter.R
+R_COMBINE_SNVS_PINDEL=${LG3_HOME}/scripts/combine_snvs_pindel.R
+SH_COMBINE_SNVS=${LG3_HOME}/scripts/combine_snvs.sh
+SH_ANN_MUT_FROM_BAM=${LG3_HOME}/scripts/annotate_mutations_from_bam.sh
+SH_LIB2PAT=${LG3_HOME}/scripts/libID_to_patientID.sh ## C
+SH_MUT_OVERLAPS=${LG3_HOME}/scripts/mutation_overlaps.sh ## D
+SH_MUTECT_COV_INTER_MUT=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh ## E
+SH_RUNLOH=${LG3_HOME}/scripts/runLOH_ivan.sh ## F
 
 assert_file_executable "${RSCRIPT_BIN}"
-assert_file_exists "${RSCRIPT_A}"
-assert_file_exists "${RSCRIPT_B}"
-assert_file_executable "${SCRIPT_A}"
-assert_file_executable "${SCRIPT_B}"
-assert_file_executable "${SCRIPT_C}"
-assert_file_executable "${SCRIPT_D}"
-assert_file_executable "${SCRIPT_E}"
-assert_file_executable "${SCRIPT_F}"
+assert_file_exists "${R_MUTDET_FILTER}"
+assert_file_exists "${R_COMBINE_SNVS_PINDEL}"
+assert_file_executable "${SH_COMBINE_SNVS}"
+assert_file_executable "${SH_ANN_MUT_FROM_BAM}"
+assert_file_executable "${SH_LIB2PAT}"
+assert_file_executable "${SH_MUT_OVERLAPS}"
+assert_file_executable "${SH_MUTECT_COV_INTER_MUT}"
+assert_file_executable "${SH_RUNLOH}"
 
 
-WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
-mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
-cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
+SCRATCH=${LG3_SCRATCH_ROOT}/MutInDel
+mkdir -p "${SCRATCH}" || error "Can't create scratch directory ${SCRATCH}"
+cd "${SCRATCH}" || error "Failed to set working directory to ${SCRATCH}"
 
 echo -e "\\n************ Cat all SNV files per patient"
-"${SCRIPT_A}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SCRIPT_A} failed"
+"${SH_COMBINE_SNVS}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SH_COMBINE_SNVS} failed"
 OK 
 
 echo -e "\\n************ Annotate mutations from aligned bam files"
-"${SCRIPT_B}" "${CONV}" "${PATIENT}" "${PROJECT}" || error "${SCRIPT_B} failed"
+"${SH_ANN_MUT_FROM_BAM}" "${CONV}" "${PATIENT}" "${PROJECT}" || error "${SH_ANN_MUT_FROM_BAM} failed"
 OK
 
 echo -e "\\n************ Convert library IDs to patient IDs"
-"${SCRIPT_C}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || error "${SCRIPT_C} failed"
+"${SH_LIB2PAT}" "${CONV}" "${PATIENT}" "${PATIENT}.snvs.anno.txt"  "${PATIENT}.snvs.anno.pat.txt" || error "${SH_LIB2PAT} failed"
 OK
 
 echo -e "\\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
-"${RSCRIPT_BIN}" "${RSCRIPT_A}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || error "${RSCRIPT_A} failed"
+"${RSCRIPT_BIN}" "${R_MUTDET_FILTER}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || error "${R_MUTDET_FILTER} failed"
 OK 
 
 echo -e "\\n************ Combine indels and snvs into one file"
-"${RSCRIPT_BIN}" "${RSCRIPT_B}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || error "${RSCRIPT_B} failed"
+"${RSCRIPT_BIN}" "${R_COMBINE_SNVS_PINDEL}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || error "${R_COMBINE_SNVS_PINDEL} failed"
 OK 
 
 echo -e "\\n************ Calculate mutation overlaps"
-"${SCRIPT_D}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || error "${SCRIPT_D} failed"
+"${SH_MUT_OVERLAPS}" "${PATIENT}.snvs.indels.filtered.txt" "${PATIENT}" "${PATIENT}.snvs.indels.filtered.overlaps.txt" || error "${SH_MUT_OVERLAPS} failed"
 OK 
 
 echo -e "\\n************ Annotate with shared coverage"
-"${SCRIPT_E}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SCRIPT_E} failed"
+"${SH_MUTECT_COV_INTER_MUT}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SH_MUTECT_COV_INTER_MUT} failed"
 OK
 
 echo -e "\\n************ Generate MAF files & LOH plots"
-"${SCRIPT_F}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SCRIPT_F} failed"
+"${SH_RUNLOH}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SH_RUNLOH} failed"
 OK
+
+WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
+mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+
+cp -p ./* "${WDIR}" || error "cp results to ${WDIR}"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

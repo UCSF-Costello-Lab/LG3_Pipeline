@@ -3,21 +3,30 @@
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME}/scripts/utils.sh"
 
+PROGRAM=${BASH_SOURCE[0]}
+PROG=$(basename "$PROGRAM")
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:-1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+  echo "${PROG} Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- hostname=$(hostname)"
+  echo "- ncores=$ncores"
 fi
 
 
@@ -33,7 +42,7 @@ export PATH=/opt/R/R-latest/bin:$PATH
 pl="Illumina"
 pu="Exome"
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PICARD=${LG3_HOME}/tools/picard-tools-1.64
+PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 
@@ -60,7 +69,7 @@ echo "[Merge] Merge BAM files..."
 # shellcheck disable=SC2086
 # Comment: Because how 'inputs' is created and used below
 $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
-        -jar "$PICARD/MergeSamFiles.jar" \
+        -jar "$PICARD_HOME/MergeSamFiles.jar" \
         ${inputs} \
         OUTPUT="${prefix}.merged.bam" \
         SORT_ORDER=coordinate \
@@ -68,14 +77,16 @@ $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT || error "Merge BAM files failed"
+assert_file_exists "${prefix}.merged.bam"
 
 echo "[Merge] Index new BAM file..."
 $SAMTOOLS index "${prefix}.merged.bam" || error "First indexing failed"
+assert_file_exists "${prefix}.merged.bam.bai"
 
 
 echo "[Merge] Coordinate-sort and enforce read group assignments..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
-        -jar "$PICARD/AddOrReplaceReadGroups.jar" \
+        -jar "$PICARD_HOME/AddOrReplaceReadGroups.jar" \
         INPUT="${prefix}.merged.bam" \
         OUTPUT="${prefix}.merged.sorted.sam" \
         SORT_ORDER=coordinate \
@@ -88,12 +99,14 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=LENIENT || error "Sort failed"
+assert_file_exists "${prefix}.merged.sorted.sam"
 
 rm -f "${prefix}.merged.bam"
 rm -f "${prefix}.merged.bam.bai"
 
 echo "[Merge] Convert SAM to BAM..."
 $SAMTOOLS view -bS "${prefix}.merged.sorted.sam" > "${prefix}.merged.sorted.bam" || error "BAM conversion failed"
+assert_file_exists "${prefix}.merged.sorted.bam"
 
 rm -f "${prefix}.merged.sorted.sam"
 
@@ -106,6 +119,7 @@ ln -sf "${prefix}.merged.sorted.bam.bai" "${prefix}.bwa.realigned.rmDups.recal.b
 
 echo "[QC] Calculate flag statistics..."
 $SAMTOOLS flagstat "${prefix}.merged.sorted.bam" > "${prefix}.merged.sorted.flagstat" 2>&1
+assert_file_exists "${prefix}.merged.sorted.flagstat"
 
 echo "[QC] Calculate hybrid selection metrics..."
 $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -118,6 +132,7 @@ $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT || error "Calculate hybrid selection metrics failed"
+assert_file_exists "${prefix}.merged.hybrid_selection_metrics"
 
 echo "[QC] Collect multiple QC metrics..."
 $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
@@ -129,8 +144,14 @@ $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
         VALIDATION_STRINGENCY=SILENT || error "Collect multiple QC metrics failed"
+        for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
+        do
+            assert_file_exists  "${prefix}.merged.${EXT}"
+        done
 
 echo "[QC] Finished!"
 
 echo "[Merge] Success!"
 echo "------------------------------------------------------"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

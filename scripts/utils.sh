@@ -150,18 +150,57 @@ function warn {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # ASSERTIONS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Usage: assert_file_exists /path/to/file
 function assert_file_exists {
-    file=$1
-    [[ -f "${file}" ]] || error "File not found: '${file}' (working directory '${PWD}')"
+    [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
+    [[ -n "$1" ]] || error "File name must be non-empty: '$1'"
+    [[ -f "$1" ]] || error "No such file: '$1' (working directory '${PWD}')"
 }
 
+function assert_link_exists {
+    [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
+    [[ -n "$1" ]] || error "File name must be non-empty: '$1'"
+    [[ -L "$1" ]] || error "File is not a link: '$1' (working directory '${PWD}')"
+    [[ -e "$1" ]] || error "[File] link is broken: '$1' (working directory '${PWD}')"
+}
+
+## Usage: assert_file_executable /path/to/file
 function assert_file_executable {
-    file=$1
-    assert_file_exists "${file}"
-    [[ -x "${file}" ]] || error "File exists but is not executable: '${file}' (working directory '${PWD}')"
+    [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
+    assert_file_exists "$1"
+    [[ -x "$1" ]] || error "File exists but is not executable: '$1' (working directory '${PWD}')"
 }
 
+## Usage: assert_directory_exists /path/to/folder
 function assert_directory_exists {
-    dir=$1
-    [[ -d "${dir}" ]] || error "Directory not found: '${dir}' (working directory '${PWD}')"
+    [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
+    [[ -n "$1" ]] || error "Directory name must be non-empty: '$1'"
+    [[ -d "$1" ]] || error "No such directory: '$1' (working directory '${PWD}')"
+}
+
+## Usage: assert_patient_name "${PATIENT}"
+function assert_patient_name {
+    [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
+    [[ -n "$1" ]] || error "Patient name must be non-empty: '$1'"
+    [[ "$1" == *[_]* ]] && error "Patient name must not contain underscores: $1"
+}
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# NAVIGATION
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+function change_dir {
+    opwd=${PWD}
+    assert_directory_exists "$1"
+    cd "$1" || error "Failed to set working directory to $1"
+    echo "New working directory: '$1' (was '${opwd}')"
+}
+
+function make_dir {
+    mkdir -p "$1" || error "Failed to create new working directory $1"
+}
+
+function make_change_dir {
+    make_dir "$1"
+    change_dir "$1"
 }

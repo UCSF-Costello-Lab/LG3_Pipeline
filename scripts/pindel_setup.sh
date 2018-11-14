@@ -37,8 +37,8 @@ fi
 ##
 #
 
-PYTHON_SCRIPT_A=${LG3_HOME}/scripts/pindel_setup.py
-assert_file_exists "${PYTHON_SCRIPT_A}"
+PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
+assert_file_exists "${PYTHON_PINDEL_SETUP}"
 
 patient_ID=$1
 proj=$2
@@ -47,9 +47,10 @@ echo "Input:"
 echo "- patient_ID=${patient_ID:?}"
 echo "- proj=${proj:?}"
 echo "- patIDs=${patIDs:?}"
-[[ "${patient_ID}" == *[_]* ]] && error "'patient_ID' must not contain underscores: ${patient_ID}"
+
+assert_patient_name "${patient_ID}"
 assert_file_exists "${patIDs}"
 
-python "${PYTHON_SCRIPT_A}" "${patient_ID}" "${proj}" "${patIDs}"
+python "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

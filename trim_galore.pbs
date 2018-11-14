@@ -60,8 +60,8 @@ echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SCRIPT=${LG3_HOME}/scripts/trim_galore.sh
-assert_file_executable "${SCRIPT}"
+SH_TRIM_GALORE=${LG3_HOME}/scripts/trim_galore.sh
+assert_file_executable "${SH_TRIM_GALORE}"
 
 mkdir -p "${LG3_OUTPUT_ROOT}" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}"
 mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}"
@@ -76,7 +76,7 @@ echo "Current working directory: ${PWD}"
 cp "$FASTQ1" .
 cp "$FASTQ2" .
 
-"${SCRIPT}" -quality="$QTY" "$FASTQ1" "$FASTQ2" || error "trim_galore FAILED"
+"${SH_TRIM_GALORE}" -quality="$QTY" "$FASTQ1" "$FASTQ2" "$SAMPLE" || error "trim_galore FAILED"
 
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
@@ -85,12 +85,8 @@ rm "$FQ1" "$FQ2"
 echo "Intermediate output files:"
 ls -laR
 
-echo "Moving files of interest to final destination:"
-if [ "$QTY" -eq 20 ]; then
-    SAMPLE_PREFIX=${SAMPLE}-trim
-else
-    SAMPLE_PREFIX=${SAMPLE}-trim${QTY}
-fi
+echo "Renaming and moving files of interest to final destination:"
+[[ "$QTY" -eq 20 ]] && SAMPLE_PREFIX=${SAMPLE}-trim || SAMPLE_PREFIX=${SAMPLE}-trim${QTY}
 echo "- SAMPLE_PREFIX=${SAMPLE_PREFIX}"
 
 mv "${SAMPLE}_R1"*_val_1.fq.gz "${SAMPLE_PREFIX}_R1.fastq.gz" || error "Failed to copy ${SAMPLE_PREFIX}_R1.fastq.gz"
@@ -108,8 +104,5 @@ rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
 ls -s "${LG3_OUTPUT_ROOT}/${PROJECT}/trim/${SAMPLE}-trim"
-
-echo "End of PBS script!"
-date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
