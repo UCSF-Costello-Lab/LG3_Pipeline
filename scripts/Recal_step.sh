@@ -48,24 +48,24 @@ echo "References:"
 echo "- REF=${REF:?}"
 echo "- THOUSAND=${THOUSAND:?}"
 echo "- DBSNP=${DBSNP:?}"
-assert_file_exits "${REF}"
-assert_file_exits "${THOUSAND}"
-assert_file_exits "${DBSNP}"
+assert_file_exists "${REF}"
+assert_file_exists "${THOUSAND}"
+assert_file_exists "${DBSNP}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
 PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
-PICARD_SCRIPT_A=${PICARD_HOME}/MergeSamFiles.jar
-PICARD_SCRIPT_B=${PICARD_HOME}/FixMateInformation.jar
-PICARD_SCRIPT_C=${PICARD_HOME}/MarkDuplicates.jar
-PICARD_SCRIPT_D=${PICARD_HOME}/CalculateHsMetrics.jar
-PICARD_SCRIPT_E=${PICARD_HOME}/CollectMultipleMetrics.jar
+PICARD_MERGESAMFILES=${PICARD_HOME}/MergeSamFiles.jar
+PICARD_FIXMATEINFO=${PICARD_HOME}/FixMateInformation.jar
+PICARD_MARKDUPS=${PICARD_HOME}/MarkDuplicates.jar
+PICARD_HSMETRICS=${PICARD_HOME}/CalculateHsMetrics.jar
+PICARD_MULTIMETRICS=${PICARD_HOME}/CollectMultipleMetrics.jar
 
 echo "Software:"
-echo "- JAVA=${JAVA:?}"
-echo "- SAMTOOLS=${SAMTOOLS:?}"
+echo "- Java=${JAVA:?}"
+echo "- samtools=${SAMTOOLS:?}"
 echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
 
@@ -74,12 +74,11 @@ assert_file_executable "${JAVA}"
 assert_file_executable "${SAMTOOLS}"
 assert_directory_exists "${PICARD_HOME}"
 assert_file_exists "${GATK}"
-assert_file_exists "${PICARD_SCRIPT_A}"
-assert_file_exists "${PICARD_SCRIPT_B}"
-assert_file_exists "${PICARD_SCRIPT_C}"
-assert_file_exists "${PICARD_SCRIPT_D}"
-assert_file_exists "${PICARD_SCRIPT_E}"
-
+assert_file_exists "${PICARD_MERGESAMFILES}"
+assert_file_exists "${PICARD_FIXMATEINFO}"
+assert_file_exists "${PICARD_MARKDUPS}"
+assert_file_exists "${PICARD_HSMETRICS}"
+assert_file_exists "${PICARD_MULTIMETRICS}"
 
 ## Input
 bamfiles=$1
@@ -97,9 +96,8 @@ echo "- RECOVER_DIR=${RECOVER_DIR:?}"
 ## Assert existance of input files
 assert_file_exists "${ILIST}"
 
-
 TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"
-mkdir -p "${TMP}" || error "Can't create scratch directory ${TMP}"
+mkdir -p "${TMP}" || error "Can't create temp scratch directory ${TMP}"
 
 echo "------------------------------------------------------"
 echo "[Recal] Base quality recalibration (step in version)"
@@ -118,7 +116,7 @@ if [ ${STEP} -ge "${START}" ]; then
 	# shellcheck disable=SC2086
 	# Comment: Because how 'inputs' is created and used below
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_A}" \
+        -jar "${PICARD_MERGESAMFILES}" \
         ${inputs} \
         OUTPUT="${PATIENT}.merged.bam" \
         SORT_ORDER=coordinate \
@@ -130,16 +128,16 @@ fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
-	[[ -f "${PATIENT}.merged.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam"
 	echo -e "\\n[Recal step ${STEP}] Index merged BAM file..."
+	assert_file_exists "${PATIENT}.merged.bam"
 	{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Create intervals for indel detection..."
-	[[ -f "${PATIENT}.merged.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam"
-	[[ -f "${PATIENT}.merged.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam.bai"
+	assert_file_exists "${PATIENT}.merged.bam"
+	assert_file_exists "${PATIENT}.merged.bam.bai"
 	{ time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
@@ -155,9 +153,9 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Indel realignment..."
-   [[ -f "${PATIENT}.merged.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam"
-   [[ -f "${PATIENT}.merged.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.bam.bai"
-   [[ -f "${PATIENT}.merged.intervals" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.intervals"
+	assert_file_exists "${PATIENT}.merged.bam"
+	assert_file_exists "${PATIENT}.merged.bam.bai"
+	assert_file_exists "${PATIENT}.merged.intervals"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type IndelRealigner \
@@ -176,9 +174,9 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Fix mate information..."
-   [[ -f "${PATIENT}.merged.realigned.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.bam"
+	assert_file_exists "${PATIENT}.merged.realigned.bam"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_B}" \
+        -jar "${PICARD_FIXMATEINFO}" \
         INPUT="${PATIENT}.merged.realigned.bam" \
         OUTPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         SORT_ORDER=coordinate \
@@ -193,9 +191,9 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Mark duplicates..."
-   [[ -f "${PATIENT}.merged.realigned.mateFixed.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.mateFixed.bam"
+	assert_file_exists "${PATIENT}.merged.realigned.mateFixed.bam"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-        -jar "${PICARD_SCRIPT_C}" \
+        -jar "${PICARD_MARKDUPS}" \
         INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         OUTPUT="${PATIENT}.merged.realigned.rmDups.bam" \
         METRICS_FILE="${PATIENT}.merged.realigned.mateFixed.metrics" \
@@ -210,15 +208,15 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Index BAM file..."
-   [[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
 	{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
 fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Base-quality recalibration: Count covariates..."
-   [[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"
-   [[ -f "${PATIENT}.merged.realigned.rmDups.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam.bai"
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 	{ time $JAVA -Xmx128g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type CountCovariates \
         --reference_sequence "$REF" \
@@ -238,9 +236,9 @@ fi
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Base-quality recalibration: Table Recalibration..."
-	[[ -f "${PATIENT}.merged.realigned.rmDups.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam"	
-	[[ -f "${PATIENT}.merged.realigned.rmDups.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.bam.bai"	
-	[[ -f "${PATIENT}.merged.realigned.rmDups.csv" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.csv"	
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.csv"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type TableRecalibration \
         --reference_sequence "$REF" \
@@ -256,16 +254,9 @@ fi
 
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
-	echo -e "\\n[Recal step ${STEP}] Index BAM file..."
-	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam"	
-	{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.recal.bam"; } 2>&1 || error "Third indexing failed"
-fi
-
-STEP+=1
-if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Split BAM files..."
-	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam"	
-	[[ -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai" ]] || error "Error on step ${STEP}: no input ${PATIENT}.merged.realigned.rmDups.recal.bam.bai"	
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bam"
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bai"
 	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
@@ -274,7 +265,6 @@ if [ ${STEP} -ge "${START}" ]; then
         --outputRoot temp_; } 2>&1 || error "Splitting BAM files failed"
 
 	rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam"
-	rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam.bai"
 	rm -f "${PATIENT}.merged.realigned.rmDups.recal.bai"
 fi
 
@@ -313,7 +303,7 @@ if [ ${STEP} -ge "${START}" ]; then
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-                -jar "${PICARD_SCRIPT_D}" \
+                -jar "${PICARD_HSMETRICS}" \
                 BAIT_INTERVALS="${ILIST}" \
                 TARGET_INTERVALS="${ILIST}" \
                 INPUT="$i" \
@@ -325,7 +315,7 @@ if [ ${STEP} -ge "${START}" ]; then
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
         { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-                -jar "${PICARD_SCRIPT_E}" \
+                -jar "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups.recal" \
                 REFERENCE_SEQUENCE="${REF}" \
