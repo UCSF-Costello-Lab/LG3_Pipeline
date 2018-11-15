@@ -4,6 +4,10 @@
 
 * ...
 
+### NEW FEATURES 
+
+* Added stand-alone Germline analysis, exactly the same as in the Recal step. In case Recal-Germline fails. 
+
 
 ## Version 2018-11-12
 
