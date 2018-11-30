@@ -6,6 +6,8 @@
 
 ### NEW FEATURES 
 
+* exomeQualityPlots pipeline is now integrated with the main pipeline
+
 * Added stand-alone Germline analysis, exactly the same as in the Recal step. In case Recal-Germline fails. 
 
 
