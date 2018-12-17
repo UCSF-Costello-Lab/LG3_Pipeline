@@ -47,7 +47,7 @@ ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
 ## Software
 SH_GERMLINE=${LG3_HOME}/scripts/Germline.sh
-assert_file_executable ${SH_GERMLINE}
+assert_file_executable "${SH_GERMLINE}"
 
 
 WDIR=${LG3_OUTPUT_ROOT}/LG3/exomes_recal/${PATIENT}/germline
