@@ -10,6 +10,10 @@
 
 * Added stand-alone Germline analysis, exactly the same as in the Recal step. In case Recal-Germline fails. 
 
+### BUG FIXES
+
+* Fixed a wrong file extension in Recal_pass2.sh
+
 
 ## Version 2018-11-12
 
