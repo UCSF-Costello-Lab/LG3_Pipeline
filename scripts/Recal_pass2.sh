@@ -239,7 +239,7 @@ do
         echo "------------------------------------------------------"
         for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
         do
-            assert_file_exists  "${base}.bwa.realigned.rmDups.recal.${EXT}"
+            assert_file_exists  "${base}.bwa.realigned.rmDups.${EXT}"
         done
         echo "------------------------------------------------------"
 done

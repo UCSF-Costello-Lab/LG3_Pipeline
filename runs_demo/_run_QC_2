@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:?}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+QC_PLOT_HOME=${QC_PLOT_HOME:-exomeQualityPlots}
+EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
+PATIENT=${PATIENT:-Patient157t10}
+BEDPATH=${BEDPATH:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.bed}
+BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
+WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
+
+## Requires absolute path
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+QC_PLOT_HOME=$(readlink -e "${QC_PLOT_HOME}")
+
+echo "Input: "
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- QC_PLOT_HOME=${QC_PLOT_HOME:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- EMAIL=${EMAIL}"
+
+assert_file_exists "${BEDPATH}"
+echo "- BEDPATH=${BEDPATH:?}"
+
+assert_directory_exists "${BAMPATH}"
+BAMPATH=$(readlink -e "${BAMPATH}") 
+echo "- BAMPATH=${BAMPATH}"
+ls -1 "${BAMPATH}/${PATIENT}"/*.bwa.realigned.rmDups.recal.bam || { echo "ERROR: No bam files found in ${BAMPATH}"; exit 1; }
+
+make_dir "${WORKDIR}"
+WORKDIR=$(readlink -e "${WORKDIR}")
+change_dir "${WORKDIR}"
+echo "- WORKDIR=${WORKDIR}"
+
+SH_GET_COV=${QC_PLOT_HOME}/get_coverage.sh
+assert_file_executable "${SH_GET_COV}"
+
+PN=${PATIENT/Patient/Pat}
+qsub -l vmem=300gb -e "_QC2_${PATIENT}.err" -o "_QC2_${PATIENT}.out" -N "QC2_${PN}" -M "${EMAIL}" -m ae -v "patient=${PATIENT},bedpath=${BEDPATH},bampath=${BAMPATH}/${PATIENT}" "${SH_GET_COV}"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

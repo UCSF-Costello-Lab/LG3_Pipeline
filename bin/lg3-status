@@ -17,6 +17,9 @@
 ###  --pindel          Check Pindel output
 ###  --combined        Check mutation output
 ###  --all             Check all outputs
+###  --qc1             Check QC1 outputs
+###  --qc2             Check QC2 outputs
+###  --qc3             Check QC3 outputs
 ###
 ### Examples:
 ###  lg3 status --all Patient157t10
@@ -49,6 +52,9 @@ GL=false
 PINDEL=false
 MUT=false
 COMB=false
+QC1=false
+QC2=false
+QC3=false
 
 wcl() {
     grep -vc "^#" "$1" 
@@ -70,6 +76,9 @@ case $1 in
     --p*) PINDEL=true;shift 1;;
     --mut*) MUT=true;shift 1;;
     --comb*) COMB=true;shift 1;;
+    --qc1) QC1=true;shift 1;;
+    --qc2) QC2=true;shift 1;;
+    --qc3) QC3=true;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -265,9 +274,6 @@ if $MUT ; then
     done < "${PATIENT}.temp.conversions.txt"
 fi
 
-## Delete PATIENT specific conversion file
-rm "${PATIENT}.temp.conversions.txt"
-
 
 if $COMB ; then
     WORKDIR1=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
@@ -304,4 +310,75 @@ if $COMB ; then
         echo -e "LOH plots $ERR"
     fi
 fi
+
+if $QC1 ; then
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
+    ## Expected output:
+    OUT=${WORKDIR}/${PATIENT}.qualityinfo.tmp
+    if [ -s "$OUT" ]; then
+        LCNT=$(wcl "$OUT")
+        echo -e "QC1.tmp $OK ${YEL}${LCNT}${NOC}"
+    else
+        echo -e "QC1.tmp $ERR"
+    fi
+fi
+
+if $QC2 ; then
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
+
+    while IFS=$'\t' read -r ID _ _ SAMP
+    do
+        ### Expected output
+        OUT=${WORKDIR}/${ID}.bwa.realigned.rmDups.recal.bam.hist
+        if [ -r "$OUT" ]; then
+				LCNT=$(wcl "$OUT")
+            echo -e "QC2 hist $ID $OK ${YEL}${LCNT}${NOC}"
+        else
+            echo -e "QC2 hist $ID $ERR"
+        fi
+    done < "${PATIENT}.temp.conversions.txt"
+fi
+
+if $QC3 ; then
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
+    ## Expected output:
+    OUT1=${WORKDIR}/${PATIENT}.qualityinfo.txt
+    if [ -s "$OUT1" ]; then
+        LCNT=$(wcl "$OUT1")
+        echo -e "QC3 info $OK ${YEL}${LCNT}${NOC}"
+    else
+        echo -e "QC3 info $ERR"
+    fi
+    OUT2=${WORKDIR}/${PATIENT}.qualitystats.txt
+    if [ -s "$OUT2" ]; then
+        LCNT=$(wcl "$OUT2")
+        echo -e "QC3 stats $OK ${YEL}${LCNT}${NOC}"
+    else
+        echo -e "QC3 stats $ERR"
+    fi
+
+	for DIR in libraryQuality VAFPatterns  variantQuality  variantSpectra
+	do
+    res=false
+    for ff in "${WORKDIR}/${PATIENT}_qualplots/${DIR}/"*.pdf; do
+        if [ -s "$ff" ]; then
+            res=true
+        else
+            res=false
+        break
+        fi
+    done
+    if $res; then
+        echo -e "QC3 ${DIR} plots $OK"
+    else
+        echo -e "QC3 ${DIR} plots $ERR"
+    fi
+	done
+
+
+fi
+
+## Delete PATIENT specific conversion file
+rm "${PATIENT}.temp.conversions.txt"
+
 done
