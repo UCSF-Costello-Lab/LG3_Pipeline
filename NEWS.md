@@ -1,18 +1,17 @@
 # LG3_Pipeline
 
-## Version 2018-11-12-9000 (develop version)
-
-* ...
+## Version 2018-12-20
 
 ### NEW FEATURES 
 
-* exomeQualityPlots pipeline is now integrated with the main pipeline
+* exomeQualityPlots pipeline is now integrated with the main pipeline.
 
-* Added stand-alone Germline analysis, exactly the same as in the Recal step. In case Recal-Germline fails. 
+* Added stand-alone Germline analysis, exactly the same as in the Recal
+  step, which can be used in case the Recal-Germline step fails.
 
 ### BUG FIXES
 
-* Fixed a wrong file extension in Recal_pass2.sh
+* Fixed a wrong file extension in Recal_pass2.sh.
 
 
 ## Version 2018-11-12
