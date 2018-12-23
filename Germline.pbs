@@ -51,14 +51,15 @@ assert_file_executable "${SH_GERMLINE}"
 
 
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
-mkdir -p "${WDIR}" || { echo "Can't create destination directory ${WDIR}"; exit 1; }
-cd "${WDIR}" || { echo "ERROR: Failed to set working directory to ${WDIR}"; exit 1; }
+make_dir "${WDIR}"
+change_dir "${WDIR}"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
 assert_file_exists "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam"
+
 "${SH_GERMLINE}" \
       "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
       "${PATIENT}" \
