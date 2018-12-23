@@ -18,7 +18,7 @@ The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, 
 ```sh
 $ module load CBC lg3
 $ lg3 --version
-2018-11-12
+2018-12-20
 ```
 
 See `module avail` for alternative versions.
@@ -30,8 +30,8 @@ See `module avail` for alternative versions.
 
 To run through the built-in "small" test example (20-25 hours), let's create a separate project folder:
 ```sh
-$ mkdir -p /path/to/lg3-ex
-$ cd /path/to/lg3-ex
+$ mkdir -p ~/lg3-demo
+$ cd ~/lg3-demo
 ```
 
 The first thing we want to do is to create an `output/` folder.  If we want it in the same location, we do:
@@ -40,8 +40,8 @@ $ mkdir output   ## folder where the output files will be saved
 ```
 If we want it to be on a separate drive, we can create it there and then using a symbol link, e.g.
 ```sh
-$ mkdir -p /another/drive/lg3-ex/output
-$ ln -s /another/drive/lg3-ex/output output
+$ mkdir -p /another/drive/lg3-demo/output
+$ ln -s /another/drive/lg3-demo/output output
 ```
 In both cases, there will be a local `./output/` folder that the LG3 pipeline can write to.
 
@@ -51,7 +51,7 @@ The remaining parts of the test setup can be either be created automatically usi
 $ export PATIENT=Patient157t10
 $ lg3 test setup
 *** Setup
-[OK] LG3_HOME: /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3
+[OK] LG3_HOME: /path/to/LG3_Pipeline
 [OK] R packages: 'RColorBrewer'
 [OK] Run scripts: _run_Align_gz
 [OK] Run scripts: _run_Merge
@@ -59,10 +59,13 @@ $ lg3 test setup
 [OK] Run scripts: _run_MutDet
 [OK] Run scripts: _run_Pindel
 [OK] Run scripts: _run_PostMut
+[OK] Run scripts: _run_QC_1
+[OK] Run scripts: _run_QC_2
+[OK] Run scripts: _run_QC_3
 [OK] Run scripts: _run_Recal
 [OK] Run scripts: _run_Recal_pass2
 [OK] Run scripts: _run_Trim
-[OK] EMAIL: henrik.bengtsson@gmail.com
+[OK] EMAIL: alice@example.org
 [OK] PROJECT: LG3
 [OK] PATIENT: Patient157t10 (required for 'lg3 test validate')
 [OK] CONV (patient TSV file): patient_ID_conversions.tsv
@@ -76,18 +79,21 @@ From the above, we should have a directory containing the following files and fo
 ```sh
 $ tree
 .
-├── output -> /another/drive/lg3-ex/output
-├── patient_ID_conversions.tsv -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/patient_ID_conversions.tsv
+├── output -> /another/drive/lg3-demo/output
+├── patient_ID_conversions.tsv -> ~/lg3-demo/runs_demo/patient_ID_conversions.tsv
 ├── rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
-├── _run_Align_gz -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Align_gz
-├── _run_Merge -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Merge
-├── _run_Merge_QC -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Merge_QC
-├── _run_MutDet -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_MutDet
-├── _run_Pindel -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Pindel
-├── _run_PostMut -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_PostMut
-├── _run_Recal -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Recal
-├── _run_Recal_pass2 -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Recal_pass2
-└── _run_Trim -> /home/henrik/repositories/UCSF-CostelloLab/LG3_Pipeline-devel3/runs_demo/_run_Trim
+├── _run_Align_gz -> ~/lg3-demo/runs_demo/_run_Align_gz
+├── _run_Merge -> ~/lg3-demo/runs_demo/_run_Merge
+├── _run_Merge_QC -> ~/lg3-demo/runs_demo/_run_Merge_QC
+├── _run_MutDet -> ~/lg3-demo/runs_demo/_run_MutDet
+├── _run_Pindel -> ~/lg3-demo/runs_demo/_run_Pindel
+├── _run_PostMut -> ~/lg3-demo/runs_demo/_run_PostMut
+├── _run_QC_1 -> ~/lg3-demo/runs_demo/_run_QC_1
+├── _run_QC_2 -> ~/lg3-demo/runs_demo/_run_QC_2
+├── _run_QC_3 -> ~/lg3-demo/runs_demo/_run_QC_3
+├── _run_Recal -> ~/lg3-demo/runs_demo/_run_Recal
+├── _run_Recal_pass2 -> ~/lg3-demo/runs_demo/_run_Recal_pass2
+└── _run_Trim -> ~/lg3-demo/runs_demo/_run_Trim
 
 2 directories, 10 files
 ```
@@ -105,7 +111,7 @@ This can preferably be set in your global `~/.bashrc` script.
 Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
-$ cd /path/to/lg3-ex
+$ cd ~/lg3-demo
 $ module load CBC lg3
 $ export PATIENT=Patient157t10
 $ ./_run_Trim                    ## ~20 minutes
