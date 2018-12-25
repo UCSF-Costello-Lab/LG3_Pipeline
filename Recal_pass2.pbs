@@ -92,7 +92,7 @@ WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
 make_dir "${WDIR2}"
 change_dir "${WDIR2}"
 
-[[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
 { time "${SH_GERMLINE}" \
       "../${NORMAL}.bwa.realigned.rmDups.bam" \

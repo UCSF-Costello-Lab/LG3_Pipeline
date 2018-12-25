@@ -54,7 +54,8 @@ check_use_utils_instead:
 #	@ ! grep -qE "exit [1-9]" bin/lg3*
 	@echo "  - Assert no calls to 'mkdir' or 'cd' (use 'make_dir' and 'change_dir' instead)"
 	@ ! grep -qE "(mkdir|cd) " --exclude="scripts/utils.sh" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh # bin/lg3*
-
+	@echo "  - Assert no [[ -(d|f|x) ... ]] assertions (use 'assert_file_exists', 'assert_directory_exists' etc. instead)"
+	@ ! grep -qE "[[][[] -(d|f|x) .* [|][|] " --exclude="scripts/utils.sh" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh
 
 test:
 	${LG3_HOME}/tests/error.sh
