@@ -72,7 +72,7 @@ PBS=${LG3_HOME}/MutDet_TvsN.pbs
 assert_file_exists "${PBS}"
 
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
-mkdir -p "${WORKDIR}" || error "Can't create scratch directory ${WORKDIR}"
+make_dir "${WORKDIR}"
 WORKDIR=$(readlink -e "${WORKDIR:?}") ## Absolute path
 
 XMX=Xmx8g

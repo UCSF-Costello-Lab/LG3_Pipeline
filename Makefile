@@ -50,8 +50,10 @@ check_hardcoded:
 check_use_utils_instead:
 	@echo "* Coding style"
 	@echo "  - Assert no calls to 'exit' (use 'error' function instead)"
-	@ ! grep -qE "exit [0-9]" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh # bin/lg3*
-#	@ ! grep -qE "exit [0-9]" bin/lg3*
+	@ ! grep -qE "exit [1-9]" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh # bin/lg3*
+#	@ ! grep -qE "exit [1-9]" bin/lg3*
+	@echo "  - Assert no calls to 'mkdir' or 'cd' (use 'make_dir' and 'change_dir' instead)"
+	@ ! grep -qE "(mkdir|cd) " --exclude="scripts/utils.sh" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh # bin/lg3*
 
 
 test:

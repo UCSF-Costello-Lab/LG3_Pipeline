@@ -90,8 +90,8 @@ assert_file_executable "${SH_RUNLOH}"
 
 
 SCRATCH=${LG3_SCRATCH_ROOT}/MutInDel
-mkdir -p "${SCRATCH}" || error "Can't create scratch directory ${SCRATCH}"
-cd "${SCRATCH}" || error "Failed to set working directory to ${SCRATCH}"
+make_dir "${SCRATCH}"
+change_dir "${SCRATCH}"
 
 echo -e "\\n************ Cat all SNV files per patient"
 "${SH_COMBINE_SNVS}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${SH_COMBINE_SNVS} failed"
@@ -126,7 +126,7 @@ echo -e "\\n************ Generate MAF files & LOH plots"
 OK
 
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
-mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+make_dir "${WDIR}"
 
 cp -p ./* "${WDIR}" || error "cp results to ${WDIR}"
 

@@ -33,7 +33,7 @@ if [ $# -ne 3 ]; then
 fi
 
 TMP="${LG3_SCRATCH_ROOT}/$prefix/tmp"
-mkdir -p "$TMP"
+make_dir "$TMP"
 
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64

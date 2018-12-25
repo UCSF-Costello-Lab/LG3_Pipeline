@@ -90,12 +90,12 @@ assert_file_exists "${TARGET}"
 
 ## set up output directory
 WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
-mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
+make_dir "${WDIR}"
 
 ## set up scratch directory
-mkdir -p "${LG3_SCRATCH_ROOT}/${PATIENT}_pindel" || error "Can't create scratch directory ${LG3_SCRATCH_ROOT}/${PATIENT}_pindel"
+make_dir "${LG3_SCRATCH_ROOT}/${PATIENT}_pindel"
 
-cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
+change_dir "${LG3_SCRATCH_ROOT}"
 
 ## setup pindel cfg file
 date
@@ -105,7 +105,7 @@ echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 assert_file_exists "${PATIENT}.pindel.cfg"
 
 ## run pindel
-cd "${PATIENT}_pindel" || error "Failed to set working directory to ${PATIENT}_pindel"
+change_dir "${PATIENT}_pindel"
 echo -e "\\n========= [Pindel] Run pindel"
 
 ${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "${PINDEL} failed"

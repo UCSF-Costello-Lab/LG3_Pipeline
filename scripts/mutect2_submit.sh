@@ -74,7 +74,7 @@ PBS=${LG3_HOME}/Mutect2_TvsN.pbs
 assert_file_exists "${PBS}"
 
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect2
-mkdir -p "${WORKDIR}" || error "Can't create scratch directory ${WORKDIR}"
+make_dir "${WORKDIR}"
 WORKDIR=$(readlink -e "${WORKDIR:?}") ## Absolute path
 
 echo "Patient information inferred from PATIENT and CONV:"

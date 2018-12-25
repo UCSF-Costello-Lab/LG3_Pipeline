@@ -75,8 +75,8 @@ assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
 
 SCRATCH="${LG3_SCRATCH_ROOT}/${PATIENT}_mutect"
-mkdir -p "${SCRATCH}" || error "Can't create scratch directory ${SCRATCH}"
-cd "${SCRATCH}" || error "Failed to set scratch directory to ${SCRATCH}"
+make_dir "${SCRATCH}"
+change_dir "${SCRATCH}"
 
 echo -n "Starting MutDet job on "
 date
@@ -99,7 +99,7 @@ echo "SCRATCH=${SCRATCH}"
   "${INTERVAL}" \
   "$XMX" || error "MutDet failed"
 
-mkdir -p "${WORKDIR}" || error "Can't create output directory ${WORKDIR}"
+make_dir "${WORKDIR}"
 echo "Copy results from ${SCRATCH} to ${WORKDIR}"
 cp -p "${SCRATCH}"/* "${WORKDIR}" || error "Fail to copy results to ${WORKDIR}"
 

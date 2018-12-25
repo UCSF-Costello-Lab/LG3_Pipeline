@@ -48,12 +48,12 @@ assert_patient_name "${PATIENT}"
 assert_file_exists "${ILIST}"
 
 date
-mkdir -p "${LG3_SCRATCH_ROOT}/${SAMPLE}"
-cd "${LG3_SCRATCH_ROOT}/${SAMPLE}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}/${SAMPLE}"
+make_dir "${LG3_SCRATCH_ROOT}/${SAMPLE}"
+change_dir "${LG3_SCRATCH_ROOT}/${SAMPLE}"
 
 "${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$SAMPLE" "${ILIST}"
 
-cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
+change_dir "${LG3_SCRATCH_ROOT}"
 
 cp -a "${LG3_SCRATCH_ROOT}/${SAMPLE}"/* "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}" || error "Failed to copy data from ${LG3_SCRATCH_ROOT}/${SAMPLE}"
 

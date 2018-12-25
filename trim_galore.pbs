@@ -63,14 +63,14 @@ echo "Using node(s): $NODES"
 SH_TRIM_GALORE=${LG3_HOME}/scripts/trim_galore.sh
 assert_file_executable "${SH_TRIM_GALORE}"
 
-mkdir -p "${LG3_OUTPUT_ROOT}" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}"
-mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}"
-mkdir -p "${LG3_OUTPUT_ROOT}/${PROJECT}/trim" || error "Can't create destination directory ${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
+make_dir "${LG3_OUTPUT_ROOT}"
+make_dir "${LG3_OUTPUT_ROOT}/${PROJECT}"
+make_dir "${LG3_OUTPUT_ROOT}/${PROJECT}/trim"
 
 WDIR=${LG3_SCRATCH_ROOT}/${SAMPLE}-trim
 echo "WDIR=${WDIR}"
-mkdir -p "${WDIR}" || error "Can't create scratch directory ${WDIR}"
-cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
+make_dir "${WDIR}"
+change_dir "${WDIR}"
 echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" .
@@ -94,7 +94,7 @@ mv "${SAMPLE}_R2"*_val_2.fq.gz "${SAMPLE_PREFIX}_R2.fastq.gz" || error "Failed t
 mv "${SAMPLE}_R1"*.fastq.gz_trimming_report.txt "${SAMPLE_PREFIX}_R1.trimming_report.txt" || error "Failed to copy ${SAMPLE_PREFIX}_R2.trimming_report.txt"
 mv "${SAMPLE}_R2"*.fastq.gz_trimming_report.txt "${SAMPLE_PREFIX}_R2.trimming_report.txt" || error "Failed to copy ${SAMPLE_PREFIX}_R2.trimming_report.txt"
 
-cd "${OPWD}" || error "Failed to set working directory to ${OPWD}"
+change_dir "${OPWD}"
 echo "Current working directory: ${PWD}"
 
 cp -r -p "${WDIR}" "${LG3_OUTPUT_ROOT}/${PROJECT}/trim"

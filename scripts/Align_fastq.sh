@@ -91,7 +91,7 @@ assert_file_exists "${fastq2}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/$SAMPLE/tmp"
-mkdir -p "${TMP}" || error "Can't create scratch directory ${TMP}"
+make_dir "${TMP}"
 
 echo "-------------------------------------------------"
 echo "[Align] BWA alignment!"
