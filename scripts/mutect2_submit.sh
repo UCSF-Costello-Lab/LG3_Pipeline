@@ -124,7 +124,7 @@ do
         ## Expected output:
         OUT=$WORKDIR/${PATIENT}.NOR-${normid}__${samp_label}-${ID}.annotated.mutations
         if [ -s "$OUT" ]; then
-                echo "WARNING: file $OUT exists, skipping this job ... "
+                warn "File $OUT exists, skipping this job ..."
         else
                 # shellcheck disable=SC2086
                 qsub ${QSUB_OPTS} -N "Mut2_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"

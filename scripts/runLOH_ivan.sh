@@ -40,7 +40,6 @@ OK() {
 PATIENT=$1
 PROJECT=$2
 CONV=$3
-echo "WARNING! Using conversion file $CONV !!!"
 echo "Settings:"
 echo " - PATIENT=${PATIENT:?}"
 echo " - PROJECT=${PROJECT:?}"

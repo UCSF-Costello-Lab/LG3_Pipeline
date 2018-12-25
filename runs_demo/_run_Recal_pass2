@@ -63,10 +63,10 @@ assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 assert_directory_exists "${D}/${PATIENT}"
-[[ -d "$D/${PATIENT}.before.merge" ]] && { echo "WARNING: Directory found: ${D}/${PATIENT}.before.merge"; }
+[[ -d "$D/${PATIENT}.before.merge" ]] && warn "Directory found: ${D}/${PATIENT}.before.merge"
 
 echo "Renaming $D/${PATIENT} to $D/${PATIENT}.before.merge"
-mv "$D/${PATIENT}" "$D/${PATIENT}.before.merge" || { echo "WARNING: No directory $D/${PATIENT}"; }
+mv "$D/${PATIENT}" "$D/${PATIENT}.before.merge" || warn "No directory $D/${PATIENT}"
 
 SUFF=bwa.realigned.rmDups.recal.bam
 

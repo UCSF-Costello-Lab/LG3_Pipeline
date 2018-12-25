@@ -56,6 +56,8 @@ check_use_utils_instead:
 	@ ! grep -qE "(mkdir|cd) " --exclude="scripts/utils.sh" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh # bin/lg3*
 	@echo "  - Assert no [[ -(d|f|x) ... ]] assertions (use 'assert_file_exists', 'assert_directory_exists' etc. instead)"
 	@ ! grep -qE "[[][[] -(d|f|x) .* [|][|] " --exclude="scripts/utils.sh" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh
+	@echo "  - Assert no echo 'ERROR/WARNING' output (use 'error' and 'warn' instead)"
+	@ ! grep -qE '"(ERROR|WARNING)' --exclude="scripts/utils.sh" *.pbs runs_demo/_run_* scripts/*.sh FilterMutations/*.sh
 
 test:
 	${LG3_HOME}/tests/error.sh
