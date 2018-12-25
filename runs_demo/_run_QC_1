@@ -36,7 +36,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- EMAIL=${EMAIL}"
 
 ## Assert that the conversion file exists
-[[ -f "${CONV}" ]] || { echo "ERROR: File not found: ${CONV}"; exit 1; }
+[[ -f "${CONV}" ]] || error "File not found: ${CONV}"
 CONV=$(readlink -e "${CONV}")
 echo "- CONV=${CONV}"
 
@@ -54,7 +54,7 @@ WORKDIR=$(readlink -e "${WORKDIR}")
 change_dir "${WORKDIR}"
 echo "- WORKDIR=${WORKDIR}"
 
-ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || { echo "ERROR: No bam files found in ${BAMPATH}"; exit 1; }
+ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
 
 PBS=${QC_PLOT_HOME}/annotate_mutations_from_bam_vSH.sh
 assert_file_executable "${PBS}"

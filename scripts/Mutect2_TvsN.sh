@@ -92,7 +92,7 @@ echo -e "\\n[Mutect2] Running GATK4::GetSampleName BETA!!! from ${nbamfile} ... 
 	--reference "${REF}" \
 	--input "${nbamfile}" \
 	--output normal_name.txt \
-	-encode; } 2>&1 || { echo "FAILED"; exit 1; } 
+	-encode; } 2>&1 || error "FAILED"
 normalname=$(cat normal_name.txt)
 	
 echo -e "\\n[Mutect2] Running GATK4::GetSampleName BETA!!! from ${tbamfile} ... "
@@ -101,7 +101,7 @@ echo -e "\\n[Mutect2] Running GATK4::GetSampleName BETA!!! from ${tbamfile} ... 
 	--reference "${REF}" \
 	--input "${tbamfile}" \
 	--output tumor_name.txt \
-	-encode; } 2>&1 || { echo "FAILED"; exit 1; } 
+	-encode; } 2>&1 || echo "FAILED"
 tumorname=$(cat tumor_name.txt)
 	
 rm normal_name.txt tumor_name.txt
@@ -145,7 +145,7 @@ if [ ! -e "${out1}" ]; then
             --input "${tbamfile}" \
             --tumor-sample "${tumorname}" \
             --contamination-fraction-to-filter ${CONTF2F} \
-            --output "${out1}"; } 2>&1 || { echo "FAILED"; exit 1; }
+            --output "${out1}"; } 2>&1 || echo "FAILED"
 
 		  assert_file_exists "${out1}"
         echo "Done"
@@ -163,7 +163,7 @@ if [ ! -e "${out2}" ]; then
 			--verbosity "${VERBOSITY}" \
       	--variant "${out1}" \
       	--output "${out2}" \
-      	--reference "${REF}"; } 2>&1 || { echo "FAILED"; exit 1; }
+      	--reference "${REF}"; } 2>&1 || error "FAILED"
 
 	  	assert_file_exists "${out2}"
 		echo "Done"
@@ -181,7 +181,7 @@ if [ ! -e "${out3}" ]; then
       	--data-sources-path "${FUNCO_PATH}" \
       	--ref-version "${HG}" \
       	--transcript-selection-mode CANONICAL \
-         --reference "${REF}"; } 2>&1 || { echo "FAILED"; exit 1; }
+         --reference "${REF}"; } 2>&1 || error "FAILED"
 		
 		assert_file_exists "${out3}"
 		echo "Done"

@@ -58,7 +58,7 @@ echo "- MUTATIONFILE=${MUTATIONFILE}"
 
 assert_directory_exists "${BAMPATH}"
 BAMPATH=$(readlink -e "${BAMPATH}") ## requires absolute path
-ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || { echo "ERROR: No bam files found in ${BAMPATH}"; exit 1; }
+ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
 echo "- BAMPATH=${BAMPATH}"
 
 make_dir "${WORKDIR}"

@@ -74,10 +74,10 @@ echo "Making symlinks ..."
 mk_links() {
   while read -r F
   do
-	 F=$(basename "$F")
+    F=$(basename "$F")
     L=${F/rmDups/rmDups.recal}
     echo "ln -sf $F $L"
-    ln -sf "$F" "$L" || { echo "Link $F --> $L FAILED!"; exit 1; }
+    ln -sf "$F" "$L" || error "Link $F --> $L failed"
   done
 }
 find . -maxdepth 1 -type f -name "*.bwa.realigned.rmDups.*" -not -name "*recal*" | mk_links
