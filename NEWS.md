@@ -2,7 +2,15 @@
 
 ## Version 2018-12-20-9000
 
-* ...
+### NEW FEATURES
+
+* More informative and consistent error messages are provided in more place by
+  making more use of internal utility functions such as 'error', 'warn',
+  'assert_file_exists', 'assert_directory_exists', 'make_dir' and 'change_dir'.
+  
+### BUG FIXES
+
+* Recall_pass2.pbs failed to create symbolic link(s).
 
 
 ## Version 2018-12-20
