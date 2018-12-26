@@ -167,7 +167,6 @@ echo -e "\\n[Mutect2] Running GATK4::CollectSequencingArtifactMetrics ..."
 echo "Generated metrics:"
 ls -s artifact_metrics.*
 
-exit 1
 
 
 
