@@ -156,6 +156,22 @@ fi
 echo -ne "\\n[Mutect2] Found raw somatic mutations: "
 zcat "${out1}" | grep -vc '#' 
 
+
+echo -e "\\n[Mutect2] Running GATK4::CollectSequencingArtifactMetrics ..."
+{ time ${GATK4} --java-options -"${XMX}" CollectSequencingArtifactMetrics \
+	-I "${tbamfile}" \
+	-R "${REF}" \
+	-VALIDATION_STRINGENCY LENIENT \
+	-O artifact_metrics; } 2>&1 || echo "FAILED"
+
+echo "Generated metrics:"
+ls -s artifact_metrics.*
+
+exit 1
+
+
+
+
 #--contamination-table contamination.table \
 if [ ! -e "${out2}" ]; then
 	   echo -e "\\n[GATK4] Running FilterMutectCalls ..."
