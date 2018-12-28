@@ -40,7 +40,6 @@ OK() {
 PATIENT=$1
 PROJECT=$2
 CONV=$3
-echo "WARNING! Using conversion file $CONV !!!"
 echo "Settings:"
 echo " - PATIENT=${PATIENT:?}"
 echo " - PROJECT=${PROJECT:?}"
@@ -59,17 +58,17 @@ assert_file_exists "${PYTHON_RUNMAF}"
 
 
 MAF=${LG3_OUTPUT_ROOT}/${PROJECT:?}/MAF
-mkdir -p "${MAF}" || error "Can't create destination directory ${MAF}"
+make_dir "${MAF}"
 
 WDIR=${MAF}/${PATIENT}_MAF
-mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
-cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
+make_dir "${WDIR}"
+change_dir "${WDIR}"
 
 python "${PYTHON_RUNMAF}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${PYTHON_RUNMAF} failed"
 OK
 
 OUTDIR=${MAF}/${PATIENT}_plots
-mkdir -p "${OUTDIR}" || error "Can't create destination directory ${OUTDIR}"
+make_dir "${OUTDIR}"
 "${RSCRIPT_BIN}" "${R_MAFPLOT}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${R_MAFPLOT} failed"
 OK
 

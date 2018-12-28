@@ -4,10 +4,10 @@
 ### Use Config: ${LG3_HOME}/FilterMutations/mutationConfig.cfg
 ### Use Interval: ${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list 
 ### Output files
-#PBS -e _MutDet_${TUMOR}.err
-#PBS -o _MutDet_${TUMOR}.out
-#PBS -N MutDet
-#PBS -l nodes=1:ppn=4,vmem=64g
+#PBS -e _Mut2_${TUMOR}.err
+#PBS -o _Mut2_${TUMOR}.out
+#PBS -N Mut2
+#PBS -l nodes=1:ppn=1,vmem=200g
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -52,21 +52,21 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- TUMOR=${TUMOR:?}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- TYPE=${TYPE:?}"
-echo "- CONFIG=${CONFIG:?}"
+#echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 echo "- XMX=${XMX:?}"
 echo "- WORKDIR=${WORKDIR:?}"
 assert_patient_name "${PATIENT}"
 BAMDIR=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 assert_directory_exists "${BAMDIR}"
-assert_file_exists "${CONFIG}"
+#assert_file_exists "${CONFIG}"
 assert_file_exists "${INTERVAL}"
-CONFIG=$(readlink -e "${CONFIG:?}") ## Absolute path
+#CONFIG=$(readlink -e "${CONFIG:?}") ## Absolute path
 INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 
 ### Software
-SH_MUTDET=${LG3_HOME}/scripts/MutDet.sh
-assert_file_executable "${SH_MUTDET}"
+SH_MUTECT2=${LG3_HOME}/scripts/Mutect2_TvsN.sh
+assert_file_executable "${SH_MUTECT2}"
 
 BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
 BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
@@ -74,30 +74,29 @@ BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
 assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
 
-SCRATCH="${LG3_SCRATCH_ROOT}/${PATIENT}_mutect"
+SCRATCH="${LG3_SCRATCH_ROOT}/${PATIENT}_mutect2"
 make_dir "${SCRATCH}"
 change_dir "${SCRATCH}"
 
-echo -n "Starting MutDet job on "
+echo -n "Starting Mutect2 job on "
 date
 echo "Patient = $PATIENT"
 echo "Normal = $BAMN"
 echo "Tumor = $BAMT"
 echo "Tum. Type = $TYPE"
-echo "Config = $CONFIG"
+#echo "Config = $CONFIG"
 echo "Interval = $INTERVAL"
 echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
 echo "SCRATCH=${SCRATCH}"
 
-"${SH_MUTDET}" \
+{ time "${SH_MUTECT2}" \
   "$BAMN" \
   "$BAMT" \
   "NOR-${NORMAL}__${TYPE}-${TUMOR}" \
   "${PATIENT}" \
-  "${CONFIG}" \
   "${INTERVAL}" \
-  "$XMX" || error "MutDet failed"
+  "$XMX"; } 2>&1 || error "Mutect2 failed"
 
 make_dir "${WORKDIR}"
 echo "Copy results from ${SCRATCH} to ${WORKDIR}"

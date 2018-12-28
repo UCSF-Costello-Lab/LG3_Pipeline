@@ -52,7 +52,7 @@ prefix=$2
 ilist=$3
 
 TMP="${LG3_SCRATCH_ROOT}/${prefix}_tmp"
-mkdir -p "$TMP"
+make_dir "$TMP"
 
 echo "------------------------------------------------------"
 echo "[Merge] Merge technical replicates"

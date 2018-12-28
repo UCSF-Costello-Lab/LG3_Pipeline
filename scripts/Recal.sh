@@ -91,7 +91,7 @@ assert_file_exists "${ILIST}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"
-mkdir -p "${TMP}" || error "Can't create scratch directory ${TMP}"
+make_dir "${TMP}"
 
 echo "------------------------------------------------------"
 echo "[Recal] Base quality recalibration (bigmem version)"

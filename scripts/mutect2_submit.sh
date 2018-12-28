@@ -16,6 +16,8 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 #LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
+XMX=Xmx160g
+
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -27,6 +29,7 @@ if [[ $LG3_DEBUG ]]; then
  # echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
+  echo "- XMX=$XMX"
 fi
 
 
@@ -57,25 +60,22 @@ if [ $# -ne 3 ]; then
     error "Please specify patient, CONV file and project!"
 fi
 
-## References
-CONFIG=${LG3_HOME}/FilterMutations/mutationConfig.cfg
 INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
-echo "References:"
-echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
-assert_file_exists "${CONFIG}"
 assert_file_exists "${INTERVAL}"
 
+#CONFIG=${LG3_HOME}/FilterMutations/mutationConfig.cfg
+#echo "- CONFIG=${CONFIG:?}"
+#assert_file_exists "${CONFIG}"
+#
 
 ## Software
-PBS=${LG3_HOME}/MutDet_TvsN.pbs
+PBS=${LG3_HOME}/Mutect2_TvsN.pbs
 assert_file_exists "${PBS}"
 
-WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
+WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect2
 make_dir "${WORKDIR}"
 WORKDIR=$(readlink -e "${WORKDIR:?}") ## Absolute path
-
-XMX=Xmx8g
 
 echo "Patient information inferred from PATIENT and CONV:"
 
@@ -127,7 +127,7 @@ do
                 warn "File $OUT exists, skipping this job ..."
         else
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "Mut_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "Mut2_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${PATIENT}.temp.conversions.txt"

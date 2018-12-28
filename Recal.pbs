@@ -68,29 +68,29 @@ SH_GERMLINE=${LG3_HOME}/scripts/Germline.sh
 assert_file_executable "${SH_GERMLINE}"
 
 DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"
+make_dir "${DESTDIR}"
 
 DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
-mkdir -p "${DESTDIR2}" || error "Can't create destination directory ${DESTDIR2}"
+make_dir "${DESTDIR2}"
 
 WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
-mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
-cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
+make_dir "${WDIR}"
+change_dir "${WDIR}"
 
 "${SH_RECAL}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL} failed"
 
-cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
+change_dir "${LG3_SCRATCH_ROOT}"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp 1"
 
 echo "Starting germline analysis ..."
 WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
 
-mkdir -p "${WDIR2}" || error "Can't create destination directory ${WDIR2}"
+make_dir "${WDIR2}"
 
-cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
+change_dir "${WDIR2}"
 
-[[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
 { time "${SH_GERMLINE}" \
       "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \

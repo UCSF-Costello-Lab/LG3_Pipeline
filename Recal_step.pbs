@@ -71,32 +71,32 @@ assert_file_executable "${SCRIPT_A}"
 assert_file_executable "${SCRIPT_B}"
 
 DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-mkdir -p "${DESTDIR}" || error "Can't create destination directory ${DESTDIR}"
+make_dir "${DESTDIR}"
 
 DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
-mkdir -p "${DESTDIR2}" || error "Can't create destination directory ${DESTDIR2}"
+make_dir "${DESTDIR2}"
 
 WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
-mkdir -p "${WDIR}" || error "Can't create destination directory ${WDIR}"
-cd "${WDIR}" || error "Failed to set working directory to ${WDIR}"
+make_dir "${WDIR}"
+change_dir "${WDIR}"
 
 echo "Copying recovered data from ${RECOVER_DIR} ..."
 cp -p "${RECOVER_DIR}/"* . || error "cp!"
 
 "${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" "$START" "$RECOVER_DIR" || error "${SCRIPT_A} failed"
 
-cd "${LG3_SCRATCH_ROOT}" || error "Failed to set working directory to ${LG3_SCRATCH_ROOT}"
+change_dir "${LG3_SCRATCH_ROOT}"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp 1"
 
 echo "Starting germline analysis ..."
 WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline 
 
-mkdir -p "${WDIR2}" || error "Can't create destination directory ${WDIR2}"
+make_dir "${WDIR2}"
 
-cd "${WDIR2}" || error "Failed to set working directory to ${WDIR2}"
+change_dir "${WDIR2}"
 
-[[ -f "../${NORMAL}.bwa.realigned.rmDups.recal.bam" ]] || error "File not found: ../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
 { time "${SCRIPT_B}" \
       "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \

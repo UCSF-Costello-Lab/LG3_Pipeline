@@ -40,7 +40,7 @@ echo "- BEDPATH=${BEDPATH:?}"
 assert_directory_exists "${BAMPATH}"
 BAMPATH=$(readlink -e "${BAMPATH}") 
 echo "- BAMPATH=${BAMPATH}"
-ls -1 "${BAMPATH}/${PATIENT}"/*.bwa.realigned.rmDups.recal.bam || { echo "ERROR: No bam files found in ${BAMPATH}"; exit 1; }
+ls -1 "${BAMPATH}/${PATIENT}"/*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
 
 make_dir "${WORKDIR}"
 WORKDIR=$(readlink -e "${WORKDIR}")
