@@ -1,0 +1,97 @@
+#!/bin/bash
+#### See https://github.com/broadinstitute/gatk/blob/master/scripts/mutect2_wdl/mutect_resources.wdl
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+module load jdk/1.8.0
+module load htslib/1.7
+
+LG3_HOME=/home/jocostello/shared/LG3_Pipeline
+LG3_HOME=${LG3_HOME:?}
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
+GATK4="${LG3_HOME}/tools/gatk-4.0.12.0/gatk"
+assert_file_executable ${GATK4}
+command_mem=100
+
+echo "Input: "
+echo "- LG3_HOME=${LG3_HOME:?}"
+
+#ILIST=${LG3_HOME}/resources/All_exome_targets.extended_200bp.bed
+ILIST=${LG3_HOME}/resources/All_but_chrM_targets.extended_200bp.bed
+echo "- ILIST=${ILIST:?}"
+assert_file_exists "${ILIST}"
+
+MAF=0.001
+echo "- MAF=$MAF"
+
+for CHR in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y
+do
+	echo "************************"
+	echo "* Processing Chrom $CHR  *"
+	echo "************************"
+	#### Fixed chrom names by adding "chr"
+	GNOMAD=/home/GenomeData/gnomAD_hg19/fixed_chr/gnomad.exomes.r2.1.sites.chr${CHR}.vcf.gz
+	assert_file_exists ${GNOMAD}
+	echo "- GNOMAD=${GNOMAD:?}"
+
+
+	echo -e "\\nStep 1: SelectVariants ... "
+	OUT1=chr${CHR}_selected.vcf
+
+	{ time ${GATK4} --java-options "-Xmx${command_mem}g" SelectVariants -V ${GNOMAD} -L ${ILIST} -O ${OUT1} --lenient; } 2>&1 || { echo "FAILED"; exit 1; }
+	
+	echo -n "Output: "
+	wc -l ${OUT1}
+	
+	echo -e "\\nStep 2: MakeAlleleFrequencyOnlyVcf .. "
+	
+	echo -n "Extracting header : "
+	grep '^#' ${OUT1} > chr${CHR}_header
+	wc -l chr${CHR}_header
+	
+	echo -n "Extracting simplified_info : "
+	# Get all lines in the file except the header:
+	# Preserve all fields before INFO, Grab only the AF annotation from the INFO Field
+	# replace ID (3rd) and QUAL (6th) columns with '.' (empty):
+	grep -v "^#" ${OUT1} | sed -e 's#\(.*\)\t\(.*\)\t\(.*\)\t\(.*\)\t\(.*\)\t\(.*\)\t\(.*\)\t.*;AF=\([0-9]*\.[e0-9+-]*\).*#\1\t\2\t.\t\4\t\5\t.\t\7\tAF=\8#g' > chr${CHR}_simplified_body &
+	
+	# Wait for background processes to finish:
+	wait
+	wc -l chr${CHR}_simplified_body
+	rm -f ${OUT1} ${OUT1}.idx
+	
+	echo -n "Consolidate VCF head and body: "
+	OUT2=gnomad4mutect2.chr${CHR}.vcf
+	cat chr${CHR}_header chr${CHR}_simplified_body > ${OUT2}
+	wc -l ${OUT2}
+	
+	rm -f chr${CHR}_header chr${CHR}_simplified_body
+	
+	echo -n "Zip ${OUT2} ... "
+	{ time bgzip -f ${OUT2}; } 2>&1 || { echo "FAILED"; exit 1; }
+	echo "OK"
+	
+	echo -e "\\nStep 2b: IndexFeatureFile ... "
+	{ time ${GATK4} --java-options "-Xmx${command_mem}g" IndexFeatureFile -F ${OUT2}.gz; } 2>&1 || { echo "FAILED"; exit 1; }
+	
+	echo -e "\\nStep 3: SelectCommonBiallelicSNPs ... "
+	echo "Using AF > $MAF"
+	OUT4=mutect2-contamination-var.chr${CHR}.biall.vcf.gz
+	{ time ${GATK4} --java-options "-Xmx${command_mem}g" SelectVariants \
+        	-V ${OUT2}.gz \
+        	-select-type SNP -restrict-alleles-to BIALLELIC \
+        	--selectExpressions "AF > ${MAF}" \
+        	-O ${OUT4} \
+        	--lenient ; } 2>&1 || { echo "FAILED"; exit 1; }
+	
+	echo "Chrom $CHR done! Output:"
+	ls -1 ${OUT4}*
+	
+done
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
