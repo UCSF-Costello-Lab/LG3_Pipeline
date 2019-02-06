@@ -10,7 +10,7 @@ GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
 
 echo -e "\\nRunning GATK4::BwaMemIndexImageCreator on ${REF}"
 { time ${GATK4} BwaMemIndexImageCreator \
-	-I ${REF} \
-	-O ${REF}.img; } 2>&1 || { echo "FAILED"; exit 1; }
+	-I "${REF}" \
+	-O "${REF}.img"; } 2>&1 || { echo "FAILED"; exit 1; }
 echo "Output: "
-ls -s ${REF}.img
+ls -s "${REF}.img"

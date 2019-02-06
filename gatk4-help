@@ -5,10 +5,11 @@ module load jdk/1.8.0 python/2.7.15
 LG3_HOME=${LG3_HOME:?}
 GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
 
-for T in $@
+for T in "$@"
 do
-	${GATK4} $T --help true 2> $T.help
-	wc -l $T.help
-	grep EXPERIMENTAL $T.help
-	grep BETA $T.help
+	OUT="$T.help"
+	${GATK4} "$T" --help true 2> "${OUT}"
+	wc -l "${OUT}"
+	grep EXPERIMENTAL "${OUT}"
+	grep BETA "${OUT}"
 done
