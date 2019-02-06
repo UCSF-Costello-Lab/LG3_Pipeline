@@ -1,0 +1,16 @@
+#!/bin/bash
+### Output image is needed for GATK4::FilterAlignmentArtifacts
+
+module load jdk/1.8.0 python/2.7.15
+
+LG3_HOME=${LG3_HOME:?}
+REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
+
+GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
+
+echo -e "\\nRunning GATK4::BwaMemIndexImageCreator on ${REF}"
+{ time ${GATK4} BwaMemIndexImageCreator \
+	-I ${REF} \
+	-O ${REF}.img; } 2>&1 || { echo "FAILED"; exit 1; }
+echo "Output: "
+ls -s ${REF}.img
