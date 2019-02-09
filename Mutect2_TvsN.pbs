@@ -96,7 +96,8 @@ echo "SCRATCH=${SCRATCH}"
   "NOR-${NORMAL}__${TYPE}-${TUMOR}" \
   "${PATIENT}" \
   "${INTERVAL}" \
-  "$XMX"; } 2>&1 || error "Mutect2 failed"
+  "${XMX}" \
+  "${WORKDIR}"; } 2>&1 || error "Mutect2 failed"
 
 make_dir "${WORKDIR}"
 echo "Copy results from ${SCRATCH} to ${WORKDIR}"
