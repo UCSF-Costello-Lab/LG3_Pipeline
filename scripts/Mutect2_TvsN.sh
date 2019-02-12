@@ -50,7 +50,7 @@ patientID=$4
 ILIST=$5
 XMX=$6
 DEST=$7 ## Destination directory
-assert_directory_exists ${DEST}
+assert_directory_exists "${DEST}"
 XMX=${XMX:-Xmx160gb} ## Default 160gb
 PADDING=${PADDING:-0} ## Padding the intervals
 
