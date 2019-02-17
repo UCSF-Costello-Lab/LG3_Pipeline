@@ -55,6 +55,7 @@ XMX=${XMX:-Xmx160gb} ## Default 160gb
 PADDING=${PADDING:-0} ## Padding the intervals
 
 HG=hg19
+### Somatic data source for Funcotator
 FUNCO_PATH=/home/GenomeData/GATK_bundle/funcotator/funcotator_dataSources.v1.6.20190124s
 assert_directory_exists ${FUNCO_PATH}
 
@@ -107,7 +108,8 @@ if ${bAA}; then
 	assert_file_exists "${IMG}"
 fi
 
-GNOMAD=/home/GenomeData/gnomAD_hg19/mutect2/gnomad4mutect2.vcf.gz
+GNOMAD=/home/GenomeData/GATK_bundle/Mutect2/af-only-gnomad.raw.sites.hg19.vcf.gz
+#GNOMAD=/home/GenomeData/gnomAD_hg19/mutect2/gnomad4mutect2.vcf.gz
 [[ -z "${GNOMAD}" ]] || {
 	echo "- GNOMAD AF =${GNOMAD}"
 	assert_file_exists "${GNOMAD}"
@@ -244,7 +246,7 @@ else
         echo -e "\\n[Mutect2] Found MuTect2 output ${OUT}, skipping ..."
 fi
 
-echo -ne "\\n[Mutect2] Raw somatic mutations in ${OUT}: "
+echo -ne "\\n[Mutect2] Found raw somatic mutations in ${OUT}: "
 zcat "${OUT}" | grep -vc '^#' 
 IN=${OUT}
 
@@ -376,7 +378,7 @@ if ${bOB}; then
 	zcat "${OUT}" | grep -v '^#' | grep -wc PASS
 	IN=${OUT}
 else
-	echo -e "\\n [Mutect2] OB filter is NOT requested. Skipping ... "
+	echo -e "\\n[Mutect2] OB filter is NOT requested. Skipping ... "
 fi
 
 
@@ -413,7 +415,7 @@ fi
 
 if ${bFUNC}; then
 	OUT=$(add2fname "${OUT}" func)
-	echo -e "\\nFuncotator annotations requested ..."
+	echo -e "\\n[Mutect2] Funcotator annotations requested ..."
 	### A GATK functional annotation tool.
 	if [ ! -e "${OUT}" ]; then
       echo -e "\\n[Mutect2] Running Funcotator ..."
