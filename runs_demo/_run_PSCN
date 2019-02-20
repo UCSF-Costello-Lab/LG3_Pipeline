@@ -1,0 +1,86 @@
+#!/bin/bash
+rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }
+
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:?}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+
+PSCN_HOME=${PSCN_HOME:-Costello-PSCN-Seq}
+rm_if_link "${PSCN_HOME}/seqzData" 
+rm_if_link "${PSCN_HOME}/pscbsData" 
+rm_if_link "${PSCN_HOME}/reports"
+
+EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
+CONV=${CONV:-patient_ID_conversions.tsv}
+PATIENT=${PATIENT:-Patient157t10}
+BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+SEQUENZA_OUT=${LG3_INPUT_ROOT}/${PROJECT}/sequenza/${PATIENT}
+make_dir "${SEQUENZA_OUT}"
+PSCBS_OUT=${LG3_INPUT_ROOT}/${PROJECT}/PSCBS/${PATIENT}
+make_dir "${PSCBS_OUT}"
+PSCN_OUT=${LG3_INPUT_ROOT}/${PROJECT}/PSCN/${PATIENT}
+make_dir "${PSCN_OUT}"
+
+## Requires absolute path
+LG3_HOME=$(readlink -e "${LG3_HOME}")
+BAMPATH=$(readlink -e "${BAMPATH}")
+SEQUENZA_OUT=$(readlink -e "${SEQUENZA_OUT}")
+LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}")
+PSCN_HOME=$(readlink -e "${PSCN_HOME}")
+PSCBS_OUT=$(readlink -e "${PSCBS_OUT}")
+PSCN_OUT=$(readlink -e "${PSCN_OUT}")
+
+echo "Input: "
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- PSCN_HOME=${PSCN_HOME:?}"
+echo "- SEQUENZA_OUT=${SEQUENZA_OUT:?}"
+echo "- PSCBS_OUT=${PSCBS_OUT:?}"
+echo "- PSCN_OUT=${PSCN_OUT:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- EMAIL=${EMAIL}"
+
+## Assert that the conversion file exists
+[[ -f "${CONV}" ]] || { echo "ERROR: File not found: ${CONV}"; exit 1; }
+CONV=$(readlink -e "${CONV}")
+echo "- CONV=${CONV}"
+
+ls -1 "${BAMPATH}/"*.bwa.realigned.rmDups.recal.bam || { echo "ERROR: No bam files found in ${BAMPATH}"; exit 1; }
+
+
+change_dir "${PSCN_HOME}"
+
+module load r/3.4.4
+Rscript 0.setup.R
+
+echo "Creating samples.tsv"
+echo -e "Patient_ID\\tSample_ID\\tSF\\tKit\\tA0" > sampleData/samples.tsv
+grep -P "\\t${PATIENT}\\t" "${CONV}" | awk -v OFS="\\t" '{print $3,$4,$2,"Nimblegen SeqCap EZ Exome v3",$1}' >> sampleData/samples.tsv
+
+cat sampleData/samples.tsv
+echo "Total samples: "
+wc -l sampleData/samples.tsv
+
+rmdir seqzData
+ln -sf "${SEQUENZA_OUT}" seqzData || { echo "ERROR: failed to create a link to ${SEQUENZA_OUT}"; exit 1; }
+
+ln -sf "${PSCBS_OUT}" pscbsData || { echo "ERROR: failed to create a link to ${PSCBS_OUT}"; exit 1; }
+
+ln -sf "${PSCN_OUT}" reports || { echo "ERROR: failed to create a link to ${PSCN_OUT}"; exit 1; }
+
+qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae "${LG3_HOME}/PSCN.submit_all.pbs"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
