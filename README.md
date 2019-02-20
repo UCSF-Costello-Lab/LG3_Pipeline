@@ -121,6 +121,25 @@ $ ./_run_Pindel && ./_run_MutDet ## ~1.5 hours & ~4 hours
 $ ./_run_PostMut                 ## ~5 minutes
 ```
 
+Optionally we can run exomeQualityPlots pipeline developped by Stephanie Hilz (UCSF).
+The pipeline generates quality plots of exome libraries and quality stats for mutation calling.
+First we need to clone original exomeQualityPlots pipeline somewhere, e.g.:
+``` sh
+$ mkdir -p ~/pipelines/exomeQualityPlots 
+$ cd ~/pipelines/exomeQualityPlots 
+$ git clone git@github.com:SRHilz/exomeQualityPlots.git
+$ cd ${LG3_HOME}
+$ ln -s ~/pipelines/exomeQualityPlots exomeQualityPlots
+```
+
+Now we are ready to roll:
+
+``` sh
+$ _run_QC_1 && _run_QC_2
+$ _run_QC_3
+```
+
+
 _Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_MutDet`, which can be ran in parallel (as soon as `_run_Recal` has finished).
 
 _Tip:_ Each step of the pipeline is submitted to the Torque/PBS scheduler requesting a default number of cores (`nodes=1:ppn=...`) and amount of memory (`vmem=...`).  For now, you need to follow the source code to see what these defaults are.  You can override the defaults via environment variable `QSUB_OPTS`, e.g.
