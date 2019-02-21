@@ -138,12 +138,12 @@ $ ./_run_QC_1 && ./_run_QC_2
 $ ./_run_QC_3
 ```
 
-Another option is to run Costello-PSCN-Seq pipeline, which is a Stephanie Hilz fork from the original Costello-PSCN-Seq pipeline created by Henrik Bengtsson. The pipline implements Parent-specific copy number (PSCN) analysis on paired tumor-normal samples.
+Another option is to run Costello-PSCN-Seq pipeline created by Henrik Bengtsson. The pipline implements Parent-specific copy number (PSCN) analysis on paired tumor-normal samples.
 First we need to clone Costello-PSCN-Seq pipeline somewhere, e.g.:
 ``` sh
 $ mkdir -p ~/pipelines/Costello-PSCN-Seq
 $ cd ~/pipelines/Costello-PSCN-Seq
-$ git clone git@github.com:SRHilz/Costello-PSCN-Seq.git
+$ git clone git@github.com:HenrikBengtsson/Costello-PSCN-Seq.git
 $ cd ${LG3_HOME}
 $ ln -s ~/pipelines/Costello-PSCN-Seq Costello-PSCN-Seq
 ```
