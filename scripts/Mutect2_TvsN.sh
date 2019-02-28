@@ -55,9 +55,6 @@ XMX=${XMX:-Xmx160gb} ## Default 160gb
 PADDING=${PADDING:-0} ## Padding the intervals
 
 HG=hg19
-### Somatic data source for Funcotator
-FUNCO_PATH=/home/GenomeData/GATK_bundle/funcotator/funcotator_dataSources.v1.6.20190124s
-assert_directory_exists ${FUNCO_PATH}
 
 bOBMM=true
 bCC=true
@@ -80,7 +77,6 @@ echo "- ILIST=${ILIST:?}"
 echo "- PADDING=${PADDING:?}"
 echo "- XMX=${XMX:?}"
 echo "- HG=${HG:?}"
-echo "- FUNCO_PATH=${FUNCO_PATH:?}"
 
 ## Assert existance of input files
 assert_file_exists "${nbamfile}"
@@ -99,13 +95,18 @@ java -version
 
 ### References
 REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
-echo "- reference=${REF}"
 assert_file_exists "${REF}"
+echo "- reference=${REF}"
+
+### Somatic data source for Funcotator
+FUNCO_PATH=/home/GenomeData/GATK_bundle/funcotator/funcotator_dataSources.v1.6.20190124s
+assert_directory_exists ${FUNCO_PATH}
+echo "- FUNCO_PATH=${FUNCO_PATH:?}"
 
 if ${bAA}; then
 	IMG="${REF}.img"
-	echo "- BWA image =${IMG}"
 	assert_file_exists "${IMG}"
+	echo "- BWA image =${IMG}"
 fi
 
 GNOMAD=/home/GenomeData/GATK_bundle/Mutect2/af-only-gnomad.raw.sites.hg19.vcf.gz
@@ -236,14 +237,21 @@ if [ ! -e "${DEST}/${OUT}" ]; then
 				--af-of-alleles-not-in-resource "${af_of_alleles_not_in_resource}" \
 				--contamination-fraction-to-filter ${CONTF2F} \
             --output "${OUT}"; } 2>&1 || error "FAILED"
-
-		  assert_file_exists "${OUT}"
-		if ${bAA}; then
-			assert_file_exists "${tumorname}".bamout.bam
-		fi
         echo "Done"
 else
-        echo -e "\\n[Mutect2] Found MuTect2 output ${OUT}, skipping ..."
+      echo -e "\\n[Mutect2] Found MuTect2 output ${OUT}, downloading ..."
+		cp -p "${DEST}/${OUT}" .
+		cp -p "${DEST}/${OUT}.tbi" .
+		if ${bAA}; then
+			cp -p "${DEST}/${tumorname}.bamout.bam" .
+			cp -p "${DEST}/${tumorname}.bamout.bai" .	
+		fi
+fi
+assert_file_exists "${OUT}"
+assert_file_exists "${OUT}".tbi
+if ${bAA}; then
+	assert_file_exists "${tumorname}".bamout.bam
+	assert_file_exists "${tumorname}".bamout.bai
 fi
 
 echo -ne "\\n[Mutect2] Found raw somatic mutations in ${OUT}: "
@@ -289,16 +297,17 @@ if ${bCC}; then
 		--matched-normal "${tumorname}-normal_pileups.table"; } 2>&1 || error "FAILED" 
 	
 	echo "[Mutect2] Generated contamination and segments tables:"
+	assert_file_exists "${tumorname}-contamination.table"
+	assert_file_exists "${tumorname}-segments.table"
+
 	wc -l "${tumorname}-contamination.table"
 	cat "${tumorname}-contamination.table"
 	wc -l "${tumorname}-segments.table"
 	
-	assert_file_exists "${tumorname}-contamination.table"
-	assert_file_exists "${tumorname}-segments.table"
-
 	XARG_contamination=(--contamination-table "${tumorname}-contamination.table" --tumor-segmentation "${tumorname}-segments.table")
 else
 	echo -e "\\n\\n[Mutect2] Calculate Contamination is NOT requested. Skipping ..."	
+	XARG_contamination=()
 fi
 
 ### Filter somatic SNVs and indels called by Mutect2
@@ -311,17 +320,18 @@ if [ ! -e "${DEST}/${OUT}" ]; then
 			--verbosity "${VERBOSITY}" \
       	--variant "${IN}" \
       	--output "${OUT}" \
+			--stats "${tumorname}-M2FilteringStats.tsv" \
       	--reference "${REF}"; } 2>&1 || error "FAILED"
-
-	  	assert_file_exists "${OUT}"
 		echo "Done"
 else
-	echo -e "\\n[Mutect2] Found FilterMutectCalls output ${OUT}, skipping ..."
+	echo -e "\\n[Mutect2] Found FilterMutectCalls output ${OUT}, downloading ..."
+	cp -p "${DEST}/${OUT}" .
 fi
+assert_file_exists "${OUT}"
 
 echo -n "[Mutect2] Total mutations in ${OUT}: "
 zcat "${OUT}" | grep -vc '^#'
-echo -n "[Mutect2]PASSed FilterMutectCalls: "
+echo -n "[Mutect2] PASSed FilterMutectCalls: "
 zcat "${OUT}" | grep -v '^#' | grep -wc PASS 
 IN=${OUT}
 
@@ -354,7 +364,7 @@ if ${bOB}; then
 	### Filter Mutect2 somatic variant calls using the OB Filter.
 	### GATK implementation of D-ToxoG with modifications to allow 
 	### multiple artifact modes
-	### Not recommended Use OB MM filter instead
+	### Not recommended! Use OB MM filter instead
 	### https://software.broadinstitute.org/cancer/cga/dtoxog
 	### Used for the OxoG (G/T) and Deamination (FFPE) (C/T) artifacts .
 	# -AM ${sep=" -AM " final_artifact_modes} \
@@ -366,12 +376,13 @@ if ${bOB}; then
 				--artifact-modes 'G/T' \
 				-P "${pre_adapter_metrics}" \
 				-O "${OUT}"; } 2>&1 || error "FAILED" 
-	
-			assert_file_exists "${OUT}"
       	echo "Done"
 	else
-   	echo -e "\\n[Mutect2] Found FilterByOrientationBias output ${OUT}, skipping ..."
+   	echo -e "\\n[Mutect2] Found FilterByOrientationBias output ${OUT}, downloading ..."
+		cp -p "${DEST}/${OUT}" .
 	fi
+	assert_file_exists "${OUT}"
+
 	echo -n "[Mutect2] Total mutations in ${OUT}: "
 	zcat "${OUT}" | grep -vc '^#'
 	echo -n "[Mutect2] PASSed FilterByOrientationBias: "
@@ -398,15 +409,18 @@ if ${bAA}; then
 			--output "${OUT}" \
       	--reference "${REF}"; } 2>&1 || error "FAILED"
 	
-      	assert_file_exists "${OUT}"
       	echo "Done"
 	else
-		echo -e "\\n[Mutect2] Found FilterAlignmentArtifacts output ${OUT}, skipping ..."
+		echo -e "\\n[Mutect2] Found FilterAlignmentArtifacts output ${OUT}, downloading ..."
+		cp -p "${DEST}/${OUT}" .
+		cp -p "${DEST}/${OUT}".tbi .
 	fi
+
+   assert_file_exists "${OUT}"
 	
-	echo -n "Total mutations in ${OUT}: "
+	echo -ne "\\n[Mutect2] Total mutations in ${OUT}: "
 	zcat "${OUT}" | grep -vc '^#'
-	echo -n "PASSed FilterAlignmentArtifacts: "
+	echo -ne "\\n[Mutect2] PASSed FilterAlignmentArtifacts: "
 	zcat "${OUT}" | grep -v '^#' | grep -wc PASS
 	IN=${OUT}
 else
@@ -416,11 +430,12 @@ fi
 if ${bFUNC}; then
 	OUT=$(add2fname "${OUT}" func)
 	echo -e "\\n[Mutect2] Funcotator annotations requested ..."
+			#--verbosity "${VERBOSITY}" \
 	### A GATK functional annotation tool.
-	if [ ! -e "${OUT}" ]; then
+	if [ ! -e "${DEST}/${OUT}" ]; then
       echo -e "\\n[Mutect2] Running Funcotator ..."
       { time ${GATK4} Funcotator "${extra_args[@]}" \
-			--verbosity "${VERBOSITY}" \
+			--verbosity DEBUG \
          --variant "${IN}" \
          --output "${OUT}" \
       	--output-file-format VCF \
@@ -428,18 +443,16 @@ if ${bFUNC}; then
       	--ref-version "${HG}" \
       	--transcript-selection-mode CANONICAL \
          --reference "${REF}"; } 2>&1 || error "FAILED"
-		
-		echo "Output"
-		ls -s "${OUT}"
-		assert_file_exists "${OUT}"
 		echo "Done"
 	else
-   	echo -e "\\n[Mutect2] Found Funcotator output ${OUT}, skipping ..."
+   	echo -e "\\n[Mutect2] Found Funcotator output ${OUT}, downloading ..."
+		cp -p "${DEST}/${OUT}" .
 	fi
+	assert_file_exists "${OUT}"
 
    echo -n "[Mutect2] Total mutations in ${OUT}: "
    zcat "${OUT}" | grep -vc '^#'
-   echo -n "PASSed all filters: "
+   echo -n "[Mutect2] PASSed all filters: "
    zcat "${OUT}" | grep -v '^#' | grep -wc PASS
    IN=${OUT}
 else
@@ -456,9 +469,9 @@ zcat "${IN}" | grep -v '^#' | grep -w PASS | bgzip >> "${OUT}"
 echo -e "\\n[Mutect2] Indexing ${OUT} ..."
 tabix -p vcf "${OUT}" || error "FAILED"
 
-echo -n "Total mutations in ${OUT}: "
+echo -n "[Mutect2] Total mutations in ${OUT}: "
 zcat "${OUT}" | grep -vc '^#'
-echo -n "PASSed all filters: "
+echo -n "[Mutect2] PASSed all filters: "
 zcat "${OUT}" | grep -v '^#' | grep -wc PASS
 
 echo "-------------------------------------------------"
