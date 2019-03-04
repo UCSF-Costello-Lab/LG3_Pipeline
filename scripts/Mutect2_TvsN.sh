@@ -88,6 +88,7 @@ module load jdk/1.8.0 python/2.7.15 htslib/1.7
 
 GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
 assert_file_executable "${GATK4}"
+assert_file_executable "${LG3_HOME}"/gatk4-funcotator-vcf2tsv
 
 echo "Software:"
 python --version
@@ -442,11 +443,12 @@ if ${bFUNC}; then
       	--data-sources-path "${FUNCO_PATH}" \
       	--ref-version "${HG}" \
       	--transcript-selection-mode CANONICAL \
-         --reference "${REF}"; } 2>&1 || error "FAILED"
+         --reference "${REF}"; } 2>&1 || warn "FAILED"
 		echo "Done"
 	else
    	echo -e "\\n[Mutect2] Found Funcotator output ${OUT}, downloading ..."
 		cp -p "${DEST}/${OUT}" .
+		cp -p "${DEST}/${OUT}".tbi .
 	fi
 	assert_file_exists "${OUT}"
 
@@ -473,6 +475,9 @@ echo -n "[Mutect2] Total mutations in ${OUT}: "
 zcat "${OUT}" | grep -vc '^#'
 echo -n "[Mutect2] PASSed all filters: "
 zcat "${OUT}" | grep -v '^#' | grep -wc PASS
+
+echo "[Mutect2] Extracting selected Funcotator annotations in .tsv format"
+"${LG3_HOME}"/gatk4-funcotator-vcf2tsv "${OUT}"
 
 echo "-------------------------------------------------"
 
