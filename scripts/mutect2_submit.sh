@@ -64,11 +64,6 @@ INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 echo "- INTERVAL=${INTERVAL:?}"
 assert_file_exists "${INTERVAL}"
 
-#CONFIG=${LG3_HOME}/FilterMutations/mutationConfig.cfg
-#echo "- CONFIG=${CONFIG:?}"
-#assert_file_exists "${CONFIG}"
-#
-
 ## Software
 PBS=${LG3_HOME}/Mutect2_TvsN.pbs
 assert_file_exists "${PBS}"
