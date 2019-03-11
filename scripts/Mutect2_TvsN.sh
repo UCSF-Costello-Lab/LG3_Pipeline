@@ -59,13 +59,13 @@ HG=hg19
 bOBMM=true
 bCC=true
 bOB=false
-bAA=false
+bAA=true
 bFUNC=true
 echo "Flow control:"
 echo "- use OBMM filter=${bOBMM:true}"
 echo "- calc contamination=${bCC:true}"
 echo "- use OB filter=${bOB:false}"
-echo "- use AA filter=${bAA:false}"
+echo "- use AA filter=${bAA:true}"
 echo "- use Funcotator=${bFUNC:true}"
 
 echo "Input:"
@@ -440,7 +440,7 @@ if ${bFUNC}; then
 	if [ ! -e "${DEST}/${OUT}" ]; then
       echo -e "\\n[Mutect2] Running Funcotator ..."
       { time ${GATK4} Funcotator "${extra_args[@]}" \
-			--verbosity DEBUG \
+			--verbosity ERROR \
          --variant "${IN}" \
          --output "${OUT}" \
       	--output-file-format VCF \
