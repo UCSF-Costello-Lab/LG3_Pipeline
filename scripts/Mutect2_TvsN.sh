@@ -2,6 +2,8 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME}/scripts/utils.sh"
+assert_file_exists "${LG3_HOME}/lg3.conf"
+source "${LG3_HOME}/lg3.conf"
 
 add2fname() {
 	if [ $# -ne 2 ]; then
@@ -47,26 +49,26 @@ nbamfile=$1
 tbamfile=$2
 prefix=$3
 patientID=$4
-ILIST=$5
+ILIST=${INTERVAL:?}
 XMX=$6
 DEST=$7 ## Destination directory
 assert_directory_exists "${DEST}"
-XMX=${XMX:-Xmx160gb} ## Default 160gb
+XMX=${XMX:-Xmx160G} ## Default 160gb
 PADDING=${PADDING:-0} ## Padding the intervals
 
 HG=hg19
 
-bOBMM=true
-bCC=true
-bOB=false
-bAA=true
-bFUNC=true
+bOBMM=${bOBMM:-true}
+bCC=${bCC:-true}
+bOB=${bOB:-false}
+bAA=${bAA:-false}
+bFUNC=${bFUNC:-true}
 echo "Flow control:"
-echo "- use OBMM filter=${bOBMM:true}"
-echo "- calc contamination=${bCC:true}"
-echo "- use OB filter=${bOB:false}"
-echo "- use AA filter=${bAA:true}"
-echo "- use Funcotator=${bFUNC:true}"
+echo "- use OBMM filter=${bOBMM:?}"
+echo "- calc contamination=${bCC:?}"
+echo "- use OB filter=${bOB:?}"
+echo "- use AA filter=${bAA:?}"
+echo "- use Funcotator=${bFUNC:?}"
 
 echo "Input:"
 echo "- nbamfile=${nbamfile:?}"
@@ -86,8 +88,8 @@ assert_file_exists "${ILIST}"
 ### Software
 module load jdk/1.8.0 python/2.7.15 htslib/1.7
 
-GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
-assert_file_executable "${GATK4}"
+#GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
+assert_file_executable "${GATK4:?}"
 assert_file_executable "${LG3_HOME}"/gatk4-funcotator-vcf2tsv
 
 echo "Software:"
@@ -95,14 +97,14 @@ python --version
 java -version
 
 ### References
-REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
-assert_file_exists "${REF}"
+#REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
+assert_file_exists "${REF:?}"
 echo "- reference=${REF}"
 
 ### Somatic data source for Funcotator
-FUNCO_PATH=/home/GenomeData/GATK_bundle/funcotator/funcotator_dataSources.v1.6.20190124s
-assert_directory_exists ${FUNCO_PATH}
-echo "- FUNCO_PATH=${FUNCO_PATH:?}"
+#FUNCO_PATH=/home/GenomeData/GATK_bundle/funcotator/funcotator_dataSources.v1.6.20190124s
+assert_directory_exists "${FUNCO_PATH:?}"
+echo "- FUNCO_PATH=${FUNCO_PATH}"
 
 if ${bAA}; then
 	IMG="${REF}.img"
@@ -110,7 +112,7 @@ if ${bAA}; then
 	echo "- BWA image =${IMG}"
 fi
 
-GNOMAD=/home/GenomeData/GATK_bundle/Mutect2/af-only-gnomad.raw.sites.hg19.vcf.gz
+#GNOMAD=/home/GenomeData/GATK_bundle/Mutect2/af-only-gnomad.raw.sites.hg19.vcf.gz
 #GNOMAD=/home/GenomeData/gnomAD_hg19/mutect2/gnomad4mutect2.vcf.gz
 ### Population allele fraction assigned to alleles not found in germline resource.
 ### See docs/mutect/mutect2.pdf for derivation of default value.
@@ -122,12 +124,12 @@ GNOMAD=/home/GenomeData/GATK_bundle/Mutect2/af-only-gnomad.raw.sites.hg19.vcf.gz
 	echo "- GNOMAD AF =${GNOMAD}"
 	assert_file_exists "${GNOMAD}"
 	assert_file_exists "${GNOMAD}.tbi"
-	af_of_alleles_not_in_resource=0.000004
-	echo "- af-of-alleles-not-in-resource=${af_of_alleles_not_in_resource}"
+	#af_of_alleles_not_in_resource=0.000004
+	echo "- af-of-alleles-not-in-resource=${af_of_alleles_not_in_resource:?}"
 	XARG_gnomAD=(--germline-resource "${GNOMAD}" --af-of-alleles-not-in-resource "${af_of_alleles_not_in_resource}")
 }
 
-GNOMAD2=/home/GenomeData/gnomAD_hg19/mutect2/mutect2-contamination-var.biall.vcf.gz
+#GNOMAD2=/home/GenomeData/gnomAD_hg19/mutect2/mutect2-contamination-var.biall.vcf.gz
 if ${bCC}; then
 	echo "- GNOMAD for contamination =${GNOMAD2:?}"
 	assert_file_exists "${GNOMAD2}"

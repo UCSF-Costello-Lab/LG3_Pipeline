@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+assert_file_exists "${LG3_HOME}/lg3.conf"
+source "${LG3_HOME}/lg3.conf"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -60,7 +62,7 @@ if [ $# -ne 3 ]; then
     error "Please specify patient, CONV file and project!"
 fi
 
-INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
+#INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 echo "- INTERVAL=${INTERVAL:?}"
 assert_file_exists "${INTERVAL}"
 
