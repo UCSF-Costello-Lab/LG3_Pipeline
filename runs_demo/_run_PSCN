@@ -55,7 +55,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- EMAIL=${EMAIL}"
 
 ## Assert that the conversion file exists
-[[ -f "${CONV}" ]] || error "File not found: ${CONV}"
+assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV}")
 echo "- CONV=${CONV}"
 
