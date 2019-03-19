@@ -2,7 +2,10 @@
 #PBS -N 1-4.all
 #PBS -j oe
 
-cd "$PBS_O_WORKDIR" || { echo "ERROR: Can't $PBS_O_WORKDIR"; exit 1; }
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME}/scripts/utils.sh"
+
+change_dir "$PBS_O_WORKDIR"
 echo "PBS_O_WORKDIR=$PBS_O_WORKDIR"
 
 jid=$(qsub -d "$PBS_O_WORKDIR" -M "${EMAIL}" -m ae                          1.mpileup.pbs)

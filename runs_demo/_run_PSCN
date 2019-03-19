@@ -1,9 +1,10 @@
 #!/bin/bash
-rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }
-
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME}/scripts/utils.sh"
+
+rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }
+
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -54,11 +55,11 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- EMAIL=${EMAIL}"
 
 ## Assert that the conversion file exists
-[[ -f "${CONV}" ]] || { echo "ERROR: File not found: ${CONV}"; exit 1; }
+[[ -f "${CONV}" ]] || error "File not found: ${CONV}"
 CONV=$(readlink -e "${CONV}")
 echo "- CONV=${CONV}"
 
-ls -1 "${BAMPATH}/"*.bwa.realigned.rmDups.recal.bam || { echo "ERROR: No bam files found in ${BAMPATH}"; exit 1; }
+ls -1 "${BAMPATH}/"*.bwa.realigned.rmDups.recal.bam || error "ERROR: No bam files found in ${BAMPATH}"
 
 
 change_dir "${PSCN_HOME}"
@@ -75,11 +76,11 @@ echo "Total samples: "
 wc -l sampleData/samples.tsv
 
 rmdir seqzData
-ln -sf "${SEQUENZA_OUT}" seqzData || { echo "ERROR: failed to create a link to ${SEQUENZA_OUT}"; exit 1; }
+ln -sf "${SEQUENZA_OUT}" seqzData || error "ERROR: failed to create a link to ${SEQUENZA_OUT}"
 
-ln -sf "${PSCBS_OUT}" pscbsData || { echo "ERROR: failed to create a link to ${PSCBS_OUT}"; exit 1; }
+ln -sf "${PSCBS_OUT}" pscbsData || error "ERROR: failed to create a link to ${PSCBS_OUT}"
 
-ln -sf "${PSCN_OUT}" reports || { echo "ERROR: failed to create a link to ${PSCN_OUT}"; exit 1; }
+ln -sf "${PSCN_OUT}" reports || error "ERROR: failed to create a link to ${PSCN_OUT}"
 
 qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae "${LG3_HOME}/PSCN.submit_all.pbs"
 
