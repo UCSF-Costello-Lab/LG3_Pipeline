@@ -12,6 +12,8 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME}/scripts/utils.sh"
+assert_file_exists "${LG3_HOME}/lg3.conf"
+source "${LG3_HOME}/lg3.conf"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -52,6 +54,7 @@ echo "- PATIENT=${PATIENT:?}"
 echo "- TUMOR=${TUMOR:?}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- TYPE=${TYPE:?}"
+echo "- RECAL_BAM_EXT=${RECAL_BAM_EXT:?}"
 #echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 echo "- XMX=${XMX:?}"
@@ -68,8 +71,8 @@ INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 SH_MUTECT2=${LG3_HOME}/scripts/Mutect2_TvsN.sh
 assert_file_executable "${SH_MUTECT2}"
 
-BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
-BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
+BAMN=$BAMDIR/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}
+BAMT=$BAMDIR/${PATIENT}/${TUMOR}.${RECAL_BAM_EXT}
 
 assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
