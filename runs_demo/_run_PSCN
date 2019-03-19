@@ -59,7 +59,7 @@ assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV}")
 echo "- CONV=${CONV}"
 
-ls -1 "${BAMPATH}/"*.bwa.realigned.rmDups.recal.bam || error "ERROR: No bam files found in ${BAMPATH}"
+ls -1 "${BAMPATH}/"*.bwa.realigned.rmDups.recal.bam || error "No BAM files found in ${BAMPATH}"
 
 
 change_dir "${PSCN_HOME}"
@@ -76,11 +76,11 @@ echo "Total samples: "
 wc -l sampleData/samples.tsv
 
 rmdir seqzData
-ln -sf "${SEQUENZA_OUT}" seqzData || error "ERROR: failed to create a link to ${SEQUENZA_OUT}"
+ln -sf "${SEQUENZA_OUT}" seqzData || error "Failed to create a link to ${SEQUENZA_OUT}"
 
-ln -sf "${PSCBS_OUT}" pscbsData || error "ERROR: failed to create a link to ${PSCBS_OUT}"
+ln -sf "${PSCBS_OUT}" pscbsData || error "Failed to create a link to ${PSCBS_OUT}"
 
-ln -sf "${PSCN_OUT}" reports || error "ERROR: failed to create a link to ${PSCN_OUT}"
+ln -sf "${PSCN_OUT}" reports || error "Failed to create a link to ${PSCN_OUT}"
 
 qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae "${LG3_HOME}/PSCN.submit_all.pbs"
 
