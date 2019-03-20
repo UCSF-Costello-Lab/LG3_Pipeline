@@ -5,6 +5,24 @@
 * ...
 
 
+## Version 2019-03-20
+
+### NEW FEATURES
+
+* Alternative data pre-processing compliant with Best Practices 2019 '_run_Align_mem'
+
+* Latest somatic mutation calling using GATK4.1 / Mutect2 '_run_Mutect2'
+
+* Alignment without trimming fastq data '_run_Align_gz_no_trim'
+
+* PSCN pipeline is integrated with the main LG3 pipeline '_run_PSCN' 
+
+### SOFTWARE QUALITY:
+
+* Paths to resources and some other parameters are now in config file 'lg3.conf' (in progress)
+
+ 
+
 ## Version 2018-12-27
 
 ### NEW FEATURES
