@@ -7,7 +7,9 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+assert_file_exists "${LG3_HOME}/lg3.conf"
+source "${LG3_HOME}/lg3.conf"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -16,7 +18,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
+LG3_HOME=${LG3_HOME}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
@@ -62,8 +64,6 @@ echo "Project: ${PROJECT}"
 echo "Conversion File: ${CONV}"
 echo "----------------------------------"
 
-PINDEL=${LG3_HOME}/tools/pindel024t/pindel
-PINDEL2VCF=${LG3_HOME}/tools/pindel024t/pindel2vcf
 SH_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.sh
 SH_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.sh
 SH_PINDEL_ANNOTATE=${LG3_HOME}/scripts/pindel_annotate.sh
@@ -108,8 +108,16 @@ assert_file_exists "${PATIENT}.pindel.cfg"
 change_dir "${PATIENT}_pindel"
 echo -e "\\n========= [Pindel] Run pindel"
 
-${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL -o "${PATIENT}.pindel" -r FALSE -t FALSE -l FALSE -k FALSE -T "${ncores}"  || error "${PINDEL} failed"
-for EXT in CloseEndMapped BP LI INV TD D SI
+${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL \
+	-o "${PATIENT}.pindel" \
+	--minimum_support_for_event 3 \
+	--report_inversions FALSE \
+	--report_duplications FALSE \
+	--report_long_insertions FALSE \
+	--report_breakpoints FALSE \
+	-T "${ncores}"  || error "${PINDEL} failed"
+
+for EXT in D INV SI
 do
 	assert_file_exists "${PATIENT}.pindel_${EXT}"
 done
@@ -118,8 +126,14 @@ done
 echo -e "\\n========= [Pindel] Convert pindel to vcf"
 ${PINDEL2VCF} -P "${PATIENT}.pindel" -r "$REF" -R hg19 -d 20121031 -v "${PATIENT}.pindel.vcf" -G  || error "${PINDEL2VCF} failed"
 assert_file_exists "${PATIENT}.pindel.vcf"
+echo "[Pindel] Generated VCF: "
+wc -l "${PATIENT}.pindel.vcf"
 
 ## convert to tdt
+echo -e "\\n========= [Pindel] Fix vcf (needed for new pindel)"
+grep -v ID=PL "${PATIENT}.pindel.vcf" | grep -v ID=RD | grep -v ID=PF > "${PATIENT}.pindel.vcf.fixed"
+mv "${PATIENT}.pindel.vcf.fixed" "${PATIENT}.pindel.vcf"
+
 echo -e "\\n========= [Pindel] Convert vcf to tdt"
 "${PYTHON_VCF2TDT}" "${PATIENT}.pindel.vcf"  || error "${PYTHON_VCF2TDT} failed"
 assert_file_exists "${PATIENT}.pindel.vcf.tdt"
@@ -142,6 +156,6 @@ echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "[Pindel] Output is in ${WDIR}"
-ls -l "${WDIR}/${PATIENT}"*
+ls -l "${WDIR}/${PATIENT}_pindel"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

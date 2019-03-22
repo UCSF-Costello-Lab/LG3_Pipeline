@@ -42,8 +42,23 @@ def pindel_filter(filename, opts):
     l = line.strip().split('\t')
 
     if l[svtype] not in ['INS', 'DEL', 'RPL']: continue
-    if int(l[norm_alt]) > opts.normal: continue
-    if int(l[tum_alt]) < opts.tumor: continue
+
+    ### BEGIN  edit by Ivan to handle newer pindel VCF with AD n_ref,n_alt
+    #if int(l[norm_alt]) > opts.normal: continue
+    #if int(l[tum_alt]) < opts.tumor: continue
+    if ',' in l[norm_alt]:
+        norm_altA = l[norm_alt].split(',')[1]
+    else:
+        norm_altA = l[norm_alt]
+    if int(norm_altA) > opts.normal: continue
+
+    if ',' in l[tum_alt]:
+        tum_altA = l[tum_alt].split(',')[1]
+    else:
+        tum_altA = l[tum_alt]
+    if int(tum_altA) < opts.tumor: continue
+    #### END of Ivan's edit
+
     if abs(int(l[svlen])) > opts.size: continue
     if l[svtype]=='RPL' and  abs(int(l[svlen])) == abs(int(l[ntlen])):
       continue
@@ -110,16 +125,10 @@ def pindel_filter(filename, opts):
       sys.exit(1)
    '''
     
-  print "data ", len(data)
-  print "filterdata ", len(filterdata)
-  print "pat_list ", pat_list
-
   ## check for multiple indels at the same position, select the one with higher coverage across all samples for that patient
   cutdata = []
   for p in pat_list:
-    print "p ", p
     pat_data = filter(lambda x:x.split('\t')[pat] == p, filterdata)
-    print "pat_data ", len(pat_data)
 
     ## make a dictionary of all mutations - 
     mut_dict = {}  ## chr_pos : [ref_alt, #supporting_reads]
@@ -156,8 +165,6 @@ def pindel_filter(filename, opts):
       val1 = l[ref] + '_' + l[alt]
       if key in mut_dict and mut_dict[key][0] == val1: cutdata.append(line)
       
-  print len(cutdata)
-
   '''
   cutdata = []
   for line in filterdata:
