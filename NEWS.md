@@ -9,6 +9,8 @@
 
 ### NEW FEATURES
 
+* Option to use new pindel v.0.2.5b8 instead of v.0.2.4t
+
 * Alternative data pre-processing compliant with Best Practices 2019 '_run_Align_mem'
 
 * Latest somatic mutation calling using GATK4.1 / Mutect2 '_run_Mutect2'
