@@ -79,23 +79,29 @@ From the above, we should have a directory containing the following files and fo
 ```sh
 $ tree
 .
-├── output -> /another/drive/lg3-demo/output
-├── patient_ID_conversions.tsv -> ~/lg3-demo/runs_demo/patient_ID_conversions.tsv
-├── rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
-├── _run_Align_gz -> ~/lg3-demo/runs_demo/_run_Align_gz
-├── _run_Merge -> ~/lg3-demo/runs_demo/_run_Merge
-├── _run_Merge_QC -> ~/lg3-demo/runs_demo/_run_Merge_QC
-├── _run_MutDet -> ~/lg3-demo/runs_demo/_run_MutDet
-├── _run_Pindel -> ~/lg3-demo/runs_demo/_run_Pindel
-├── _run_PostMut -> ~/lg3-demo/runs_demo/_run_PostMut
-├── _run_QC_1 -> ~/lg3-demo/runs_demo/_run_QC_1
-├── _run_QC_2 -> ~/lg3-demo/runs_demo/_run_QC_2
-├── _run_QC_3 -> ~/lg3-demo/runs_demo/_run_QC_3
-├── _run_Recal -> ~/lg3-demo/runs_demo/_run_Recal
-├── _run_Recal_pass2 -> ~/lg3-demo/runs_demo/_run_Recal_pass2
-└── _run_Trim -> ~/lg3-demo/runs_demo/_run_Trim
+|-- _run_Align_gz -> ~/lg3-demo/runs_demo/_run_Align_gz
+|-- _run_Align_mem -> ~/lg3-demo/runs_demo/_run_Align_mem
+|-- _run_Align_no_trim -> ~/lg3-demo/runs_demo/_run_Align_no_trim
+|-- _run_Germline -> ~/lg3-demo/runs_demo/_run_Germline
+|-- _run_Merge -> ~/lg3-demo/runs_demo/_run_Merge
+|-- _run_Merge_QC -> ~/lg3-demo/runs_demo/_run_Merge_QC
+|-- _run_MutDet -> ~/lg3-demo/runs_demo/_run_MutDet
+|-- _run_Mutect2 -> ~/lg3-demo/runs_demo/_run_Mutect2
+|-- _run_PSCN -> ~/lg3-demo/runs_demo/_run_PSCN
+|-- _run_Pindel -> ~/lg3-demo/runs_demo/_run_Pindel
+|-- _run_PostMut -> ~/lg3-demo/runs_demo/_run_PostMut
+|-- _run_QC_1 -> ~/lg3-demo/runs_demo/_run_QC_1
+|-- _run_QC_2 -> ~/lg3-demo/runs_demo/_run_QC_2
+|-- _run_QC_3 -> ~/lg3-demo/runs_demo/_run_QC_3
+|-- _run_Recal -> ~/lg3-demo/runs_demo/_run_Recal
+|-- _run_Recal_pass2 -> ~/lg3-demo/runs_demo/_run_Recal_pass2
+|-- _run_Recal_step -> ~/lg3-demo/runs_demo/_run_Recal_step
+|-- _run_Trim -> ~/lg3-demo/runs_demo/_run_Trim
+|-- output
+|-- patient_ID_conversions.tsv -> ~/lg3-demo/runs_demo/patient_ID_conversions.tsv
+`-- rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
 
-2 directories, 10 files
+2 directories, 19 files
 ```
 
 
