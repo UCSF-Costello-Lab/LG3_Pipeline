@@ -80,7 +80,7 @@ XMX=Xmx8g
 echo "Patient information inferred from PATIENT and CONV:"
 
 ## Pull out patient specific conversion info
-grep -w "${PATIENT}" "${CONV}" | tr -d '\r' > "${PATIENT}.temp.conversions.txt"
+grep -P "\\t${PATIENT}\\t" "${CONV}" | tr -d '\r' > "${PATIENT}.temp.conversions.txt"
 
 ## Get normal ID
 while IFS=$'\t' read -r ID _ _ SAMP

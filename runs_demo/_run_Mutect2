@@ -42,8 +42,8 @@ echo -n "Submitting jobs for $PATIENT "
 date
 
 ## Assert that input files exist
-D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-assert_directory_exists "${D}"
+#D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+#assert_directory_exists "${D}"
 
 ## Pass QSUB_OPTS to ${SH_MUTECT2_SUBMIT} where it's an optional input
 export QSUB_OPTS

@@ -1,0 +1,39 @@
+#!/bin/bash
+module load jdk/1.8.0 python/2.7.15
+
+LG3_HOME=${LG3_HOME:?}
+REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
+
+GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
+
+echo -e "\\nRunning GATK4::VariantsToTable on ${REF}"
+
+for VCF in "$@"
+do
+	B=$(basename "${VCF}" .vcf.gz)
+	OUT=${B}.tsv
+	HEAD=${B}.h
+	zcat "${VCF}" | grep ID=FUNCOTATION | cut -d: -f2 | sed 's/">//;s/^ //' | tr '|' '\t' > "${HEAD}"
+	#zcat ${VCF} | grep ID=FUNCOTATION | cut -d: -f2 | sed 's/">//;s/^ //' | tr '|' '\t' | tr -d '\n' > ${HEAD}
+	#echo -e "\\tDP\\tMBQ\\tFILTER" >> ${HEAD}
+		##-F FUNCOTATION -F DP -F MBQ -F FILTER \
+	{ time ${GATK4} VariantsToTable \
+		--verbosity ERROR \
+		-R "${REF}" \
+		-V "${VCF}" \
+		-F FUNCOTATION \
+		-O "${OUT}.tmp"; } 2>&1 || { echo "FAILED"; exit 1; }
+	echo "Output: "
+	wc -l "${OUT}.tmp"
+	sed -i 's/|/\t/g;s/\],\[/\n/g;s/\[//;s/\]//' "${OUT}.tmp"
+	tail -n +2 "${OUT}.tmp" >> "${HEAD}"
+	mv "${HEAD}" "${OUT}"
+	rm "${OUT}.tmp"
+	### 218 total fields avail!
+	#cut -f1-22,147,148,149,150 ${OUT} > ${OUT}.tmp
+	cut -f1,3,4,5,6,8-19,88,89,106,126,127,128,144,145,147,185,187,215,217 "${OUT}" > "${OUT}.tmp"
+	mv "${OUT}.tmp" "${OUT}"
+
+	head -n 2 "${OUT}"
+	wc -l "${OUT}"
+done

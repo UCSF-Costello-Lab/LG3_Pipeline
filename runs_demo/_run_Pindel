@@ -51,7 +51,7 @@ CONV=$(readlink -e "$CONV")
 PBS=${LG3_HOME}/pindel_all.pbs
 assert_file_exists "${PBS}"
 
-## Assert that input files exist
+## Assert that input directory exist
 D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 assert_directory_exists "${D}"
 

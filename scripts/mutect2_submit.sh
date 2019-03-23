@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+assert_file_exists "${LG3_HOME}/lg3.conf"
+source "${LG3_HOME}/lg3.conf"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -60,14 +62,9 @@ if [ $# -ne 3 ]; then
     error "Please specify patient, CONV file and project!"
 fi
 
-INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
+#INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 echo "- INTERVAL=${INTERVAL:?}"
 assert_file_exists "${INTERVAL}"
-
-#CONFIG=${LG3_HOME}/FilterMutations/mutationConfig.cfg
-#echo "- CONFIG=${CONFIG:?}"
-#assert_file_exists "${CONFIG}"
-#
 
 ## Software
 PBS=${LG3_HOME}/Mutect2_TvsN.pbs
@@ -80,7 +77,7 @@ WORKDIR=$(readlink -e "${WORKDIR:?}") ## Absolute path
 echo "Patient information inferred from PATIENT and CONV:"
 
 ## Pull out patient specific conversion info
-grep -w "${PATIENT}" "${CONV}" | tr -d '\r' > "${PATIENT}.temp.conversions.txt"
+grep -P "\\t${PATIENT}\\t" "${CONV}" | tr -d '\r' > "${PATIENT}.temp.conversions.txt"
 
 ## Get normal ID
 while IFS=$'\t' read -r ID _ _ SAMP

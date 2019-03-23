@@ -1,122 +1,144 @@
 # LG3_Pipeline
 
+## Version 2019-03-23
+
+### NEW FEATURES
+
+ * Added option to use new Pindel 0.2.5b8 instead of Pindel 0.2.4t.
+
+ * Added '_run_Align_mem' for an alternative data pre-processing compliant
+   with Best Practices 2019.
+
+ * Added '_run_Mutect2' for somatic mutation calling by Mutect2 and GATK 4.1.
+
+ * Added '_run_Align_gz_no_trim' to align without trimming FASTQ data.
+
+ * Added '_run_PSCN' for running the PSCN pipeline directly within the LG3
+   pipeline.
+
+### SOFTWARE QUALITY
+
+ * Paths to resources and some other parameters are now in config file
+   'lg3.conf' (work in progress).
+ 
+
 ## Version 2018-12-27
 
 ### NEW FEATURES
 
-* More informative and consistent error messages are provided in more place by
-  making more use of internal utility functions such as 'error', 'warn',
-  'assert_file_exists', 'assert_directory_exists', 'make_dir' and 'change_dir'.
+ * More informative and consistent error messages are provided in more place by
+   making more use of internal utility functions such as 'error', 'warn',
+   'assert_file_exists', 'assert_directory_exists', 'make_dir' and 'change_dir'.
   
 ### BUG FIXES
 
-* Recall_pass2.pbs failed to create symbolic link(s).
+ * Recall_pass2.pbs failed to create symbolic link(s).
 
 
 ## Version 2018-12-20
 
 ### NEW FEATURES 
 
-* exomeQualityPlots pipeline is now integrated with the main pipeline.
+ * exomeQualityPlots pipeline is now integrated with the main pipeline.
 
-* Added stand-alone Germline analysis, exactly the same as in the Recal
-  step, which can be used in case the Recal-Germline step fails.
+ * Added stand-alone Germline analysis, exactly the same as in the Recal
+   step, which can be used in case the Recal-Germline step fails.
 
 ### BUG FIXES
 
-* Fixed a wrong file extension in Recal_pass2.sh.
+ * Fixed a wrong file extension in Recal_pass2.sh.
 
 
 ## Version 2018-11-12
 
 ### NEW FEATURES
 
-* Errors produced by the pipeline itself do now also output traceback
-  information showing the function, line number, and script pathname
-  call stack.
+ * Errors produced by the pipeline itself do now also output traceback
+   information showing the function, line number, and script pathname
+   call stack.
 
 ### SOFTWARE QUALITY
 
-* Using more informative names on variables used for script filenames.
+ * Using more informative names on variables used for script filenames.
 
-* Earlier detection of errors by asserting that expected output files are
-  produced after each internal call of the pipeline finishes.
+ * Earlier detection of errors by asserting that expected output files are
+   produced after each internal call of the pipeline finishes.
 
 ### BUG FIXES
 
-* All scripts are now cleaning scratch space in the end of the run.
+ * All scripts are now cleaning scratch space in the end of the run.
 
 
 ## Version 2018-10-27
 
 ### NEW FEATURES
 
-* Now `./_run_MutDet` reports on the `NORMAL`, `TUMOR`, and `TYPE` inferred
-  from the `CONV` file and the `PATIENT` name, and asserts that such
-  entries actually exist in the `CONV` file.
+ * Now `./_run_MutDet` reports on the `NORMAL`, `TUMOR`, and `TYPE` inferred
+   from the `CONV` file and the `PATIENT` name, and asserts that such
+   entries actually exist in the `CONV` file.
 
 ### KNOWN ISSUES
 
-* It appears not to be possible to quote `INPUT` filenames for Picard, i.e.
-  we cannot use `INPUT="<file>"` but have to stick with `INPUT=<file>`.
-  This means that those input file names must not have spaces.  GATK has
-  the same limitation on its `-I <file>` option.
+ * It appears not to be possible to quote `INPUT` filenames for Picard, i.e.
+   we cannot use `INPUT="<file>"` but have to stick with `INPUT=<file>`.
+   This means that those input file names must not have spaces.  GATK has
+   the same limitation on its `-I <file>` option.
 
 ### BUG FIXES
 
-* The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
-  line 6: PROJECT: parameter null or not set".
+ * The (optional) `_run_Merge` step would produce error: "scripts/Merge.sh:
+   line 6: PROJECT: parameter null or not set".
 
-* Run scripts `_run_MutDet`, `_run_Merge`, and `_run_Merge_QC` would fail
-  if previous step used a `PROJECT` other than the default 'LG3'.
+ * Run scripts `_run_MutDet`, `_run_Merge`, and `_run_Merge_QC` would fail
+   if previous step used a `PROJECT` other than the default 'LG3'.
 
-* Pipeline would not support tab-delimited patient files with Microsoft
-  Windows-style line endings, i.e. CRLF (`\r\n`) line endings.
+ * Pipeline would not support tab-delimited patient files with Microsoft
+   Windows-style line endings, i.e. CRLF (`\r\n`) line endings.
 
-* `scripts/chk_mutdet.sh` did not acknowledge environment variable 'CONV'.
+ * `scripts/chk_mutdet.sh` did not acknowledge environment variable 'CONV'.
 
 
 ## Version 2018-10-17
 
 ### SIGNIFICANT CHANGES
 
-* Environment variable `LG3_HOME` must now be set.  If not set, an error
-  is produced.  It used to default to a Costello Lab specific location on
-  the TIPCC cluster.
+ * Environment variable `LG3_HOME` must now be set.  If not set, an error
+   is produced.  It used to default to a Costello Lab specific location on
+   the TIPCC cluster.
  
 ### NEW FEATURES
 
-* Alignment jobs now require less memory by default (64 GiB RAM instead of
-  100 GiB), which should decreased the average default queuing time.
+ * Alignment jobs now require less memory by default (64 GiB RAM instead of
+   100 GiB), which should decreased the average default queuing time.
 
-* Added `lg3 envir` for displaying current environment variables related
-  to the LG3 Pipeline.
+ * Added `lg3 envir` for displaying current environment variables related
+   to the LG3 Pipeline.
   
-* Added `lg3 --news` for displaying the NEWS.md file in the terminal.
+ * Added `lg3 --news` for displaying the NEWS.md file in the terminal.
 
 ### KNOWN ISSUES
 
-* Patient IDs must not contain underscores (`_`) because the Pindel step
-  of the pipeline does not support that.  All steps of the pipeline now
-  assert that patient IDs do no contain underscores.
+ * Patient IDs must not contain underscores (`_`) because the Pindel step
+   of the pipeline does not support that.  All steps of the pipeline now
+   assert that patient IDs do no contain underscores.
 
 ### BUG FIXES
 
-* PBS scripts would only run on TIPCC compute nodes that support the legacy
-  PBS `bigmem` flag.  By removing this unnecessary `bigmem` requirement from
-  all PBS scripts, jobs can now run on all compute nodes that meet the core
-  and memory requirement specified by each PBS script (or is overridden in
-  the LG3 call).
+ * PBS scripts would only run on TIPCC compute nodes that support the legacy
+   PBS `bigmem` flag.  By removing this unnecessary `bigmem` requirement from
+   all PBS scripts, jobs can now run on all compute nodes that meet the core
+   and memory requirement specified by each PBS script (or is overridden in
+   the LG3 call).
 
 
 ## Version 2018-10-11
 
 ### SIGNIFICANT CHANGES
 
-* Run scripts now infer `SAMPLES` and `NORMAL` from the patient file (`CONV`)
-  given the `PATIENT` name.  It is no longer necessary to set environment
-  variables `SAMPLES` and `NORMAL` when running the pipeline. These variables
-  will become deprecated soon and later produce an error if specified.
+ * Run scripts now infer `SAMPLES` and `NORMAL` from the patient file (`CONV`)
+   given the `PATIENT` name.  It is no longer necessary to set environment
+   variables `SAMPLES` and `NORMAL` when running the pipeline. These variables
+   will become deprecated soon and later produce an error if specified.
 
 ### DOCUMENTATION
 

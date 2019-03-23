@@ -17,6 +17,7 @@ PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 SAMPLES=${SAMPLES:-Z00600t10 Z00601t10}
 SAMPLE=${SAMPLE:-Y00600t10}
+ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 
 ## Requires absolute path
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -70,4 +71,4 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT}}" "$PBS"
+qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
