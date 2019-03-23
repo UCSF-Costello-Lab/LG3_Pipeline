@@ -18,7 +18,7 @@ The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, 
 ```sh
 $ module load CBC lg3
 $ lg3 --version
-2018-12-27
+2019-03-23
 ```
 
 See `module avail` for alternative versions.
