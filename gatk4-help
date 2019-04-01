@@ -1,9 +1,12 @@
 #!/bin/bash
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+assert_file_exists "${LG3_HOME}/lg3.conf"
+source "${LG3_HOME}/lg3.conf"
 
 module load jdk/1.8.0 python/2.7.15
 
 LG3_HOME=${LG3_HOME:?}
-GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
 
 for T in "$@"
 do
