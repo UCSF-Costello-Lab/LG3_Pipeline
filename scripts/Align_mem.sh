@@ -20,8 +20,6 @@ LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
-#INTERVAL=${INTERVAL:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
-#PADDING=${PADDING:-200}
 assert_file_exists "${INTERVAL:?}"
 
 ### Debug

@@ -99,12 +99,10 @@ python --version
 java -version
 
 ### References
-#REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
 assert_file_exists "${REF:?}"
 echo "- reference=${REF}"
 
 ### Somatic data source for Funcotator
-#FUNCO_PATH=/home/GenomeData/GATK_bundle/funcotator/funcotator_dataSources.v1.6.20190124s
 assert_directory_exists "${FUNCO_PATH:?}"
 echo "- FUNCO_PATH=${FUNCO_PATH}"
 
@@ -472,7 +470,7 @@ fi
 
 OUT=$(add2fname "${OUT}" filt)
 
-echo -e "\\n[Mutect2] applying filter to keep only PASSed variants ... "
+echo -e "\\n[Mutect2] Keep only PASSed variants ... "
 zcat "${IN}" | grep '^#' | bgzip > "${OUT}"
 zcat "${IN}" | grep -v '^#' | grep -w PASS | bgzip >> "${OUT}"
 
