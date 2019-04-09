@@ -34,7 +34,7 @@ echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 assert_patient_name "${PATIENT}"
 
-SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
+SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 echo "- SAMPLES=${SAMPLES:?}"
 
 

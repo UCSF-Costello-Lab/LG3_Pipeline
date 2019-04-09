@@ -15,7 +15,7 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 CONV=${CONV:-patient_ID_conversions.tsv}
-SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
+SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
