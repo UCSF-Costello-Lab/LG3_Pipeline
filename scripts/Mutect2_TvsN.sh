@@ -322,7 +322,7 @@ fi
 #${m2_extra_filtering_args} optional
 if [ ! -e "${DEST}/${OUT}" ]; then
 	   echo -e "\\n[Mutect2] Running FilterMutectCalls ..."
-   	{ time ${GATK4} FilterMutectCalls "${extra_args[@]}" "${XARG_contamination_filter[@]}" ${XARG_artifact_prior[@]} \
+   	{ time ${GATK4} FilterMutectCalls "${extra_args[@]}" "${XARG_contamination_filter[@]}" "${XARG_artifact_prior[@]}" \
 			--verbosity "${VERBOSITY}" \
       	--variant "${IN}" \
       	--output "${OUT}" \
