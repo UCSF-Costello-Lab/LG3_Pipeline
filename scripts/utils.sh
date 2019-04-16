@@ -14,34 +14,34 @@ function term_colors {
     [[ -z "${what}" ]] && what=1
     
     if [[ "${action}" == "enable" && -t "${what}" ]]; then
-	## ANSI foreground colors
-	black=$(tput setaf 0)
-	red=$(tput setaf 1)
-	green=$(tput setaf 2)
-	yellow=$(tput setaf 3)
-	blue=$(tput setaf 4)
-	magenta=$(tput setaf 5)
-	cyan=$(tput setaf 6)
-	white=$(tput setaf 7)
+        ## ANSI foreground colors
+        black=$(tput setaf 0)
+        red=$(tput setaf 1)
+        green=$(tput setaf 2)
+        yellow=$(tput setaf 3)
+        blue=$(tput setaf 4)
+        magenta=$(tput setaf 5)
+        cyan=$(tput setaf 6)
+        white=$(tput setaf 7)
 
-	## Text modes
-	bold=$(tput bold)
-	dim=$(tput dim)
-	reset=$(tput sgr0)
+        ## Text modes
+        bold=$(tput bold)
+        dim=$(tput dim)
+        reset=$(tput sgr0)
     else
-	export black=
-	export red=
-	export green=
-	export yellow=
-	export blue=
-	export magenta=
-	export cyan=
-	export white=
+        export black=
+        export red=
+        export green=
+        export yellow=
+        export blue=
+        export magenta=
+        export cyan=
+        export white=
 
-	export bold=
-	export dim=
+        export bold=
+        export dim=
 
-	export reset=
+        export reset=
     fi
 }
 
@@ -53,7 +53,7 @@ function test_context {
     local magenta
     local reset
     if [[ -t 1 ]]; then
-	magenta=$(tput setaf 5)
+        magenta=$(tput setaf 5)
         reset=$(tput sgr0)
     fi
     echo -e "${magenta}*** $*${reset}"
@@ -92,9 +92,9 @@ function error {
     done
 
     if [[ -t 1 ]]; then
-	red=$(tput setaf 1)
-	gray=$(tput setaf 8)
-	bold=$(tput bold)
+        red=$(tput setaf 1)
+        gray=$(tput setaf 8)
+        bold=$(tput bold)
         reset=$(tput sgr0)
     fi
 
@@ -108,15 +108,15 @@ function error {
     fi
 
     if [[ -n "${ON_ERROR}" ]]; then
-	if [[ $(type -t "${ON_ERROR}") == "function" ]]; then
+        if [[ $(type -t "${ON_ERROR}") == "function" ]]; then
             ${ON_ERROR}
-	fi
+        fi
     fi
 
     ## Exit?
     if ${EXIT_ON_ERROR}; then
         echo -e "Exiting (exit ${EXIT_VALUE})${reset}";
-	exit "${EXIT_VALUE}"
+        exit "${EXIT_VALUE}"
     fi
 
     printf "%s" "${reset}"
@@ -129,8 +129,8 @@ function warn {
     TRACEBACK_ON_WARN=${TRACEBACK_ON_WARN:-false}
     
     if [[ -t 1 ]]; then
-	yellow=$(tput setaf 3)
-	bold=$(tput bold)
+        yellow=$(tput setaf 3)
+        bold=$(tput bold)
         reset=$(tput sgr0)
     fi
     
@@ -218,9 +218,6 @@ function equal_dirs {
 # LG3 specific
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function source_lg3_conf {
-    local home
-    local pwd
-    
     ## The default settings
     assert_file_exists "${LG3_HOME}/lg3.conf"
     # shellcheck disable=1090
