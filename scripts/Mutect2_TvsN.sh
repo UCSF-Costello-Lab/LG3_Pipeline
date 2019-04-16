@@ -2,8 +2,7 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME}/scripts/utils.sh"
-assert_file_exists "${LG3_HOME}/lg3.conf"
-source "${LG3_HOME}/lg3.conf"
+source_lg3_conf
 CLEAN=true
 
 add2fname() {

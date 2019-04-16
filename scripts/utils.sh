@@ -204,3 +204,21 @@ function make_change_dir {
     make_dir "$1"
     change_dir "$1"
 }
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# LG3 specific
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+function source_lg3_conf {
+    ## The default settings
+    assert_file_exists "${LG3_HOME}/lg3.conf"
+    # shellcheck disable=1090
+    source "${LG3_HOME}/lg3.conf"
+
+    ## Settings specific to the project folder?
+    if [[ -f "lg3.conf" ]]; then
+        # shellcheck disable=1090
+	source "lg3.conf"
+    fi
+}
