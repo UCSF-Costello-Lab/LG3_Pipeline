@@ -2,8 +2,15 @@
 
 ## Version 2019-03-23-9000 (develop version)
 
- * ...
+### NEW FEATURES
 
+ * Globals settings for the LG3 Pipeline such as locations of software tools
+   can be configured via the '${LG3_HOME}/lg3.conf' bash script.  If a file
+   'lg3.conf' exists in the current working directory ("the project folder"),
+   then that file is sourced after '${LG3_HOME}/lg3.conf', which makes it
+   possible to override some or all of the predefined settings on a project
+   to project basis.
+   
 
 ## Version 2019-03-23
 
