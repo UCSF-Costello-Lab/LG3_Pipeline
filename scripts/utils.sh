@@ -205,20 +205,30 @@ function make_change_dir {
     change_dir "$1"
 }
 
+function equal_dirs {
+    local a
+    local b
+    a=$(readlink -f "$1")
+    b=$(readlink -f "$2")
+    [[ "${a}" == "${b}" ]]
+}
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # LG3 specific
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function source_lg3_conf {
+    local home
+    local pwd
+    
     ## The default settings
     assert_file_exists "${LG3_HOME}/lg3.conf"
     # shellcheck disable=1090
     source "${LG3_HOME}/lg3.conf"
 
     ## Settings specific to the project folder?
-    if [[ -f "lg3.conf" ]]; then
+    if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
         # shellcheck disable=1090
-	source "lg3.conf"
+        source "lg3.conf"
     fi
 }
