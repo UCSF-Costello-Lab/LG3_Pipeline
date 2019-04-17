@@ -71,6 +71,7 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-13
 
 echo "Software:"
 echo "- PINDEL=${PINDEL:?}"
+echo "- PINDEL_NEW=${PINDEL_NEW:?}"
 echo "- PINDEL2VCF=${PINDEL2VCF:?}"
 assert_file_executable "${PINDEL}"
 assert_file_executable "${PINDEL2VCF}"
@@ -79,8 +80,6 @@ assert_file_executable "${SH_PINDEL_FILTER}"
 assert_file_executable "${SH_PINDEL_ANNOTATE}"
 assert_file_executable "${PYTHON_VCF2TDT}"
 
-REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
-TARGET=${LG3_HOME}/resources/All_exome_targets.extended_200bp.bed
 echo "References:"
 echo "- REF=${REF:?}"
 echo "- TARGET=${TARGET:?}"
