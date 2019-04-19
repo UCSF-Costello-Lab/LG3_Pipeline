@@ -291,6 +291,13 @@ The above folder is now where the LG3 Pipeline lives.  Environment variable `LG3
 export LG3_HOME=/path/to/LG3_Pipeline
 ```
 
+Then, in order to get access to the `lg3` command-line tool, make sure to also set:
+
+```sh
+export PATH="${LG3_HOME}/bin:${PATH}"
+```
+
+
 ### Contributors
 
 The following people (in reverse chronological order) have contributed to the LG3 Pipeline code base over the years:
