@@ -9,14 +9,10 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+# shellcheck source=scripts/config_run.sh
+source "${LG3_HOME}/scripts/config_run.sh"
+
 QC_PLOT_HOME=${QC_PLOT_HOME:-exomeQualityPlots}
-EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
-PATIENT=${PATIENT:-Patient157t10}
 MUTATIONFILE=${LG3_INPUT_ROOT}/${PROJECT}/MutInDel/${PATIENT}.snvs.indels.filtered.overlaps.txt
 BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}

@@ -9,12 +9,9 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-EMAIL=${EMAIL:-?}
-PROJECT=${PROJECT:-LG3}
-PATIENT=${PATIENT:-Patient157t10}
+# shellcheck source=scripts/config_run.sh
+source "${LG3_HOME}/scripts/config_run.sh"
+
 SAMPLES=${SAMPLES:-Z00600t10 Z00601t10}
 SAMPLE=${SAMPLE:-Y00600t10}
 

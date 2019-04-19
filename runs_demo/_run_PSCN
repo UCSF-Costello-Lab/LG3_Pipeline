@@ -12,19 +12,14 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+# shellcheck source=scripts/config_run.sh
+source "${LG3_HOME}/scripts/config_run.sh"
 
 PSCN_HOME=${PSCN_HOME:-Costello-PSCN-Seq}
 rm_if_link "${PSCN_HOME}/seqzData" 
 rm_if_link "${PSCN_HOME}/pscbsData" 
 rm_if_link "${PSCN_HOME}/reports"
 
-EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
-PATIENT=${PATIENT:-Patient157t10}
 BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 SEQUENZA_OUT=${LG3_INPUT_ROOT}/${PROJECT}/sequenza/${PATIENT}
 make_dir "${SEQUENZA_OUT}"

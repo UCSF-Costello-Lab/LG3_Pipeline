@@ -9,16 +9,12 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
-PATIENT=${PATIENT:-Patient157t10}
+# shellcheck source=scripts/config_run.sh
+source "${LG3_HOME}/scripts/config_run.sh"
+
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 NORMAL=${NORMAL:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | grep -w "Normal" | cut -f 1)}
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
-EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")

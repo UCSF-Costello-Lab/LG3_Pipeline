@@ -11,11 +11,8 @@ echo "Arguments: $*"
 
 FAILED=false
 
-### Configuration
-LG3_HOME=${LG3_HOME:?}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
-LG3_DEBUG=${LG3_DEBUG:-true}
+# shellcheck source=scripts/config.sh
+source "${LG3_HOME}/scripts/config.sh"
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then

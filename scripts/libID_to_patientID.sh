@@ -9,11 +9,8 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:?}
-LG3_DEBUG=${LG3_DEBUG:-true}
+# shellcheck source=scripts/config.sh
+source "${LG3_HOME}/scripts/config.sh"
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then

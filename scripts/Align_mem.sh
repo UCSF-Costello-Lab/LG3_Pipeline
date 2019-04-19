@@ -12,12 +12,9 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 CLEAN=true
 
-### Configuration
-LG3_HOME=${LG3_HOME}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
-LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+# shellcheck source=scripts/config.sh
+source "${LG3_HOME}/scripts/config.sh"
+
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 assert_file_exists "${INTERVAL:?}"
 

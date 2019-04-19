@@ -215,7 +215,7 @@ function equal_dirs {
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# LG3 specific
+# LG3
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function source_lg3_conf {
     ## The default settings
@@ -230,4 +230,23 @@ function source_lg3_conf {
         source "lg3.conf"
         echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
+}
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# LG3 DEPRECATION
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+function assert_lg3_input_root {
+    if [[ -z "${LG3_INPUT_ROOT}" ]]; then return; fi
+    local known="$1"
+    if [[ -z "${known}" ]]; then
+	known="output"
+    fi
+    [[ "${LG3_INPUT_ROOT}" == "${known}" ]] || warn "Environment variable 'LG3_INPUT_ROOT' is deprecated. Using a value other than '${known}' will give an error in a future version: '${LG3_INPUT_ROOT}'"
+}
+
+function assert_lg3_output_root {
+    if [[ -z "${LG3_OUTPUT_ROOT}" ]]; then return; fi
+    [[ "${LG3_OUTPUT_ROOT}" == "output" ]] || warn "Environment variable 'LG3_OUTPUT_ROOT' is deprecated. Using a value other than 'output' will give an error in a future version: '${LG3_OUTPUT_ROOT}'"
 }

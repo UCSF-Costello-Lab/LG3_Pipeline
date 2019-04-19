@@ -10,15 +10,12 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-### Configuration
-LG3_HOME=${LG3_HOME:?}
-LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+# shellcheck source=scripts/config.sh
+source "${LG3_HOME}/scripts/config.sh"
+
 EMAIL=${EMAIL:?}
-#LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 XMX=Xmx160g
-
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
