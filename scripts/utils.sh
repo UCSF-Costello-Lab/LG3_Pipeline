@@ -222,10 +222,12 @@ function source_lg3_conf {
     assert_file_exists "${LG3_HOME}/lg3.conf"
     # shellcheck disable=1090
     source "${LG3_HOME}/lg3.conf"
+    echo "Sourced: ${LG3_HOME}/lg3.conf"
 
     ## Settings specific to the project folder?
     if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
         # shellcheck disable=1090
         source "lg3.conf"
+        echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
 }
