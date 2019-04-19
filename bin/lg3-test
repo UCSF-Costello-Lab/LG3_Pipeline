@@ -62,6 +62,12 @@ function report_ok {
     echo "] $*"
 }
 
+function report_note {
+    printf "["
+    printf_yellow "NOTE"
+    echo "] $*"
+}
+
 function report_warn {
     printf "["
     printf_yellow "WARN"
@@ -241,6 +247,13 @@ if [ "$action" == "setup" ]; then
     ## Now we can load all the utils functions
     # shellcheck source=scripts/utils.sh
     source "${LG3_HOME}/scripts/utils.sh"
+
+    report_ok "Current directory: ${PWD}"
+    
+    if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
+        report_note "Local configuration detected: ./lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
+    fi
+
     
     RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
     assert_file_executable "${RSCRIPT}"
