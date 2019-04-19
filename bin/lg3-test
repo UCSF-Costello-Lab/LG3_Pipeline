@@ -238,7 +238,13 @@ if [ "$action" == "setup" ]; then
         report_error "LG3_HOME: ${LG3_HOME} (non-existing folder)"
     fi
 
+    ## Now we can load all the utils functions
+    # shellcheck source=scripts/utils.sh
+    source "${LG3_HOME}/scripts/utils.sh"
+    
     RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
+    assert_file_executable "${RSCRIPT}"
+    
     if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
 	## Create R user library folder
         "R_LIBS_USER=~/R/%p-library/%v ${RSCRIPT}" -e "dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)"

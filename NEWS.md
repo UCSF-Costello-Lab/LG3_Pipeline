@@ -10,7 +10,10 @@
    then that file is sourced after '${LG3_HOME}/lg3.conf', which makes it
    possible to override some or all of the predefined settings on a project
    to project basis.
-   
+
+ * ROBUSTNESS: Now `bin/lg3-test` explicitly asserts that Rscript exists
+   before attemption to use it.
+
 
 ## Version 2019-03-23
 

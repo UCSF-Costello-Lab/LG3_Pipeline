@@ -20,7 +20,7 @@ check_pbs:
 
 check_sh:
 	@echo "* Validating shell scripts"
-	shellcheck bin/lg3*
+	shellcheck -x bin/lg3*
 	shellcheck FilterMutations/*.sh
 	shellcheck -x scripts/*.sh
 
