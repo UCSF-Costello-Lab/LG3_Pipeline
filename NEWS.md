@@ -2,6 +2,14 @@
 
 ## Version 2019-03-23-9000 (develop version)
 
+### SIGNIFICANT CHANGES
+
+ * The LG3 Pipeline now refuses to run from within its installation folder,
+   i.e. when the current working directory equals '${LG3_HOME}'.  This
+   protects against various potential mistakes such as overriding installed
+   files and settings.
+   
+ 
 ### NEW FEATURES
 
  * Globals settings for the LG3 Pipeline such as locations of software tools
