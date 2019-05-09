@@ -25,7 +25,8 @@ def get_samples_from_patient(mutfile, conversionfile, patient_ID, projectname):
     patient_ID_folder = patient_ID
   fullpath = os.environ["LG3_INPUT_ROOT"] + "/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
   #fileheader = ".bwa.realigned.rmDups"
-  fileheader = ".bwa.realigned.rmDups.recal"
+  #fileheader = ".bwa.realigned.rmDups.recal"
+  fileheader = "." + os.environ["RECAL_BAM_EXT"]
   if not os.path.isfile(fullpath + testID + fileheader + ".bam"):
     fullpath = fullpath.replace("data", "home", 1)
     if not os.path.isfile(fullpath + testID + fileheader + ".bam"):

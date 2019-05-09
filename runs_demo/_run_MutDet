@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 assert_pwd
 
@@ -11,16 +12,12 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PATIENT=${PATIENT:-Patient157t10}
-PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
 
 ## Requires absolute path 
-LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
@@ -35,7 +32,6 @@ echo "- CONV=${CONV:?}"
 assert_patient_name "${PATIENT}"
 
 assert_file_exists "${CONV}"
-CONV=$(readlink -e "$CONV")
 
 SH_MUTDET_SUBMIT=${LG3_HOME}/scripts/mutdet_submit.sh
 assert_file_executable "${SH_MUTDET_SUBMIT}"
@@ -50,6 +46,6 @@ assert_directory_exists "${D}"
 ## Pass QSUB_OPTS to ${SH_MUTDET_SUBMIT} where it's an optional input
 export QSUB_OPTS
 
-"${SH_MUTDET_SUBMIT}" "${PATIENT}" "${CONV}" "${PROJECT}" || error "${SH_MUTDET_SUBMIT} failed"
+"${SH_MUTDET_SUBMIT}" "${PATIENT}" || error "${SH_MUTDET_SUBMIT} failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

@@ -11,7 +11,8 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -20,10 +21,8 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:?}
 EMAIL=${EMAIL:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -62,14 +61,13 @@ assert_directory_exists "${BAMDIR}"
 assert_file_exists "${CONFIG}"
 assert_file_exists "${INTERVAL}"
 CONFIG=$(readlink -e "${CONFIG:?}") ## Absolute path
-INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 
 ### Software
 SH_MUTDET=${LG3_HOME}/scripts/MutDet.sh
 assert_file_executable "${SH_MUTDET}"
 
-BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
-BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
+BAMN=$BAMDIR/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}.bam
+BAMT=$BAMDIR/${PATIENT}/${TUMOR}.${RECAL_BAM_EXT}.bam
 
 assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
@@ -96,7 +94,6 @@ echo "SCRATCH=${SCRATCH}"
   "NOR-${NORMAL}__${TYPE}-${TUMOR}" \
   "${PATIENT}" \
   "${CONFIG}" \
-  "${INTERVAL}" \
   "$XMX" || error "MutDet failed"
 
 make_dir "${WORKDIR}"
@@ -105,8 +102,5 @@ cp -p "${SCRATCH}"/* "${WORKDIR}" || error "Fail to copy results to ${WORKDIR}"
 
 echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT}"
-
-echo "End of PBS script!"
-date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

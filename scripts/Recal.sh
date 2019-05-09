@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
@@ -11,11 +12,13 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
+
+echo -n "Checking R: "
+Rscript --version || error "No Rscript is available!"
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -29,32 +32,21 @@ if [[ $LG3_DEBUG ]]; then
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
 fi
-
-
 #
 ## Base quality recalibration, prep for indel detection, and quality control
 #
 ## Usage: /path/to/Recal.sh <bamfiles> <PATIENT> <exome_kit.interval_list>
 #
 #
-
-## References
-REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
-THOUSAND=${LG3_HOME}/resources/1000G_biallelic.indels.hg19.sorted.vcf
-DBSNP=${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf
 echo "References:"
 echo "- REF=${REF:?}"
-echo "- THOUSAND=${THOUSAND:?}"
-echo "- DBSNP=${DBSNP:?}"
+echo "- THOUSAND_OLD=${THOUSAND_OLD:?}"
+echo "- DBSNP_132=${DBSNP_132:?}"
 assert_file_exists "${REF}"
-assert_file_exists "${THOUSAND}"
-assert_file_exists "${DBSNP}"
+assert_file_exists "${THOUSAND_OLD}"
+assert_file_exists "${DBSNP_132}"
 
 ## Software
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
-GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
-PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
 PICARD_MERGESAMFILES=${PICARD_HOME}/MergeSamFiles.jar
 PICARD_FIXMATEINFO=${PICARD_HOME}/FixMateInformation.jar
 PICARD_MARKDUPS=${PICARD_HOME}/MarkDuplicates.jar
@@ -62,16 +54,16 @@ PICARD_HSMETRICS=${PICARD_HOME}/CalculateHsMetrics.jar
 PICARD_MULTIMETRICS=${PICARD_HOME}/CollectMultipleMetrics.jar
 
 echo "Software:"
-echo "- Java=${JAVA:?}"
-echo "- samtools=${SAMTOOLS:?}"
-echo "- GATK=${GATK:?}"
+echo "- Java=${JAVA6:?}"
+echo "- samtools=${SAMTOOLS0_1_18:?}"
+echo "- GATK1_65=${GATK1_65:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
 
 ## Assert existance of software
-assert_file_executable "${JAVA}"
-assert_file_executable "${SAMTOOLS}"
+assert_file_executable "${JAVA6}"
+assert_file_executable "${SAMTOOLS0_1_18}"
 assert_directory_exists "${PICARD_HOME}"
-assert_file_exists "${GATK}"
+assert_file_exists "${GATK1_65}"
 assert_file_exists "${PICARD_MERGESAMFILES}"
 assert_file_exists "${PICARD_FIXMATEINFO}"
 assert_file_exists "${PICARD_MARKDUPS}"
@@ -81,13 +73,12 @@ assert_file_exists "${PICARD_MULTIMETRICS}"
 ## Input
 bamfiles=$1
 PATIENT=$2
-ILIST=$3
 echo "Input:"
 echo "- bamfiles=${bamfiles:?}"
 echo "- PATIENT=${PATIENT:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 
-assert_file_exists "${ILIST}"
+assert_file_exists "${INTERVAL}"
 
 
 TMP="${LG3_SCRATCH_ROOT}/${PATIENT}_tmp"
@@ -105,10 +96,10 @@ echo "------------------------------------------------------"
 inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 
 echo -e "\\n[Recal] Merge BAM files..."
-# shellcheck disable=SC2086
+
 
 # Comment: Because how 'inputs' is created and used below
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_MERGESAMFILES}" \
         ${inputs} \
         OUTPUT="${PATIENT}.merged.bam" \
@@ -121,17 +112,17 @@ echo -e "\\n[Recal] Merge BAM files..."
 assert_file_exists "${PATIENT}.merged.bam"
 
 echo -e "\\n[Recal] Index new BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
+{ time $SAMTOOLS0_1_18 index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
 
 assert_file_exists "${PATIENT}.merged.bam.bai"
 
 echo -e "\\n[Recal] Create intervals for indel detection..."
-{ time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
-        -jar "$GATK" \
+{ time $JAVA6 -Xmx8g -Djava.io.tmpdir="${TMP}" \
+        -jar "$GATK1_65" \
         --analysis_type RealignerTargetCreator \
         --reference_sequence "$REF" \
-        --known "$THOUSAND" \
-		  -L "${ILIST}" \
+        --known "$THOUSAND_OLD" \
+		  -L "${INTERVAL}" \
         --num_threads "${ncores}" \
         --logging_level WARN \
         --input_file "${PATIENT}.merged.bam" \
@@ -140,11 +131,11 @@ echo -e "\\n[Recal] Create intervals for indel detection..."
 assert_file_exists "${PATIENT}.merged.intervals"
 
 echo -e "\\n[Recal] Indel realignment..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
-        -jar "$GATK" \
+{ time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        -jar "$GATK1_65" \
         --analysis_type IndelRealigner \
         --reference_sequence "$REF" \
-        --knownAlleles "$THOUSAND" \
+        --knownAlleles "$THOUSAND_OLD" \
         --logging_level WARN \
         --consensusDeterminationModel USE_READS \
         --input_file "${PATIENT}.merged.bam" \
@@ -158,7 +149,7 @@ rm -f "${PATIENT}.merged.bam.bai"
 rm -f "${PATIENT}.merged.intervals"
 
 echo -e "\\n[Recal] Fix mate information..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_FIXMATEINFO}" \
         INPUT="${PATIENT}.merged.realigned.bam" \
         OUTPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
@@ -174,7 +165,7 @@ rm -f "${PATIENT}.merged.realigned.bam"
 rm -f "${PATIENT}.merged.realigned.bai"
 
 echo -e "\\n[Recal] Mark duplicates..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_MARKDUPS}" \
         INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         OUTPUT="${PATIENT}.merged.realigned.rmDups.bam" \
@@ -190,16 +181,16 @@ assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo -e "\\n[Recal] Index BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+{ time $SAMTOOLS0_1_18 index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
 
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 
 ### Job crushed at -Xmx8g, increase!
 echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
-{ time $JAVA -Xmx128g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
+{ time $JAVA6 -Xmx128g -Djava.io.tmpdir="${TMP}" -jar "$GATK1_65" \
         --analysis_type CountCovariates \
         --reference_sequence "$REF" \
-        --knownSites "$DBSNP" \
+        --knownSites "$DBSNP_132" \
         --num_threads "${ncores}" \
         --logging_level WARN \
         --covariate ReadGroupCovariate \
@@ -214,7 +205,7 @@ echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.csv"
 
 echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
+{ time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK1_65" \
         --analysis_type TableRecalibration \
         --reference_sequence "$REF" \
         --logging_level WARN \
@@ -231,7 +222,7 @@ rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
 rm -f "${PATIENT}.merged.realigned.rmDups.csv"
 
 echo -e "\\n[Recal] Split BAM files..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
+{ time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK1_65" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
         --logging_level WARN \
@@ -248,13 +239,13 @@ do
         base=${base%%.bam}
         echo -e "\\n[Recal] Splitting off $base..."
 
-		  echo "[Recal] sorting ${base}.bwa.realigned.rmDups.recal.bam"
-        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || error "Sorting $base failed"
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam"
+		  echo "[Recal] sorting ${base}.${RECAL_BAM_EXT}.bam"
+        { time $SAMTOOLS0_1_18 sort "$i" "${base}.${RECAL_BAM_EXT}"; } 2>&1 || error "Sorting $base failed"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.bam"
 
-		  echo "[Recal] indexing ${base}.bwa.realigned.rmDups.recal.bam"
-        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || error "Indexing $base failed"
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam.bai"
+		  echo "[Recal] indexing ${base}.${RECAL_BAM_EXT}.bam"
+        { time $SAMTOOLS0_1_18 index "${base}.${RECAL_BAM_EXT}.bam"; } 2>&1 || error "Indexing $base failed"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.bam.bai"
         rm -f "$i"
 done
 
@@ -264,36 +255,36 @@ date
 echo "------------------------------------------------------"
 
 echo "[QC] Quality Control"
-for i in *.bwa.realigned.rmDups.recal.bam
+for i in *.${RECAL_BAM_EXT}.bam
 do
         echo "------------------------------------------------------"
-        base=${i%%.bwa.realigned.rmDups.recal.bam}
+        base=${i%%.${RECAL_BAM_EXT}.bam}
         echo "[QC] $base"
 
         echo -e "\\n[QC] Calculate flag statistics..."
-        { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat"; } 2>&1
+        { time $SAMTOOLS0_1_18 flagstat "$i" > "${base}.${RECAL_BAM_EXT}.flagstat"; } 2>&1
 
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.flagstat"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.flagstat"
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
-        { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_HSMETRICS}" \
-                BAIT_INTERVALS="${ILIST}" \
-                TARGET_INTERVALS="${ILIST}" \
+                BAIT_INTERVALS="${INTERVAL}" \
+                TARGET_INTERVALS="${INTERVAL}" \
                 INPUT="$i" \
-                OUTPUT="${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" \
+                OUTPUT="${base}.${RECAL_BAM_EXT}.hybrid_selection_metrics" \
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
 
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.hybrid_selection_metrics"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
-        { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA6 -Xmx16g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
-                OUTPUT="${base}.bwa.realigned.rmDups.recal" \
+                OUTPUT="${base}.${RECAL_BAM_EXT}" \
                 REFERENCE_SEQUENCE="${REF}" \
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
@@ -301,7 +292,7 @@ do
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Collect multiple QC metrics failed"
 		  for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
 		  do
-		      assert_file_exists  "${base}.bwa.realigned.rmDups.recal.${EXT}"
+		      assert_file_exists  "${base}.${RECAL_BAM_EXT}.${EXT}"
 		  done
         echo "------------------------------------------------------"
 done

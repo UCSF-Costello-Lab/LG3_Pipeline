@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 assert_pwd
 
@@ -14,55 +15,62 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 
-PSCN_HOME=${PSCN_HOME:-Costello-PSCN-Seq}
-rm_if_link "${PSCN_HOME}/seqzData" 
-rm_if_link "${PSCN_HOME}/pscbsData" 
-rm_if_link "${PSCN_HOME}/reports"
+if [ ! -r "${PSCN_HOME:?}" ]; then
+   error "PSCN_HOME link is not set! Please clone 'Costello-PSCN-Seq' repo, edit config.yml and 0.setup.R and provide link"
+fi
+warn "Make sure you edited config.yml and 0.setup.R files in 'Costello-PSCN-Seq' repo!"
 
-EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157t10}
-BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-SEQUENZA_OUT=${LG3_INPUT_ROOT}/${PROJECT}/sequenza/${PATIENT}
-make_dir "${SEQUENZA_OUT}"
-PSCBS_OUT=${LG3_INPUT_ROOT}/${PROJECT}/PSCBS/${PATIENT}
-make_dir "${PSCBS_OUT}"
-PSCN_OUT=${LG3_INPUT_ROOT}/${PROJECT}/PSCN/${PATIENT}
-make_dir "${PSCN_OUT}"
+## Assert that the conversion file exists
+assert_file_exists "${CONV}"
 
-## Requires absolute path
-LG3_HOME=$(readlink -e "${LG3_HOME}")
-BAMPATH=$(readlink -e "${BAMPATH}")
-SEQUENZA_OUT=$(readlink -e "${SEQUENZA_OUT}")
-LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}")
-PSCN_HOME=$(readlink -e "${PSCN_HOME}")
-PSCBS_OUT=$(readlink -e "${PSCBS_OUT}")
-PSCN_OUT=$(readlink -e "${PSCN_OUT}")
+BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 
 echo "Input: "
 echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- PSCN_HOME=${PSCN_HOME:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- CONV=${CONV}"
+echo "- BAMPATH=${BAMPATH}"
+echo "- EMAIL=${EMAIL}"
+
+echo "Removing symlinks for output"
+rm_if_link "${PSCN_HOME}/seqzData" 
+rm_if_link "${PSCN_HOME}/pscbsData" 
+rm_if_link "${PSCN_HOME}/reports"
+
+
+## Requires absolute path
+#LG3_HOME=$(readlink -e "${LG3_HOME}")
+LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}")
+BAMPATH=$(readlink -e "${BAMPATH}")
+
+echo "Making output directories if needed..."
+SEQUENZA_OUT=${LG3_INPUT_ROOT}/${PROJECT}/sequenza/${PATIENT}
+make_dir "${SEQUENZA_OUT}"
+if [ ! -d "${SEQUENZA_OUT}" ]; then
+	error "Directory not created: ${SEQUENZA_OUT}"
+fi
+PSCBS_OUT=${LG3_INPUT_ROOT}/${PROJECT}/PSCBS/${PATIENT}
+make_dir "${PSCBS_OUT}"
+PSCN_OUT=${LG3_INPUT_ROOT}/${PROJECT}/PSCN/${PATIENT}
+make_dir "${PSCN_OUT}"
+
+SEQUENZA_OUT=$(readlink -e "${SEQUENZA_OUT}")
+PSCBS_OUT=$(readlink -e "${PSCBS_OUT}")
+PSCN_OUT=$(readlink -e "${PSCN_OUT}")
+
 echo "- SEQUENZA_OUT=${SEQUENZA_OUT:?}"
 echo "- PSCBS_OUT=${PSCBS_OUT:?}"
 echo "- PSCN_OUT=${PSCN_OUT:?}"
-echo "- PROJECT=${PROJECT:?}"
-echo "- PATIENT=${PATIENT:?}"
-echo "- EMAIL=${EMAIL}"
 
-## Assert that the conversion file exists
-assert_file_exists "${CONV}"
-CONV=$(readlink -e "${CONV}")
-echo "- CONV=${CONV}"
-
-ls -1 "${BAMPATH}/"*.bwa.realigned.rmDups.recal.bam || error "No BAM files found in ${BAMPATH}"
-
+ls -1 "${BAMPATH}/"*."${RECAL_BAM_EXT}.bam" || error "No BAM files found in ${BAMPATH}"
 
 change_dir "${PSCN_HOME}"
 
@@ -84,6 +92,7 @@ ln -sf "${PSCBS_OUT}" pscbsData || error "Failed to create a link to ${PSCBS_OUT
 
 ln -sf "${PSCN_OUT}" reports || error "Failed to create a link to ${PSCN_OUT}"
 
-qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae "${LG3_HOME}/PSCN.submit_all.pbs"
+
+qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae -v "LG3_HOME=${LG3_HOME}" "${LG3_HOME}/PSCN.submit_all.pbs"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

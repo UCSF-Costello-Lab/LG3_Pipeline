@@ -1,12 +1,13 @@
 #!/bin/bash
-### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,INTERVAL=/path/to/exome_kit.interval_list /path/to/Recal.pbs
 #PBS -e _Recal_${PATIENT}.err
 #PBS -o _Recal_${PATIENT}.out
 #PBS -l nodes=1:ppn=12,vmem=200gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -15,10 +16,8 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
@@ -42,16 +41,14 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- NORMAL=${NORMAL:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 
 assert_patient_name "${PATIENT}"
 
 ## Assert existance of input files
-assert_file_exists "${ILIST}"
-ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
+assert_file_exists "${INTERVAL}"
 
 module load CBC r/3.4.2
-
 echo -n "Checking R: "
 Rscript --version || error "No Rscript is available!"
 
@@ -77,7 +74,8 @@ WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
 make_dir "${WDIR}"
 change_dir "${WDIR}"
 
-"${SH_RECAL}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL} failed"
+#"${SH_RECAL}" "$BAMS" "$PATIENT" "$INTERVAL" || error "${SH_RECAL} failed"
+"${SH_RECAL}" "$BAMS" "$PATIENT" || error "${SH_RECAL} failed"
 
 change_dir "${LG3_SCRATCH_ROOT}"
 
@@ -90,11 +88,12 @@ make_dir "${WDIR2}"
 
 change_dir "${WDIR2}"
 
-assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+assert_file_exists "../${NORMAL}.${RECAL_BAM_EXT}.bam"
 
 { time "${SH_GERMLINE}" \
-      "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SH_GERMLINE} failed"
+      "../${NORMAL}.${RECAL_BAM_EXT}.bam" \
+      "${PATIENT}" ; } 2>&1 || error "${SH_GERMLINE} failed"
+      #"${PATIENT}" "$INTERVAL"; } 2>&1 || error "${SH_GERMLINE} failed"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
 

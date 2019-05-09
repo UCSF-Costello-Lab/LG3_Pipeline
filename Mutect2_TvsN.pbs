@@ -11,7 +11,7 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -21,10 +21,8 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:?}
 EMAIL=${EMAIL:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -54,24 +52,22 @@ echo "- TUMOR=${TUMOR:?}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- TYPE=${TYPE:?}"
 echo "- RECAL_BAM_EXT=${RECAL_BAM_EXT:?}"
-#echo "- CONFIG=${CONFIG:?}"
+echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 echo "- XMX=${XMX:?}"
 echo "- WORKDIR=${WORKDIR:?}"
 assert_patient_name "${PATIENT}"
 BAMDIR=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 assert_directory_exists "${BAMDIR}"
-#assert_file_exists "${CONFIG}"
+assert_file_exists "${CONFIG}"
 assert_file_exists "${INTERVAL}"
-#CONFIG=$(readlink -e "${CONFIG:?}") ## Absolute path
-INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 
 ### Software
 SH_MUTECT2=${LG3_HOME}/scripts/Mutect2_TvsN.sh
 assert_file_executable "${SH_MUTECT2}"
 
-BAMN=$BAMDIR/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}
-BAMT=$BAMDIR/${PATIENT}/${TUMOR}.${RECAL_BAM_EXT}
+BAMN=$BAMDIR/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}.bam
+BAMT=$BAMDIR/${PATIENT}/${TUMOR}.${RECAL_BAM_EXT}.bam
 
 assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
@@ -86,18 +82,18 @@ echo "Patient = $PATIENT"
 echo "Normal = $BAMN"
 echo "Tumor = $BAMT"
 echo "Tum. Type = $TYPE"
-#echo "Config = $CONFIG"
+echo "Config = $CONFIG"
 echo "Interval = $INTERVAL"
 echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
 echo "SCRATCH=${SCRATCH}"
 
+  #"${INTERVAL}" \
 { time "${SH_MUTECT2}" \
   "$BAMN" \
   "$BAMT" \
   "NOR-${NORMAL}__${TYPE}-${TUMOR}" \
   "${PATIENT}" \
-  "${INTERVAL}" \
   "${XMX}" \
   "${WORKDIR}"; } 2>&1 || error "Mutect2 failed"
 
@@ -107,8 +103,5 @@ cp -p "${SCRATCH}"/* "${WORKDIR}" || error "Fail to copy results to ${WORKDIR}"
 
 echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT}"
-
-echo "End of PBS script!"
-date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

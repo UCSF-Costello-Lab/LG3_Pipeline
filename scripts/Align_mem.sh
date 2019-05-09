@@ -2,7 +2,7 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
-source_lg3_conf
+
 XMX=${XMX:-Xmx32G} 
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -13,12 +13,10 @@ echo "Arguments: $*"
 CLEAN=true
 
 ### Configuration
-LG3_HOME=${LG3_HOME}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
-LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 assert_file_exists "${INTERVAL:?}"
 
 ### Debug
@@ -212,6 +210,11 @@ echo "[BQSR] GATK4::ApplyBQSR "
    --QUIET true \
    --verbosity ERROR; } 2>&1 || error "FAILED"
 		
+echo "[Align] Sort ${SAMPLE}.mem.sorted.mrkDups.recal.bam"
+{ time ${SAMTOOLS} sort "${SAMPLE}.mem.sorted.mrkDups.recal.bam" -o "${SAMPLE}.mem.sorted.mrkDups.recal.sorted.bam"; } 2>&1 || error "FAILED"
+
+mv -f "${SAMPLE}.mem.sorted.mrkDups.recal.sorted.bam" "${SAMPLE}.mem.sorted.mrkDups.recal.bam"
+
 echo "[Align] Index ${SAMPLE}.mem.sorted.mrkDups.recal.bam"
 { time ${SAMTOOLS} index "${SAMPLE}.mem.sorted.mrkDups.recal.bam"; } 2>&1 || error "FAILED"
 
@@ -241,8 +244,6 @@ ${CLEAN} && rm -f "${SAMPLE}.mem.sorted."???
 ${CLEAN} && rm -f "${SAMPLE}.mem.sorted.mrkDups.bam"
 ${CLEAN} && rm -f "${SAMPLE}.mem.sorted.mrkDups.bam.bai"
 
-echo "All done!"
-echo "-------------------------------------------------"
 rm -rf "$TMP"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

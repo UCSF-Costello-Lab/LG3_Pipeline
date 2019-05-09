@@ -3,7 +3,7 @@
 #PBS -N ${PATIENT}.pindel
 #PBS -e _Pindel_${PATIENT}.err
 #PBS -o _Pindel_${PATIENT}.out
-#PBS -l nodes=1:ppn=6,vmem=12gb
+#PBS -l nodes=1:ppn=6,vmem=64gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -17,12 +17,9 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
@@ -55,13 +52,6 @@ echo "- CONV=${CONV:?}"
 
 assert_patient_name "${PATIENT}"
 assert_file_exists "${CONV}"
-CONV=$(readlink -e "${CONV:?}") ## Absolute path
-
-echo "PINDEL"
-echo "Patient: ${PATIENT}"
-echo "Project: ${PROJECT}"
-echo "Conversion File: ${CONV}"
-echo "----------------------------------"
 
 SH_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.sh
 SH_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.sh
@@ -71,7 +61,6 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-13
 
 echo "Software:"
 echo "- PINDEL=${PINDEL:?}"
-echo "- PINDEL_NEW=${PINDEL_NEW:?}"
 echo "- PINDEL2VCF=${PINDEL2VCF:?}"
 assert_file_executable "${PINDEL}"
 assert_file_executable "${PINDEL2VCF}"
@@ -99,7 +88,7 @@ change_dir "${LG3_SCRATCH_ROOT}"
 date
 echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 
-"${SH_PINDEL_SETUP}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${SH_PINDEL_SETUP} failed"
+"${SH_PINDEL_SETUP}" "${PATIENT}" || error "${SH_PINDEL_SETUP} failed"
 assert_file_exists "${PATIENT}.pindel.cfg"
 
 ## run pindel
@@ -146,6 +135,9 @@ echo -e "\\n========= [Filter] Filter pindel output using target $TARGET"
 ## annotate (annovar, kinase, cosmic, etc) and filter
 echo -e "\\n========= [Annotate] Annotate indels and apply annotation-based filters"
 "${SH_PINDEL_ANNOTATE}" "${PATIENT}.indels" "${PROJECT}"  || error "${SH_PINDEL_ANNOTATE} failed"
+
+echo -n "[Pindel] Total mutations: "
+grep -vc "#" "${PATIENT}.indels.filtered.anno.txt"
 
 ## move from scratch to project folder
 cp -r "${LG3_SCRATCH_ROOT}"/* "${WDIR}"

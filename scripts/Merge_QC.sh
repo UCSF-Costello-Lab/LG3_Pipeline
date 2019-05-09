@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
@@ -11,7 +11,6 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -41,10 +40,6 @@ export PATH=/opt/R/R-latest/bin:$PATH
 #Define resources and tools
 pl="Illumina"
 pu="Exome"
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
-REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 
 #Input variables
 bamfiles=$1
@@ -68,7 +63,7 @@ inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf 
 echo "[Merge] Merge BAM files..."
 # shellcheck disable=SC2086
 # Comment: Because how 'inputs' is created and used below
-$JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
+${JAVA6} -Xmx32g -Djava.io.tmpdir="${TMP}" \
         -jar "$PICARD_HOME/MergeSamFiles.jar" \
         ${inputs} \
         OUTPUT="${prefix}.merged.bam" \
@@ -80,12 +75,12 @@ $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
 assert_file_exists "${prefix}.merged.bam"
 
 echo "[Merge] Index new BAM file..."
-$SAMTOOLS index "${prefix}.merged.bam" || error "First indexing failed"
+${SAMTOOLS0_1_18} index "${prefix}.merged.bam" || error "First indexing failed"
 assert_file_exists "${prefix}.merged.bam.bai"
 
 
 echo "[Merge] Coordinate-sort and enforce read group assignments..."
-$JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
+${JAVA6} -Xmx2g -Djava.io.tmpdir="${TMP}" \
         -jar "$PICARD_HOME/AddOrReplaceReadGroups.jar" \
         INPUT="${prefix}.merged.bam" \
         OUTPUT="${prefix}.merged.sorted.sam" \
@@ -105,24 +100,24 @@ rm -f "${prefix}.merged.bam"
 rm -f "${prefix}.merged.bam.bai"
 
 echo "[Merge] Convert SAM to BAM..."
-$SAMTOOLS view -bS "${prefix}.merged.sorted.sam" > "${prefix}.merged.sorted.bam" || error "BAM conversion failed"
+${SAMTOOLS0_1_18} view -bS "${prefix}.merged.sorted.sam" > "${prefix}.merged.sorted.bam" || error "BAM conversion failed"
 assert_file_exists "${prefix}.merged.sorted.bam"
 
 rm -f "${prefix}.merged.sorted.sam"
 
 echo "[Merge] Index the BAM file..."
-$SAMTOOLS index "${prefix}.merged.sorted.bam" || error "BAM indexing failed"
+${SAMTOOLS0_1_18} index "${prefix}.merged.sorted.bam" || error "BAM indexing failed"
 
 echo "[Merge] make symbolic link for downstream compatibility..."
-ln -sf "${prefix}.merged.sorted.bam" "${prefix}.bwa.realigned.rmDups.recal.bam"
-ln -sf "${prefix}.merged.sorted.bam.bai" "${prefix}.bwa.realigned.rmDups.recal.bam.bai"
+ln -sf "${prefix}.merged.sorted.bam" "${prefix}.${RECAL_BAM_EXT}.bam"
+ln -sf "${prefix}.merged.sorted.bam.bai" "${prefix}.${RECAL_BAM_EXT}.bam.bai"
 
 echo "[QC] Calculate flag statistics..."
-$SAMTOOLS flagstat "${prefix}.merged.sorted.bam" > "${prefix}.merged.sorted.flagstat" 2>&1
+${SAMTOOLS0_1_18} flagstat "${prefix}.merged.sorted.bam" > "${prefix}.merged.sorted.flagstat" 2>&1
 assert_file_exists "${prefix}.merged.sorted.flagstat"
 
 echo "[QC] Calculate hybrid selection metrics..."
-$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+${JAVA6} -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${LG3_HOME}/tools/picard-tools-1.64/CalculateHsMetrics.jar" \
         BAIT_INTERVALS="${ilist}" \
         TARGET_INTERVALS="${ilist}" \
@@ -135,7 +130,7 @@ $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
 assert_file_exists "${prefix}.merged.hybrid_selection_metrics"
 
 echo "[QC] Collect multiple QC metrics..."
-$JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+${JAVA6} -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${LG3_HOME}/tools/picard-tools-1.64/CollectMultipleMetrics.jar" \
         INPUT="${prefix}.merged.sorted.bam" \
         OUTPUT="${prefix}.merged" \

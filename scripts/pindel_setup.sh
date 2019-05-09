@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -10,10 +10,8 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
@@ -29,28 +27,18 @@ if [[ $LG3_DEBUG ]]; then
   echo "- hostname=$(hostname)"
 fi
 
-#
-##
-### PINDEL
-###
-### /path/to/pindel_setup.sh
-##
-#
+PINDEL_SETUP=${LG3_HOME}/scripts/mk_pindel_cfg.sh
+assert_file_exists "${PINDEL_SETUP}"
 
-PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
-assert_file_exists "${PYTHON_PINDEL_SETUP}"
-
-patient_ID=$1
-proj=$2
-patIDs=$3
+PATIENT=$1
 echo "Input:"
-echo "- patient_ID=${patient_ID:?}"
-echo "- proj=${proj:?}"
-echo "- patIDs=${patIDs:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- CONV=${CONV:?}"
 
-assert_patient_name "${patient_ID}"
-assert_file_exists "${patIDs}"
+assert_patient_name "${PATIENT}"
+assert_file_exists "${CONV}"
 
-python "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
+${PINDEL_SETUP}
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

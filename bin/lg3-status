@@ -1,4 +1,6 @@
 #! /usr/bin/env bash
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 ### Check Status of Running LG3 Pipeline
 ###
 ### Usage:
@@ -13,25 +15,21 @@
 ###  --recal           Check recalibrated output
 ###  --recal2          Check before merge recalibrated output
 ###  --germline        Check germline output
-###  --mutect          Check MutDet output
+###  --mut             Check MutDet output
+###  --mut2            Check Mutect2 output
 ###  --pindel          Check Pindel output
-###  --combined        Check mutation output
+###  --comb            Check combined mutation output
 ###  --all             Check all outputs
 ###  --qc1             Check QC1 outputs
 ###  --qc2             Check QC2 outputs
 ###  --qc3             Check QC3 outputs
+###  --pscn            Check PSCN reports
 ###
 ### Examples:
 ###  lg3 status --all Patient157t10
 ###
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-PROJECT=${PROJECT:-LG3}
-CONV=${CONV:-patient_ID_conversions.tsv}
-
-#BAM_SUFF=bwa.realigned.rmDups.recal.bam
-BAM_SUFF=bwa.realigned.rmDups.recal.insert_size_metrics
 
 ## Colors and colored messages
 RED='\033[0;31m'
@@ -51,10 +49,12 @@ REC2=false
 GL=false
 PINDEL=false
 MUT=false
+MUT2=false
 COMB=false
 QC1=false
 QC2=false
 QC3=false
+PSCN=false
 
 wcl() {
     grep -vc "^#" "$1" 
@@ -64,7 +64,6 @@ wcl() {
 while [ -n "$1" ]; do
 case $1 in
     --conv*=*) CONV=${1#*=};shift 1;;
-    --bam*=*) BAM_SUFF=${1#*=};shift 1;;
     --all) ALL=true;shift 1;;
 
     --f*) FQ=true;shift 1;;
@@ -73,12 +72,14 @@ case $1 in
     --recal) REC=true;shift 1;;
     --recal2) REC2=true;shift 1;;
     --g*) GL=true;shift 1;;
-    --p*) PINDEL=true;shift 1;;
-    --mut*) MUT=true;shift 1;;
+    --pindel) PINDEL=true;shift 1;;
+    --mut) MUT=true;shift 1;;
+    --mut2) MUT2=true;shift 1;;
     --comb*) COMB=true;shift 1;;
     --qc1) QC1=true;shift 1;;
     --qc2) QC2=true;shift 1;;
     --qc3) QC3=true;shift 1;;
+    --pscn) PSCN=true;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -98,18 +99,18 @@ fi
 
 PATIENTS=${*:-Patient157t10}
 
-echo -e "Checking output for project ${PROJECT}"
+echo -e "Checking output for project ${PROJECT:?}"
 echo "Patient/samples table ${CONV}"
-echo "BAM suffix ${BAM_SUFF}"
+echo "BAM suffix ${RECAL_BAM_EXT}"
 echo "Patients ${PATIENTS:?}"
 
 for PATIENT in ${PATIENTS[*]}
 do
-    [[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
+    assert_patient_name "${PATIENT}"
     normid="$ERR"
     echo -e -n "$SEP Checking ${YEL}${PATIENT}${NOC}"
     ## Pull out PATIENT specific conversion info
-    grep -w "${PATIENT}" "${CONV}" > "${PATIENT}.temp.conversions.txt"
+    grep -P "\\t${PATIENT}\\t" "${CONV}" > "${PATIENT}.temp.conversions.txt"
     ## Get normal ID
     while IFS=$'\t' read -r ID _ _ SAMP
     do
@@ -174,12 +175,14 @@ if $REC ; then
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
-        OUT=${WORKDIR}/${ID}.$BAM_SUFF
-        if [ -s "$OUT" ]; then
-            echo -e "Recal $ID $OK"
-        else
-            echo -e "Recal $ID $ERR"
-        fi
+		  for _file in ${WORKDIR}/${ID}.${RECAL_BAM_EXT}.*insert_size_metrics
+		  do
+				if [ -s "${_file}" ]; then
+					echo -e "Recal $ID $OK"
+				else
+					echo -e "Recal $ID $ERR"
+				fi
+		  done
     done < "${PATIENT}.temp.conversions.txt"
 fi
 
@@ -189,12 +192,14 @@ if $REC2 ; then
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
-        OUT=${WORKDIR}/${ID}.$BAM_SUFF
-        if [ -s "$OUT" ]; then
-            echo -e "Recal $ID $OK"
-        else
-            echo -e "Recal $ID $ERR"
-        fi
+        for _file in ${WORKDIR}/${ID}.${RECAL_BAM_EXT}.*insert_size_metrics
+        do
+            if [ -s "${_file}" ]; then
+               echo -e "Recal $ID $OK"
+            else
+               echo -e "Recal $ID $ERR"
+            fi
+        done
     done < "${PATIENT}.temp.conversions.txt"
 fi
 
@@ -274,6 +279,44 @@ if $MUT ; then
     done < "${PATIENT}.temp.conversions.txt"
 fi
 
+if $MUT2 ; then
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/mutations/${PATIENT}_mutect2
+    ## Cycle through tumors and check MUTECT2 output
+    while IFS=$'\t' read -r ID _ _ SAMP
+    do
+        if [ "$SAMP" = "Normal" ]; then
+            continue
+        elif [ "${SAMP:0:2}" = "ML" ]; then
+            samp_label="ML"
+        elif [ "${SAMP:0:3}" = "GBM" ]; then
+            samp_label="GBM"
+        elif [ "${SAMP:0:3}" = "Pri" ]; then
+            samp_label="TUM"
+        elif [ "${SAMP:0:3}" = "Tum" ]; then
+            samp_label="TUM"
+        elif [ "${SAMP:0:11}" = "Recurrence1" ]; then
+            samp_label="REC1"
+        elif [ "${SAMP:0:11}" = "Recurrence2" ]; then
+            samp_label="REC2"
+        elif [ "${SAMP:0:11}" = "Recurrence3" ]; then
+            samp_label="REC3"
+        elif [ "${SAMP:0:5}" == "tumor" ]; then
+            samp_label="unkTUM"
+        else
+            samp_label="TUM"
+        fi
+    
+        ## Expected output:
+        OUT=${WORKDIR}/NOR-${normid}__${samp_label}-${ID}.m2.obmm.cc.func.filt.tsv
+        if [ -s "$OUT" ]; then
+            LCNT=$(wcl "$OUT")
+            echo -e "Mutect2 $ID $OK ${YEL}${LCNT}${NOC}"
+        else
+            echo -e "Mutect2 $ID $ERR"
+        fi
+    
+    done < "${PATIENT}.temp.conversions.txt"
+fi
 
 if $COMB ; then
     WORKDIR1=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
@@ -329,7 +372,8 @@ if $QC2 ; then
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
-        OUT=${WORKDIR}/${ID}.bwa.realigned.rmDups.recal.bam.hist
+        #OUT=${WORKDIR}/${ID}.bwa.realigned.rmDups.recal.bam.hist
+        OUT=${WORKDIR}/${ID}.${RECAL_BAM_EXT}.bam.hist
         if [ -r "$OUT" ]; then
 				LCNT=$(wcl "$OUT")
             echo -e "QC2 hist $ID $OK ${YEL}${LCNT}${NOC}"
@@ -374,8 +418,43 @@ if $QC3 ; then
         echo -e "QC3 ${DIR} plots $ERR"
     fi
 	done
+fi
 
-
+	if $PSCN ; then
+		 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/PSCN/${PATIENT}/Costello-Exome,bwa,realigned,rmDups,recal,seqz,100kb,tcn=2
+    while IFS=$'\t' read -r ID _ _ SAMP
+    do
+        if [ "$SAMP" = "Normal" ]; then
+            continue
+        elif [ "${SAMP:0:2}" = "ML" ]; then
+            samp_label="ML"
+        elif [ "${SAMP:0:3}" = "GBM" ]; then
+            samp_label="GBM"
+        elif [ "${SAMP:0:3}" = "Pri" ]; then
+            samp_label="TUM"
+        elif [ "${SAMP:0:3}" = "Tum" ]; then
+            samp_label="TUM"
+        elif [ "${SAMP:0:11}" = "Recurrence1" ]; then
+            samp_label="REC1"
+        elif [ "${SAMP:0:11}" = "Recurrence2" ]; then
+            samp_label="REC2"
+        elif [ "${SAMP:0:11}" = "Recurrence3" ]; then
+            samp_label="REC3"
+        elif [ "${SAMP:0:5}" == "tumor" ]; then
+            samp_label="unkTUM"
+        else
+            samp_label="TUM"
+        fi
+    
+        ## Expected output:
+        OUT=${WORKDIR}/${PATIENT},${ID}_vs_${normid},PairedPSCBS,report.pdf
+        if [ -s "$OUT" ]; then
+            echo -e "PSCN $ID $OK"
+        else
+            echo -e "PSCN $ID $ERR"
+        fi
+    
+    done < "${PATIENT}.temp.conversions.txt"
 fi
 
 ## Delete PATIENT specific conversion file

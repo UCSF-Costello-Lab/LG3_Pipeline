@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -12,7 +13,6 @@ echo "Arguments: $*"
 FAILED=false
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -32,13 +32,11 @@ GRN='\033[0;32m'
 YEL='\033[0;33m'
 NOC='\033[0m'
 
-if [ $# -lt 2 ]; then
-    error "please specify project and patient!"
+if [ $# -ne 1 ]; then
+    error "please specify patient!"
 fi
 
-PROJECT=$1
-PATIENT=$2
-CONV=${CONV:-patient_ID_conversions.tsv}
+PATIENT=$1
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
 
 echo -e "Checking MuTect output for ${YEL}${PATIENT}${NOC}, project ${PROJECT}"
@@ -105,7 +103,3 @@ rm "${PATIENT}.temp.conversions.txt"
 ${FAILED} && error "Script failed"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
-
-
-
-

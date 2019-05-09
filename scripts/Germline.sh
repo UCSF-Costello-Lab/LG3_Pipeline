@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
@@ -11,7 +12,6 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -34,43 +34,38 @@ fi
 ## Input
 nbamfile=$1
 PATIENT=$2
-ILIST=$3
 echo "Input:"
 echo "- nbamfile=${nbamfile:?}"
 echo "- PATIENT=${PATIENT:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 
 ## Assert existance of input files
 assert_file_exists "${nbamfile}"
-assert_file_exists "${ILIST}"
+assert_file_exists "${INTERVAL}"
 
 normalname=${nbamfile##*/}
-normalname=${normalname%%.bwa*}
+normalname=${normalname%%.*}
 bamdir=${nbamfile%/*}
 
 ## References
-REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
-DBSNP=${LG3_HOME}/resources/dbsnp_132.hg19.sorted.vcf
 echo "References:"
 echo "- REF=${REF:?}"
-echo "- DBSNP=${DBSNP:?}"
+echo "- DBSNP_132=${DBSNP_132:?}"
 assert_file_exists "${REF}"
-assert_file_exists "${DBSNP}"
+assert_file_exists "${DBSNP_132}"
 
 ## Software
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
-GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 PYTHON_VCF_GERMLINE=${LG3_HOME}/scripts/vcf_germline.py
 echo "Software:"
-echo "- JAVA=${JAVA:?}"
+echo "- JAVA6=${JAVA6:?}"
 echo "- PYTHON=${PYTHON:?}"
-echo "- GATK=${GATK:?}"
+echo "- GATK1_65=${GATK1_65:?}"
 
 ## Assert existance of software
-assert_file_executable "${JAVA}"
+assert_file_executable "${JAVA6}"
 assert_file_executable "${PYTHON}"
-assert_file_exists "${GATK}"
+assert_file_exists "${GATK1_65}"
 assert_file_exists "${PYTHON_VCF_GERMLINE}"
 
 
@@ -83,29 +78,29 @@ echo "[Germline] Normal Sample: $normalname"
 echo "-------------------------------------------------"
 
 ## Construct string with one or more '-I <bam>' elements
-INPUTS=$(for i in ${bamdir}/*.bwa.realigned.rmDups.recal.bam
+INPUTS=$(for i in ${bamdir}/*.${RECAL_BAM_EXT}.bam
 do
         assert_file_exists "${i}"
         echo -n "-I $i "
 done)
 echo "$INPUTS"
 
-        ### $JAVA -Xmx16g \
+        ### $JAVA6 -Xmx16g \
         ### -nct 3 -nt 8 \
 if [ ! -e "${PATIENT}.UG.snps.raw.vcf" ]; then
         echo "[Germline] Running Unified Genotyper..."
         # shellcheck disable=SC2086
         # Comment: Because how INPUTS is created and used below
-        { time $JAVA -Xmx64g \
-                -jar "$GATK" \
+        { time $JAVA6 -Xmx64g \
+                -jar "${GATK1_65}" \
                 --analysis_type UnifiedGenotyper \
                 --genotype_likelihoods_model SNP \
                 --genotyping_mode DISCOVERY \
-                $INPUTS \
+                ${INPUTS} \
                 --reference_sequence "$REF" \
-                --dbsnp "$DBSNP" \
+                --dbsnp "${DBSNP_132}" \
                 --logging_level WARN \
-                --intervals "$ILIST" \
+                --intervals "${INTERVAL}" \
                 -baq CALCULATE_AS_NECESSARY \
                 --noSLOD \
                 -nt "${ncores}" \
@@ -123,12 +118,12 @@ if [ ! -e "${PATIENT}.UG.snps.annotated.vcf" ]; then
         echo "[Germline] Annotating Unified Genotyper SNPs..."
         # shellcheck disable=SC2086
         # Comment: Because how INPUTS is created and used below
-        { time $JAVA -Xmx64g \
-                -jar "$GATK" \
+        { time $JAVA6 -Xmx64g \
+                -jar "${GATK1_65}" \
                 --analysis_type VariantAnnotator \
-                $INPUTS \
+                ${INPUTS} \
                 --reference_sequence "$REF" \
-                --dbsnp "$DBSNP" \
+                --dbsnp "${DBSNP_132}" \
                 --logging_level WARN \
                 --intervals "${PATIENT}.UG.snps.raw.vcf" \
                 --variant "${PATIENT}.UG.snps.raw.vcf" \
@@ -153,8 +148,8 @@ fi
 
 if [ ! -e "${PATIENT}.UG.snps.vcf" ]; then
         echo "[Germline] Filtering Unified Genotyper SNPs..."
-        { time $JAVA -Xmx64g \
-                -jar "$GATK" \
+        { time $JAVA6 -Xmx64g \
+                -jar "${GATK1_65}" \
                 --analysis_type VariantFiltration \
                 --reference_sequence "$REF" \
                 --logging_level WARN \
@@ -186,7 +181,7 @@ fi
 for i in ${bamdir}/*.bam
 do
         tumorname=${i##*/}
-        tumorname=${tumorname%%.bwa*}
+        tumorname=${tumorname%%.*}
         prefix="NOR-${normalname}_vs_${tumorname}"
 
         if [ ! -e "${prefix}.germline" ]; then

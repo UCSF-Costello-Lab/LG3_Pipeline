@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -9,10 +10,8 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -30,8 +29,6 @@ fi
 
 ### Input
 PATIENT=$1
-PROJECT=$2
-CONV=$3
 echo "Input:"
 echo " - PATIENT=${PATIENT:?}"
 echo " - PROJECT=${PROJECT:?}"

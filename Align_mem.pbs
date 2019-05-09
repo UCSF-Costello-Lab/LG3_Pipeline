@@ -7,7 +7,8 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -16,13 +17,10 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -71,9 +69,6 @@ echo "Current working directory: ${PWD}"
 
 cp "$FASTQ1" "$FASTQ2" .
 
-#echo "Content of ${PWD}:"
-#ls -srt
-
 FQ1=$(basename "$FASTQ1")
 FQ2=$(basename "$FASTQ2")
 
@@ -92,8 +87,5 @@ cp -p "${WDIR}/"* "${DEST}/"
 
 echo "Cleanup: rm ${LG3_SCRATCH_ROOT}"
 rm -rf "${LG3_SCRATCH_ROOT}"
-
-echo "End of script!"
-date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

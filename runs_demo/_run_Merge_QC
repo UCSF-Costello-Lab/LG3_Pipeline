@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 assert_pwd
 
@@ -11,18 +12,14 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:-?}
-PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 SAMPLES=${SAMPLES:-Z00600t10 Z00601t10}
 SAMPLE=${SAMPLE:-Y00600t10}
-ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 
 ## Requires absolute path
-LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 echo "Input:"
@@ -37,7 +34,7 @@ echo "- SAMPLE=${SAMPLE:?}"
 
 assert_patient_name "${PATIENT}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
 ## Override the qsub email address?
@@ -56,13 +53,11 @@ D=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
-SUFF=bwa.realigned.rmDups.recal.bam
-
 CNT=0
 for S in ${SAMPLES}
 do
    ((CNT++))
-   B=$D/${PATIENT}/${S}.$SUFF
+   B=$D/${PATIENT}/${S}.${RECAL_BAM_EXT}.bam
    assert_file_exists "${B}"
    echo "Found $B"
    BAMS=${BAMS}:$B
@@ -73,4 +68,6 @@ echo "Total BAMS: $CNT"
 echo "$BAMS"
 
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT}" "$PBS"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

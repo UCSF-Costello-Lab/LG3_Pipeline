@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -9,10 +10,8 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -26,8 +25,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- USER=$USER"
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
-
-
 #
 ##
 #
@@ -38,14 +35,12 @@ OK() {
 
 ### Input
 PATIENT=$1
-PROJECT=$2
-CONV=$3
 echo "Settings:"
 echo " - PATIENT=${PATIENT:?}"
 echo " - PROJECT=${PROJECT:?}"
 echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
-
+CONV=$(readlink -e "${CONV}")
 
 ### Software
 unset PYTHONPATH  ## ADHOC: In case it is set by user
@@ -71,7 +66,5 @@ OUTDIR=${MAF}/${PATIENT}_plots
 make_dir "${OUTDIR}"
 "${RSCRIPT_BIN}" "${R_MAFPLOT}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${R_MAFPLOT} failed"
 OK
-
-echo "Finished"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

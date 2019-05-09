@@ -1,31 +1,27 @@
 #!/bin/bash
 #### See https://github.com/broadinstitute/gatk/blob/master/scripts/mutect2_wdl/mutect_resources.wdl
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-module load jdk/1.8.0
-module load htslib/1.7
+module load jdk/1.8.0 htslib/1.7
 
-LG3_HOME=/home/jocostello/shared/LG3_Pipeline
-LG3_HOME=${LG3_HOME:?}
-
-# shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
-
-GATK4="${LG3_HOME}/tools/gatk-4.0.12.0/gatk"
-assert_file_executable ${GATK4}
+assert_file_executable "${GATK4:?}"
 command_mem=100
 
 echo "Input: "
-echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_HOME=${LG3_HOME}"
+echo "- GATK4=${GATK4}"
 
-#ILIST=${LG3_HOME}/resources/All_exome_targets.extended_200bp.bed
-ILIST=${LG3_HOME}/resources/All_but_chrM_targets.extended_200bp.bed
-echo "- ILIST=${ILIST:?}"
-assert_file_exists "${ILIST}"
+TARGET=${LG3_HOME}/resources/All_but_chrM_targets.extended_200bp.bed
+echo "- TARGET=${TARGET:?}"
+assert_file_exists "${TARGET}"
 
 MAF=0.001
 echo "- MAF=$MAF"
@@ -44,7 +40,7 @@ do
 	echo -e "\\nStep 1: SelectVariants ... "
 	OUT1=chr${CHR}_selected.vcf
 
-	{ time ${GATK4} --java-options "-Xmx${command_mem}g" SelectVariants -V ${GNOMAD} -L ${ILIST} -O ${OUT1} --lenient; } 2>&1 || { echo "FAILED"; exit 1; }
+	{ time ${GATK4} --java-options "-Xmx${command_mem}g" SelectVariants -V ${GNOMAD} -L "${TARGET}" -O ${OUT1} --lenient; } 2>&1 || { echo "FAILED"; exit 1; }
 	
 	echo -n "Output: "
 	wc -l ${OUT1}

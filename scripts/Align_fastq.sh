@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -10,12 +10,10 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
-LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -40,17 +38,13 @@ fi
 #
 
 ## References
-BWA_INDEX=${LG3_HOME}/resources/bwa_indices/hg19.bwa
 echo "References:"
-echo "- BWA_INDEX=${BWA_INDEX:?}"
-BWA_INDEX_HOME=$(dirname "${BWA_INDEX}")
+echo "- BWA_INDEX_OLD=${BWA_INDEX_OLD:?}"
+BWA_INDEX_HOME=$(dirname "${BWA_INDEX_OLD}")
 assert_directory_exists "${BWA_INDEX_HOME}"
 
 ## Software
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
-BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
 PYTHON_REMOVEQC_GZ=${LG3_HOME}/scripts/removeQCgz.py
@@ -58,16 +52,16 @@ PICARD_FIXMATEINFO=${LG3_HOME}/tools/picard-tools-1.64/FixMateInformation.jar
 PICARD_ADD_OR_REPLACE_RG=${LG3_HOME}/tools/picard-tools-1.64/AddOrReplaceReadGroups.jar
 
 echo "Software:"
-echo "- JAVA=${JAVA:?}"
+echo "- JAVA6=${JAVA6:?}"
 echo "- PYTHON=${PYTHON:?}"
-echo "- BWA=${BWA:?}"
-echo "- SAMTOOLS=${SAMTOOLS:?}"
+echo "- BWA_OLD=${BWA_OLD:?}"
+echo "- SAMTOOLS0_1_18=${SAMTOOLS0_1_18:?}"
 
 ## Assert existance of software
-assert_file_executable "${JAVA}"
+assert_file_executable "${JAVA6}"
 assert_file_executable "${PYTHON}"
-assert_file_executable "${BWA}"
-assert_file_executable "${SAMTOOLS}"
+assert_file_executable "${BWA_OLD}"
+assert_file_executable "${SAMTOOLS0_1_18}"
 assert_file_exists "${PYTHON_REMOVEQC_GZ}"
 assert_file_exists "${PICARD_FIXMATEINFO}"
 assert_file_exists "${PICARD_ADD_OR_REPLACE_RG}"
@@ -90,7 +84,7 @@ assert_file_exists "${fastq1}"
 assert_file_exists "${fastq2}"
 
 
-TMP="${LG3_SCRATCH_ROOT}/$SAMPLE/tmp"
+TMP="${LG3_SCRATCH_ROOT}/${SAMPLE}/tmp"
 make_dir "${TMP}"
 
 echo "-------------------------------------------------"
@@ -99,7 +93,7 @@ echo "-------------------------------------------------"
 echo "[Align] Fastq file #1: $fastq1"
 echo "[Align] Fastq file #2: $fastq2"
 echo "[Align] Prefix: $SAMPLE"
-echo "[Align] BWA index: $BWA_INDEX"
+echo "[Align] BWA index: ${BWA_INDEX_OLD}"
 echo "-------------------------------------------------"
 
 
@@ -122,17 +116,17 @@ else
 fi
 
 echo "[Align] Align first-in-pair reads..."
-$BWA aln -t "${ncores}" "$BWA_INDEX" "${SAMPLE}.read1.QC.fastq" \
+${BWA_OLD} aln -t "${ncores}" "${BWA_INDEX_OLD}" "${SAMPLE}.read1.QC.fastq" \
   > "${SAMPLE}.read1.sai" 2> "__${SAMPLE}_read1.log" || error "BWA alignment 1 failed"
 assert_file_exists "${SAMPLE}.read1.sai"
 
 echo "[Align] Align second-in-pair reads..."
-$BWA aln -t "${ncores}" "$BWA_INDEX" "${SAMPLE}.read2.QC.fastq" \
+${BWA_OLD} aln -t "${ncores}" "${BWA_INDEX_OLD}" "${SAMPLE}.read2.QC.fastq" \
   > "${SAMPLE}.read2.sai" 2> "__${SAMPLE}_read2.log" || error "BWA alignment 2 failed"
 assert_file_exists "${SAMPLE}.read2.sai"
 
 echo "[Align] Pair aligned reads..."
-$BWA sampe "$BWA_INDEX" "${SAMPLE}.read1.sai" "${SAMPLE}.read2.sai" \
+${BWA_OLD} sampe "${BWA_INDEX_OLD}" "${SAMPLE}.read1.sai" "${SAMPLE}.read2.sai" \
   "${SAMPLE}.read1.QC.fastq" "${SAMPLE}.read2.QC.fastq" > "${SAMPLE}.bwa.sam" 2>> "__${SAMPLE}.sampe.log" || error "BWA sampe failed"
 assert_file_exists "${SAMPLE}.bwa.sam"
 
@@ -140,7 +134,7 @@ rm -f "${SAMPLE}.read1.QC.fastq"
 rm -f "${SAMPLE}.read2.QC.fastq"
 
 echo "[Align] Verify mate information..."
-$JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
+${JAVA6} -Xmx2g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_FIXMATEINFO}" \
         INPUT="${SAMPLE}.bwa.sam" \
         OUTPUT="${SAMPLE}.bwa.mateFixed.sam" \
@@ -151,7 +145,7 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
 assert_file_exists "${SAMPLE}.bwa.mateFixed.sam"
 
 echo "[Align] Coordinate-sort and enforce read group assignments..."
-$JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
+${JAVA6} -Xmx2g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_ADD_OR_REPLACE_RG}" \
         INPUT="${SAMPLE}.bwa.mateFixed.sam" \
         OUTPUT="${SAMPLE}.bwa.sorted.sam" \
@@ -168,11 +162,11 @@ $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \
 assert_file_exists "${SAMPLE}.bwa.sorted.sam"
 
 echo "[Align] Convert SAM to BAM..."
-$SAMTOOLS view -bS "${SAMPLE}.bwa.sorted.sam" > "${SAMPLE}.trim.bwa.sorted.bam" || error "BAM conversion failed"
+${SAMTOOLS0_1_18} view -bS "${SAMPLE}.bwa.sorted.sam" > "${SAMPLE}.trim.bwa.sorted.bam" || error "BAM conversion failed"
 assert_file_exists "${SAMPLE}.trim.bwa.sorted.bam"
 
 echo "[Align] Index the BAM file..."
-$SAMTOOLS index "${SAMPLE}.trim.bwa.sorted.bam" || error "BAM indexing failed"
+${SAMTOOLS0_1_18} index "${SAMPLE}.trim.bwa.sorted.bam" || error "BAM indexing failed"
 assert_file_exists "${SAMPLE}.trim.bwa.sorted.bam.bai"
 
 echo "[Align] Clean up..."
@@ -183,8 +177,9 @@ echo "[Align] Finished!"
 
 echo "-------------------------------------------------"
 echo "[QC] Calculate flag statistics..."
-$SAMTOOLS flagstat "${SAMPLE}.trim.bwa.sorted.bam" > "${SAMPLE}.trim.bwa.sorted.flagstat" 2>&1
+${SAMTOOLS0_1_18} flagstat "${SAMPLE}.trim.bwa.sorted.bam" > "${SAMPLE}.trim.bwa.sorted.flagstat" 2>&1
 assert_file_exists "${SAMPLE}.trim.bwa.sorted.flagstat"
+cat "${SAMPLE}.trim.bwa.sorted.flagstat"
 
 echo "[QC] Finished!"
 echo "-------------------------------------------------"

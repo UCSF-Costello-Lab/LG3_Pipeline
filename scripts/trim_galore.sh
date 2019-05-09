@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -10,14 +11,9 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-TG=${TG:-${LG3_HOME}/tools/TrimGalore-0.4.4/trim_galore}
-
-#CUTADAPT=/opt/Python/Python-2.7.9/bin/cutadapt ### Problem !
-CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then

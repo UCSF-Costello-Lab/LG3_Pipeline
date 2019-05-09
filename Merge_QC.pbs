@@ -9,6 +9,7 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -19,7 +20,6 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -42,16 +42,16 @@ echo "Input:"
 echo "- PATIENT=${PATIENT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- SAMPLE=${SAMPLE:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 
 assert_patient_name "${PATIENT}"
-assert_file_exists "${ILIST}"
+assert_file_exists "${INTERVAL}"
 
 date
 make_dir "${LG3_SCRATCH_ROOT}/${SAMPLE}"
 change_dir "${LG3_SCRATCH_ROOT}/${SAMPLE}"
 
-"${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$SAMPLE" "${ILIST}"
+"${LG3_HOME}/scripts/Merge_QC.sh" "$BAMS" "$SAMPLE" "${INTERVAL}"
 
 change_dir "${LG3_SCRATCH_ROOT}"
 
@@ -61,7 +61,5 @@ echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
 rm -rf "${LG3_SCRATCH_ROOT:?}/${SAMPLE}"
 
 echo "Output: ${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}"
-echo "End of script!"
-date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

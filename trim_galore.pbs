@@ -5,7 +5,8 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -14,7 +15,6 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -53,15 +53,9 @@ echo "FASTQ1=${FASTQ1:?} (expanded)"
 echo "FASTQ2=${FASTQ2:?} (expanded)"
 
 OPWD=${PWD:?}
-PROG=trim_galore
-NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
-DATE=$(date '+%Y-%m-%d %H:%M:%S')
-echo "Started $PROG on $DATE"
-echo "Using node(s): $NODES"
 
 ## Assert existance of software
-SH_TRIM_GALORE=${LG3_HOME}/scripts/trim_galore.sh
-assert_file_executable "${SH_TRIM_GALORE}"
+assert_file_executable "${SH_TRIM_GALORE:?}"
 
 make_dir "${LG3_OUTPUT_ROOT}"
 make_dir "${LG3_OUTPUT_ROOT}/${PROJECT}"

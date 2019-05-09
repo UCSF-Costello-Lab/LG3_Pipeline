@@ -1,12 +1,13 @@
 #!/bin/bash
-### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,INTERVAL=/path/to/exome_kit.interval_list /path/to/Recal.pbs
 #PBS -e _Rec${START}_${PATIENT}.err
 #PBS -o _Rec${START}_${PATIENT}.out
 #PBS -l nodes=1:ppn=12,vmem=200gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -15,10 +16,8 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 START=${START:?}
@@ -44,15 +43,15 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- NORMAL=${NORMAL:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 echo "- START=${START:?}"
 echo "- RECOVER_DIR=${RECOVER_DIR:?}"
 
 assert_patient_name "${PATIENT}"
 
 ## Assert existance of input files
-assert_file_exists "${ILIST}"
-ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
+assert_file_exists "${INTERVAL}"
+#INTERVAL=$(readlink -e "${INTERVAL:?}") ## Absolute path
 
 module load CBC r/3.4.2
 
@@ -83,7 +82,7 @@ change_dir "${WDIR}"
 echo "Copying recovered data from ${RECOVER_DIR} ..."
 cp -p "${RECOVER_DIR}/"* . || error "cp!"
 
-"${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" "$START" "$RECOVER_DIR" || error "${SCRIPT_A} failed"
+"${SCRIPT_A}" "$BAMS" "$PATIENT" "$START" "$RECOVER_DIR" || error "${SCRIPT_A} failed"
 
 change_dir "${LG3_SCRATCH_ROOT}"
 
@@ -96,11 +95,11 @@ make_dir "${WDIR2}"
 
 change_dir "${WDIR2}"
 
-assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+assert_file_exists "../${NORMAL}.${RECAL_BAM_EXT}.bam"
 
 { time "${SCRIPT_B}" \
-      "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SCRIPT_B} failed"
+      "../${NORMAL}.${RECAL_BAM_EXT}.bam" \
+      "${PATIENT}"; } 2>&1 || error "${SCRIPT_B} failed"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2" 
 

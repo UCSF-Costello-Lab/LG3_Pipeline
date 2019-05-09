@@ -15,18 +15,7 @@ def pindel_setup(patient_ID, projectname, patIDs):
   ## pull out patient specific info
   data_pat = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID, data)
 
-  ## determine where files are stored
-  #if col_file != "":
-  #  fileheader = col_file
-  #  print fileheader
-  #else:
-
-  ### After Recal2 use this:
-  #fileheader = ".bwa.realigned.rmDups"
-
-  ### After Recal use this:
-  fileheader = ".bwa.realigned.rmDups.recal"
-  #fileheader = "-trim.bwa.realigned.rmDups.recal"
+  fileheader = "." + os.environ["RECAL_BAM_EXT"]
 
   testID = data_pat[0].strip().split('\t')[col_lib]
   if "norm" in patient_ID:

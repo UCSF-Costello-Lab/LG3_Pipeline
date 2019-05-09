@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 assert_pwd
 
@@ -11,27 +12,26 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-QC_PLOT_HOME=${QC_PLOT_HOME:-exomeQualityPlots}
 EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 BEDPATH=${BEDPATH:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.bed}
 BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
 
+if [ ! -r "${QC_PLOT_HOME:?}" ]; then
+   error "QC_PLOT_HOME link is not set! Please clone 'exomeQualityPlots' repo and provide link"
+fi
+
 ## Requires absolute path
-LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
-QC_PLOT_HOME=$(readlink -e "${QC_PLOT_HOME}")
 
 echo "Input: "
 echo "- LG3_HOME=${LG3_HOME:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
-echo "- QC_PLOT_HOME=${QC_PLOT_HOME:?}"
+echo "- QC_PLOT_HOME=${QC_PLOT_HOME}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- EMAIL=${EMAIL}"
@@ -42,7 +42,7 @@ echo "- BEDPATH=${BEDPATH:?}"
 assert_directory_exists "${BAMPATH}"
 BAMPATH=$(readlink -e "${BAMPATH}") 
 echo "- BAMPATH=${BAMPATH}"
-ls -1 "${BAMPATH}/${PATIENT}"/*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
+ls -1 "${BAMPATH}/${PATIENT}"/*."${RECAL_BAM_EXT}.bam" || error "No bam files found in ${BAMPATH}"
 
 make_dir "${WORKDIR}"
 WORKDIR=$(readlink -e "${WORKDIR}")

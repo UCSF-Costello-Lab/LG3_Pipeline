@@ -1,7 +1,7 @@
 #!/bin/bash
 ##### Version of the pipeline without Base Qual. Recal! (for BAMS already recaled!)
 
-### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal_pass2.pbs
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,INTERVAL=/path/to/exome_kit.interval_list /path/to/Recal_pass2.pbs
 ### Output files
 #PBS -e _Recal2_${PATIENT}.err
 #PBS -o _Recal2_${PATIENT}.out
@@ -9,13 +9,18 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
-PROJECT=${PROJECT:-LG3}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
@@ -28,6 +33,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- hostname=$(hostname)"
 fi
 
 ### Input
@@ -36,20 +43,14 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- BAMS=${BAMS:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- NORMAL=${NORMAL:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 
 ## Assert existance of input files
-assert_file_exists "${ILIST}"
-ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
+assert_file_exists "${INTERVAL}"
 
 module load CBC r/3.4.4
 echo -n "Checking R: "
 Rscript --version || error "Rscript executable is not available"
-
-DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
-echo "Started $PROG on $DATE"
-echo "Using node(s): $NODES"
 
 ## Assert existance of software
 SH_RECAL_PASS2=${LG3_HOME}/scripts/Recal_pass2.sh
@@ -67,7 +68,7 @@ WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
 make_dir "${WDIR}"
 change_dir "${WDIR}"
 
-"${SH_RECAL_PASS2}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL_PASS2} failed!"
+"${SH_RECAL_PASS2}" "$BAMS" "$PATIENT" || error "${SH_RECAL_PASS2} failed!"
 echo "${SH_RECAL_PASS2} done!"
 
 echo "Making symlinks ..."
@@ -92,11 +93,12 @@ WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
 make_dir "${WDIR2}"
 change_dir "${WDIR2}"
 
-assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+assert_file_exists "../${NORMAL}.${RECAL_BAM_EXT}.bam"
 
 { time "${SH_GERMLINE}" \
       "../${NORMAL}.bwa.realigned.rmDups.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SH_GERMLINE} failed"
+      "${PATIENT}"; } 2>&1 || error "${SH_GERMLINE} failed"
+      #"${PATIENT}" "$INTERVAL"; } 2>&1 || error "${SH_GERMLINE} failed"
 
 cp -a "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
 

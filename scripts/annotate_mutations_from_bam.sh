@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -9,10 +10,8 @@ echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-PROJECT=${PROJECT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -27,9 +26,7 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 ## Input
-CONV=$1
-PATIENT=$2
-PROJECT=$3
+PATIENT=$1
 echo "Input:"
 echo " - CONV=${CONV:?}"
 echo " - PATIENT=${PATIENT:?}"
@@ -43,7 +40,5 @@ python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${PATIENT}.snvs" "$
 
 ## remove intermediate files
 rm -f "${PATIENT}.snvs."*Q.txt
-
-echo "Finished"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

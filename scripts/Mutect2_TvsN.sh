@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
-source_lg3_conf
+source "${LG3_HOME:?}/scripts/utils.sh"
+
 CLEAN=true
 
 add2fname() {
@@ -20,9 +20,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-PROJECT=${PROJECT:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
@@ -48,21 +46,14 @@ echo "- VERBOSITY=${VERBOSITY}"
 nbamfile=$1
 tbamfile=$2
 prefix=$3
-patientID=$4
-ILIST=${INTERVAL:?}
-XMX=$6
-DEST=$7 ## Destination directory
+PATIENT=$4
+XMX=$5
+DEST=$6 ## Destination directory
 assert_directory_exists "${DEST}"
 XMX=${XMX:-Xmx160G} ## Default 160gb
-PADDING=${PADDING:-0} ## Padding the intervals
 
 HG=hg19
 
-bOBMM=${bOBMM:-true}
-bCC=${bCC:-true}
-bOB=${bOB:-false}
-bAA=${bAA:-false}
-bFUNC=${bFUNC:-true}
 echo "Flow control:"
 echo "- use OBMM filter=${bOBMM:?}"
 echo "- calc contamination=${bCC:?}"
@@ -75,8 +66,8 @@ echo "Input:"
 echo "- nbamfile=${nbamfile:?}"
 echo "- tbamfile=${tbamfile:?}"
 echo "- prefix=${prefix:?}"
-echo "- patientID=${patientID:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 echo "- PADDING=${PADDING:?}"
 echo "- XMX=${XMX:?}"
 echo "- HG=${HG:?}"
@@ -84,7 +75,7 @@ echo "- HG=${HG:?}"
 ## Assert existance of input files
 assert_file_exists "${nbamfile}"
 assert_file_exists "${tbamfile}"
-assert_file_exists "${ILIST}"
+assert_file_exists "${INTERVAL}"
 
 ### Software
 module load jdk/1.8.0 python/2.7.15 htslib/1.7
@@ -168,7 +159,7 @@ echo "-------------------------------------------------"
 echo -n "[Mutect2] Somatic Mutation Detection "
 date
 echo "-------------------------------------------------"
-echo "[Mutect2] Patient ID: $patientID"
+echo "[Mutect2] Patient ID: $PATIENT"
 echo "[Mutect2] Normal bam file: $nbamfile"
 echo "[Mutect2] Tumor bam file: $tbamfile"
 echo "[Mutect2] Normal Sample: $normalname"
@@ -220,7 +211,7 @@ if ${bOBMM}; then
    OUT=$(add2fname "${OUT}" obmm)
 fi
 extra_args=""
-[[ -z "${ILIST}" ]] || extra_args=(--intervals "${ILIST}" --interval-padding "${PADDING}")
+[[ -z "${INTERVAL}" ]] || extra_args=(--intervals "${INTERVAL}" --interval-padding "${PADDING}")
 echo "[Mutect2] extra_args: ${extra_args[*]}"
 
 ### --disable-read-filter MateOnSameContigOrNoMappedMateReadFilter when use alt-aware and post-alt processed alignments to GRCh38

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Germline.pbs
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,INTERVAL=/path/to/exome_kit.interval_list /path/to/Germline.pbs
 ### Output files
 #PBS -e _Germline_${PATIENT}.err
 #PBS -o _Germline_${PATIENT}.out
@@ -8,7 +8,8 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -17,9 +18,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -31,7 +30,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "EMAIL=${EMAIL}"
-#  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
+  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "PWD=$PWD"
   echo "USER=$USER"
 fi
@@ -40,10 +39,9 @@ fi
 ## Input
 echo "Input:"
 echo "- PATIENT=${PATIENT:?}"
-echo "- ILIST=${ILIST:?}"
+echo "- INTERVAL=${INTERVAL:?}"
 
-assert_file_exists "${ILIST}"
-ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
+assert_file_exists "${INTERVAL}"
 
 ## Software
 SH_GERMLINE=${LG3_HOME}/scripts/Germline.sh
@@ -58,11 +56,11 @@ DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 
-assert_file_exists "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam"
+assert_file_exists "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}.bam"
 
 "${SH_GERMLINE}" \
-      "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}.bam" \
       "${PATIENT}" \
-      "$ILIST"
+      "${INTERVAL}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

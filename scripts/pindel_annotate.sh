@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -10,9 +10,7 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-PROJECT=${PROJECT:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
@@ -47,15 +45,15 @@ echo "- proj=${proj:?}"
 assert_file_exists "${datafile}"
 
 BIN=${LG3_HOME}/scripts
-ANNOVAR_HOME=${LG3_HOME}/AnnoVar
+#ANNOVAR_HOME=${LG3_HOME}/AnnoVar
 assert_directory_exists "${BIN}"
 assert_directory_exists "${ANNOVAR_HOME}"
 
-KINASEDATA="${LG3_HOME}/resources/all_human_kinases.txt"
-COSMICDATA="${LG3_HOME}/resources/CosmicMutantExport_v58_150312.tsv"
-CANCERDATA="${LG3_HOME}/resources/SangerCancerGeneCensus_2012-03-15.txt"
-CONVERT="${LG3_HOME}/resources/RefSeq.Entrez.txt"
-ANNDB=${ANNOVAR_HOME}/hg19db/
+#KINASEDATA="${LG3_HOME}/resources/all_human_kinases.txt"
+#COSMICDATA="${LG3_HOME}/resources/CosmicMutantExport_v58_150312.tsv"
+#CANCERDATA="${LG3_HOME}/resources/SangerCancerGeneCensus_2012-03-15.txt"
+#CONVERT="${LG3_HOME}/resources/RefSeq.Entrez.txt"
+#ANNDB=${ANNOVAR_HOME}/hg19db/
 
 echo "References:"
 echo "- KINASEDATA=${KINASEDATA:?}"
@@ -149,8 +147,5 @@ echo "================= [Annotate] delete intermediate files"
 rm -f "${datafile}.filter"
 rm -f "${datafile}.filter".*
 rm -f "${datafile}.tmp"*
-
-echo -n "$PROG is done on "
-date
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

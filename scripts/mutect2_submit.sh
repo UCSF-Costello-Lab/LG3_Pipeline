@@ -2,7 +2,6 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
-source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -11,7 +10,6 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
@@ -49,19 +47,16 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 ### Input
 PATIENT=$1
-CONV=$2
-PROJECT=$3
 echo "Input:"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 echo "- PATIENT=${PATIENT:?}"
 assert_file_exists "${CONV}"
 
-if [ $# -ne 3 ]; then
-    error "Please specify patient, CONV file and project!"
-fi
+#if [ $# -ne 3 ]; then
+#    error "Please specify patient, CONV file and project!"
+#fi
 
-#INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 echo "- INTERVAL=${INTERVAL:?}"
 assert_file_exists "${INTERVAL}"
 
@@ -123,7 +118,7 @@ do
                 warn "File $OUT exists, skipping this job ..."
         else
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "Mut2_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "Mut2_${PATIENT}" -v "${QSUB_ENVVARS},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${PATIENT}.temp.conversions.txt"
