@@ -201,7 +201,7 @@ if ${bOBMM}; then
 	echo "[Mutect2] Generated artifact priors:"
 	ls -l "${tumorname}-artifact-prior-table.tar.gz"
 
-	XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tar.gz")
+	#XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tar.gz")
 else
 	echo -e "\\n[Mutect2] OBMM filter is NOT requested. Skipping ..."
 fi
@@ -229,6 +229,7 @@ if [ ! -e "${DEST}/${OUT}" ]; then
             --normal-sample "${normalname}" \
             --input "${tbamfile}" \
             --tumor-sample "${tumorname}" \
+				--f1r2-tar-gz "${tumorname}-F1R2Counts.tar.gz" \
             --output "${OUT}"; } 2>&1 || error "FAILED"
         echo "Done"
 			mv "${OUT}.stats" "${tumorname}-M2FilteringStats.tsv"
@@ -237,14 +238,35 @@ else
       echo -e "\\n[Mutect2] Found MuTect2 output ${OUT}, downloading ..."
 		cp -p "${DEST}/${OUT}" .
 		cp -p "${DEST}/${OUT}.tbi" .
+		cp -p "${tumorname}-M2FilteringStats.tsv" .
 		if ${bAA}; then
 			cp -p "${DEST}/${tumorname}.bamout.bam" .
 			cp -p "${DEST}/${tumorname}.bamout.bai" .	
+			cp -p "${DEST}/${tumorname}-F1R2Counts.tar.gz" .
 		fi
 fi
+assert_file_exists "${tumorname}-F1R2Counts.tar.gz"
 assert_file_exists "${OUT}"
 assert_file_exists "${OUT}".tbi
 assert_file_exists "${tumorname}-M2FilteringStats.tsv"
+
+### Learning step of the OB MM filter (RECOMMENDED)
+### AKA read orientation model
+### Get the maximum likelihood estimates of artifact prior probabilities
+echo -e "\\n[Mutect2] Running GATK4::LearnReadOrientationModel ..."
+{ time ${GATK4} --java-options -"${XMX}" LearnReadOrientationModel \
+	--verbosity "${VERBOSITY}" \
+	-I "${tumorname}-F1R2Counts.tar.gz" \
+	-O "${tumorname}-artifact-prior-table.tar.gz"; } 2>&1 || error "FAILED"
+
+assert_file_exists "${tumorname}-artifact-prior-table.tar.gz"
+echo "[Mutect2] Generated artifact priors:"
+ls -l "${tumorname}-artifact-prior-table.tar.gz"
+
+XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tar.gz")
+
+
+
 if ${bAA}; then
 	assert_file_exists "${tumorname}".bamout.bam
 	assert_file_exists "${tumorname}".bamout.bai
@@ -318,6 +340,8 @@ if [ ! -e "${DEST}/${OUT}" ]; then
       	--output "${OUT}" \
 			--stats "${tumorname}-M2FilteringStats.tsv" \
 			--contamination-estimate ${CONTF2F} \
+			--threshold-strategy OPTIMAL_F_SCORE \
+			--f-score-beta 1.0 \
       	--reference "${REF}"; } 2>&1 || error "FAILED"
 		echo "Done"
 else

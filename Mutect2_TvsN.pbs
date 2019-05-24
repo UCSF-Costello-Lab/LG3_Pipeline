@@ -1,7 +1,5 @@
 #!/bin/bash
 
-### Usage: qsub -v NORMAL=LibraryName,TUMOR=LibraryName,TYPE=TUM_or_REC1,PATIENT=XX,CONFIG=/path/to/mutationconfig.cfg,INTERVAL=/path/to/Interval_List ${LG3_HOME}/MutDet.pbs
-### Use Config: ${LG3_HOME}/FilterMutations/mutationConfig.cfg
 ### Use Interval: ${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list 
 ### Output files
 #PBS -e _Mut2_${TUMOR}.err
@@ -52,14 +50,14 @@ echo "- TUMOR=${TUMOR:?}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- TYPE=${TYPE:?}"
 echo "- RECAL_BAM_EXT=${RECAL_BAM_EXT:?}"
-echo "- CONFIG=${CONFIG:?}"
+#echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 echo "- XMX=${XMX:?}"
 echo "- WORKDIR=${WORKDIR:?}"
 assert_patient_name "${PATIENT}"
 BAMDIR=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 assert_directory_exists "${BAMDIR}"
-assert_file_exists "${CONFIG}"
+#assert_file_exists "${CONFIG}"
 assert_file_exists "${INTERVAL}"
 
 ### Software
@@ -82,7 +80,7 @@ echo "Patient = $PATIENT"
 echo "Normal = $BAMN"
 echo "Tumor = $BAMT"
 echo "Tum. Type = $TYPE"
-echo "Config = $CONFIG"
+#echo "Config = $CONFIG"
 echo "Interval = $INTERVAL"
 echo "Java Memory = $XMX"
 echo "WORKDIR=$WORKDIR"
