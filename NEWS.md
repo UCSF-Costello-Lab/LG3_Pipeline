@@ -1,6 +1,6 @@
 # LG3_Pipeline
 
-## Version 2019-03-23-9000 (develop version)
+## Version 2019-03-23-9002 (develop version)
 
 ### SIGNIFICANT CHANGES
 
@@ -8,7 +8,7 @@
    i.e. when the current working directory equals '${LG3_HOME}'.  This
    protects against various potential mistakes such as overriding installed
    files and settings.
-   
+
  
 ### NEW FEATURES
 
