@@ -8,7 +8,7 @@ LG3_HOME_HIDE:=/home/jocostello/shared/LG3_Pipeline_HIDE
 
 check: check_use_utils_instead check_hardcoded check_shellcheck check_r
 
-check_shellcheck: check_pbs check_sh check_demo check_tests
+check_shellcheck: check_pbs check_sh check_demo check_tests check_conf
 
 check_tests:
 	@echo "* Validating test scripts"
@@ -20,9 +20,13 @@ check_pbs:
 
 check_sh:
 	@echo "* Validating shell scripts"
-	shellcheck bin/lg3*
+	shellcheck -x bin/lg3*
 	shellcheck FilterMutations/*.sh
 	shellcheck -x scripts/*.sh
+
+check_conf:
+	@echo "* Validating configuration scripts"
+	shellcheck --shell=bash --exclude=2034 lg3.conf
 
 check_demo:
 	@echo "* Validating run scripts"

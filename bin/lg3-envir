@@ -4,8 +4,11 @@
 ### Usage:
 ###  lg3 envir
 ###
-
 CURDIR=$(pwd -P)
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
 
 echo "Cur dir =$CURDIR"
 echo "LG3_HOME=$LG3_HOME"

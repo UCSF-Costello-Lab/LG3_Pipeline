@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -45,7 +46,7 @@ echo -e "Checking MuTect output for ${YEL}${PATIENT}${NOC}, project ${PROJECT}"
 echo "conversion ${CONV}"
 
 ## Pull out patient specific conversion info
-grep -w "${PATIENT}" "${CONV}" | tr -d '\r' > "${PATIENT}.temp.conversions.txt"
+grep -P "\\t${PATIENT}\\t" "${CONV}" | tr -d '\r' > "${PATIENT}.temp.conversions.txt"
 
 ## Get normal ID
 while IFS=$'\t' read -r ID _ _ SAMP

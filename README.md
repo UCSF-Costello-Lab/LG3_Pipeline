@@ -18,7 +18,7 @@ The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, 
 ```sh
 $ module load CBC lg3
 $ lg3 --version
-2019-03-23
+2019-07-22
 ```
 
 See `module avail` for alternative versions.
@@ -28,7 +28,7 @@ See `module avail` for alternative versions.
 
 ### Setup
 
-To run through the built-in "small" test example (20-25 hours), let's create a separate project folder:
+To run through the built-in "small" test example (5-10 hours), let's create a separate project folder:
 ```sh
 $ mkdir -p ~/lg3-demo
 $ cd ~/lg3-demo
@@ -120,10 +120,10 @@ Now, we are ready to launch the pipeline (step by step):
 $ cd ~/lg3-demo
 $ module load CBC lg3
 $ export PATIENT=Patient157t10
-$ ./_run_Trim                    ## ~20 minutes
-$ ./_run_Align_gz                ## ~1 hour
-$ ./_run_Recal                   ## ~13-15 hours
-$ ./_run_Pindel && ./_run_MutDet ## ~1.5 hours & ~4 hours
+$ ./_run_Trim                    ## ~5 minutes
+$ ./_run_Align_gz                ## ~5-10 minutes
+$ ./_run_Recal                   ## ~2.5 hours
+$ ./_run_Pindel && ./_run_MutDet ## ~20 minutes & ~1.0 hour
 $ ./_run_PostMut                 ## ~5 minutes
 ```
 
@@ -172,7 +172,7 @@ QSUB_OPTS="-l nodes=1:ppn=6 -l vmem=32gb" ./_run_Align_gz
 Throughout all steps, you can check the current status using the `lg3 status` command.  Here is what the output looks like when all steps are complete:
 ```sh
 $ export PATIENT=Patient157t10
-$ lg3 status --all $PATIENT
+$ lg3 status $PATIENT
 Checking output for project LG3
 Patient/samples table patient_ID_conversions.tsv
 BAM suffix bwa.realigned.rmDups.recal.insert_size_metrics
@@ -290,6 +290,13 @@ The above folder is now where the LG3 Pipeline lives.  Environment variable `LG3
 ```sh
 export LG3_HOME=/path/to/LG3_Pipeline
 ```
+
+Then, in order to get access to the `lg3` command-line tool, make sure to also set:
+
+```sh
+export PATH="${LG3_HOME}/bin:${PATH}"
+```
+
 
 ### Contributors
 

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
@@ -83,7 +84,7 @@ echo "[Germline] Normal Sample: $normalname"
 echo "-------------------------------------------------"
 
 ## Construct string with one or more '-I <bam>' elements
-INPUTS=$(for i in ${bamdir}/*.bwa.realigned.rmDups.recal.bam
+INPUTS=$(for i in "${bamdir}"/*.bwa.realigned.rmDups.recal.bam
 do
         assert_file_exists "${i}"
         echo -n "-I $i "
@@ -183,7 +184,7 @@ else
    echo "[Germline] Found output ${PATIENT}.UG.snps.vcf -- Skipping..."
 fi
 
-for i in ${bamdir}/*.bam
+for i in "${bamdir}"/*.bam
 do
         tumorname=${i##*/}
         tumorname=${tumorname%%.bwa*}

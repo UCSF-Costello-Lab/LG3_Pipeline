@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
+
+assert_pwd
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -34,7 +37,7 @@ echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 assert_patient_name "${PATIENT}"
 
-SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
+SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 echo "- SAMPLES=${SAMPLES:?}"
 
 

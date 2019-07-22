@@ -2,8 +2,7 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
-assert_file_exists "${LG3_HOME}/lg3.conf"
-source "${LG3_HOME}/lg3.conf"
+source_lg3_conf
 XMX=${XMX:-Xmx32G} 
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -20,8 +19,6 @@ LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${PBS_NUM_PPN:-1}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
-#INTERVAL=${INTERVAL:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
-#PADDING=${PADDING:-200}
 assert_file_exists "${INTERVAL:?}"
 
 ### Debug
@@ -73,7 +70,7 @@ echo "- SAMTOOLS=${SAMTOOLS:?}"
 
 ## Assert existance of software
 assert_file_executable "${PYTHON}"
-assert_file_executable "$(which ${BWA})"
+assert_file_executable "$(command -v ${BWA})"
 assert_file_exists "${PYTHON_REMOVEQC_GZ}"
 
 ### Input

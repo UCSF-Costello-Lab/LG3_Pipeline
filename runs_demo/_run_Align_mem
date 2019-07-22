@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+
+assert_pwd
+
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -31,6 +35,8 @@ echo "- EMAIL=${EMAIL}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- CONV=${CONV:?}"
+echo "- INTERVAL=${INTERVAL:?}"
+echo "- PADDING=${PADDING:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 assert_patient_name "${PATIENT}"

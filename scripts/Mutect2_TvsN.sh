@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
-assert_file_exists "${LG3_HOME}/lg3.conf"
-source "${LG3_HOME}/lg3.conf"
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
+source_lg3_conf
+CLEAN=true
 
 add2fname() {
 	if [ $# -ne 2 ]; then
@@ -69,6 +70,7 @@ echo "- calc contamination=${bCC:?}"
 echo "- use OB filter=${bOB:?}"
 echo "- use AA filter=${bAA:?}"
 echo "- use Funcotator=${bFUNC:?}"
+echo "- clean intermediate files=${CLEAN:?}"
 
 echo "Input:"
 echo "- nbamfile=${nbamfile:?}"
@@ -97,12 +99,10 @@ python --version
 java -version
 
 ### References
-#REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
 assert_file_exists "${REF:?}"
 echo "- reference=${REF}"
 
 ### Somatic data source for Funcotator
-#FUNCO_PATH=/home/GenomeData/GATK_bundle/funcotator/funcotator_dataSources.v1.6.20190124s
 assert_directory_exists "${FUNCO_PATH:?}"
 echo "- FUNCO_PATH=${FUNCO_PATH}"
 
@@ -148,7 +148,7 @@ echo -e "\\n[Mutect2] Running GATK4::GetSampleName (BETA) from ${nbamfile} ... "
 	--verbosity "${VERBOSITY}" \
 	--input "${nbamfile}" \
 	--output normal_name.txt \
-	-encode; } 2>&1 || error "FAILED"
+	-encode true; } 2>&1 || error "FAILED"
 normalname=$(cat normal_name.txt)
 echo "Recovered normal sample name: ${normalname}"
 	
@@ -157,7 +157,7 @@ echo -e "\\n[Mutect2] Running GATK4::GetSampleName (BETA) from ${tbamfile} ... "
 	--verbosity "${VERBOSITY}" \
 	--input "${tbamfile}" \
 	--output tumor_name.txt \
-	-encode; } 2>&1 || error "FAILED"
+	-encode true; } 2>&1 || error "FAILED"
 tumorname=$(cat tumor_name.txt)
 echo "Recovered tumor sample name: ${tumorname}"
 	
@@ -193,28 +193,25 @@ if ${bOBMM}; then
 		--verbosity "${VERBOSITY}" \
 		-I "${tbamfile}" \
 		-R "${REF}" \
-		-ref-hist "${tumorname}-ref.metrics" \
-		-alt-table "${tumorname}-alt.tsv" \
-		-alt-hist "${tumorname}-alt-depth1.metrics"; } 2>&1 || error "FAILED"
+		-O "${tumorname}-F1R2Counts.tar.gz"; } 2>&1 || error "FAILED"
 	
+	assert_file_exists "${tumorname}-F1R2Counts.tar.gz"
 	echo "[Mutect2] Generated metrics:"
-	wc -l "${tumorname}"-alt* "${tumorname}"-ref.metrics
+	ls -l "${tumorname}-F1R2Counts.tar.gz"
 	
 	### Learning step of the OB MM filter (RECOMMENDED)
 	### Get the maximum likelihood estimates of artifact prior probabilities
 	echo -e "\\n[Mutect2] Running GATK4::LearnReadOrientationModel ..."
 	{ time ${GATK4} --java-options -"${XMX}" LearnReadOrientationModel \
 		--verbosity "${VERBOSITY}" \
-		-O "${tumorname}-artifact-prior-table.tsv" \
-   	-alt-table "${tumorname}-alt.tsv" \
-   	-ref-hist "${tumorname}-ref.metrics" \
-   	-alt-hist "${tumorname}-alt-depth1.metrics"; } 2>&1 || error "FAILED"
+		-I "${tumorname}-F1R2Counts.tar.gz" \
+		-O "${tumorname}-artifact-prior-table.tar.gz"; } 2>&1 || error "FAILED"
 	
-	assert_file_exists "${tumorname}-artifact-prior-table.tsv"
+	assert_file_exists "${tumorname}-artifact-prior-table.tar.gz"
 	echo "[Mutect2] Generated artifact priors:"
-	wc -l "${tumorname}-artifact-prior-table.tsv"
+	ls -l "${tumorname}-artifact-prior-table.tar.gz"
 
-	XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tsv")
+	XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tar.gz")
 else
 	echo -e "\\n[Mutect2] OBMM filter is NOT requested. Skipping ..."
 fi
@@ -235,16 +232,17 @@ if [ ! -e "${DEST}/${OUT}" ]; then
 			echo "[Mutect2] BAM out option requested"
 			echo "${XARG_bamout[@]}"
 		fi
-		{ time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_artifact_prior[@]}" "${XARG_bamout[@]}"  "${XARG_gnomAD[@]}" \
+		{ time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_bamout[@]}"  "${XARG_gnomAD[@]}" \
 				--verbosity "${VERBOSITY}" \
             --reference "${REF}" \
             --input "${nbamfile}" \
             --normal-sample "${normalname}" \
             --input "${tbamfile}" \
             --tumor-sample "${tumorname}" \
-				--contamination-fraction-to-filter ${CONTF2F} \
             --output "${OUT}"; } 2>&1 || error "FAILED"
         echo "Done"
+			mv "${OUT}.stats" "${tumorname}-M2FilteringStats.tsv"
+		
 else
       echo -e "\\n[Mutect2] Found MuTect2 output ${OUT}, downloading ..."
 		cp -p "${DEST}/${OUT}" .
@@ -256,6 +254,7 @@ else
 fi
 assert_file_exists "${OUT}"
 assert_file_exists "${OUT}".tbi
+assert_file_exists "${tumorname}-M2FilteringStats.tsv"
 if ${bAA}; then
 	assert_file_exists "${tumorname}".bamout.bam
 	assert_file_exists "${tumorname}".bamout.bai
@@ -323,11 +322,12 @@ fi
 #${m2_extra_filtering_args} optional
 if [ ! -e "${DEST}/${OUT}" ]; then
 	   echo -e "\\n[Mutect2] Running FilterMutectCalls ..."
-   	{ time ${GATK4} FilterMutectCalls "${extra_args[@]}" "${XARG_contamination_filter[@]}" \
+   	{ time ${GATK4} FilterMutectCalls "${extra_args[@]}" "${XARG_contamination_filter[@]}" "${XARG_artifact_prior[@]}" \
 			--verbosity "${VERBOSITY}" \
       	--variant "${IN}" \
       	--output "${OUT}" \
 			--stats "${tumorname}-M2FilteringStats.tsv" \
+			--contamination-estimate ${CONTF2F} \
       	--reference "${REF}"; } 2>&1 || error "FAILED"
 		echo "Done"
 else
@@ -470,7 +470,7 @@ fi
 
 OUT=$(add2fname "${OUT}" filt)
 
-echo -e "\\n[Mutect2] applying filter to keep only PASSed variants ... "
+echo -e "\\n[Mutect2] Keep only PASSed variants ... "
 zcat "${IN}" | grep '^#' | bgzip > "${OUT}"
 zcat "${IN}" | grep -v '^#' | grep -w PASS | bgzip >> "${OUT}"
 

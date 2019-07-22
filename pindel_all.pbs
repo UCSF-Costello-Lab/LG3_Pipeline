@@ -8,8 +8,7 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
-assert_file_exists "${LG3_HOME}/lg3.conf"
-source "${LG3_HOME}/lg3.conf"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -80,8 +79,6 @@ assert_file_executable "${SH_PINDEL_FILTER}"
 assert_file_executable "${SH_PINDEL_ANNOTATE}"
 assert_file_executable "${PYTHON_VCF2TDT}"
 
-REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
-TARGET=${LG3_HOME}/resources/All_exome_targets.extended_200bp.bed
 echo "References:"
 echo "- REF=${REF:?}"
 echo "- TARGET=${TARGET:?}"
@@ -105,8 +102,12 @@ echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 assert_file_exists "${PATIENT}.pindel.cfg"
 
 ## run pindel
+
 change_dir "${PATIENT}_pindel"
 echo -e "\\n========= [Pindel] Run pindel"
+
+## Report on the Pindel version
+${PINDEL} | head -1
 
 ${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL \
 	-o "${PATIENT}.pindel" \
