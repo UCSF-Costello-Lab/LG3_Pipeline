@@ -20,6 +20,8 @@
    of the predefined global settings on a project to project basis.  The
    latter file can also be used to configure variables such as PATIENT etc.
 
+ * Now 'lg3 status' defaults to using '--all'.
+
  * ROBUSTNESS: Now `bin/lg3-test` explicitly asserts that Rscript exists
    before attemption to use it.
 

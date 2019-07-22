@@ -16,7 +16,7 @@
 ###  --mutect          Check MutDet output
 ###  --pindel          Check Pindel output
 ###  --combined        Check mutation output
-###  --all             Check all outputs
+###  --all             Check all outputs (default)
 ###  --qc1             Check QC1 outputs
 ###  --qc2             Check QC2 outputs
 ###  --qc3             Check QC3 outputs
@@ -45,7 +45,7 @@ OK="$GRN OK$NOC"
 ERR="$RED missing$NOC"
 SEP="$YEL******$NOC"
 
-ALL=false
+ALL=true
 FQ=false
 TRIM=false
 BWA=false
@@ -70,18 +70,18 @@ case $1 in
     --bam*=*) BAM_SUFF=${1#*=};shift 1;;
     --all) ALL=true;shift 1;;
 
-    --f*) FQ=true;shift 1;;
-    --trim) TRIM=true;shift 1;;
-    --bwa) BWA=true;shift 1;;
-    --recal) REC=true;shift 1;;
-    --recal2) REC2=true;shift 1;;
-    --g*) GL=true;shift 1;;
-    --p*) PINDEL=true;shift 1;;
-    --mut*) MUT=true;shift 1;;
-    --comb*) COMB=true;shift 1;;
-    --qc1) QC1=true;shift 1;;
-    --qc2) QC2=true;shift 1;;
-    --qc3) QC3=true;shift 1;;
+    --f*) FQ=true;ALL=false;shift 1;;
+    --trim) TRIM=true;ALL=false;shift 1;;
+    --bwa) BWA=true;ALL=false;shift 1;;
+    --recal) REC=true;ALL=false;shift 1;;
+    --recal2) REC2=true;ALL=false;shift 1;;
+    --g*) GL=true;ALL=false;shift 1;;
+    --p*) PINDEL=true;ALL=false;shift 1;;
+    --mut*) MUT=true;ALL=false;shift 1;;
+    --comb*) COMB=true;ALL=false;shift 1;;
+    --qc1) QC1=true;ALL=false;shift 1;;
+    --qc2) QC2=true;ALL=false;shift 1;;
+    --qc3) QC3=true;ALL=false;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
