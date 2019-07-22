@@ -21,7 +21,7 @@
 ###  LG3_HOME={{LG3_HOME}}
 ###  EMAIL={{EMAIL}}
 ###
-### Version: 2019-03-23-9000
+### Version: 2019-03-23-9002
 ### Source: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 
 LG3_DIR=$(dirname "$(readlink -e "$0")")
@@ -50,7 +50,7 @@ function list_tools {
 
 function whatis {
     local pathname
-    pathname="$(which "lg3-$1")"
+    pathname="$(command -v "lg3-$1")"
     local res
     res=$(grep -E "^### whatis: " "$pathname" | sed 's/^### whatis: //')
     if [[ -z "${res}" ]]; then
@@ -71,7 +71,7 @@ version() {
     ver=$(grep -E "^###[ ]*Version:[ ]*" "$0" | sed 's/###[ ]*Version:[ ]*//g')
     ## Develop version?
     if ! (( $(echo "$ver" | grep -q -E "[-]9[0-9][0-9][0-9]") )); then
-	if [ -d "${LG3_HOME}/.git" ] && ! (( $(which git &> /dev/null) )); then
+	if [ -d "${LG3_HOME}/.git" ] && ! (( $(command -v git &> /dev/null) )); then
 	    commit=$(cd "$LG3_HOME" || return; git rev-parse --short HEAD)
             ver="$ver (commit ${commit})"
 	fi
@@ -91,7 +91,7 @@ help() {
       grep "^###" "$0" | cut -b 5- | sed "s|{{LG3_HOME}}|$LG3_HOME|" | sed "s|{{LG3_OUTPUT_ROOT}}|$LG3_OUTPUT_ROOT|" | sed "s|{{EMAIL}}|$EMAIL|" | sed "s/{{table_of_tools}}/$t/"
     else
       local pathname
-      pathname="$(which "lg3-$1")"
+      pathname="$(command -v "lg3-$1")"
       local res
       grep "^###" "$pathname" | cut -b 5-
     fi

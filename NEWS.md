@@ -1,6 +1,6 @@
 # LG3_Pipeline
 
-## Version 2019-03-23-9000 (develop version)
+## Version 2019-03-23-9002 (develop version)
 
 ### SIGNIFICANT CHANGES
 
@@ -8,16 +8,19 @@
    i.e. when the current working directory equals '${LG3_HOME}'.  This
    protects against various potential mistakes such as overriding installed
    files and settings.
-   
+
  
 ### NEW FEATURES
 
  * Globals settings for the LG3 Pipeline such as locations of software tools
-   can be configured via the '${LG3_HOME}/lg3.conf' bash script.  If a file
-   'lg3.conf' exists in the current working directory ("the project folder"),
-   then that file is sourced after '${LG3_HOME}/lg3.conf', which makes it
-   possible to override some or all of the predefined settings on a project
-   to project basis.
+   are now configured in the '${LG3_HOME}/lg3.conf' bash script (which should
+   not be edited by the user).  If a file 'lg3.conf' exists in the current
+   working directory ("the project folder"), then that file is sourced after
+   '${LG3_HOME}/lg3.conf', which makes it possible to override some or all
+   of the predefined global settings on a project to project basis.  The
+   latter file can also be used to configure variables such as PATIENT etc.
+
+ * Now 'lg3 status' defaults to using '--all'.
 
  * ROBUSTNESS: Now `bin/lg3-test` explicitly asserts that Rscript exists
    before attemption to use it.

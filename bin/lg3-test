@@ -13,7 +13,10 @@
 ###  lg3 test validate Patient157t10
 ###
 
-LG3_HOME=${LG3_HOME:?}
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
+
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_TEST_TRUTH=${LG3_TEST_TRUTH:-/costellolab/data1/shared/LG3_Pipeline/example_data}
 PROJECT=${PROJECT:-LG3}

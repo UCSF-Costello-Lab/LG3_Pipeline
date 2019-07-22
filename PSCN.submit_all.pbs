@@ -3,7 +3,8 @@
 #PBS -j oe
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
 
 change_dir "$PBS_O_WORKDIR"
 echo "PBS_O_WORKDIR=$PBS_O_WORKDIR"

@@ -70,7 +70,7 @@ echo "- SAMTOOLS=${SAMTOOLS:?}"
 
 ## Assert existance of software
 assert_file_executable "${PYTHON}"
-assert_file_executable "$(which ${BWA})"
+assert_file_executable "$(command -v ${BWA})"
 assert_file_exists "${PYTHON_REMOVEQC_GZ}"
 
 ### Input
