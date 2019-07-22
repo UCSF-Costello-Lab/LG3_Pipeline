@@ -25,7 +25,10 @@
 ###  lg3 status --all Patient157t10
 ###
 
-LG3_HOME=${LG3_HOME:?}
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME?}/scripts/utils.sh"
+source_lg3_conf
+
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
