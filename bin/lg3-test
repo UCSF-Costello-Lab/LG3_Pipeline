@@ -252,6 +252,9 @@ if [ "$action" == "setup" ]; then
     
     if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
         report_note "Local configuration detected: ./lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
+	 else
+		  cp ${LG3_HOME}/lg3_user.conf ./lg3.conf
+        report_note "Default local configuration installed: ./lg3.conf ($(stat --printf='%s' lg3.conf) bytes). Please edit as needed!"
     fi
 
     
