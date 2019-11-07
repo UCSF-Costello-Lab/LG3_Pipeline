@@ -256,7 +256,10 @@ if [ "$action" == "setup" ]; then
 		  cp ${LG3_HOME}/lg3_user.conf ./lg3.conf
         report_note "Default local configuration installed: ./lg3.conf ($(stat --printf='%s' lg3.conf) bytes). Please edit as needed!"
     fi
-
+	 if [ ! -f "run.conf" ]; then
+		 cp ${LG3_HOME}/run.conf ./run.conf
+		 report_note "Default run.conf installed: ./run.conf ($(stat --printf='%s' run.conf) bytes). Please edit as needed!"
+	 fi
     
     RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
     assert_file_executable "${RSCRIPT}"
