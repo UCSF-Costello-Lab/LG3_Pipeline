@@ -246,6 +246,7 @@ if [ "$action" == "setup" ]; then
 
     ## Now we can load all the utils functions
     # shellcheck source=scripts/utils.sh
+	 # shellcheck disable=SC1091
     source "${LG3_HOME}/scripts/utils.sh"
 
     report_ok "Current directory: ${PWD}"
@@ -253,11 +254,11 @@ if [ "$action" == "setup" ]; then
     if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
         report_note "Local configuration detected: ./lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
 	 else
-		  cp ${LG3_HOME}/lg3_user.conf ./lg3.conf
+		  cp "${LG3_HOME}/lg3_user.conf" ./lg3.conf
         report_note "Default local configuration installed: ./lg3.conf ($(stat --printf='%s' lg3.conf) bytes). Please edit as needed!"
     fi
 	 if [ ! -f "run.conf" ]; then
-		 cp ${LG3_HOME}/run.conf ./run.conf
+		 cp "${LG3_HOME}/run.conf" ./run.conf
 		 report_note "Default run.conf installed: ./run.conf ($(stat --printf='%s' run.conf) bytes). Please edit as needed!"
 	 fi
     

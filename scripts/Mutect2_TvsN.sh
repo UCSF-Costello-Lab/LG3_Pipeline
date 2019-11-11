@@ -80,7 +80,6 @@ assert_file_exists "${INTERVAL}"
 ### Software
 module load jdk/1.8.0 python/2.7.15 htslib/1.7
 
-#GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
 assert_file_executable "${GATK4:?}"
 assert_file_executable "${LG3_HOME}"/gatk4-funcotator-vcf2tsv
 
@@ -498,6 +497,10 @@ zcat "${OUT}" | grep -v '^#' | grep -wc PASS
 
 echo "[Mutect2] Extracting selected Funcotator annotations in .tsv format"
 "${LG3_HOME}"/gatk4-funcotator-vcf2tsv "${OUT}"
+
+if [[ ${CLEAN} ]]; then
+	echo "Cleaning intermediate files" 
+fi
 
 echo "-------------------------------------------------"
 
