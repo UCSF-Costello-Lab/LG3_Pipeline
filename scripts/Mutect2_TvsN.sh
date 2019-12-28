@@ -81,7 +81,6 @@ assert_file_exists "${INTERVAL}"
 module load jdk/1.8.0 python/2.7.15 htslib/1.7
 
 assert_file_executable "${GATK4:?}"
-assert_file_executable "${LG3_HOME}"/gatk4-funcotator-vcf2tsv
 
 echo "Software:"
 python --version
@@ -496,10 +495,19 @@ echo -n "[Mutect2] PASSed all filters: "
 zcat "${OUT}" | grep -v '^#' | grep -wc PASS
 
 echo "[Mutect2] Extracting selected Funcotator annotations in .tsv format"
+assert_file_executable "${LG3_HOME}"/gatk4-funcotator-vcf2tsv
 "${LG3_HOME}"/gatk4-funcotator-vcf2tsv "${OUT}"
 
 if [[ ${CLEAN} ]]; then
 	echo "Cleaning intermediate files" 
+	rm -f ${tumorname}-M2FilteringStats.tsv
+	rm -f ${tumorname}-F1R2Counts.tar.gz
+	rm -f ${prefix}.m2.vcf.gz*
+	#rm -f ${prefix}.m2.cc.vcf.gz*
+	rm -f ${tumorname}-artifact-prior-table.tar.gz
+	rm -f ${tumorname}-normal_pileups.table
+	rm -f ${tumorname}-pileups.table
+	rm -f ${tumorname}-segments.table
 fi
 
 echo "-------------------------------------------------"
