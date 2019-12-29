@@ -32,12 +32,14 @@ do
 	mv "${HEAD}" "${OUT}"
 	rm "${OUT}.tmp"
 
-	echo "All available fields:"
-	head -n 1 "${OUT}" | tr '\t' '\n' | nr
+	echo "Available Funcotator fields:"
+	head -n 1 "${OUT}" | tr '\t' '\n' | nl
 	### 218 total fields avail!
 	#cut -f1-22,147,148,149,150 ${OUT} > ${OUT}.tmp
 	cut -f1,3,4,5,6,8-19,88,89,106,126,127,128,144,145,147,185,187,215,217 "${OUT}" > "${OUT}.tmp"
 	mv "${OUT}.tmp" "${OUT}"
+	echo "Used Funcotator fields:"
+   head -n 1 "${OUT}" | tr '\t' '\n' | nl
 
 	head -n 2 "${OUT}"
 	echo -n "Total records in ${OUT} : "

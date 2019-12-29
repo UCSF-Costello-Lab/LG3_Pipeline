@@ -8,8 +8,6 @@ module load jdk/1.8.0
 LG3_HOME=${LG3_HOME:?}
 #REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
 
-#GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
-
 echo -e "\\nRunning GATK4::BwaMemIndexImageCreator on ${REF}"
 { time ${GATK4} BwaMemIndexImageCreator \
 	-I "${REF}" \

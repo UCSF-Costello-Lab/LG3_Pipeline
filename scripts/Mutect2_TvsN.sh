@@ -131,7 +131,7 @@ fi
 #tumorname=${tumorname%%.bwa*}
 
 	#--reference "${REF}" \
-echo -e "\\n[Mutect2] Running GATK4::GetSampleName (BETA) from ${nbamfile} ... "
+echo -e "\\n[Mutect2] Running GATK4::GetSampleName from ${nbamfile} ... "
 { time ${GATK4} --java-options -"${XMX}" GetSampleName \
 	--verbosity "${VERBOSITY}" \
 	--input "${nbamfile}" \
@@ -140,7 +140,7 @@ echo -e "\\n[Mutect2] Running GATK4::GetSampleName (BETA) from ${nbamfile} ... "
 normalname=$(cat normal_name.txt)
 echo "Recovered normal sample name: ${normalname}"
 	
-echo -e "\\n[Mutect2] Running GATK4::GetSampleName (BETA) from ${tbamfile} ... "
+echo -e "\\n[Mutect2] Running GATK4::GetSampleName from ${tbamfile} ... "
 { time ${GATK4} --java-options -"${XMX}" GetSampleName \
 	--verbosity "${VERBOSITY}" \
 	--input "${tbamfile}" \
@@ -280,7 +280,7 @@ if ${bCC}; then
 	echo -e "\\n\\n[Mutect2] Calculate Contamination is requested ..."
 	
 	### Tabulates pileup metrics for inferring contamination
-	echo -e "\\n[Mutect2] Running GATK4::GetPileupSummaries (BETA!) for Normal ..."
+	echo -e "\\n[Mutect2] Running GATK4::GetPileupSummaries for Normal ..."
 	{ time ${GATK4} --java-options -"${XMX}" GetPileupSummaries "${XARG_contamination[@]}" \
 		--verbosity "${VERBOSITY}" \
 		-I "${nbamfile}" \
@@ -291,7 +291,7 @@ if ${bCC}; then
 	echo "Generated pileups:"
 	wc -l "${tumorname}-normal_pileups.table"
 	
-	echo -e "\\n[Mutect2] Running GATK4::GetPileupSummaries (BETA!) for Tumor ..."
+	echo -e "\\n[Mutect2] Running GATK4::GetPileupSummaries for Tumor ..."
 	{ time ${GATK4} --java-options -"${XMX}" GetPileupSummaries "${XARG_contamination[@]}" \
 		--verbosity "${VERBOSITY}" \
 		-R "${REF}" \
