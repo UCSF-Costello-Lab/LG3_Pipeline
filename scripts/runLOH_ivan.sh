@@ -44,10 +44,11 @@ CONV=$(readlink -e "${CONV}")
 
 ### Software
 unset PYTHONPATH  ## ADHOC: In case it is set by user
-RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
+RSCRIPT_BIN=Rscript
+${RSCRIPT_BIN} --version
 PYTHON_RUNMAF=${LG3_HOME}/scripts/runMAF.py
 R_MAFPLOT=${LG3_HOME}/scripts/MAFplot_version3_script.R
-assert_file_executable "${RSCRIPT_BIN}"
+#assert_file_executable "${RSCRIPT_BIN}"
 assert_file_exists "${R_MAFPLOT}"
 assert_file_exists "${PYTHON_RUNMAF}"
 
