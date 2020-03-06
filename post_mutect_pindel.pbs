@@ -63,9 +63,11 @@ echo "Project: ${PROJECT:?}"
 echo "Conversion file: ${CONV:?}"
 echo "----------------------------------"
 
+module load r/3.6.1
 
 ### Software
-RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
+RSCRIPT_BIN=Rscript
+${RSCRIPT_BIN} --version
 R_MUTDET_FILTER=${LG3_HOME}/scripts/MutDet_filter.R
 R_COMBINE_SNVS_PINDEL=${LG3_HOME}/scripts/combine_snvs_pindel.R
 
@@ -76,7 +78,7 @@ SH_MUT_OVERLAPS=${LG3_HOME}/scripts/mutation_overlaps.sh ## D
 SH_MUTECT_COV_INTER_MUT=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh ## E
 SH_RUNLOH=${LG3_HOME}/scripts/runLOH_ivan.sh ## F
 
-assert_file_executable "${RSCRIPT_BIN}"
+#assert_file_executable "${RSCRIPT_BIN}"
 assert_file_exists "${R_MUTDET_FILTER}"
 assert_file_exists "${R_COMBINE_SNVS_PINDEL}"
 assert_file_executable "${SH_COMBINE_SNVS}"
