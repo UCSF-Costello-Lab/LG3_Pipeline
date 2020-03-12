@@ -3,7 +3,7 @@
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
 
-CLEAN=true
+bCLEAN=true
 
 add2fname() {
 	if [ $# -ne 2 ]; then
@@ -55,12 +55,11 @@ XMX=${XMX:-Xmx160G} ## Default 160gb
 HG=hg19
 
 echo "Flow control:"
-echo "- use OBMM filter=${bOBMM:?}"
+echo "- use Gnomad resources=${bGNOMAD:?}"
 echo "- calc contamination=${bCC:?}"
-echo "- use OB filter=${bOB:?}"
-echo "- use AA filter=${bAA:?}"
+echo "- use OBMM artefact filter=${bOBMM:?}"
 echo "- use Funcotator=${bFUNC:?}"
-echo "- clean intermediate files=${CLEAN:?}"
+echo "- delete intermediate files=${bCLEAN:?}"
 
 echo "Input:"
 echo "- nbamfile=${nbamfile:?}"
@@ -85,44 +84,25 @@ assert_file_executable "${GATK4:?}"
 echo "Software:"
 python --version
 java -version
+echo "gatk = ${GATK4}"
 
 ### References
 assert_file_exists "${REF:?}"
 echo "- reference=${REF}"
 
-### Somatic data source for Funcotator
-assert_directory_exists "${FUNCO_PATH:?}"
-echo "- FUNCO_PATH=${FUNCO_PATH}"
 
-if ${bAA}; then
-	IMG="${REF}.img"
-	assert_file_exists "${IMG}"
-	echo "- BWA image =${IMG}"
-fi
-
-#GNOMAD=/home/GenomeData/GATK_bundle/Mutect2/af-only-gnomad.raw.sites.hg19.vcf.gz
-#GNOMAD=/home/GenomeData/gnomAD_hg19/mutect2/gnomad4mutect2.vcf.gz
-### Population allele fraction assigned to alleles not found in germline resource.
-### See docs/mutect/mutect2.pdf for derivation of default value.
-### af-of-alleles-not-in-resource == 1(2*N.of.samples in GNOMAD) 
-### Default 0.001 if there is no population germline resource; 
-### If Gnomad 125,748 exomes ==> 0.000004
-
-[[ -z "${GNOMAD}" ]] || {
+if ${bGNOMAD}; then
 	echo "- GNOMAD AF =${GNOMAD}"
 	assert_file_exists "${GNOMAD}"
 	assert_file_exists "${GNOMAD}.tbi"
-	#af_of_alleles_not_in_resource=0.000004
 	echo "- af-of-alleles-not-in-resource=${af_of_alleles_not_in_resource:?}"
 	XARG_gnomAD=(--germline-resource "${GNOMAD}" --af-of-alleles-not-in-resource "${af_of_alleles_not_in_resource}")
-}
+fi
 
-#GNOMAD2=/home/GenomeData/gnomAD_hg19/mutect2/mutect2-contamination-var.biall.vcf.gz
-if ${bCC}; then
-	echo "- GNOMAD for contamination =${GNOMAD2:?}"
-	assert_file_exists "${GNOMAD2}"
-	assert_file_exists "${GNOMAD2}.tbi"
-	XARG_contamination=(-V "${GNOMAD2}" -L "${GNOMAD2}")
+if ${bFUNC}; then
+	### Somatic data source for Funcotator
+	assert_directory_exists "${FUNCO_PATH:?}"
+	echo "- FUNCO_PATH=${FUNCO_PATH}"
 fi
 
 #normalname=${nbamfile##*/}
@@ -149,9 +129,11 @@ echo -e "\\n[Mutect2] Running GATK4::GetSampleName from ${tbamfile} ... "
 tumorname=$(cat tumor_name.txt)
 echo "Recovered tumor sample name: ${tumorname}"
 	
-rm normal_name.txt tumor_name.txt
+if ${bOBMM}; then
+	XARG_OBMM=(--f1r2-tar-gz "${tumorname}-F1R2Counts.tar.gz")
+fi
 
-CONTF2F=0
+rm normal_name.txt tumor_name.txt
 
 echo "-------------------------------------------------"
 echo -n "[Mutect2] Somatic Mutation Detection "
@@ -163,7 +145,7 @@ echo "[Mutect2] Tumor bam file: $tbamfile"
 echo "[Mutect2] Normal Sample: $normalname"
 echo "[Mutect2] Tumor Sample: $tumorname"
 echo "[Mutect2] Prefix: $prefix"
-echo "[Mutect2] Known contamination CONTF2F: ${CONTF2F}"
+echo "[Mutect2] Known contamination CONTF2F: ${CONTF2F:?}"
 echo "-------------------------------------------------"
 echo "[Mutect2] Java Memory Xmx value: $XMX"
 echo -n "[Mutect2] Working directory: "
@@ -172,22 +154,39 @@ echo "-------------------------------------------------"
 
 OUT=${prefix}.vcf.gz ## Initial output name
 
+
+OUT=$(add2fname "${OUT}" m2)
+extra_args=""
+[[ -z "${INTERVAL}" ]] || extra_args=(--intervals "${INTERVAL}" --interval-padding "${PADDING}")
+echo "[Mutect2] extra_args: ${extra_args[*]}"
+
+      echo -e "\\n[Mutect2] Running GATK4::MuTect2 ..."
+		{ time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_gnomAD[@]}" ${XARG_OBMM[@]}\
+				--verbosity "${VERBOSITY}" \
+            --reference "${REF}" \
+            --input "${nbamfile}" \
+            --normal "${normalname}" \
+            --input "${tbamfile}" \
+            --output "${OUT}"; } 2>&1 || error "FAILED"
+        echo "Done"
+			mv "${OUT}.stats" "${tumorname}-M2FilteringStats.tsv"
+		
+assert_file_exists "${OUT}"
+assert_file_exists "${OUT}".tbi
+assert_file_exists "${tumorname}-M2FilteringStats.tsv"
+echo -ne "\\n[Mutect2] Found raw somatic mutations in ${OUT}: "
+zcat "${OUT}" | grep -vc '^#' 
+IN=${OUT}
+
+
+
+
 if ${bOBMM}; then
-	echo -e "\\n[Mutect2] OBMM filter is requested. Collecting some metrics..."
-	### Collect F1R2 read counts for the Mutect2 Orientation Bias Mixture Model filter
-	### Needed for OB MM filter, which is RECOMMENDED as of Sep 2018!
-	echo -e "\\n[Mutect2] Running GATK4::CollectF1R2Counts ..."
-	{ time ${GATK4} --java-options -"${XMX}" CollectF1R2Counts "${extra_args[@]}" \
-		--verbosity "${VERBOSITY}" \
-		-I "${tbamfile}" \
-		-R "${REF}" \
-		-O "${tumorname}-F1R2Counts.tar.gz"; } 2>&1 || error "FAILED"
-	
+	OUT=$(add2fname "${OUT}" obmm)
 	assert_file_exists "${tumorname}-F1R2Counts.tar.gz"
-	echo "[Mutect2] Generated metrics:"
-	ls -l "${tumorname}-F1R2Counts.tar.gz"
-	
+
 	### Learning step of the OB MM filter (RECOMMENDED)
+	### AKA read orientation model
 	### Get the maximum likelihood estimates of artifact prior probabilities
 	echo -e "\\n[Mutect2] Running GATK4::LearnReadOrientationModel ..."
 	{ time ${GATK4} --java-options -"${XMX}" LearnReadOrientationModel \
@@ -198,91 +197,31 @@ if ${bOBMM}; then
 	assert_file_exists "${tumorname}-artifact-prior-table.tar.gz"
 	echo "[Mutect2] Generated artifact priors:"
 	ls -l "${tumorname}-artifact-prior-table.tar.gz"
-
-	#XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tar.gz")
+	
+	XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tar.gz")
 else
-	echo -e "\\n[Mutect2] OBMM filter is NOT requested. Skipping ..."
+	echo "OBMM filter not requested"	
 fi
 
-OUT=$(add2fname "${OUT}" m2)
-if ${bOBMM}; then
-   OUT=$(add2fname "${OUT}" obmm)
-fi
-extra_args=""
-[[ -z "${INTERVAL}" ]] || extra_args=(--intervals "${INTERVAL}" --interval-padding "${PADDING}")
-echo "[Mutect2] extra_args: ${extra_args[*]}"
-
-### --disable-read-filter MateOnSameContigOrNoMappedMateReadFilter when use alt-aware and post-alt processed alignments to GRCh38
-if [ ! -e "${DEST}/${OUT}" ]; then
-      echo -e "\\n[Mutect2] Running GATK4::MuTect2 ..."
-		if ${bAA}; then
-			 XARG_bamout=(--bam-output "${tumorname}".bamout.bam)
-			echo "[Mutect2] BAM out option requested"
-			echo "${XARG_bamout[@]}"
-		fi
-		{ time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_bamout[@]}"  "${XARG_gnomAD[@]}" \
-				--verbosity "${VERBOSITY}" \
-            --reference "${REF}" \
-            --input "${nbamfile}" \
-            --normal-sample "${normalname}" \
-            --input "${tbamfile}" \
-            --tumor-sample "${tumorname}" \
-				--f1r2-tar-gz "${tumorname}-F1R2Counts.tar.gz" \
-            --output "${OUT}"; } 2>&1 || error "FAILED"
-        echo "Done"
-			mv "${OUT}.stats" "${tumorname}-M2FilteringStats.tsv"
-		
-else
-      echo -e "\\n[Mutect2] Found MuTect2 output ${OUT}, downloading ..."
-		cp -p "${DEST}/${OUT}" .
-		cp -p "${DEST}/${OUT}.tbi" .
-		cp -p "${tumorname}-M2FilteringStats.tsv" .
-		if ${bAA}; then
-			cp -p "${DEST}/${tumorname}.bamout.bam" .
-			cp -p "${DEST}/${tumorname}.bamout.bai" .	
-			cp -p "${DEST}/${tumorname}-F1R2Counts.tar.gz" .
-		fi
-fi
-assert_file_exists "${tumorname}-F1R2Counts.tar.gz"
-assert_file_exists "${OUT}"
-assert_file_exists "${OUT}".tbi
-assert_file_exists "${tumorname}-M2FilteringStats.tsv"
-
-### Learning step of the OB MM filter (RECOMMENDED)
-### AKA read orientation model
-### Get the maximum likelihood estimates of artifact prior probabilities
-echo -e "\\n[Mutect2] Running GATK4::LearnReadOrientationModel ..."
-{ time ${GATK4} --java-options -"${XMX}" LearnReadOrientationModel \
-	--verbosity "${VERBOSITY}" \
-	-I "${tumorname}-F1R2Counts.tar.gz" \
-	-O "${tumorname}-artifact-prior-table.tar.gz"; } 2>&1 || error "FAILED"
-
-assert_file_exists "${tumorname}-artifact-prior-table.tar.gz"
-echo "[Mutect2] Generated artifact priors:"
-ls -l "${tumorname}-artifact-prior-table.tar.gz"
-
-XARG_artifact_prior=(--orientation-bias-artifact-priors "${tumorname}-artifact-prior-table.tar.gz")
-
-
-
-if ${bAA}; then
-	assert_file_exists "${tumorname}".bamout.bam
-	assert_file_exists "${tumorname}".bamout.bai
-fi
-
-echo -ne "\\n[Mutect2] Found raw somatic mutations in ${OUT}: "
-zcat "${OUT}" | grep -vc '^#' 
-IN=${OUT}
 
 
 if ${bCC}; then
 	OUT=$(add2fname "${OUT}" cc)
 	echo -e "\\n\\n[Mutect2] Calculate Contamination is requested ..."
+
+	#GNOMAD2=/home/GenomeData/gnomAD_hg19/mutect2/mutect2-contamination-var.biall.vcf.gz
+	echo "- GNOMAD for contamination =${GNOMAD2:?}"
+	assert_file_exists "${GNOMAD2}"
+	assert_file_exists "${GNOMAD2}.tbi"
+	XARG_contamination=(-V "${GNOMAD2}" -L "${GNOMAD2}")
+	#XARG_contamination=(-L "${GNOMAD2}")
 	
 	### Tabulates pileup metrics for inferring contamination
+	### Pileup or GetPileupSummaries ??
 	echo -e "\\n[Mutect2] Running GATK4::GetPileupSummaries for Normal ..."
 	{ time ${GATK4} --java-options -"${XMX}" GetPileupSummaries "${XARG_contamination[@]}" \
 		--verbosity "${VERBOSITY}" \
+		-R "${REF}" \
 		-I "${nbamfile}" \
 		--interval-set-rule INTERSECTION \
 		-O "${tumorname}-normal_pileups.table"; } 2>&1 || error "FAILED"	
@@ -326,13 +265,19 @@ else
 	XARG_contamination_filter=()
 fi
 
+
+
+
+
+
 ### Filter somatic SNVs and indels called by Mutect2
 ### Use always with optional contamination and segments tables!
 ## --reference "${REF}" # Optional
 #${m2_extra_filtering_args} optional
-if [ ! -e "${DEST}/${OUT}" ]; then
-	   echo -e "\\n[Mutect2] Running FilterMutectCalls ..."
-   	{ time ${GATK4} FilterMutectCalls "${extra_args[@]}" "${XARG_contamination_filter[@]}" "${XARG_artifact_prior[@]}" \
+#if [ ! -e "${DEST}/${OUT}" ]; then
+echo -e "\\n[Mutect2] Running FilterMutectCalls ..."
+OUT=$(add2fname "${OUT}" flt)
+{ time ${GATK4} FilterMutectCalls "${extra_args[@]}" "${XARG_contamination_filter[@]}" "${XARG_artifact_prior[@]}" \
 			--verbosity "${VERBOSITY}" \
       	--variant "${IN}" \
       	--output "${OUT}" \
@@ -341,11 +286,7 @@ if [ ! -e "${DEST}/${OUT}" ]; then
 			--threshold-strategy OPTIMAL_F_SCORE \
 			--f-score-beta 1.0 \
       	--reference "${REF}"; } 2>&1 || error "FAILED"
-		echo "Done"
-else
-	echo -e "\\n[Mutect2] Found FilterMutectCalls output ${OUT}, downloading ..."
-	cp -p "${DEST}/${OUT}" .
-fi
+echo "Done"
 assert_file_exists "${OUT}"
 
 echo -n "[Mutect2] Total mutations in ${OUT}: "
@@ -355,105 +296,12 @@ zcat "${OUT}" | grep -v '^#' | grep -wc PASS
 IN=${OUT}
 
 
-if ${bOB}; then
-	OUT=$(add2fname "${OUT}" ob)	
-	echo -e "\\n[Mutect2] OrientationBias (OB) filter is requested [deprecated!]... "
-	### Collect metrics to quantify single-base sequencing artifacts
-	### both pre-adapter and bait-bias
-	### Needed for OB filter only: FilterByOrientationBias
-	echo -e "\\n[Mutect2] Running GATK4::CollectSequencingArtifactMetrics ..."
-	{ time ${GATK4} --java-options -"${XMX}" CollectSequencingArtifactMetrics \
-		--VERBOSITY "${VERBOSITY}" \
-		-I "${tbamfile}" \
-		-R "${REF}" \
-		--FILE_EXTENSION ".txt" \
-		-VALIDATION_STRINGENCY LENIENT \
-		-O "${tumorname}"-artifact; } 2>&1 || error "FAILED"
-	
-	pre_adapter_metrics=${tumorname}-artifact.pre_adapter_detail_metrics.txt
-	assert_file_exists "${pre_adapter_metrics}"
-	assert_file_exists "${tumorname}"-artifact.pre_adapter_summary_metrics.txt
-	assert_file_exists "${tumorname}"-artifact.error_summary_metrics.txt
-	assert_file_exists "${tumorname}"-artifact.bait_bias_summary_metrics.txt
-	assert_file_exists "${tumorname}"-artifact.bait_bias_detail_metrics.txt
-	
-	echo "[Mutect2] Generated various artifact metrics:"
-	wc -l "${tumorname}-artifact."*
-	
-	### Filter Mutect2 somatic variant calls using the OB Filter.
-	### GATK implementation of D-ToxoG with modifications to allow 
-	### multiple artifact modes
-	### Not recommended! Use OB MM filter instead
-	### https://software.broadinstitute.org/cancer/cga/dtoxog
-	### Used for the OxoG (G/T) and Deamination (FFPE) (C/T) artifacts .
-	# -AM ${sep=" -AM " final_artifact_modes} \
-	if [ ! -e "${DEST}/${OUT}" ]; then
-      	echo -e "\\n[Mutect2] Running FilterByOrientationBias **EXPERIMENTAL** ..."
-				{ time ${GATK4} FilterByOrientationBias \
-				--verbosity "${VERBOSITY}" \
-				-V "${IN}" \
-				--artifact-modes 'G/T' \
-				-P "${pre_adapter_metrics}" \
-				-O "${OUT}"; } 2>&1 || error "FAILED" 
-      	echo "Done"
-	else
-   	echo -e "\\n[Mutect2] Found FilterByOrientationBias output ${OUT}, downloading ..."
-		cp -p "${DEST}/${OUT}" .
-	fi
-	assert_file_exists "${OUT}"
-
-	echo -n "[Mutect2] Total mutations in ${OUT}: "
-	zcat "${OUT}" | grep -vc '^#'
-	echo -n "[Mutect2] PASSed FilterByOrientationBias: "
-	zcat "${OUT}" | grep -v '^#' | grep -wc PASS
-	IN=${OUT}
-else
-	echo -e "\\n[Mutect2] OB filter is NOT requested. Skipping ... "
-fi
-
-
-if ${bAA}; then
-	OUT=$(add2fname "${OUT}" aa)	
-	echo -e "\\n[Mutect2] AlignmentArtifacts (AA) filter is requested ..."
-
-	### Filter alignment artifacts from a vcf callset.
-	## --bwa-mem-index-image  Generated by BwaMemIndexImageCreator.
-	if [ ! -e "${DEST}/${OUT}" ]; then
-      	echo -e "\\n[Mutect2] Running FilterAlignmentArtifacts **EXPERIMENTAL** ..."
-      	{ time ${GATK4} FilterAlignmentArtifacts \
-			--verbosity "${VERBOSITY}" \
-			-V "${IN}" \
-			-I "${tumorname}".bamout.bam \
-			--bwa-mem-index-image "${IMG}" \
-			--output "${OUT}" \
-      	--reference "${REF}"; } 2>&1 || error "FAILED"
-	
-      	echo "Done"
-	else
-		echo -e "\\n[Mutect2] Found FilterAlignmentArtifacts output ${OUT}, downloading ..."
-		cp -p "${DEST}/${OUT}" .
-		cp -p "${DEST}/${OUT}".tbi .
-	fi
-
-   assert_file_exists "${OUT}"
-	
-	echo -ne "\\n[Mutect2] Total mutations in ${OUT}: "
-	zcat "${OUT}" | grep -vc '^#'
-	echo -ne "\\n[Mutect2] PASSed FilterAlignmentArtifacts: "
-	zcat "${OUT}" | grep -v '^#' | grep -wc PASS
-	IN=${OUT}
-else
-	echo -e "\\n[Mutect2] AlignmentArtifacts filter is NOT requested. Skipping ..."
-fi
-
 if ${bFUNC}; then
 	OUT=$(add2fname "${OUT}" func)
 	echo -e "\\n[Mutect2] Funcotator annotations requested ..."
-			#--verbosity "${VERBOSITY}" \
 	### A GATK functional annotation tool.
-	if [ ! -e "${DEST}/${OUT}" ]; then
-      echo -e "\\n[Mutect2] Running Funcotator ..."
-      { time ${GATK4} Funcotator "${extra_args[@]}" \
+    echo -e "\\n[Mutect2] Running Funcotator ..."
+    { time ${GATK4} Funcotator "${extra_args[@]}" \
 			--verbosity ERROR \
          --variant "${IN}" \
          --output "${OUT}" \
@@ -463,14 +311,9 @@ if ${bFUNC}; then
       	--transcript-selection-mode CANONICAL \
          --reference "${REF}"; } 2>&1 || warn "FAILED"
 		echo "Done"
-	else
-   	echo -e "\\n[Mutect2] Found Funcotator output ${OUT}, downloading ..."
-		cp -p "${DEST}/${OUT}" .
-		cp -p "${DEST}/${OUT}".tbi .
-	fi
 	assert_file_exists "${OUT}"
 
-   echo -n "[Mutect2] Total mutations in ${OUT}: "
+   echo -n "[Mutect2] Total Funcotated mutations in ${OUT}: "
    zcat "${OUT}" | grep -vc '^#'
    echo -n "[Mutect2] PASSed all filters: "
    zcat "${OUT}" | grep -v '^#' | grep -wc PASS
@@ -480,7 +323,7 @@ else
 fi
 
 
-OUT=$(add2fname "${OUT}" filt)
+OUT=$(add2fname "${OUT}" pass)
 
 echo -e "\\n[Mutect2] Keep only PASSed variants ... "
 zcat "${IN}" | grep '^#' | bgzip > "${OUT}"
@@ -498,12 +341,10 @@ echo "[Mutect2] Extracting selected Funcotator annotations in .tsv format"
 assert_file_executable "${LG3_HOME}"/gatk4-funcotator-vcf2tsv
 "${LG3_HOME}"/gatk4-funcotator-vcf2tsv "${OUT}"
 
-if [[ ${CLEAN} ]]; then
+if ${bCLEAN}; then
 	echo "Cleaning intermediate files" 
 	rm -f ${tumorname}-M2FilteringStats.tsv
 	rm -f ${tumorname}-F1R2Counts.tar.gz
-	rm -f ${prefix}.m2.vcf.gz*
-	#rm -f ${prefix}.m2.cc.vcf.gz*
 	rm -f ${tumorname}-artifact-prior-table.tar.gz
 	rm -f ${tumorname}-normal_pileups.table
 	rm -f ${tumorname}-pileups.table
