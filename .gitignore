@@ -1,4 +1,5 @@
 *~
+*.help
 *.err
 *.out
 *.pyc
