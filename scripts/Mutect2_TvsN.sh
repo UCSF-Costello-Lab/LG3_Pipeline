@@ -85,6 +85,8 @@ echo "Software:"
 python --version
 java -version
 echo "gatk = ${GATK4}"
+echo -n "GATK4 " > GATK.ver
+${GATK4} Mutect2 --help 2>&1 | grep Version >> GATK.ver
 
 ### References
 assert_file_exists "${REF:?}"
