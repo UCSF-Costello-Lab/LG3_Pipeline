@@ -3,6 +3,12 @@
 ## Version 2019-07-22-9000 (development version)
 
  * ...
+ 
+### KNOWN ISSUES
+
+ * The 'lg3.conf' file must not be edited while the pipeline is running.  If
+   done, then the outcome and the results are unpredictable.  This is because
+   the 'lg3.conf' file is not frozen when the pipeline is launched.
 
 
 ## Version 2019-07-22
