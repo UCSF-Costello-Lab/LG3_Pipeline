@@ -10,6 +10,12 @@
    done, then the outcome and the results are unpredictable.  This is because
    the 'lg3.conf' file is not frozen when the pipeline is launched.
 
+### BUG FIXES
+
+ * The LG3 Pipeline could run the Python 2 scripts using Python 3.  If an
+   incompatible Python version is detected, then an informative error is
+   produced.
+
 
 ## Version 2019-07-22
 

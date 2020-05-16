@@ -49,6 +49,7 @@ assert_file_exists "${CONV}"
 
 
 ### Software
+assert_python ""
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 PYTHON_RUNMAF=${LG3_HOME}/scripts/runMAF.py

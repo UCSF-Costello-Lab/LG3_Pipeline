@@ -37,6 +37,7 @@ echo " - PATIENT=${PATIENT:?}"
 echo " - PROJECT=${PROJECT:?}"
 assert_file_exists "${CONV}"
 
+assert_python ""
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## run annotation code

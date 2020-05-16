@@ -34,6 +34,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- CUTADAPT=${CUTADAPT:?}"
 fi
 
+assert_python ""
+
 QTY=20
 LEN=20
 STRINGENCY=1

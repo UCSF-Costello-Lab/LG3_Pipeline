@@ -41,6 +41,7 @@ CALCULATE="${LG3_HOME}/scripts/CalculateMutationRates.py"
 GENOME="${LG3_HOME}/resources/hg19.2bit"
 
 export PYTHONPATH=/home/jssong/lib/:/opt/local/lib/python2.6/site-packages/:${LG3_HOME}/
+assert_python "$PYTHON"
 
 if [ ! -e "${prefix}.mutation_context" ]; then
         echo "[MutContext] Converting MuTect WIG to BED3..."

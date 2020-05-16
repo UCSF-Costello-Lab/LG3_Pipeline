@@ -38,6 +38,8 @@ fi
 ##
 #
 
+assert_python ""
+
 PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
 assert_file_exists "${PYTHON_PINDEL_SETUP}"
 

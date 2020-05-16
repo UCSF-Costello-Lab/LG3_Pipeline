@@ -98,6 +98,8 @@ echo "Software:"
 python --version
 java -version
 
+assert_python ""
+
 ### References
 assert_file_exists "${REF:?}"
 echo "- reference=${REF}"

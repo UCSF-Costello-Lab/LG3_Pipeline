@@ -40,6 +40,7 @@ echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 
 ### Software
+assert_python ""
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 R_MUT_ANN_INTERSECTED_COV=${LG3_HOME}/scripts/mutations_annotate_intersected_coverage.R

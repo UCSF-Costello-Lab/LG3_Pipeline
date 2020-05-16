@@ -29,6 +29,7 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
+assert_python ""
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## Input

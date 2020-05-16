@@ -194,11 +194,22 @@ function assert_pwd {
 }
 
 
-## Usage: assert_python
+## Usage: assert_python "" or assert_python "<python-binary>"
 function assert_python {
     local version version_x_y
-    command -v python > /dev/null || error "Python executable not found on PATH: ${PATH}"
-    version=$(2>&1 python --version | sed -E 's/.*(P|p)ython *//g')
+    local bin
+
+    ## Arguments are optional
+    bin=$1
+    
+    if [[ -n "$bin" ]]; then
+	assert_file_executable "$bin"
+    else	
+	bin=$(command -v python) || error "Python executable not found on PATH: ${PATH}"
+    fi
+    
+    ## Assert correct version
+    version=$(2>&1 "$bin" --version | sed -E 's/.*(P|p)ython *//g')
     version_x_y=$(echo "$version" | sed -E 's/[.][0-9]+$//g')
     [[ "$version_x_y" == "2.6" ]] || [[ "$version_x_y" == "2.7" ]] || error "Requires Python 2.6 or 2.7: $version"
 }

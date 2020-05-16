@@ -67,13 +67,14 @@ echo "Software:"
 echo "- JAVA=${JAVA:?}"
 echo "- PYTHON=${PYTHON:?}"
 echo "- GATK=${GATK:?}"
+assert_python "$PYTHON"
+
 
 ## Assert existance of software
 assert_file_executable "${JAVA}"
 assert_file_executable "${PYTHON}"
 assert_file_exists "${GATK}"
 assert_file_exists "${PYTHON_VCF_GERMLINE}"
-
 
 echo "-------------------------------------------------"
 echo "[Germline] Germline SNPs and relatedness"
