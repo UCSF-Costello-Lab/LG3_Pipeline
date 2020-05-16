@@ -194,6 +194,15 @@ function assert_pwd {
 }
 
 
+## Usage: assert_python
+function assert_python {
+    local version version_x_y
+    command -v python > /dev/null || error "Python executable not found on PATH: ${PATH}"
+    version=$(2>&1 python --version | sed -E 's/.*(P|p)ython *//g')
+    version_x_y=$(echo "$version" | sed -E 's/[.][0-9]+$//g')
+    [[ "$version_x_y" == "2.6" ]] || [[ "$version_x_y" == "2.7" ]] || error "Requires Python 2.6 or 2.7: $version"
+}
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NAVIGATION
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
