@@ -280,6 +280,8 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 ## R scripting front-end version 3.2.0 (2015-04-16)
 RSCRIPT=/opt/R/R-latest/bin/Rscript
 assert_file_executable "$RSCRIPT"
+## Workaround: 'Rscript' called somewhere in the Recal script(s)
+PATH="$(dirname "$RSCRIPT"):$PATH"
 
 ## samtools 0.1.18 (r982:295
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
