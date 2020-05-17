@@ -46,7 +46,6 @@ TMP=${LG3_SCRATCH_ROOT}
 pl="Illumina"
 pu="Exome"
 PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 
 #Input variables
 bamfiles=$1

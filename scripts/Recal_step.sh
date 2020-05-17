@@ -54,7 +54,6 @@ assert_file_exists "${THOUSAND}"
 assert_file_exists "${DBSNP}"
 
 ## Software
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
 PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
 PICARD_MERGESAMFILES=${PICARD_HOME}/MergeSamFiles.jar

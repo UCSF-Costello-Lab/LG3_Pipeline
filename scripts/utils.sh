@@ -275,7 +275,16 @@ assert_file_executable "$JAVA"
 PYTHON=/usr/bin/python
 assert_file_executable "$PYTHON"
 assert_python "$PYTHON"
+unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
 ## R scripting front-end version 3.2.0 (2015-04-16)
 RSCRIPT=/opt/R/R-latest/bin/Rscript
 assert_file_executable "$RSCRIPT"
+
+## samtools Version: 0.1.18 (r982:295
+SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
+assert_file_executable "$SAMTOOLS"
+
+## Version: 0.5.9-r26-dev
+BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
+assert_file_executable "$BWA"

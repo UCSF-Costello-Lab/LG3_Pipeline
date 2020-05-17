@@ -48,8 +48,6 @@ BWA_INDEX_HOME=$(dirname "${BWA_INDEX}")
 assert_directory_exists "${BWA_INDEX_HOME}"
 
 ## Software
-BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
