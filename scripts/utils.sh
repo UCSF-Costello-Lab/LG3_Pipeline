@@ -211,7 +211,7 @@ function assert_python {
     ## Assert correct version
     version=$(2>&1 "$bin" --version | sed -E 's/.*(P|p)ython *//g')
     version_x_y=$(echo "$version" | sed -E 's/[.][0-9]+$//g')
-    [[ "$version_x_y" == "2.6" ]] || [[ "$version_x_y" == "2.7" ]] || error "Requires Python 2.6 or 2.7: $version"
+    [[ "$version_x_y" == "2.6" ]] || [[ "$version_x_y" == "2.7" ]] || error "Requires Python 2.6 or 2.7: $version ($bin)"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
