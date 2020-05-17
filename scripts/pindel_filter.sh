@@ -35,7 +35,6 @@ fi
 ##
 #
 
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 
 BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools

@@ -70,7 +70,6 @@ tumorname=${tumorname%%.bwa*}
 
 ### Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user /HB 2018-09-13
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"

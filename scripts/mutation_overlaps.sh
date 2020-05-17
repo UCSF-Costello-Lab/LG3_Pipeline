@@ -28,7 +28,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 

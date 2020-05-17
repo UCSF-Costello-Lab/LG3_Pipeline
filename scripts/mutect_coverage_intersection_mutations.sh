@@ -40,7 +40,6 @@ echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 
 ### Software
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript

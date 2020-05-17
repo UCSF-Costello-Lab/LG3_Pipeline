@@ -51,7 +51,6 @@ echo "- THOUSAND=${THOUSAND}"
 
 ## Software
 
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 

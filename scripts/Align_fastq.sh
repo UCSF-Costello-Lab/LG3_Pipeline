@@ -49,7 +49,6 @@ assert_directory_exists "${BWA_INDEX_HOME}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PYTHON=/usr/bin/python
 BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 

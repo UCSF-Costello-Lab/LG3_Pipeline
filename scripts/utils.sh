@@ -259,3 +259,15 @@ function source_lg3_conf {
         echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
 }
+
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# SOFTWARE
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+## Python
+assert_file_executable "$PYTHON"
+assert_python "$PYTHON"
+

@@ -38,7 +38,6 @@ fi
 ##
 #
 
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 
 PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py

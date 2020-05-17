@@ -2,7 +2,10 @@
 
 ## Version 2020-05-16-9000 (develop version)
 
-* ...
+### SOFTWARE QUALITY
+
+ * The 'python' executable is now set in a central location to guarantee
+   the same, expected version is used everywhere.
 
 
 ## Version 2020-05-16

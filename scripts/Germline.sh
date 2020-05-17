@@ -60,7 +60,6 @@ assert_file_exists "${DBSNP}"
 
 ## Software
 JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PYTHON=/usr/bin/python
 GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 PYTHON_VCF_GERMLINE=${LG3_HOME}/scripts/vcf_germline.py
 echo "Software:"

@@ -29,7 +29,6 @@ fi
 
 PROG=$(basename "$0")
 
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
