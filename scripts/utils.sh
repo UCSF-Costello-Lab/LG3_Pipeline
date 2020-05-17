@@ -307,11 +307,10 @@ assert_file_executable "$BEDTOOLS"
 MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
 assert_file_executable "$MUTECT"
 
-
 # AnnoVar
 ANNOVAR_HOME=${LG3_HOME}/AnnoVar
 assert_directory_exists "$ANNOVAR_HOME"
 
-$ cutadapt 1.2.1
+# cutadapt 1.2.1
 CUTADAPT=/opt/Python/Python-2.7.3/bin/cutadapt
 assert_file_executable "$CUTADAPT"
