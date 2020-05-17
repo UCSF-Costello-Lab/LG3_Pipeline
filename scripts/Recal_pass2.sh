@@ -41,7 +41,6 @@ assert_file_exists "${REF}"
 assert_file_exists "${THOUSAND}"
 
 ## Software
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
 PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64

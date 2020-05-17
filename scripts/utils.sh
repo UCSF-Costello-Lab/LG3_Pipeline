@@ -267,6 +267,9 @@ function source_lg3_conf {
 # SOFTWARE
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+## java version "1.6.0_27"
+assert_file_executable "$JAVA"
+
 ## Python 2.6.6
 PYTHON=/usr/bin/python
 assert_file_executable "$PYTHON"
