@@ -7,7 +7,7 @@
  * The 'java', 'python' and 'Rscript' executables are now set in a central
    location to guarantee that the same, expected versions are used everywhere.
 
- * The 'bwa', 'picard', and 'samtools' executables are now set in a central
+ * The 'bwa', GATK, Picard, and 'samtools' executables are now set in a central
    location to guarantee that the same, expected versions are used everywhere.
 
 

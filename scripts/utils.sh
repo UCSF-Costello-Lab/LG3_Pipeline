@@ -293,3 +293,6 @@ assert_file_executable "$BWA"
 PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
 assert_directory_exists "$PICARD_HOME"
 
+# GATK 1.6-5-g557da77
+GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
+assert_file_executable "$GATK"

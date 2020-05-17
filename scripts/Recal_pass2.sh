@@ -41,7 +41,6 @@ assert_file_exists "${REF}"
 assert_file_exists "${THOUSAND}"
 
 ## Software
-GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
 PICARD_MERGESAMFILES=${PICARD_HOME}/MergeSamFiles.jar
 PICARD_FIXMATEINFO=${PICARD_HOME}/FixMateInformation.jar
 PICARD_MARKDUPS=${PICARD_HOME}/MarkDuplicates.jar
