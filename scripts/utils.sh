@@ -268,6 +268,7 @@ function source_lg3_conf {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ## java version "1.6.0_27"
+JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 assert_file_executable "$JAVA"
 
 ## Python 2.6.6
