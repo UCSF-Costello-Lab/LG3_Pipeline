@@ -29,7 +29,8 @@ fi
 
 PROG=$(basename "$0")
 
-assert_python ""
+PYTHON=/usr/bin/python
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 CONV=$1
@@ -44,7 +45,7 @@ echo "- OUTFILE=${OUTFILE:?}"
 assert_file_exists "${MUTFILE}"
 assert_file_exists "${CONV}"
 
-python "${LG3_HOME}/scripts/libID_to_patientID.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" "${CONV}" || error "libID_to_patientID.py failed"
+$PYTHON "${LG3_HOME}/scripts/libID_to_patientID.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" "${CONV}" || error "libID_to_patientID.py failed"
 assert_file_exists "${OUTFILE}"
 
 echo "$PROG Finished"

@@ -28,8 +28,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
 fi
 
-
-assert_python ""
+PYTHON=/usr/bin/python
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## Input
@@ -41,7 +41,7 @@ echo "- MUTFILE=${MUTFILE:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- OUTFILE=${OUTFILE:?}"
 
-python "${LG3_HOME}/scripts/mutation_overlaps.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" || error "mutation_overlaps.py failed"
+$PYTHON "${LG3_HOME}/scripts/mutation_overlaps.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" || error "mutation_overlaps.py failed"
 assert_file_exists "${OUTFILE}"
 
 awk -F'\t' '{print $NF}' "${OUTFILE}" | sort | uniq -c

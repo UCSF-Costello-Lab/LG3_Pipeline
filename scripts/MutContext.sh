@@ -33,7 +33,7 @@ mutsfile=$1
 wigfile=$2
 prefix=$3
 
-PYTHON=/opt/local/bin/python
+PYTHON=/usr/bin/python
 WIGFIXER="${LG3_HOME}/scripts/mutect_wig_to_bed.py"
 BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
 ANNO_AGILENT="${LG3_HOME}/resources/Agilent_SureSelect_HumanAllExon50Mb.exonic_and_splicing.bed"

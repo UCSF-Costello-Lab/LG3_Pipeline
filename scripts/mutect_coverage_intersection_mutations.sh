@@ -40,7 +40,8 @@ echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 
 ### Software
-assert_python ""
+PYTHON=/usr/bin/python
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 R_MUT_ANN_INTERSECTED_COV=${LG3_HOME}/scripts/mutations_annotate_intersected_coverage.R
@@ -54,7 +55,7 @@ assert_file_exists "${PYTHON_CONV_PAT_WIG2BED}"
 MUT=${LG3_OUTPUT_ROOT}/${PROJECT:?}/mutations/${PATIENT}_mutect
 MUT2=.
 
-python "${PYTHON_CONV_PAT_WIG2BED}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${PYTHON_CONV_PAT_WIG2BED} failed"
+$PYTHON "${PYTHON_CONV_PAT_WIG2BED}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${PYTHON_CONV_PAT_WIG2BED} failed"
 assert_file_exists  "$MUT/${PATIENT}.mutect.coverage.intersect.bed"
 
 "${RSCRIPT_BIN}" "${R_MUT_ANN_INTERSECTED_COV}" "$MUT/${PATIENT}.mutect.coverage.intersect.bed" "$MUT2/${PATIENT}.snvs.indels.filtered.overlaps.txt" "$MUT2/${PATIENT}.R.mutations"  || error "${R_MUT_ANN_INTERSECTED_COV} failed"
