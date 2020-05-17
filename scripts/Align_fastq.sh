@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME?}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -52,6 +52,8 @@ JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
 PYTHON=/usr/bin/python
 BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
+
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
 PYTHON_REMOVEQC_GZ=${LG3_HOME}/scripts/removeQCgz.py

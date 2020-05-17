@@ -1,5 +1,19 @@
 # LG3_Pipeline
 
+## Version 2020-05-16
+
+### NEW FEATURES
+
+ * The LG3 Pipeline requires Python 2.  If an incompatible Python version is
+   detected on the 'PATH', then an informative error is produced.
+   
+### KNOWN ISSUES
+
+ * The 'lg3.conf' file must not be edited while the pipeline is running.  If
+   done, then the outcome and the results are unpredictable.  This is because
+   the 'lg3.conf' file is not frozen when the pipeline is launched.
+
+
 ## Version 2019-07-22
 
 ### SIGNIFICANT CHANGES

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME?}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -28,6 +28,8 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 PROG=$(basename "$0")
+
+assert_python ""
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 CONV=$1

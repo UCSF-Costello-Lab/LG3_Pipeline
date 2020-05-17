@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME?}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -34,6 +34,8 @@ fi
 ### /path/to/pindel_filter.sh <pindel_output_all>
 ##
 #
+
+assert_python ""
 
 BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools
 PYTHON_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.py

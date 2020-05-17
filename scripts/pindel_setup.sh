@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME?}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -37,6 +37,8 @@ fi
 ### /path/to/pindel_setup.sh
 ##
 #
+
+assert_python ""
 
 PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
 assert_file_exists "${PYTHON_PINDEL_SETUP}"

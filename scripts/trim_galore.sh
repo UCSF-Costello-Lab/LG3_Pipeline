@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME?}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
@@ -33,6 +33,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- TG=${TG:?}"
   echo "- CUTADAPT=${CUTADAPT:?}"
 fi
+
+assert_python ""
 
 QTY=20
 LEN=20
