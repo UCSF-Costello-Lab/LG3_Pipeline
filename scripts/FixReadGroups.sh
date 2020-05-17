@@ -36,7 +36,6 @@ fi
 TMP="${LG3_SCRATCH_ROOT}/$prefix/tmp"
 make_dir "$TMP"
 
-PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
 
 pl="Illumina"
 pu="Exome"

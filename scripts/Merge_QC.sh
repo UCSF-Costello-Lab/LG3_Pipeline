@@ -42,7 +42,6 @@ export PATH=/opt/R/R-latest/bin:$PATH
 #Define resources and tools
 pl="Illumina"
 pu="Exome"
-PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 
 #Input variables

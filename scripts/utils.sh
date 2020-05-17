@@ -281,10 +281,15 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 RSCRIPT=/opt/R/R-latest/bin/Rscript
 assert_file_executable "$RSCRIPT"
 
-## samtools Version: 0.1.18 (r982:295
+## samtools 0.1.18 (r982:295
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 assert_file_executable "$SAMTOOLS"
 
-## Version: 0.5.9-r26-dev
+## bwa 0.5.9-r26-dev
 BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
 assert_file_executable "$BWA"
+
+# Picard
+PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
+assert_directory_exists "$PICARD_HOME"
+
