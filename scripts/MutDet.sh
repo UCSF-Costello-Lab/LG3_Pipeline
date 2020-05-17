@@ -71,7 +71,6 @@ tumorname=${tumorname%%.bwa*}
 ### Software
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user /HB 2018-09-13
-MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
 FILTER=${LG3_HOME}/FilterMutations/Filter.py
 REORDER="${LG3_HOME}/scripts/vcf_reorder.py"
 

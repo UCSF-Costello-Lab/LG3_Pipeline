@@ -48,7 +48,6 @@ echo "- proj=${proj:?}"
 assert_file_exists "${datafile}"
 
 BIN=${LG3_HOME}/scripts
-ANNOVAR_HOME=${LG3_HOME}/AnnoVar
 assert_directory_exists "${BIN}"
 assert_directory_exists "${ANNOVAR_HOME}"
 

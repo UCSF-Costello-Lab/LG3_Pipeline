@@ -37,7 +37,6 @@ fi
 
 assert_python "$PYTHON"
 
-BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools
 PYTHON_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.py
 assert_file_executable "${BEDTOOLS}"
 assert_file_exists "${PYTHON_PINDEL_FILTER}"

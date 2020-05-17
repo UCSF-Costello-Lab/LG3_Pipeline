@@ -7,8 +7,9 @@
  * The 'java', 'python' and 'Rscript' executables are now set in a central
    location to guarantee that the same, expected versions are used everywhere.
 
- * The 'bwa', GATK, Picard, and 'samtools' executables are now set in a central
-   location to guarantee that the same, expected versions are used everywhere.
+ * The AnnoVar, bedtools, cutadapt, BWA, GATK, MuTect, Picard, and Samtools
+   executables are now set in a central location to guarantee that the same,
+   expected versions are used everywhere.
 
 
 ## Version 2020-05-16

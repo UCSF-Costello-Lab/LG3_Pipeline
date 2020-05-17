@@ -296,3 +296,20 @@ assert_directory_exists "$PICARD_HOME"
 # GATK 1.6-5-g557da77
 GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 assert_file_executable "$GATK"
+
+# bedtools 2.16.2
+BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
+assert_file_executable "$BEDTOOLS"
+
+# muTect
+MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
+assert_file_executable "$MUTECT"
+
+
+# AnnoVar
+ANNOVAR_HOME=${LG3_HOME}/AnnoVar
+assert_directory_exists "$ANNOVAR_HOME"
+
+$ cutadapt 1.2.1
+CUTADAPT=/opt/Python/Python-2.7.3/bin/cutadapt
+assert_file_executable "$CUTADAPT"

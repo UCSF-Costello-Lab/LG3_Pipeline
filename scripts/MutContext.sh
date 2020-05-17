@@ -34,7 +34,6 @@ wigfile=$2
 prefix=$3
 
 WIGFIXER="${LG3_HOME}/scripts/mutect_wig_to_bed.py"
-BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
 ANNO_AGILENT="${LG3_HOME}/resources/Agilent_SureSelect_HumanAllExon50Mb.exonic_and_splicing.bed"
 CALCULATE="${LG3_HOME}/scripts/CalculateMutationRates.py"
 GENOME="${LG3_HOME}/resources/hg19.2bit"
