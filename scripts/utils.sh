@@ -267,7 +267,11 @@ function source_lg3_conf {
 # SOFTWARE
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-## Python
+## Python 2.6.6
+PYTHON=/usr/bin/python
 assert_file_executable "$PYTHON"
 assert_python "$PYTHON"
 
+## R scripting front-end version 3.2.0 (2015-04-16)
+RSCRIPT=/opt/R/R-latest/bin/Rscript
+assert_file_executable "$RSCRIPT"

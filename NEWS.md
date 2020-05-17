@@ -4,8 +4,8 @@
 
 ### SOFTWARE QUALITY
 
- * The 'python' executable is now set in a central location to guarantee
-   the same, expected version is used everywhere.
+ * The 'python' and 'Rscript' executables are now set in a central location
+   to guarantee that the same, expected versions are used everywhere.
 
 
 ## Version 2020-05-16
