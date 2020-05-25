@@ -255,7 +255,6 @@ function expected_file_md5 {
 	mm="${mm}.md5"
 	[[ -f "${dir}/${mm}" ]] || "$cat_cmd" "${dir}/${ff}" | md5sum > "${dir}/${mm}"
 	[[ -f "${t}/${dir}/${mm}" ]] || "$cat_cmd" "${t}/${dir}/${ff}" | md5sum > "${t}/${dir}/${mm}"
-	diff -b "${t}/${dir}/${mm}" "${dir}/${mm}"
 	res_array+=("$(diff -b "${t}/${dir}/${mm}" "${dir}/${mm}")")
     done
 
@@ -273,7 +272,6 @@ function expected_file_md5 {
         report_ok "file md5 checksums$t ('${path}/${glob}')"
     else
         report_warn "unexpected file md5 checksums$t ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}')"
-        echo "${res}" | tail -n +3
     fi
 }
 
@@ -429,7 +427,7 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "Z00*/*"
-        expected_file_md5 "${path}" 'Z00*/*.bam.bai'
+        expected_file_md5 "${path}" 'Z00*/*.bai'
         expected_file_md5 "${path}" 'Z00*/*.bam'
         time_range_of_files "${path}"
     else
@@ -444,6 +442,8 @@ elif [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "*"
         expected_file_sizes human "${path}" "germline/*"
         expected_file_sizes human "${path}" "*.bai"
+##        expected_file_md5 "${path}" '*.bai'
+##        expected_file_md5 "${path}" '*.bam'
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
