@@ -5,7 +5,8 @@
 ### NEW FEATURES
 
  * `lg3 test validate` now compares the MD5 checksums of the content of the
-   trimmed FASTQ files. This requires that MD5 checksum files can be written.
+   trimmed FASTQ files, the BWA aligned BAM files and the corresponding BAM
+   index files. This requires that MD5 checksum files can be written.
 
 ### SOFTWARE QUALITY
 
