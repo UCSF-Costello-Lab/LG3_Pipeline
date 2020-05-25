@@ -213,12 +213,14 @@ function expected_file_content {
     fi
 }
 
-## Example: expected_file_md5_gunzip "${path}" 'Z00*-trim/*.fastq.gz'
-function expected_file_md5_gunzip {
+## Example: expected_file_md5 "${path}" 'Z00*-trim/*.fastq.gz'
+## Example: expected_file_md5 "${path}" 'Z00*-trim/*.fastq.gz' gunzip
+function expected_file_md5 {
     local res
     local res_array
     local t
-
+    local cat_cmd
+    
     [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
 
     local path="$1"
@@ -231,17 +233,28 @@ function expected_file_md5_gunzip {
     { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
     
     local glob=$1
+    shift
     [[ -n "${glob}" ]] || error 'No *.gz files specified'
+
+    local how="$1"
+    shift
+    cat_cmd=cat
+    if [[ "$how" == "gunzip" ]]; then
+      cat_cmd=zcat
+    fi
 
     t="${LG3_TEST_TRUTH}/${PATIENT}"
     res_array=()
     for pp in ${path}/${glob}; do
 	dir=$(dirname "$pp")
 	ff=$(basename "$pp")
-	mm=${ff/.gz/.md5}
-	
-	[[ -f "${dir}/${mm}" ]] || zcat "${dir}/${ff}" | md5sum > "${dir}/${mm}"
-	[[ -f "${t}/${dir}/${mm}" ]] || zcat "${t}/${dir}/${ff}" | md5sum > "${t}/${dir}/${mm}"
+	mm=${ff}
+        if [[ "$how" == "gunzip" ]]; then
+	    mm=${ff/.gz/}
+	fi    
+	mm="${mm}.md5"
+	[[ -f "${dir}/${mm}" ]] || "$cat_cmd" "${dir}/${ff}" | md5sum > "${dir}/${mm}"
+	[[ -f "${t}/${dir}/${mm}" ]] || "$cat_cmd" "${t}/${dir}/${ff}" | md5sum > "${t}/${dir}/${mm}"
 	diff -b "${t}/${dir}/${mm}" "${dir}/${mm}"
 	res_array+=("$(diff -b "${t}/${dir}/${mm}" "${dir}/${mm}")")
     done
@@ -251,11 +264,15 @@ function expected_file_md5_gunzip {
     
     ## Trim whitespace
     res=${res##*( )}
-    
+
+    t=""
+    if [[ -n "$how" ]]; then
+	t=" (after $how)"
+    fi 
     if [ -z "${res}" ]; then
-        report_ok "file md5 checksums after gunzip ('${path}/${glob}')"
+        report_ok "file md5 checksums$t ('${path}/${glob}')"
     else
-        report_warn "unexpected file md5 checksums after gunzip ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}')"
+        report_warn "unexpected file md5 checksums$t ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}')"
         echo "${res}" | tail -n +3
     fi
 }
@@ -401,7 +418,7 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}" 'Z00*-trim'
         expected_file_sizes bytes "${path}" 'Z00*-trim/*'
-        expected_file_md5_gunzip "${path}" 'Z00*-trim/*.fastq.gz'
+        expected_file_md5 "${path}" 'Z00*-trim/*.fastq.gz' gunzip
 	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
@@ -412,8 +429,8 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "Z00*/*"
-        expected_file_md5_gunzip "${path}" 'Z00*/*.bam.bai'
-        expected_file_md5_gunzip "${path}" 'Z00*/*.bam'
+        expected_file_md5 "${path}" 'Z00*/*.bam.bai'
+        expected_file_md5 "${path}" 'Z00*/*.bam'
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
