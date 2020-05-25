@@ -101,7 +101,7 @@ function expected_file_tree {
     shift
 
     # Step not started?
-    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    { tree "${path}" | grep -qF " 0 files" ; } && { report_skip "No files found: ${path}"; return; }
     
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
@@ -110,7 +110,7 @@ function expected_file_tree {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; tree ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(tree ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; tree -I '*.md5' ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(tree -I '*.md5' ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file tree ('${path}')"
@@ -149,7 +149,7 @@ function expected_file_sizes {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; du --apparent-size --si ${unit} ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(du --apparent-size --si ${unit} ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; du --apparent-size --si ${unit} ${truth_path} | grep -vF '.md5' | sed "s|/LG3/|/${PROJECT}/|g") <(du --apparent-size --si ${unit} ${path} | grep -vF '.md5'))
         
     if [ -z "${res}" ]; then
         report_ok "file sizes ('${path}')"
@@ -210,6 +210,53 @@ function expected_file_content {
     else
         report_warn "unexpected file content ('${pathname}')"
         echo "${res}"
+    fi
+}
+
+## Example: expected_file_md5_gunzip "${path}" 'Z00*-trim/*.fastq.gz'
+function expected_file_md5_gunzip {
+    local res
+    local res_array
+    local t
+
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
+
+    local path="$1"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
+    [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
+    shift
+
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    
+    local glob=$1
+    [[ -n "${glob}" ]] || error 'No *.gz files specified'
+
+    t="${LG3_TEST_TRUTH}/${PATIENT}"
+    res_array=()
+    for pp in ${path}/${glob}; do
+	dir=$(dirname "$pp")
+	ff=$(basename "$pp")
+	mm=${ff/.gz/.md5}
+	
+	[[ -f "${dir}/${mm}" ]] || zcat "${dir}/${ff}" | md5sum > "${dir}/${mm}"
+	[[ -f "${t}/${dir}/${mm}" ]] || zcat "${t}/${dir}/${ff}" | md5sum > "${t}/${dir}/${mm}"
+	diff -b "${t}/${dir}/${mm}" "${dir}/${mm}"
+	res_array+=("$(diff -b "${t}/${dir}/${mm}" "${dir}/${mm}")")
+    done
+
+    ## String array as string
+    res=${res_array[*]}
+    
+    ## Trim whitespace
+    res=${res##*( )}
+    
+    if [ -z "${res}" ]; then
+        report_ok "file md5 checksums after gunzip ('${path}/${glob}')"
+    else
+        report_warn "unexpected file md5 checksums after gunzip ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}')"
+        echo "${res}" | tail -n +3
     fi
 }
 
@@ -354,7 +401,8 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}" 'Z00*-trim'
         expected_file_sizes bytes "${path}" 'Z00*-trim/*'
-        time_range_of_files "${path}"
+        expected_file_md5_gunzip "${path}" 'Z00*-trim/*.fastq.gz'
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
