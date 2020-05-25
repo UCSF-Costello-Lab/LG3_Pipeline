@@ -238,9 +238,9 @@ function expected_file_md5 {
 
     local how="$1"
     shift
-    cat_cmd=cat
+    cat_cmd="cat"
     if [[ "$how" == "gunzip" ]]; then
-      cat_cmd=zcat
+      cat_cmd="zcat"
     fi
 
     t="${LG3_TEST_TRUTH}/${PATIENT}"
