@@ -543,6 +543,9 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
+        expected_file_md5 "${path}" "*.mutations"
+        expected_file_md5 "${path}" "*.txt"
+        expected_file_md5 "${path}" "*.intersect.bed"
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
