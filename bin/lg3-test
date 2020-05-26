@@ -429,6 +429,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "Z00*/*"
         expected_file_md5 "${path}" 'Z00*/*.bai'
         expected_file_md5 "${path}" 'Z00*/*.bam'
+        expected_file_md5 "${path}" 'Z00*/*.flagstat'
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
@@ -442,8 +443,8 @@ elif [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "*"
         expected_file_sizes human "${path}" "germline/*"
         expected_file_sizes human "${path}" "*.bai"
-##        expected_file_md5 "${path}" '*.bai'
-##        expected_file_md5 "${path}" '*.bam'
+        expected_file_md5 "${path}" '*.bai'
+        expected_file_md5 "${path}" '*.bam'
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
