@@ -275,6 +275,60 @@ function expected_file_md5 {
     fi
 }
 
+function expected_file_bam {
+    local res
+    local res_array
+    local files_array
+    local t
+    local cat_cmd
+    
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
+
+    local path="$1"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
+    [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
+    shift
+
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    
+    local glob=$1
+    shift
+    [[ -n "${glob}" ]] || error 'No *.gz files specified'
+
+    t="${LG3_TEST_TRUTH}/${PATIENT}"
+    res_array=()
+    # shellcheck disable=SC2206
+    files_array=(${path}/${glob})
+    for ii in "${!files_array[@]}"; do
+	pp=${files_array[$ii]}
+	dir=$(dirname "$pp")
+	ff=$(basename "$pp")
+	printf "(%d/%d) bam diff: %s ... " "$((ii + 1))" "${#files_array[@]}" "${ff}"
+	bam diff --noPhoneHome --in1 "${t}/${dir}/${ff}" --in2 "${dir}/${ff}" > bam_diff
+	printf '\r                                                              \r'
+	[[ -s bam_diff ]] && res_array+=("$ff")
+        rm bam_diff
+    done
+
+    ## String array as string
+    res=${res_array[*]}
+    
+    ## Trim whitespace
+    res=${res##*( )}
+
+    t=""
+    if [[ -n "$how" ]]; then
+	t=" (after $how)"
+    fi 
+    if [ -z "${res}" ]; then
+        report_ok "BAM file content ('${path}/${glob}')"
+    else
+        report_warn "unexpected BAM file content ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}'): ${res}"
+    fi
+}
+
 function time_range_of_files {
     ## At this point, file timestamps is *not* a sufficient estimate on how
     ## long each step took at, because they don't reflect when each step *started*.
@@ -287,9 +341,25 @@ function time_range_of_files {
     echo "     Time range of files: ${first} -- ${last}"
 }
 
+function prune_timestamps() {
+    sed -E 's/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]/YYYY-MM-DD hh:mm:ss/g' | sed -E 's/[0-9][0-9]:[0-9][0-9]:[0-9][0-9],[0-9][0-9][0-9]/hh:mm:ss,uuu/g' | sed -E 's/[A-Z][a-z]+ [A-Z][a-z]+ [0-9]+ [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z][A-Z] [0-9][0-9][0-9][0-9]/DDD MMMM DD hh:mm:ss TZ YYYY/g'
+}
+
+function prune_folders() {
+    sed -E 's/LG3_Pipeline-[0-9-]+/LG3_Pipeline/g' | sed -E 's/[0-9]+.cclc01.som.ucsf.edu/NNN.cclc01.som.ucsf.edu/g'
+}
+
+function prune_gatk() {
+    sed -E '/^(real|user|sys)/d' | sed -E '/^WARN  ..:..:..,... RestStorageService - Error Response/d'
+}
+
+
 #### Parse optional args
+full=false
+
 while [ -n "$1" ]; do
     case $1 in
+        --full) full=true; shift;;
         setup) action="$1"; shift;;
         validate) action="$1"; shift;;
         --*) error "Unknown option $1";;
@@ -445,6 +515,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_sizes human "${path}" "*.bai"
         expected_file_md5 "${path}" '*.bai'
         expected_file_md5 "${path}" '*.bam'
+        $full && expected_file_bam "${path}" '*.bam'
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
