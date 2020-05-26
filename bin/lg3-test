@@ -246,6 +246,7 @@ function expected_file_md5 {
     t="${LG3_TEST_TRUTH}/${PATIENT}"
     res_array=()
     for pp in ${path}/${glob}; do
+	[[ $pp == *.md5 ]] && continue
 	dir=$(dirname "$pp")
 	ff=$(basename "$pp")
 	mm=${ff}
@@ -530,6 +531,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
         expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
+        expected_file_md5 "${path}" "${PATIENT}_pindel/*"
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
