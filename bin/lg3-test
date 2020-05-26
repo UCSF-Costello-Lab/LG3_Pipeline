@@ -325,7 +325,7 @@ function expected_file_bam {
     if [ -z "${res}" ]; then
         report_ok "BAM file content ('${path}/${glob}')"
     else
-        report_warn "unexpected BAM file content ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}'): ${res}"
+        report_warn "unexpected BAM file content ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}')"
     fi
 }
 
