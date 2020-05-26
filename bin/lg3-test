@@ -512,7 +512,9 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
         expected_file_sizes human "${path}" "germline/*"
+        expected_file_md5 "${path}" 'germline/*.germline'
         expected_file_sizes human "${path}" "*.bai"
+        expected_file_md5 "${path}" '*.flagstat'
         expected_file_md5 "${path}" '*.bai'
         expected_file_md5 "${path}" '*.bam'
         $full && expected_file_bam "${path}" '*.bam'
