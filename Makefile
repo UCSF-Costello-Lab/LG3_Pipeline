@@ -73,3 +73,4 @@ setup:
 	ln -fs $(LG3_HOME_HIDE)/AnnoVar .
 	ln -fs $(LG3_HOME_HIDE)/pykent .
 	ln -fs /home/jocostello/shared/exomeQualityPlots .
+	ln -fs /home/jocostello/repositories/HenrikBengtsson/Costello-PSCN-Seq .
