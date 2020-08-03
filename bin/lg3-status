@@ -307,8 +307,8 @@ if $MUT2 ; then
         fi
     
         ## Expected output:
-        #OUT=${WORKDIR}/NOR-${normid}__${samp_label}-${ID}.m2.obmm.cc.func.filt.tsv
-        OUT=${WORKDIR}/NOR-${normid}__${samp_label}-${ID}.m2.cc.func.filt.tsv
+        OUT=${WORKDIR}/NOR-${normid}__${samp_label}-${ID}.m2.obmm.cc.flt.func.pass.tsv
+        #OUT=${WORKDIR}/NOR-${normid}__${samp_label}-${ID}.m2.cc.func.filt.tsv
         if [ -s "$OUT" ]; then
             LCNT=$(wcl "$OUT")
             echo -e "Mutect2 $ID $OK ${YEL}${LCNT}${NOC}"
