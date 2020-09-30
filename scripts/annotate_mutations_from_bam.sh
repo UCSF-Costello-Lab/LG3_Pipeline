@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -36,10 +37,11 @@ echo " - PATIENT=${PATIENT:?}"
 echo " - PROJECT=${PROJECT:?}"
 assert_file_exists "${CONV}"
 
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ## run annotation code
-python "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${PATIENT}.snvs" "${CONV}" "${PATIENT}" "${PROJECT}" || error "annotate_mutations_from_bam.py failed"
+$PYTHON "${LG3_HOME}/scripts/annotate_mutations_from_bam.py" "${PATIENT}.snvs" "${CONV}" "${PATIENT}" "${PROJECT}" || error "annotate_mutations_from_bam.py failed"
 
 ## remove intermediate files
 rm -f "${PATIENT}.snvs."*Q.txt

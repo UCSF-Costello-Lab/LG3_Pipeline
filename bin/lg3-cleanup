@@ -27,8 +27,12 @@
 ###
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
-HOT=false
 
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+HOT=false
 TRIM=false
 ALIGN=false
 RECAL=false

@@ -101,8 +101,12 @@ echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 assert_file_exists "${PATIENT}.pindel.cfg"
 
 ## run pindel
+
 change_dir "${PATIENT}_pindel"
 echo -e "\\n========= [Pindel] Run pindel"
+
+## Report on the Pindel version
+${PINDEL} | head -1
 
 ${PINDEL} -f "$REF" -i "${LG3_SCRATCH_ROOT}/${PATIENT}.pindel.cfg" -c ALL \
 	-o "${PATIENT}.pindel" \

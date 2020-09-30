@@ -2,6 +2,7 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
@@ -35,9 +36,6 @@ fi
 TMP="${LG3_SCRATCH_ROOT}/$prefix/tmp"
 make_dir "$TMP"
 
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 
 pl="Illumina"
 pu="Exome"

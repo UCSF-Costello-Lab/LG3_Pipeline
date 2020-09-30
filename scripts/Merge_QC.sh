@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
@@ -41,9 +42,6 @@ export PATH=/opt/R/R-latest/bin:$PATH
 #Define resources and tools
 pl="Illumina"
 pu="Exome"
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
 REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 
 #Input variables

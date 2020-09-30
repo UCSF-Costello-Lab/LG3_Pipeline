@@ -8,7 +8,8 @@
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -68,7 +69,6 @@ echo "----------------------------------"
 
 
 ### Software
-RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 R_MUTDET_FILTER=${LG3_HOME}/scripts/MutDet_filter.R
 R_COMBINE_SNVS_PINDEL=${LG3_HOME}/scripts/combine_snvs_pindel.R
 SH_COMBINE_SNVS=${LG3_HOME}/scripts/combine_snvs.sh
@@ -78,7 +78,6 @@ SH_MUT_OVERLAPS=${LG3_HOME}/scripts/mutation_overlaps.sh ## D
 SH_MUTECT_COV_INTER_MUT=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh ## E
 SH_RUNLOH=${LG3_HOME}/scripts/runLOH_ivan.sh ## F
 
-assert_file_executable "${RSCRIPT_BIN}"
 assert_file_exists "${R_MUTDET_FILTER}"
 assert_file_exists "${R_COMBINE_SNVS_PINDEL}"
 assert_file_executable "${SH_COMBINE_SNVS}"
@@ -106,11 +105,11 @@ echo -e "\\n************ Convert library IDs to patient IDs"
 OK
 
 echo -e "\\n************ Remove SomaticIndelDetector and ourJudgment=='no' and mutations with alt in normal"
-"${RSCRIPT_BIN}" "${R_MUTDET_FILTER}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || error "${R_MUTDET_FILTER} failed"
+"${RSCRIPT}" "${R_MUTDET_FILTER}" "${PATIENT}.snvs.anno.pat.txt" "${PATIENT}.snvs.anno.pat.filt.txt" || error "${R_MUTDET_FILTER} failed"
 OK 
 
 echo -e "\\n************ Combine indels and snvs into one file"
-"${RSCRIPT_BIN}" "${R_COMBINE_SNVS_PINDEL}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || error "${R_COMBINE_SNVS_PINDEL} failed"
+"${RSCRIPT}" "${R_COMBINE_SNVS_PINDEL}" "${PATIENT}.snvs.anno.pat.filt.txt" "${LG3_OUTPUT_ROOT}/${PROJECT}/pindel/${PATIENT}_pindel/${PATIENT}.indels.filtered.anno.txt" "${PATIENT}.snvs.indels.filtered.txt" || error "${R_COMBINE_SNVS_PINDEL} failed"
 OK 
 
 echo -e "\\n************ Calculate mutation overlaps"

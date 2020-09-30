@@ -2,6 +2,9 @@
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+assert_pwd
 
 rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }
 

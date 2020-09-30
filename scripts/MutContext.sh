@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
@@ -32,14 +33,13 @@ mutsfile=$1
 wigfile=$2
 prefix=$3
 
-PYTHON=/opt/local/bin/python
 WIGFIXER="${LG3_HOME}/scripts/mutect_wig_to_bed.py"
-BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
 ANNO_AGILENT="${LG3_HOME}/resources/Agilent_SureSelect_HumanAllExon50Mb.exonic_and_splicing.bed"
 CALCULATE="${LG3_HOME}/scripts/CalculateMutationRates.py"
 GENOME="${LG3_HOME}/resources/hg19.2bit"
 
 export PYTHONPATH=/home/jssong/lib/:/opt/local/lib/python2.6/site-packages/:${LG3_HOME}/
+assert_python "$PYTHON"
 
 if [ ! -e "${prefix}.mutation_context" ]; then
         echo "[MutContext] Converting MuTect WIG to BED3..."

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -68,11 +69,8 @@ tumorname=${tbamfile##*/}
 tumorname=${tumorname%%.bwa*}
 
 ### Software
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PYTHON=/usr/bin/python
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user /HB 2018-09-13
-GATK="${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar"
-MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
 FILTER=${LG3_HOME}/FilterMutations/Filter.py
 REORDER="${LG3_HOME}/scripts/vcf_reorder.py"
 

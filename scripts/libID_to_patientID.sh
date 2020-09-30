@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -27,6 +28,8 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 PROG=$(basename "$0")
+
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 CONV=$1
@@ -41,7 +44,7 @@ echo "- OUTFILE=${OUTFILE:?}"
 assert_file_exists "${MUTFILE}"
 assert_file_exists "${CONV}"
 
-python "${LG3_HOME}/scripts/libID_to_patientID.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" "${CONV}" || error "libID_to_patientID.py failed"
+$PYTHON "${LG3_HOME}/scripts/libID_to_patientID.py" "${MUTFILE}" "${PATIENT}" "${OUTFILE}" "${CONV}" || error "libID_to_patientID.py failed"
 assert_file_exists "${OUTFILE}"
 
 echo "$PROG Finished"

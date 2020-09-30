@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -37,6 +38,8 @@ fi
 ##
 #
 
+assert_python "$PYTHON"
+
 PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
 assert_file_exists "${PYTHON_PINDEL_SETUP}"
 
@@ -51,7 +54,6 @@ echo "- patIDs=${patIDs:?}"
 assert_patient_name "${patient_ID}"
 assert_file_exists "${patIDs}"
 
-echo "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
-python "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
+$PYTHON "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

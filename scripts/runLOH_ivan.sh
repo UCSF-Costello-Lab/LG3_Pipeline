@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -48,11 +49,10 @@ assert_file_exists "${CONV}"
 
 
 ### Software
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
-RSCRIPT_BIN=/opt/R/R-latest/bin/Rscript
 PYTHON_RUNMAF=${LG3_HOME}/scripts/runMAF.py
 R_MAFPLOT=${LG3_HOME}/scripts/MAFplot_version3_script.R
-assert_file_executable "${RSCRIPT_BIN}"
 assert_file_exists "${R_MAFPLOT}"
 assert_file_exists "${PYTHON_RUNMAF}"
 
@@ -64,12 +64,12 @@ WDIR=${MAF}/${PATIENT}_MAF
 make_dir "${WDIR}"
 change_dir "${WDIR}"
 
-python "${PYTHON_RUNMAF}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${PYTHON_RUNMAF} failed"
+$PYTHON "${PYTHON_RUNMAF}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${PYTHON_RUNMAF} failed"
 OK
 
 OUTDIR=${MAF}/${PATIENT}_plots
 make_dir "${OUTDIR}"
-"${RSCRIPT_BIN}" "${R_MAFPLOT}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${R_MAFPLOT} failed"
+"${RSCRIPT}" "${R_MAFPLOT}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${R_MAFPLOT} failed"
 OK
 
 echo "Finished"

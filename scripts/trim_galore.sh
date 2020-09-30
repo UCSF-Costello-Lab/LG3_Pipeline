@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -17,7 +18,6 @@ LG3_DEBUG=${LG3_DEBUG:-true}
 TG=${TG:-${LG3_HOME}/tools/TrimGalore-0.4.4/trim_galore}
 
 #CUTADAPT=/opt/Python/Python-2.7.9/bin/cutadapt ### Problem !
-CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -32,6 +32,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- TG=${TG:?}"
   echo "- CUTADAPT=${CUTADAPT:?}"
 fi
+
+assert_python ""
 
 QTY=20
 LEN=20

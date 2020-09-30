@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 PROG=$(basename "$PROGRAM")
@@ -58,21 +59,19 @@ assert_file_exists "${REF}"
 assert_file_exists "${DBSNP}"
 
 ## Software
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
-PYTHON=/usr/bin/python
-GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 PYTHON_VCF_GERMLINE=${LG3_HOME}/scripts/vcf_germline.py
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
 echo "- PYTHON=${PYTHON:?}"
 echo "- GATK=${GATK:?}"
+assert_python "$PYTHON"
+
 
 ## Assert existance of software
 assert_file_executable "${JAVA}"
 assert_file_executable "${PYTHON}"
 assert_file_exists "${GATK}"
 assert_file_exists "${PYTHON_VCF_GERMLINE}"
-
 
 echo "-------------------------------------------------"
 echo "[Germline] Germline SNPs and relatedness"
@@ -83,7 +82,7 @@ echo "[Germline] Normal Sample: $normalname"
 echo "-------------------------------------------------"
 
 ## Construct string with one or more '-I <bam>' elements
-INPUTS=$(for i in ${bamdir}/*.bwa.realigned.rmDups.recal.bam
+INPUTS=$(for i in "${bamdir}"/*.bwa.realigned.rmDups.recal.bam
 do
         assert_file_exists "${i}"
         echo -n "-I $i "
@@ -183,7 +182,7 @@ else
    echo "[Germline] Found output ${PATIENT}.UG.snps.vcf -- Skipping..."
 fi
 
-for i in ${bamdir}/*.bam
+for i in "${bamdir}"/*.bam
 do
         tumorname=${i##*/}
         tumorname=${tumorname%%.bwa*}

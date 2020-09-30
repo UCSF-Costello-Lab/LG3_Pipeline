@@ -186,6 +186,34 @@ function assert_patient_name {
 }
 
 
+## Usage: assert_pwd
+function assert_pwd {
+    [[ $# -ne 0 ]] && error "${FUNCNAME[0]}() must not be called with arguments: $#"
+    ## Don't allow running the pipeline from within LG3_HOME
+    equal_dirs "${PWD}" "${LG3_HOME}" && error "The LG3 Pipeline must not be run from the folder where it is installed (LG3_HOME): ${PWD}"
+}
+
+
+## Usage: assert_python "" or assert_python "<python-binary>"
+function assert_python {
+    local version version_x_y
+    local bin
+
+    ## Arguments are optional
+    bin=$1
+    
+    if [[ -n "$bin" ]]; then
+	assert_file_executable "$bin"
+    else	
+	bin=$(command -v python) || error "Python executable not found on PATH: ${PATH}"
+    fi
+    
+    ## Assert correct version
+    version=$(2>&1 "$bin" --version | sed -E 's/.*(P|p)ython *//g')
+    version_x_y=$(echo "$version" | sed -E 's/[.][0-9]+$//g')
+    [[ "$version_x_y" == "2.6" ]] || [[ "$version_x_y" == "2.7" ]] || error "Requires Python 2.6 or 2.7: $version ($bin)"
+}
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NAVIGATION
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -231,3 +259,58 @@ function source_lg3_conf {
         echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
 }
+
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# SOFTWARE
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+## java version "1.6.0_27"
+JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
+assert_file_executable "$JAVA"
+
+## Python 2.6.6
+PYTHON=/usr/bin/python
+assert_file_executable "$PYTHON"
+assert_python "$PYTHON"
+unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
+
+## R scripting front-end version 3.2.0 (2015-04-16)
+RSCRIPT=/opt/R/R-latest/bin/Rscript
+assert_file_executable "$RSCRIPT"
+## Workaround: 'Rscript' called somewhere in the Recal script(s)
+PATH="$(dirname "$RSCRIPT"):$PATH"
+
+## samtools 0.1.18 (r982:295
+SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
+assert_file_executable "$SAMTOOLS"
+
+## bwa 0.5.9-r26-dev
+BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
+assert_file_executable "$BWA"
+
+# Picard
+PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
+assert_directory_exists "$PICARD_HOME"
+
+# GATK 1.6-5-g557da77
+GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
+assert_file_executable "$GATK"
+
+# bedtools 2.16.2
+BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
+assert_file_executable "$BEDTOOLS"
+
+# muTect
+MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
+assert_file_executable "$MUTECT"
+
+# AnnoVar
+ANNOVAR_HOME=${LG3_HOME}/AnnoVar
+assert_directory_exists "$ANNOVAR_HOME"
+
+# cutadapt 1.2.1
+CUTADAPT=/opt/Python/Python-2.7.3/bin/cutadapt
+assert_file_executable "$CUTADAPT"

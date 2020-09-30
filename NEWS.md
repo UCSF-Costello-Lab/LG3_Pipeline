@@ -1,15 +1,58 @@
 # LG3_Pipeline
 
-## Version 2019-03-23-9000 (develop version)
+## Version 2020-05-16-9000 (develop version)
 
 ### NEW FEATURES
 
+ * `lg3 test validate` now compares the MD5 checksums of the content of the
+   trimmed FASTQ files, the BWA aligned BAM files and the corresponding BAM
+   index files. This requires that MD5 checksum files can be written.
+
+### SOFTWARE QUALITY
+
+ * The 'java', 'python' and 'Rscript' executables are now set in a central
+   location to guarantee that the same, expected versions are used everywhere.
+
+ * The AnnoVar, bedtools, cutadapt, BWA, GATK, MuTect, Picard, and Samtools
+   executables are now set in a central location to guarantee that the same,
+   expected versions are used everywhere.
+
+
+## Version 2020-05-16
+
+### NEW FEATURES
+
+ * The LG3 Pipeline requires Python 2.  If an incompatible Python version is
+   detected on the 'PATH', then an informative error is produced.
+   
+### KNOWN ISSUES
+
+ * The 'lg3.conf' file must not be edited while the pipeline is running.  If
+   done, then the outcome and the results are unpredictable.  This is because
+   the 'lg3.conf' file is not frozen when the pipeline is launched.
+
+
+## Version 2019-07-22
+
+### SIGNIFICANT CHANGES
+
+ * The LG3 Pipeline now refuses to run from within its installation folder,
+   i.e. when the current working directory equals '${LG3_HOME}'.  This
+   protects against various potential mistakes such as overriding installed
+   files and settings.
+
+ 
+### NEW FEATURES
+
  * Globals settings for the LG3 Pipeline such as locations of software tools
-   can be configured via the '${LG3_HOME}/lg3.conf' bash script.  If a file
-   'lg3.conf' exists in the current working directory ("the project folder"),
-   then that file is sourced after '${LG3_HOME}/lg3.conf', which makes it
-   possible to override some or all of the predefined settings on a project
-   to project basis.
+   are now configured in the '${LG3_HOME}/lg3.conf' bash script (which should
+   not be edited by the user).  If a file 'lg3.conf' exists in the current
+   working directory ("the project folder"), then that file is sourced after
+   '${LG3_HOME}/lg3.conf', which makes it possible to override some or all
+   of the predefined global settings on a project to project basis.  The
+   latter file can also be used to configure variables such as PATIENT etc.
+
+ * Now 'lg3 status' defaults to using '--all'.
 
  * ROBUSTNESS: Now `bin/lg3-test` explicitly asserts that Rscript exists
    before attemption to use it.

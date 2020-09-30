@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -34,7 +35,8 @@ fi
 ##
 #
 
-BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools
+assert_python "$PYTHON"
+
 PYTHON_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.py
 assert_file_executable "${BEDTOOLS}"
 assert_file_exists "${PYTHON_PINDEL_FILTER}"
@@ -49,7 +51,7 @@ echo "- interval=${interval:?}"
 assert_file_exists "${datafile}"
 
 ### filter indels
-python "${PYTHON_PINDEL_FILTER}" "${datafile}"
+$PYTHON "${PYTHON_PINDEL_FILTER}" "${datafile}"
 assert_file_exists "${datafile}.filter"
 
 ### intersect with target sequence

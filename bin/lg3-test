@@ -13,7 +13,10 @@
 ###  lg3 test validate Patient157t10
 ###
 
-LG3_HOME=${LG3_HOME:?}
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_TEST_TRUTH=${LG3_TEST_TRUTH:-/costellolab/data1/shared/LG3_Pipeline/example_data}
 PROJECT=${PROJECT:-LG3}
@@ -98,7 +101,7 @@ function expected_file_tree {
     shift
 
     # Step not started?
-    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    { tree "${path}" | grep -qF " 0 files" ; } && { report_skip "No files found: ${path}"; return; }
     
     local glob=$1  ## optional
     if [[ -n "${glob}" ]]; then
@@ -107,7 +110,7 @@ function expected_file_tree {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; tree ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(tree ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; tree -I '*.md5' ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(tree -I '*.md5' ${path}))
         
     if [ -z "${res}" ]; then
         report_ok "file tree ('${path}')"
@@ -146,7 +149,7 @@ function expected_file_sizes {
     fi
 
     # shellcheck disable=SC2164,SC2086
-    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; du --apparent-size --si ${unit} ${truth_path} | sed "s|/LG3/|/${PROJECT}/|g") <(du --apparent-size --si ${unit} ${path}))
+    res=$(diff -U 0 <(cd "${LG3_TEST_TRUTH}/${PATIENT}"; du --apparent-size --si ${unit} ${truth_path} | grep -vF '.md5' | sed "s|/LG3/|/${PROJECT}/|g") <(du --apparent-size --si ${unit} ${path} | grep -vF '.md5'))
         
     if [ -z "${res}" ]; then
         report_ok "file sizes ('${path}')"
@@ -210,6 +213,123 @@ function expected_file_content {
     fi
 }
 
+## Example: expected_file_md5 "${path}" 'Z00*-trim/*.fastq.gz'
+## Example: expected_file_md5 "${path}" 'Z00*-trim/*.fastq.gz' gunzip
+function expected_file_md5 {
+    local res
+    local res_array
+    local t
+    local cat_cmd
+    
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
+
+    local path="$1"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
+    [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
+    shift
+
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    
+    local glob=$1
+    shift
+    [[ -n "${glob}" ]] || error 'No *.gz files specified'
+
+    local how="$1"
+    shift
+    cat_cmd="cat"
+    if [[ "$how" == "gunzip" ]]; then
+      cat_cmd="zcat"
+    fi
+
+    t="${LG3_TEST_TRUTH}/${PATIENT}"
+    res_array=()
+    for pp in ${path}/${glob}; do
+	[[ $pp == *.md5 ]] && continue
+	dir=$(dirname "$pp")
+	ff=$(basename "$pp")
+	mm=${ff}
+        if [[ "$how" == "gunzip" ]]; then
+	    mm=${ff/.gz/}
+	fi    
+	mm="${mm}.md5"
+	[[ -f "${dir}/${mm}" ]] || "$cat_cmd" "${dir}/${ff}" | md5sum > "${dir}/${mm}"
+	[[ -f "${t}/${dir}/${mm}" ]] || "$cat_cmd" "${t}/${dir}/${ff}" | md5sum > "${t}/${dir}/${mm}"
+	res_array+=("$(diff -b "${t}/${dir}/${mm}" "${dir}/${mm}")")
+    done
+
+    ## String array as string
+    res=${res_array[*]}
+    
+    ## Trim whitespace
+    res=${res##*( )}
+
+    t=""
+    if [[ -n "$how" ]]; then
+	t=" (after $how)"
+    fi 
+    if [ -z "${res}" ]; then
+        report_ok "file md5 checksums$t ('${path}/${glob}')"
+    else
+        report_warn "unexpected file md5 checksums$t ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}')"
+    fi
+}
+
+function expected_file_bam {
+    local res
+    local res_array
+    local files_array
+    local t
+    local cat_cmd
+    
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}"
+
+    local path="$1"
+    local truth_path=${path/${PROJECT}/LG3}
+    [[ -d "${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}" ]] || error "No such folder: ${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}"
+    [[ -d "${path}" ]] || { report_skip "No such folder: ${path}"; return; }
+    shift
+
+    # Step not started?
+    { tree "${path}" | grep -qF " 0 files"; } && { report_skip "No files found: ${path}"; return; }
+    
+    local glob=$1
+    shift
+    [[ -n "${glob}" ]] || error 'No *.gz files specified'
+
+    t="${LG3_TEST_TRUTH}/${PATIENT}"
+    res_array=()
+    # shellcheck disable=SC2206
+    files_array=(${path}/${glob})
+    for ii in "${!files_array[@]}"; do
+	pp=${files_array[$ii]}
+	dir=$(dirname "$pp")
+	ff=$(basename "$pp")
+	printf "(%d/%d) bam diff: %s ... " "$((ii + 1))" "${#files_array[@]}" "${ff}"
+	bam diff --noPhoneHome --in1 "${t}/${dir}/${ff}" --in2 "${dir}/${ff}" > bam_diff
+	printf '\r                                                              \r'
+	[[ -s bam_diff ]] && res_array+=("$ff")
+        rm bam_diff
+    done
+
+    ## String array as string
+    res=${res_array[*]}
+    
+    ## Trim whitespace
+    res=${res##*( )}
+
+    t=""
+    if [[ -n "$how" ]]; then
+	t=" (after $how)"
+    fi 
+    if [ -z "${res}" ]; then
+        report_ok "BAM file content ('${path}/${glob}')"
+    else
+        report_warn "unexpected BAM file content ('${LG3_TEST_TRUTH}/${PATIENT}/${truth_path}/${glob}' != '${path}/${glob}')"
+    fi
+}
+
 function time_range_of_files {
     ## At this point, file timestamps is *not* a sufficient estimate on how
     ## long each step took at, because they don't reflect when each step *started*.
@@ -222,9 +342,25 @@ function time_range_of_files {
     echo "     Time range of files: ${first} -- ${last}"
 }
 
+function prune_timestamps() {
+    sed -E 's/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]/YYYY-MM-DD hh:mm:ss/g' | sed -E 's/[0-9][0-9]:[0-9][0-9]:[0-9][0-9],[0-9][0-9][0-9]/hh:mm:ss,uuu/g' | sed -E 's/[A-Z][a-z]+ [A-Z][a-z]+ [0-9]+ [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z][A-Z] [0-9][0-9][0-9][0-9]/DDD MMMM DD hh:mm:ss TZ YYYY/g'
+}
+
+function prune_folders() {
+    sed -E 's/LG3_Pipeline-[0-9-]+/LG3_Pipeline/g' | sed -E 's/[0-9]+.cclc01.som.ucsf.edu/NNN.cclc01.som.ucsf.edu/g'
+}
+
+function prune_gatk() {
+    sed -E '/^(real|user|sys)/d' | sed -E '/^WARN  ..:..:..,... RestStorageService - Error Response/d'
+}
+
+
 #### Parse optional args
+full=false
+
 while [ -n "$1" ]; do
     case $1 in
+        --full) full=true; shift;;
         setup) action="$1"; shift;;
         validate) action="$1"; shift;;
         --*) error "Unknown option $1";;
@@ -351,7 +487,8 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}" 'Z00*-trim'
         expected_file_sizes bytes "${path}" 'Z00*-trim/*'
-        time_range_of_files "${path}"
+        expected_file_md5 "${path}" 'Z00*-trim/*.fastq.gz' gunzip
+	time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
     fi
@@ -361,6 +498,9 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "Z00*/*"
+        expected_file_md5 "${path}" 'Z00*/*.bai'
+        expected_file_md5 "${path}" 'Z00*/*.bam'
+        expected_file_md5 "${path}" 'Z00*/*.flagstat'
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
@@ -373,7 +513,12 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
         expected_file_sizes human "${path}" "germline/*"
+        expected_file_md5 "${path}" 'germline/*.germline'
         expected_file_sizes human "${path}" "*.bai"
+        expected_file_md5 "${path}" '*.flagstat'
+        expected_file_md5 "${path}" '*.bai'
+        expected_file_md5 "${path}" '*.bam'
+        $full && expected_file_bam "${path}" '*.bam'
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
@@ -386,6 +531,7 @@ elif [ "$action" == "validate" ]; then
         expected_file_tree "${path}"
         expected_file_rows "${path}" "${PATIENT}.pindel.cfg"
         expected_file_sizes human "${path}/${PATIENT}_pindel" "*"
+        expected_file_md5 "${path}" "${PATIENT}_pindel/*"
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
@@ -397,6 +543,9 @@ elif [ "$action" == "validate" ]; then
     if [ -d "${path}" ]; then
         expected_file_tree "${path}"
         expected_file_sizes human "${path}" "*"
+        expected_file_md5 "${path}" "*.mutations"
+        expected_file_md5 "${path}" "*.txt"
+        expected_file_md5 "${path}" "*.intersect.bed"
         time_range_of_files "${path}"
     else
         report_skip "No such folder: ${path}"
