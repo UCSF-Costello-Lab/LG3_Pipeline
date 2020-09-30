@@ -54,12 +54,13 @@ WORKDIR=$(readlink -e "${WORKDIR}")
 change_dir "${WORKDIR}"
 echo "- WORKDIR=${WORKDIR}"
 
-ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
+#ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
+ls -1 "${BAMPATH}/${PATIENT}/"*."${RECAL_BAM_EXT}.bam" || error "No bam files found in ${BAMPATH}"
 
 PBS=${QC_PLOT_HOME}/annotate_mutations_from_bam_vSH.sh
 assert_file_executable "${PBS}"
 
 PN=${PATIENT/Patient/Pat}
-qsub -l vmem=96gb -e "_QC1_${PATIENT}.err" -o "_QC1_${PATIENT}.out" -N "QC1_${PN}" -M "${EMAIL}" -m ae -v "mutationfile=${MUTATIONFILE},conversionfile=${CONV},patient=${PATIENT},project=${PROJECT},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME}" "${PBS}"
+qsub -l vmem=96gb -e "_QC1_${PATIENT}.err" -o "_QC1_${PATIENT}.out" -N "QC1_${PN}" -M "${EMAIL}" -m ae -v "mutationfile=${MUTATIONFILE},conversionfile=${CONV},patient=${PATIENT},project=${PROJECT},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME},RECAL_BAM_EXT=${RECAL_BAM_EXT}" "${PBS}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

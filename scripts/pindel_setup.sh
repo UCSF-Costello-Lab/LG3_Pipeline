@@ -51,6 +51,7 @@ echo "- patIDs=${patIDs:?}"
 assert_patient_name "${patient_ID}"
 assert_file_exists "${patIDs}"
 
+echo "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
 python "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

@@ -19,6 +19,8 @@ PATIENT=${PATIENT:-Patient157t10}
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 NORMAL=${NORMAL:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | grep -w "Normal" | cut -f 1)}
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+#SUFF=trim.bwa.sorted.bam
+SUFF=bwa.sorted.bam
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -66,7 +68,6 @@ assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
 
 
-SUFF=trim.bwa.sorted.bam
 
 CNT=0
 for SAMPLE in ${SAMPLES}

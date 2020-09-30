@@ -246,6 +246,7 @@ else
       echo -e "\\n[Mutect2] Found MuTect2 output ${OUT}, downloading ..."
 		cp -p "${DEST}/${OUT}" .
 		cp -p "${DEST}/${OUT}.tbi" .
+		cp -p "${tumorname}-M2FilteringStats.tsv" .
 		if ${bAA}; then
 			cp -p "${DEST}/${tumorname}.bamout.bam" .
 			cp -p "${DEST}/${tumorname}.bamout.bai" .	

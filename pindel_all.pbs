@@ -3,7 +3,7 @@
 #PBS -N ${PATIENT}.pindel
 #PBS -e _Pindel_${PATIENT}.err
 #PBS -o _Pindel_${PATIENT}.out
-#PBS -l nodes=1:ppn=6,vmem=12gb
+#PBS -l nodes=1:ppn=6,vmem=64gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -57,7 +57,6 @@ assert_patient_name "${PATIENT}"
 assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV:?}") ## Absolute path
 
-echo "PINDEL"
 echo "Patient: ${PATIENT}"
 echo "Project: ${PROJECT}"
 echo "Conversion File: ${CONV}"
@@ -71,7 +70,6 @@ unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-13
 
 echo "Software:"
 echo "- PINDEL=${PINDEL:?}"
-echo "- PINDEL_NEW=${PINDEL_NEW:?}"
 echo "- PINDEL2VCF=${PINDEL2VCF:?}"
 assert_file_executable "${PINDEL}"
 assert_file_executable "${PINDEL2VCF}"

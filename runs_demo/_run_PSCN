@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=scripts/utils.sh
-source "${LG3_HOME}/scripts/utils.sh"
+source "${LG3_HOME:?}/scripts/utils.sh"
 
 rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }
 
@@ -11,12 +11,18 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
 echo "Arguments: $*"
-
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-
 PSCN_HOME=${PSCN_HOME:-Costello-PSCN-Seq}
+
+echo "************** Run once 0.setup.R ********************"
+cat ${PSCN_HOME}/0.setup.R
+
+echo "************** Check config.yml ********************"
+cat ${PSCN_HOME}/config.yml
+echo "****************************************************"
+
 rm_if_link "${PSCN_HOME}/seqzData" 
 rm_if_link "${PSCN_HOME}/pscbsData" 
 rm_if_link "${PSCN_HOME}/reports"
@@ -26,6 +32,7 @@ PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157t10}
 BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+echo "- BAMPATH=${BAMPATH:?}"
 SEQUENZA_OUT=${LG3_INPUT_ROOT}/${PROJECT}/sequenza/${PATIENT}
 make_dir "${SEQUENZA_OUT}"
 PSCBS_OUT=${LG3_INPUT_ROOT}/${PROJECT}/PSCBS/${PATIENT}
@@ -36,6 +43,7 @@ make_dir "${PSCN_OUT}"
 ## Requires absolute path
 LG3_HOME=$(readlink -e "${LG3_HOME}")
 BAMPATH=$(readlink -e "${BAMPATH}")
+echo "- BAMPATH=${BAMPATH:?}"
 SEQUENZA_OUT=$(readlink -e "${SEQUENZA_OUT}")
 LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}")
 PSCN_HOME=$(readlink -e "${PSCN_HOME}")
@@ -82,6 +90,7 @@ ln -sf "${PSCBS_OUT}" pscbsData || error "Failed to create a link to ${PSCBS_OUT
 
 ln -sf "${PSCN_OUT}" reports || error "Failed to create a link to ${PSCN_OUT}"
 
-qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae "${LG3_HOME}/PSCN.submit_all.pbs"
+qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae -v "LG3_HOME=${LG3_HOME}" "${LG3_HOME}/PSCN.submit_all.pbs"
+#qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae -v "LG3_HOME=${LG3_HOME},PROJECT=${PROJECT},PATIENT=${PATIENT}" "${LG3_HOME}/PSCN.submit_all.pbs"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
