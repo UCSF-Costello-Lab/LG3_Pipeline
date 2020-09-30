@@ -1,0 +1,138 @@
+#!/bin/bash
+#PBS -N ${PATIENT}.fac
+#PBS -e _Fac_${PATIENT}.err
+#PBS -o _Fac_${PATIENT}.out
+#PBS -l nodes=1:ppn=6,vmem=20gb
+#PBS -m ae
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+### Configuration
+LG3_HOME=${LG3_HOME}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
+CONV=${CONV:-patient_ID_conversions.tsv}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}/facets/${PATIENT:?}}
+LG3_DEBUG=${LG3_DEBUG:-true}
+ncores=${PBS_NUM_PPN:-1}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- EMAIL=${EMAIL}"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- hostname=$(hostname)"
+  echo "- ncores=$ncores"
+fi
+
+LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}") ## Absolute path
+assert_directory_exists "${LG3_OUTPUT_ROOT}"
+
+### Input
+echo "Input:"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- CONV=${CONV:?}"
+
+assert_patient_name "${PATIENT}"
+assert_file_exists "${CONV}"
+CONV=$(readlink -e "${CONV}") ## Absolute path
+
+echo "Patient: ${PATIENT}"
+echo "Project: ${PROJECT}"
+echo "Conversion File: ${CONV}"
+echo "----------------------------------"
+
+SNP_PILEUP_SETUP=${LG3_HOME}/scripts/create_input_snp_pileup.py
+assert_file_exists "${SNP_PILEUP_SETUP}"
+FACETS_RUN=${LG3_HOME}/scripts/runFACETS.R
+assert_file_exists "${FACETS_RUN}"
+
+echo "Software:"
+echo "- SNP_PILEUP_SETUP=${SNP_PILEUP_SETUP:?}"
+echo "- SNP_PILEUP=${SNP_PILEUP:?}"
+assert_file_executable "${SNP_PILEUP}"
+echo "- COMMONSNPS=${COMMONSNPS:?}"
+assert_file_exists "${COMMONSNPS:?}"
+echo "- FACETS_RUN=${FACETS_RUN:?}"
+
+## set up scratch directory
+make_dir "${LG3_SCRATCH_ROOT}"
+change_dir "${LG3_SCRATCH_ROOT}"
+
+BAMPATH=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal
+
+echo -e "\\n========= Create config file for ${SNP_PILEUP_SETUP}"
+python "${SNP_PILEUP_SETUP}" "${CONV}" "${BAMPATH}" || error "${SNP_PILEUP_SETUP} failed"
+
+CNF=${PATIENT}.snp_pileup_input.txt
+grep -w "${PATIENT}" snp_pileup_input.txt > "${CNF}"
+rm snp_pileup_input.txt
+assert_file_exists "${CNF}"
+echo "========= Final config file:"
+cat "${CNF}"
+
+echo -e "\\n========= Run ${SNP_PILEUP} "
+# PART 1: creates input arrays from a samples file (snp_pileup_input.txt) that we will loop through - only things in this file will be run through the pipeline
+patientARRAY=($(cut -f 1 "${CNF}"))
+normalidARRAY=($(cut -f 2 "${CNF}"))
+tumoridARRAY=($(cut -f 3 "${CNF}"))
+normalbamARRAY=($(cut -f 4 "${CNF}"))
+tumorbamARRAY=($(cut -f 5 "${CNF}"))
+sampleARRAY=($(cut -f 6 "${CNF}"))
+
+rm "${CNF}"
+
+echo "Found ${#patientARRAY[*]} Patient(s)"
+
+# PART 2: Loops through arrays above and runs snp-pileup, a piece of c++ code that prepares FACETS input from bam files
+for ((i=0; i<${#patientARRAY[*]}; i++));
+do
+    mkdir -p "${patientARRAY[i]}"
+    ${SNP_PILEUP} -g -q15 -Q20 -P100 -r25,0 -d1000 \
+			"${COMMONSNPS}" \
+			"${patientARRAY[i]}"/"${patientARRAY[i]}"_"${sampleARRAY[i]}"_"${normalidARRAY[i]}"_vs_"${tumoridARRAY[i]}" \
+			"${normalbamARRAY[i]}" \
+			"${tumorbamARRAY[i]}"
+done
+
+module load r/3.4.4
+
+# PART 3: Runs FACETS by patient, and creates a final output summary file, FACETS.txt, for each patient, which includes the purity for each sample
+#patientARRAY=(Patient469 Patient486) # can use this to override PART 1 if ever just want to rerun facets post-PART2 (comment both parts out) for specific patients
+patientuniqARRAY=($(echo "${patientARRAY[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+for patient in "${patientuniqARRAY[@]}"
+do
+    echo "======== Running FACETS for ${patient}"
+    Rscript "${FACETS_RUN}" "${patient}"/
+done
+
+## set up output directory
+WDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/facets
+make_dir "${WDIR}"
+
+
+## move from scratch to project folder
+cp -rp "${LG3_SCRATCH_ROOT}"/* "${WDIR}"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
+
+echo "Output is in ${WDIR}"
+ls -l "${WDIR}"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
