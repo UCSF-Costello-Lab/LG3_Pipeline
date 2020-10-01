@@ -1,0 +1,20 @@
+#!/bin/bash
+#PBS -N 1-5.all
+#PBS -j oe
+
+##### This file replaces original 1-5.submit_all.pbs
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+
+change_dir "$PBS_O_WORKDIR"
+echo "PBS_O_WORKDIR=$PBS_O_WORKDIR"
+
+jid=$(qsub -l vmem=200gb -d "$PBS_O_WORKDIR" -M "${EMAIL}" -m ae 1.mpileup.pbs)
+jid=$(qsub -l vmem=200gb -d "$PBS_O_WORKDIR" -M "${EMAIL}" -m ae -W depend="afterok:$jid" 2.sequenza.pbs)
+jid=$(qsub -l vmem=200gb -d "$PBS_O_WORKDIR" -M "${EMAIL}" -m ae -W depend="afterok:$jid" 3.pscbs.pbs)
+jid=$(qsub -l vmem=200gb -d "$PBS_O_WORKDIR" -M "${EMAIL}" -m ae -W depend="afterok:$jid" 4.reports.pbs)
+jid=$(qsub -l vmem=10gb  -d "$PBS_O_WORKDIR" -M "${EMAIL}" -m ae -W depend="afterok:$jid" 5.integrate.pbs)
+
+echo "Submitted"
+
