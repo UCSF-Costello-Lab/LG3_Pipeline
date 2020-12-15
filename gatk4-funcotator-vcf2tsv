@@ -4,7 +4,7 @@ module load jdk/1.8.0 python/2.7.15
 LG3_HOME=${LG3_HOME:?}
 REF="${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa"
 
-GATK4="${LG3_HOME}/tools/gatk-4.1.4.1/gatk"
+GATK4="${LG3_HOME}/tools/gatk-4.1.9.0/gatk"
 
 echo -e "\\nRunning GATK4::VariantsToTable on ${REF}"
 
@@ -29,11 +29,10 @@ do
 	tail -n +2 "${OUT}.tmp" >> "${HEAD}"
 	mv "${HEAD}" "${OUT}"
 	rm "${OUT}.tmp"
-	### 218 total fields avail!
-	#cut -f1-22,147,148,149,150 ${OUT} > ${OUT}.tmp
-	cut -f1,3,4,5,6,8-19,88,89,106,126,127,128,144,145,147,185,187,215,217 "${OUT}" > "${OUT}.tmp"
+	echo "242 total fields avail! Selecting some..."
+	#cut -f1,3,4,5,6,8-19,88,89,106,126,127,128,144,145,147,185,187,215,217 "${OUT}" > "${OUT}.tmp"
+	cut -f1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,23,28,30,31,32,34,35,36,38,52,54,57,61,62,64,66,68,69,71,72,76,77,83,87,88,89,90,91,95,96,97,98,99,100,102,105,106,107,109,110,112,113,150,151,152,169,171,172,175,178,181,188,192,204,206,209,211,212,215,218,221,225,229,239,241 "${OUT}" > "${OUT}.tmp"
 	mv "${OUT}.tmp" "${OUT}"
-
 	head -n 2 "${OUT}"
 	wc -l "${OUT}"
 done
