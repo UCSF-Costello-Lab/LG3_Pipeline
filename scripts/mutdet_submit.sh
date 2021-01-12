@@ -60,7 +60,7 @@ fi
 
 ## References
 CONFIG=${LG3_HOME}/FilterMutations/mutationConfig.cfg
-INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
+#INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
 echo "References:"
 echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
@@ -128,7 +128,7 @@ do
                 warn "File $OUT exists, skipping this job ..."
         else
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "Mut_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "M_${ID}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},CONFIG=$CONFIG,INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${PATIENT}.temp.conversions.txt"

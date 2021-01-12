@@ -23,6 +23,7 @@ source_lg3_conf
 ###  --qc1             Check QC1 outputs
 ###  --qc2             Check QC2 outputs
 ###  --qc3             Check QC3 outputs
+###  --fac            Check FACETS outputs
 ###  --pscn            Check PSCN reports
 ###
 ### Examples:
@@ -58,6 +59,8 @@ COMB=false
 QC1=false
 QC2=false
 QC3=false
+QC=false
+FAC=false
 PSCN=false
 
 wcl() {
@@ -70,18 +73,22 @@ case $1 in
     --conv*=*) CONV=${1#*=};shift 1;;
     --all) ALL=true;shift 1;;
 
-    --f*) FQ=true;ALL=false;shift 1;;
+    --fq) FQ=true;ALL=false;shift 1;;
     --trim) TRIM=true;ALL=false;shift 1;;
     --bwa) BWA=true;ALL=false;shift 1;;
     --recal) REC=true;ALL=false;shift 1;;
     --recal2) REC2=true;ALL=false;shift 1;;
     --g*) GL=true;ALL=false;shift 1;;
     --p*) PINDEL=true;ALL=false;shift 1;;
-    --mut*) MUT=true;ALL=false;shift 1;;
+    --mut) MUT=true;ALL=false;shift 1;;
+    --mut2) MUT2=true;ALL=false;shift 1;;
     --comb*) COMB=true;ALL=false;shift 1;;
     --qc1) QC1=true;ALL=false;shift 1;;
     --qc2) QC2=true;ALL=false;shift 1;;
     --qc3) QC3=true;ALL=false;shift 1;;
+    --qc) QC=true;ALL=false;shift 1;;
+    --fac) FAC=true;ALL=false;shift 1;;
+    --pscn) PSCN=true;ALL=false;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -97,6 +104,12 @@ if $ALL ; then
     PINDEL=true
     MUT=true
     COMB=true
+fi
+
+if $QC ; then
+	QC1=true
+	QC2=true
+	QC3=true
 fi
 
 PATIENTS=${*:-Patient157t10}
@@ -149,9 +162,11 @@ if $TRIM ; then
     do
         ### Expected output
         OUT=${WORKDIR}/${ID}-trim/${ID}-trim_R1.fastq.gz
+        OUT2=${WORKDIR}/${ID}-trim/${ID}-trim_R2.fastq.gz
         if [ -r "$OUT" ]; then
 		  		MESS=$(ls -sh ${OUT} | cut -d' ' -f1)
-            echo -e "Trim $ID ${GRN} ${MESS}${NOC}"
+		  		MESS2=$(ls -sh ${OUT} | cut -d' ' -f1)
+            echo -e "Trim $ID ${GRN} ${MESS} / ${MESS2} ${NOC}"
             #echo -e "Trim $ID $OK"
         else
             echo -e "Trim $ID $ERR"
@@ -227,8 +242,9 @@ if $GL ; then
 
         ### Expected output
         OUT=${WORKDIR}/NOR-${normid}_vs_${ID}.germline
+        RET=$(tail -n +2 ${OUT} | cut -d' ' -f4,5,6)
         if [ -s "$OUT" ]; then
-            echo -e "Germline $ID $OK"
+            echo -e "Germline $ID $OK ${YEL}${RET}${NOC}"
         else
             echo -e "Germline $ID $ERR"
         fi
@@ -314,7 +330,7 @@ if $MUT2 ; then
         fi
     
         ## Expected output:
-        OUT=${WORKDIR}/NOR-${normid}__${samp_label}-${ID}.m2.obmm.cc.func.filt.tsv
+        OUT=${WORKDIR}/NOR-${normid}__${samp_label}-${ID}.m2.obmm.cc.flt.func.filt.tsv
         if [ -s "$OUT" ]; then
             LCNT=$(wcl "$OUT")
             echo -e "Mutect2 $ID $OK ${YEL}${LCNT}${NOC}"
@@ -379,7 +395,6 @@ if $QC2 ; then
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
-        #OUT=${WORKDIR}/${ID}.bwa.realigned.rmDups.recal.bam.hist
         OUT=${WORKDIR}/${ID}.${RECAL_BAM_EXT}.bam.hist
         if [ -r "$OUT" ]; then
 				LCNT=$(wcl "$OUT")
@@ -425,10 +440,32 @@ if $QC3 ; then
         echo -e "QC3 ${DIR} plots $ERR"
     fi
 	done
+
+	OUT3=${WORKDIR}/${PATIENT}_qualplots/VAFPatterns/TERTp.pdf
+	if [ -s "$OUT3" ]; then
+		echo -e "QC3 TERTp.pdf $OK"
+	else
+		echo -e "QC3 TERTp.pdf $ERR"
+	fi
+	
 fi
 
-	if $PSCN ; then
-		 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/PSCN/${PATIENT}/Costello-Exome,bwa,realigned,rmDups,recal,seqz,100kb,tcn=2
+
+if $FAC ; then
+    WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/facets/${PATIENT}
+    ## Expected output:
+    OUT=${WORKDIR}/FACETS.txt
+    if [ -s "$OUT" ]; then
+        LCNT=$(wcl "$OUT")
+        echo -e "FACETS $OK ${YEL}${LCNT}${NOC}"
+    else
+        echo -e "FACETS $ERR"
+    fi
+fi
+
+
+if $PSCN ; then
+	 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/PSCN/${PATIENT}/Costello-Exome,bwa,realigned,rmDups,recal,seqz,100kb,tcn=2
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         if [ "$SAMP" = "Normal" ]; then

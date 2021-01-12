@@ -22,8 +22,8 @@ PATIENT=${PATIENT:-Patient157t10}
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 NORMAL=${NORMAL:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | grep -w "Normal" | cut -f 1)}
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
-#SUFF=trim.bwa.sorted.bam
-SUFF=bwa.sorted.bam
+SUFF=trim.bwa.sorted.bam
+#SUFF=bwa.sorted.bam
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -36,7 +36,7 @@ echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
 echo "- PATIENT=${PATIENT:?}"
-echo "- SAMPLES=${SAMPLES:?}"
+echo "- SAMPLES=${SAMPLES}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 echo "- EMAIL=${EMAIL}"
@@ -49,7 +49,6 @@ ILIST=$(readlink -e "$ILIST")
 
 ## Assert that NORMAL is one of the SAMPLES
 echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || error "NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"
-
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
