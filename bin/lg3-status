@@ -25,6 +25,7 @@ source_lg3_conf
 ###  --qc3             Check QC3 outputs
 ###  --fac             Check FACETS outputs
 ###  --pscn            Check PSCN reports
+###  --tree            Check phylo_tree outputs
 ###
 ### Examples:
 ###  lg3 status --all Patient157t10
@@ -62,6 +63,7 @@ QC3=false
 QC=false
 FAC=false
 PSCN=false
+TREE=false
 
 wcl() {
     grep -vc "^#" "$1" 
@@ -89,6 +91,7 @@ case $1 in
     --qc) QC=true;ALL=false;shift 1;;
     --fac) FAC=true;ALL=false;shift 1;;
     --pscn) PSCN=true;ALL=false;shift 1;;
+    --tree) TREE=true;ALL=false;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -350,12 +353,20 @@ do
     	WORKDIR1=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
     	## Expected output: 
     	OUT=${WORKDIR1}/${PATIENT}.R.mutations
-    	if [ -s "$OUT" ]; then
-        	LCNT=$(wcl "$OUT")
+    	OUT2=${WORKDIR1}/${PATIENT}.R.mutations.avf
+    	if [ -s "${OUT}" ]; then
+        	LCNT=$(wcl "${OUT}")
         	echo -e "MutCombine $OK ${YEL}${LCNT}${NOC}"
     	else
         	echo -e "MutCombine $ERR"
     	fi
+    	if [ -s "${OUT2}" ]; then
+        	LCNT=$(wcl "${OUT2}")
+        	echo -e "AVF $OK ${YEL}${LCNT}${NOC}"
+    	else
+        	echo -e "AVF $ERR"
+    	fi
+    	
     	
     	WORKDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/MAF
     	OUT=${WORKDIR2}/${PATIENT}_MAF/${PATIENT}.Normal.MAF.txt    
@@ -484,6 +495,22 @@ do
 			else
 				echo -e "PSCN *.RDS 0 $ERR"	
 			fi
+	fi
+	
+	if $TREE ; then
+    	WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/phylo_trees/${PATIENT}
+    	## Expected output:
+    	OUT=${WORKDIR}/${PATIENT}.R.mutations.tree.txt
+    	OUT2=${WORKDIR}/${PATIENT}.R.mutations.avftree.txt
+    	if [ -s "$OUT" ]; then
+        	LCNT=$(wcl "$OUT")
+        	echo -e "PhiloTree $OK ${YEL}${LCNT}${NOC}"
+		elif [ -s "$OUT2" ]; then
+         LCNT=$(wcl "$OUT2")
+         echo -e "PhiloTree $OK ${YEL}${LCNT}${NOC}"
+    	else
+        	echo -e "PhiloTree $ERR"
+    	fi
 	fi
 	
 	
