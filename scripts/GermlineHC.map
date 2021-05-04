@@ -1,0 +1,184 @@
+Source: https://github.com/gatk-workflows/gatk4-germline-snps-indels/blob/master/joint-discovery-gatk4-local.wdl
+See also: https://github.com/gatk-workflows/gatk4-exome-analysis-pipeline/blob/master/ExomeGermlineSingleSample.wdl
+
+CALL Map
+
+call DynamicallyCombineIntervals
+scatter (idx in range(length(unpadded_intervals))) {
+	call ImportGVCFs
+	call GenotypeGVCFs
+	call HardFilterAndMakeSitesOnlyVcf
+}
+call GatherVcfs as SitesOnlyGatherVcf
+call IndelsVariantRecalibrator
+
+#if (num_gvcfs > 10000) {
+	#call SNPsVariantRecalibratorCreateModel
+	#scatter (idx in range(length(HardFilterAndMakeSitesOnlyVcf.sites_only_vcf))) {
+		#call SNPsVariantRecalibrator as SNPsVariantRecalibratorScattered 
+	#}	
+	#call GatherTranches as SNPGatherTranches 
+#}
+
+if (num_gvcfs <= 10000){
+	call SNPsVariantRecalibrator as SNPsVariantRecalibratorClassic
+}
+scatter (idx in range(length(HardFilterAndMakeSitesOnlyVcf.variant_filtered_vcf))) {
+	call ApplyRecalibration
+#	if (!is_small_callset) {
+#		call CollectVariantCallingMetrics as CollectMetricsSharded
+#	}
+}
+if (is_small_callset) {
+	call GatherVcfs as FinalGatherVcf
+	call CollectVariantCallingMetrics as CollectMetricsOnFullVcf
+}
+#if (!is_small_callset) {
+#	call GatherMetrics
+#}
+
+************** Tasks ****************
+
+
+**** task GenotypeGVCFs ****
+    ${gatk_path} --java-options "-Xmx5g -Xms5g" \
+     GenotypeGVCFs \
+     -R ${ref_fasta} \
+     -O ${output_vcf_filename} \ = "output.vcf.gz"
+     -D ${dbsnp_vcf} \
+     -G StandardAnnotation \
+     --only-output-calls-starting-in-intervals \
+     --use-new-qual-calculator \
+     -V gendb://$WORKSPACE \
+     -L ${interval}
+
+**** task HardFilterAndMakeSitesOnlyVcf ****
+    ${gatk_path} --java-options "-Xmx3g -Xms3g" \
+      VariantFiltration \
+      --filter-expression "ExcessHet > ${excess_het_threshold}" \ = 54.69
+      --filter-name ExcessHet \
+      -O ${variant_filtered_vcf_filename} \ = callset_name + "." + idx + ".variant_filtered.vcf.gz"
+      -V ${vcf} # = GenotypeGVCFs.output_vcf
+
+    ${gatk_path} --java-options "-Xmx3g -Xms3g" \
+      MakeSitesOnlyVcf \
+      --INPUT ${variant_filtered_vcf_filename} \
+      --OUTPUT ${sites_only_vcf_filename} # = callset_name + "." + idx + ".sites_only.variant_filtered.vcf.gz
+
+**** task IndelsVariantRecalibrator ****
+    ${gatk_path} --java-options "-Xmx24g -Xms24g" \
+      VariantRecalibrator \
+      -V ${sites_only_variant_filtered_vcf} \ = SitesOnlyGatherVcf.output_vcf
+      -O ${recalibration_filename} \ = callset_name + ".snps.recal"
+      --tranches-file ${tranches_filename} \ = callset_name + ".indels.tranches"
+      --trust-all-polymorphic \
+      -tranche ${sep=' -tranche ' recalibration_tranche_values} \ = indel_recalibration_tranche_values
+      -an ${sep=' -an ' recalibration_annotation_values} \ = indel_recalibration_annotation_values
+      -mode INDEL \
+      --max-gaussians 4 \
+      --resource:mills,known=false,training=true,truth=true,prior=12 ${mills_resource_vcf} \
+      --resource:axiomPoly,known=false,training=true,truth=false,prior=10 ${axiomPoly_resource_vcf} \
+      --resource:dbsnp,known=true,training=false,truth=false,prior=2 ${dbsnp_resource_vcf}
+
+**** task SNPsVariantRecalibrator ****
+if (num_gvcfs <= 10000){
+    ${gatk_path} --java-options "-Xmx3g -Xms3g" \
+      VariantRecalibrator \
+      -V ${sites_only_variant_filtered_vcf} \ = SitesOnlyGatherVcf.output_vcf
+      -O ${recalibration_filename} \ = callset_name + ".snps.recal"
+      --tranches-file ${tranches_filename} \ = callset_name + ".snps.tranches"
+      --trust-all-polymorphic \
+      -tranche ${sep=' -tranche ' recalibration_tranche_values} \ = snp_recalibration_tranche_values
+      -an ${sep=' -an ' recalibration_annotation_values} \ = snp_recalibration_annotation_values
+      -mode SNP \
+      ${"--input-model " + model_report + " --output-tranches-for-scatter "} \
+      --max-gaussians 6 \
+      --resource:hapmap,known=false,training=true,truth=true,prior=15:${hapmap_resource_vcf} \
+      --resource:omni,known=false,training=true,truth=true,prior=12:${omni_resource_vcf} \
+      --resource:1000G,known=false,training=true,truth=false,prior=10:${one_thousand_genomes_resource_vcf} \
+      --resource:dbsnp,known=true,training=false,truth=false,prior=7:${dbsnp_resource_vcf}
+}
+
+#**** task GatherTranches ****
+      #${gatk_path} --java-options "-Xmx6g -Xms6g" \
+      #GatherTranches \
+      #--input ${sep=" --input " input_fofn}  \
+      #--output ${output_filename}
+
+**** task ApplyRecalibration ****
+    ${gatk_path} --java-options "-Xmx5g -Xms5g" \
+      ApplyVQSR \
+      -O tmp.indel.recalibrated.vcf \
+      -V ${input_vcf} \ = HardFilterAndMakeSitesOnlyVcf.variant_filtered_vcf
+      --recal-file ${indels_recalibration} \ = IndelsVariantRecalibrator.recalibration
+      --tranches-file ${indels_tranches} \ = IndelsVariantRecalibrator.tranches
+      --truth-sensitivity-filter-level ${indel_filter_level} \
+      --create-output-variant-index true \
+      -mode INDEL
+
+    ${gatk_path} --java-options "-Xmx5g -Xms5g" \
+      ApplyVQSR \
+      -O ${recalibrated_vcf_filename} \
+      -V tmp.indel.recalibrated.vcf \
+      --recal-file ${snps_recalibration} \ = ?SNPsVariantRecalibratorClassic.recalibration
+      --tranches-file ${snps_tranches} \ = ?SNPsVariantRecalibratorClassic.tranches
+      --truth-sensitivity-filter-level ${snp_filter_level} \
+      --create-output-variant-index true \
+      -mode SNP
+
+**** task CollectVariantCallingMetrics ****
+if (!is_small_callset) {
+    ${gatk_path} --java-options "-Xmx6g -Xms6g" \
+      CollectVariantCallingMetrics \
+      --INPUT ${input_vcf} \
+      --DBSNP ${dbsnp_vcf} \
+      --SEQUENCE_DICTIONARY ${ref_dict} \
+      --OUTPUT ${metrics_filename_prefix} \
+      --THREAD_COUNT 8 \
+      --TARGET_INTERVALS ${interval_list}
+}
+
+
+if (is_small_callset) {
+	call GatherVcfs as FinalGatherVcf {
+		***** task GatherVcfs {
+		${gatk_path} --java-options "-Xmx6g -Xms6g" \
+    	GatherVcfsCloud \
+    	--ignore-safety-checks \
+    	--gather-type BLOCK \
+    	--input ${sep=" --input " input_vcfs_fofn} \
+    	--output ${output_vcf_name}
+
+    ${gatk_path} --java-options "-Xmx6g -Xms6g" \
+    IndexFeatureFile \
+    --feature-file ${output_vcf_name}
+
+		}
+	}
+
+	call CollectVariantCallingMetrics as CollectMetricsOnFullVcf {
+	   *****	task CollectVariantCallingMetrics {
+			${gatk_path} --java-options "-Xmx6g -Xms6g" \
+      		CollectVariantCallingMetrics \
+      		--INPUT ${input_vcf} \
+      		--DBSNP ${dbsnp_vcf} \
+      		--SEQUENCE_DICTIONARY ${ref_dict} \
+      		--OUTPUT ${metrics_filename_prefix} \
+      		--THREAD_COUNT 8 \
+      		--TARGET_INTERVALS ${interval_list}
+		}
+	}
+}
+
+
+
+#**** task GatherMetrics ****
+#if (is_small_callset) {
+    #${gatk_path} --java-options "-Xmx2g -Xms2g" \
+    #AccumulateVariantCallingMetrics \
+    #--INPUT ${sep=" --INPUT " input_details_fofn} \ ? = ApplyRecalibration.recalibrated_vcf
+    #--OUTPUT ${output_prefix} # ? = ApplyRecalibration.recalibrated_vcf
+#}
+#
+#call GatherVcfs as FinalGatherVcf 
+#

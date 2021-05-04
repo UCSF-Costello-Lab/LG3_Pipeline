@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cat patient_ID_conversions.2020.add1 | awk -v OFS="\t" '{print $3,$4,$2,"Nimblegen SeqCap EZ Exome v3",$1}' 
+
+cat patient_ID_conversions.2020.add2 | awk -v OFS="\t" '{print $3,$4,$2,"Xgen Exome Research Panel",$1}'

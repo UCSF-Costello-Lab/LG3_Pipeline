@@ -26,6 +26,7 @@ source_lg3_conf
 ###  --fac             Check FACETS outputs
 ###  --pscn            Check PSCN reports
 ###  --tree            Check phylo_tree outputs
+###  --pyclone         Check pyclone outputs
 ###
 ### Examples:
 ###  lg3 status --all Patient157t10
@@ -64,6 +65,7 @@ QC=false
 FAC=false
 PSCN=false
 TREE=false
+PYCLONE=false
 
 wcl() {
     grep -vc "^#" "$1" 
@@ -92,6 +94,7 @@ case $1 in
     --fac) FAC=true;ALL=false;shift 1;;
     --pscn) PSCN=true;ALL=false;shift 1;;
     --tree) TREE=true;ALL=false;shift 1;;
+    --pyclone) PYCLONE=true;ALL=false;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -112,6 +115,9 @@ if $ALL ; then
     QC3=true
 	 MUT2=true
 	 FAC=true
+	 PSCN=true
+	 TREE=true
+	 PYCLONE=true
 fi
 
 if $QC ; then
@@ -510,6 +516,18 @@ do
          echo -e "PhiloTree $OK ${YEL}${LCNT}${NOC}"
     	else
         	echo -e "PhiloTree $ERR"
+    	fi
+	fi
+	
+	if $PYCLONE ; then
+    	WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/pyclone/${PATIENT}/PyClone/plots/cluster
+    	## Expected output:
+    	OUT=${WORKDIR}/density.pdf
+    	if [ -s "$OUT" ]; then
+        	LCNT=$(wcl "$OUT")
+        	echo -e "PyClone $OK ${YEL}${LCNT}${NOC}"
+    	else
+        	echo -e "PyClone $ERR"
     	fi
 	fi
 	

@@ -31,7 +31,7 @@ PATIENT=${PATIENT:-Patient157t10}
 #PAT_MASTER=${PAT_MASTER:-samples_last_X00216.tsv}
 PAT_MASTER=${LG3_HOME}/samples_last_X00216.tsv
 BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-echo "- BAMPATH=${BAMPATH:?}"
+#echo "- BAMPATH=${BAMPATH:?}"
 
 ## Requires absolute path
 LG3_HOME=$(readlink -e "${LG3_HOME}")
@@ -78,6 +78,6 @@ echo "Total samples: "
 wc -l sampleData/samples.tsv
 echo "================================================="
 
-qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae -v "LG3_HOME=${LG3_HOME},PROJECT=${PROJECT}" "${LG3_HOME}/PSCN.submit_1-5.pbs"
+#qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae -v "LG3_HOME=${LG3_HOME},PROJECT=${PROJECT}" "${LG3_HOME}/PSCN.submit_1-5.pbs"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

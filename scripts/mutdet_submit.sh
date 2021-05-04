@@ -61,6 +61,7 @@ fi
 ## References
 CONFIG=${LG3_HOME}/FilterMutations/mutationConfig.cfg
 #INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
+INTERVAL=${LG3_HOME}/resources/All_exome_XgenPanel_merged.extended_200bp.interval_list
 echo "References:"
 echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
