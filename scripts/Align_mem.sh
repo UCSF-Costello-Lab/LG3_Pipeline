@@ -209,8 +209,8 @@ echo "[BQSR] GATK4::ApplyBQSR "
    --QUIET true \
    --verbosity ERROR; } 2>&1 || error "FAILED"
 		
-echo "[Align] Index ${SAMPLE}.mem.sorted.mrkDups.recal.bam"
-{ time ${SAMTOOLS} index "${SAMPLE}.mem.sorted.mrkDups.recal.bam"; } 2>&1 || error "FAILED"
+#echo "[Align] Index ${SAMPLE}.mem.sorted.mrkDups.recal.bam"
+#{ time ${SAMTOOLS} index "${SAMPLE}.mem.sorted.mrkDups.recal.bam"; } 2>&1 || error "FAILED"
 
 echo "[QC] GATK4::CollectHsMetrics "
 { time ${GATK4} --java-options -"${XMX}" CollectHsMetrics \
