@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -24,6 +24,7 @@ NORMAL=${NORMAL:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | grep -w "Normal" | cut
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 SUFF=trim.bwa.sorted.bam
 #SUFF=bwa.sorted.bam
+LG3_DEBUG=true
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -40,6 +41,7 @@ echo "- SAMPLES=${SAMPLES}"
 echo "- NORMAL=${NORMAL:?}"
 echo "- ILIST=${ILIST:?}"
 echo "- EMAIL=${EMAIL}"
+echo "- LG3_DEBUG=${LG3_DEBUG}"
 
 assert_patient_name "${PATIENT}"
 
@@ -50,26 +52,12 @@ ILIST=$(readlink -e "$ILIST")
 ## Assert that NORMAL is one of the SAMPLES
 echo "${SAMPLES}" | grep -q -P "(^|\\t| )${NORMAL}(\\t| |$)" || error "NORMAL '${NORMAL}' is not part of SAMPLES: ${SAMPLES}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
-
-## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
-
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
 PBS=${LG3_HOME}/Recal.pbs
 assert_file_exists "${PBS}"
 
 D=${LG3_INPUT_ROOT}/${PROJECT}/exomes
 assert_directory_exists "${D}"
 D=$(readlink -e "$D") ## requires absolute path
-
-
 
 CNT=0
 for SAMPLE in ${SAMPLES}
@@ -84,8 +72,17 @@ done
 BAMS=$(echo "$BAMS" | cut -c2-)
 echo "Total BAMS: $CNT"
 echo "$BAMS"
-
-# shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N Rec_$PATIENT -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+	## Short PatientID
+	PAT=${PATIENT/atient/}
+   sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+      --job-name="Rec-${PAT}" \
+      --output="Rec-${PAT}.out" \
+      --error="Rec-${PAT}.err" \
+      --export=ALL,LG3_HOME="${LG3_HOME}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",BAMS="${BAMS}",NORMAL="${NORMAL}",PATIENT="${PATIENT}",ILIST="${ILIST}",PROJECT="${PROJECT}",LG3_DEBUG="${LG3_DEBUG}" \
+      --nodes=1 \
+      --ntasks=12 \
+      --mem=200G \
+      --time=9-06:00:00 \
+      "${PBS}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

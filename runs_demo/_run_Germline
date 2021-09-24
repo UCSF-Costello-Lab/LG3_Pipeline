@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -22,6 +22,7 @@ PATIENT=${PATIENT:-Patient157t10}
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 NORMAL=${NORMAL:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | grep -w "Normal" | cut -f 1)}
 ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+LG3_DEBUG=true
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -45,22 +46,20 @@ assert_patient_name "${PATIENT}"
 assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "$ILIST")
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
-
-## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
-
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
 PBS=${LG3_HOME}/Germline.pbs
 assert_file_exists "${PBS}"
 
 # shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N GL_$PATIENT -v "${QSUB_ENVVARS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
 
+   sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+      --job-name="GL-${PATIENT}" \
+      --output="GL-${PATIENT}.out" \
+      --error="GL-${PATIENT}.err" \
+      --export=ALL,LG3_HOME="${LG3_HOME}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",NORMAL="${NORMAL}",PATIENT="${PATIENT}",ILIST="${ILIST}",PROJECT="${PROJECT}",LG3_DEBUG="${LG3_DEBUG}" \
+      --nodes=1 \
+      --ntasks=8 \
+      --mem=100G \
+      --time=9-06:00:00 \
+      "${PBS}"
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

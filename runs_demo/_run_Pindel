@@ -1,7 +1,7 @@
 #!/bin/bash
 ### Time 8h , 6 CPUs , vmem >= 2GB
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -20,6 +20,7 @@ PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157t10}
 EMAIL=${EMAIL:?}
+LG3_DEBUG=true
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -36,19 +37,6 @@ echo "- CONV=${CONV:?}"
 echo "- PINDEL=${PINDEL:?}"
 
 assert_patient_name "${PATIENT}"
-
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
-
-## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
-
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
 assert_file_exists "${CONV}"
 CONV=$(readlink -e "$CONV")
 
@@ -59,7 +47,17 @@ assert_file_exists "${PBS}"
 D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 assert_directory_exists "${D}"
 
-# shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
+## Short PatientID
+PAT=${PATIENT/atient/}
+sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+	--job-name="P_${PAT}" \
+	--output="Pindel_${PAT}.out" \
+	--error="Pindel_${PAT}.err" \
+	--export=ALL,LG3_HOME="${LG3_HOME}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",LG3_INPUT_ROOT="${LG3_INPUT_ROOT}",PROJECT="${PROJECT}",PATIENT="${PATIENT}",CONV="${CONV}",LG3_DEBUG="${LG3_DEBUG}" \
+	--nodes=1 \
+	--ntasks=6 \
+	--mem=64G \
+	--time=9-06:00:00 \
+	"${PBS}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

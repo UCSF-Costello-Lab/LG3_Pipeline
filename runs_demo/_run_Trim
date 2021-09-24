@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 assert_pwd
+
+echo "ETA ~4h"
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -19,11 +21,11 @@ PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 CONV=${CONV:-patient_ID_conversions.tsv}
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
-EMAIL=${EMAIL:?}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+LG3_DEBUG=false
 
 echo "Input:"
 echo "- LG3_HOME=${LG3_HOME:?}"
@@ -33,28 +35,13 @@ echo "- CONV=${CONV:?}"
 echo "- SAMPLES=${SAMPLES:?}"
 echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
 echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
-echo "- EMAIL=${EMAIL}"
-echo "- TG=${TG}"             ## optional
+echo "- EMAIL=${EMAIL:?}"
+echo "- LG3_DEBUG=${LG3_DEBUG:?}"
 
 assert_patient_name "${PATIENT}"
 
-QSUB_ENVVARS="JUNK=junk,LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-if [[ -n ${TG} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},TG=${TG}"; fi
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
-
-## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
-
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
 PBS=${LG3_HOME}/trim_galore.pbs
 assert_file_exists "${PBS}"
-
-echo "ETA ~4h"
 
 QTY=20
 
@@ -79,8 +66,16 @@ for SAMPLE in ${SAMPLES}; do
     echo "- FASTQ1: ${FASTQ1}"
     echo "- FASTQ2: ${FASTQ2}"
     
-    # shellcheck disable=SC2086
-    qsub ${QSUB_OPTS} -N trim${QTY}_$SAMPLE -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},SAMPLE=${SAMPLE},QTY=${QTY},PROJECT=${PROJECT}" "$PBS"
+	sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+	   --job-name="Tr-${SAMPLE}" \
+     	--output="Trim-${SAMPLE}.out" \
+     	--error="Trim-${SAMPLE}.err" \
+		--export=ALL,LG3_HOME="${LG3_HOME}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",SAMPLE="${SAMPLE}",FASTQ1="${FASTQ1}",FASTQ2="${FASTQ2}",QTY="${QTY}",PROJECT="${PROJECT}",LG3_DEBUG="${LG3_DEBUG}" \
+      --nodes=1 \
+      --ntasks=2 \
+      --mem=8G \
+      --time=1-06:00:00 \
+		"${PBS}"
 done
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

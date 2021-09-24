@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -19,6 +19,7 @@ EMAIL=${EMAIL:?}
 PATIENT=${PATIENT:-Patient157t10}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
+LG3_DEBUG=true
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -32,6 +33,7 @@ echo "- EMAIL=${EMAIL}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- CONV=${CONV:?}"
+echo "- LG3_DEBUG=${LG3_DEBUG}"
 
 assert_patient_name "${PATIENT}"
 
@@ -45,11 +47,8 @@ echo -n "Submitting jobs for $PATIENT "
 date
 
 ## Assert that input files exist
-#D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
-#assert_directory_exists "${D}"
-
-## Pass QSUB_OPTS to ${SH_MUTECT2_SUBMIT} where it's an optional input
-export QSUB_OPTS
+D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+assert_directory_exists "${D}"
 
 "${SH_MUTECT2_SUBMIT}" "${PATIENT}" "${CONV}" "${PROJECT}" || error "${SH_MUTECT2_SUBMIT} failed"
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -19,6 +19,7 @@ PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157t10}
 EMAIL=${EMAIL:?}
+LG3_DEBUG=true
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -35,22 +36,7 @@ echo "- CONV=${CONV:?}"
 
 assert_patient_name "${PATIENT}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
-
-## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
-
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
 assert_file_exists "${CONV}"
-
-PBS=${LG3_HOME}/post_mutect_pindel.pbs
-assert_file_exists "${PBS}"
 
 SH_CHK_PINDEL=${LG3_HOME}/scripts/chk_pindel.sh
 assert_file_executable "${SH_CHK_PINDEL}"
@@ -61,7 +47,20 @@ assert_file_executable "${SH_CHK_MUTDET}"
 "${SH_CHK_PINDEL}" "${PROJECT}" "${PATIENT}" || error "${SH_CHK_PINDEL} failed"
 "${SH_CHK_MUTDET}" "${PROJECT}" "${PATIENT}" || error "${SH_CHK_MUTDET} failed"
 
-# shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
+PBS=${LG3_HOME}/post_mutect_pindel.pbs
+assert_file_exists "${PBS}"
+
+## Short PatientID
+PAT=${PATIENT/atient/}
+sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+	--job-name="${PAT}_comb" \
+	--output="${PAT}_comb.out" \
+	--error="${PAT}_comb.err" \
+	--export=ALL,LG3_HOME="${LG3_HOME}",LG3_INPUT_ROOT="${LG3_INPUT_ROOT}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",PROJECT="${PROJECT}",PATIENT="${PATIENT}",CONV="${CONV}",LG3_DEBUG="${LG3_DEBUG}" \
+	--nodes=1 \
+	--ntasks=1 \
+	--mem=64G \
+	--time=9-06:00:00 \
+	"${PBS}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

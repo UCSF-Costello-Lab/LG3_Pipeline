@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -15,12 +15,12 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
-#LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 CONV=${CONV:-patient_ID_conversions.tsv}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-false}
 EMAIL=${EMAIL:?}
+LG3_DEBUG=true
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -40,19 +40,6 @@ assert_patient_name "${PATIENT}"
 
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 echo "- SAMPLES=${SAMPLES:?}"
-
-
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
-
-## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
-
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Align_fastq.pbs
 assert_file_exists "${PBS}"
@@ -77,8 +64,18 @@ do
       warn "${SAMPLE} is aligned (${ALIGNED}/${SAMPLE}.*.bam). Skipping ..."
     else
       echo "Submitting $SAMPLE ..."
-      # shellcheck disable=SC2086
-      qsub ${QSUB_OPTS} -N Align_$SAMPLE -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},SAMPLE=${SAMPLE},LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING},PROJECT=${PROJECT}" "${PBS}"
+      #qsub ${QSUB_OPTS} -N Align_$SAMPLE -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},SAMPLE=${SAMPLE},LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING},PROJECT=${PROJECT}" "${PBS}"
+
+      sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+        --job-name="Aln-${SAMPLE}" \
+        --output="Align-${SAMPLE}.out" \
+        --error="Align-${SAMPLE}.err" \
+        --export=ALL,LG3_HOME="${LG3_HOME}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",SAMPLE="${SAMPLE}",FASTQ1="${FASTQ1}",FASTQ2="${FASTQ2}",LG3_CHASTITY_FILTERING="${LG3_CHASTITY_FILTERING}",PROJECT="${PROJECT}",LG3_DEBUG="${LG3_DEBUG}" \
+        --nodes=1 \
+        --ntasks=12 \
+        --mem=64G \
+        --time=9-06:00:00 \
+       "${PBS}" 
     fi
   fi
 done

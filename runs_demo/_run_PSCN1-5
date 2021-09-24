@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 
 rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }
@@ -17,11 +17,11 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PSCN_HOME=${LG3_HOME}/Costello-PSCN-Seq
 
 echo "************** Check once 0.setup.R ********************"
-cat ${PSCN_HOME}/0.setup.R
+cat "${PSCN_HOME}/0.setup.R"
 echo "************** Check config.yml ********************"
-cat ${PSCN_HOME}/config.yml
+cat "${PSCN_HOME}/config.yml"
 echo "************** Check BAM path ! ********************"
-ls ${PSCN_HOME}/bamData/*
+ls "${PSCN_HOME}/bamData/"*
 echo "****************************************************"
 
 EMAIL=${EMAIL:?}
@@ -64,7 +64,7 @@ change_dir "${PSCN_HOME}"
 #Rscript 0.setup.R
 
 echo "Creating samples.tsv"
-head -n 1 ${PAT_MASTER} > sampleData/samples.tsv
+head -n 1 "${PAT_MASTER}" > sampleData/samples.tsv
 grep -P "${PATIENT}\\t" "${PAT_MASTER}" >> sampleData/samples.tsv
 
 #echo -e "Patient_ID\\tSample_ID\\tSF Kit\\tA0" > sampleData/samples.tsv

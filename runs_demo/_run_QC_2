@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -15,18 +15,20 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-QC_PLOT_HOME=${QC_PLOT_HOME:-exomeQualityPlots}
+#QC_PLOT_HOME=${QC_PLOT_HOME:-exomeQualityPlots}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
-BEDPATH=${BEDPATH:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.bed}
+#BEDPATH=${BEDPATH:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.bed}
 BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
 
 ## Requires absolute path
 LG3_HOME=$(readlink -e "$LG3_HOME")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
-QC_PLOT_HOME=$(readlink -e "${QC_PLOT_HOME}")
+#QC_PLOT_HOME=$(readlink -e "${QC_PLOT_HOME}")
+QC_PLOT_HOME=${LG3_HOME}/exomeQualityPlots
+LG3_DEBUG=true
 
 echo "Input: "
 echo "- LG3_HOME=${LG3_HOME:?}"
@@ -37,8 +39,8 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- EMAIL=${EMAIL}"
 
-assert_file_exists "${BEDPATH}"
 echo "- BEDPATH=${BEDPATH:?}"
+assert_file_exists "${BEDPATH}"
 
 assert_directory_exists "${BAMPATH}"
 BAMPATH=$(readlink -e "${BAMPATH}") 
@@ -53,7 +55,23 @@ echo "- WORKDIR=${WORKDIR}"
 SH_GET_COV=${QC_PLOT_HOME}/get_coverage.sh
 assert_file_executable "${SH_GET_COV}"
 
-PN=${PATIENT/Patient/Pat}
-qsub -l vmem=300gb -e "_QC2_${PATIENT}.err" -o "_QC2_${PATIENT}.out" -N "QC2_${PN}" -M "${EMAIL}" -m ae -v "patient=${PATIENT},bedpath=${BEDPATH},bampath=${BAMPATH}/${PATIENT}" "${SH_GET_COV}"
+#PN=${PATIENT/Patient/Pat}
+#qsub -l vmem=300gb -e "_QC2_${PATIENT}.err" -o "_QC2_${PATIENT}.out" -N "QC2_${PN}" -M "${EMAIL}" -m ae -v "patient=${PATIENT},bedpath=${BEDPATH},bampath=${BAMPATH}/${PATIENT}" "${SH_GET_COV}"
+
+## Short PatientID
+PAT=${PATIENT/atient/}
+## Submit
+# shellcheck disable=SC2140
+sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+   --job-name="QC2_${PAT}" \
+   --output="QC2_${PAT}.out" \
+   --error="QC2_${PAT}.err" \
+   --export=ALL,patient="${PATIENT}",bedpath="${BEDPATH}",bampath="${BAMPATH}/${PATIENT}",LG3_DEBUG="${LG3_DEBUG}" \
+   --nodes=1 \
+   --ntasks=1 \
+   --mem=300G \
+   --time=9-06:00:00 \
+   "${SH_GET_COV}"
+
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

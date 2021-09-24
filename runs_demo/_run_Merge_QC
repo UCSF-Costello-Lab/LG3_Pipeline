@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -38,17 +38,17 @@ echo "- SAMPLE=${SAMPLE:?}"
 
 assert_patient_name "${PATIENT}"
 
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
+#QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},PROJECT=${PROJECT}"
+#QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
 ## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
+#if [[ -n ${EMAIL} ]]; then
+#  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+#fi
 
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
+#echo "Qsub extras:"
+#echo "- QSUB_OPTS=${QSUB_OPTS}"
+#echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 PBS=${LG3_HOME}/Merge_QC.pbs
 assert_file_exists "${PBS}"
