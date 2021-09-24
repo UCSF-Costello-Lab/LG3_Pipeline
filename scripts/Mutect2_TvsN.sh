@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 bCLEAN=true
@@ -23,21 +23,21 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:?}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+ncores=${SLURM_NTASKS:-1}
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+if $LG3_DEBUG ; then
+  echo "Debug info:"
   echo "- LG3_HOME=${LG3_HOME}"
   echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT}"
   echo "- LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT}"
   echo "- PWD=$PWD"
   echo "- USER=${USER}"
-  echo "- PBS_NUM_PPN=${PBS_NUM_PPN}"
   echo "- hostname=$(hostname)"
   echo "- ncores=${ncores}"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
 	VERBOSITY=ERROR ## WARNING INFO DEBUG
 else
 	VERBOSITY=ERROR ## WARNING INFO DEBUG
@@ -83,9 +83,10 @@ assert_file_exists "${tbamfile}"
 assert_file_exists "${ILIST}"
 
 ### Software
-module load jdk/1.8.0 python/2.7.15 htslib/1.7
+#module load jdk/1.8.0 python/2.7.15 htslib/1.7
+#module load CBI openjdk/1.8.0_292-b10-1 htslib/1.10.2
+module load CBI htslib/1.10.2
 
-#GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
 assert_file_executable "${GATK4:?}"
 assert_file_executable "${LG3_HOME}"/gatk4-funcotator-vcf2tsv
 
@@ -102,6 +103,7 @@ assert_file_exists "${REF:?}"
 echo "- reference=${REF}"
 
 if ${bGNOMAD}; then
+	# shellcheck disable=SC2153
    echo "- GNOMAD AF =${GNOMAD}"
    assert_file_exists "${GNOMAD}"
    assert_file_exists "${GNOMAD}.tbi"
@@ -175,7 +177,7 @@ extra_args=""
 echo "[Mutect2] extra_args: ${extra_args[*]}"
 
 echo -e "\\n[Mutect2] Running GATK4::MuTect2 ..."
-      { time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_gnomAD[@]}" ${XARG_OBMM[@]}\
+      { time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_gnomAD[@]}" "${XARG_OBMM[@]}" \
             --verbosity "${VERBOSITY}" \
             --reference "${REF}" \
             --input "${nbamfile}" \
@@ -309,7 +311,7 @@ if ${bFUNC}; then
 	### A GATK functional annotation tool.
    echo -e "\\n[Mutect2] Running Funcotator ..."
    { time ${GATK4} Funcotator "${extra_args[@]}" \
-		--verbosity ERROR \
+		--verbosity DEBUG \
       --variant "${IN}" \
       --output "${OUT}" \
      	--output-file-format VCF \
@@ -318,6 +320,8 @@ if ${bFUNC}; then
      	--transcript-selection-mode CANONICAL \
       --reference "${REF}"; } 2>&1 || warn "FAILED"
 	echo "Done"
+pwd -P
+ls -lt 
 	assert_file_exists "${OUT}"
 
    echo -n "[Mutect2] Total mutations in ${OUT}: "
@@ -350,12 +354,12 @@ echo "[Mutect2] Extracting selected Funcotator annotations in .tsv format"
 
 if ${bCLEAN}; then
    echo "Cleaning intermediate files"
-   rm -f ${tumorname}-M2FilteringStats.tsv
-   rm -f ${tumorname}-F1R2Counts.tar.gz
-   rm -f ${tumorname}-artifact-prior-table.tar.gz
-   rm -f ${tumorname}-normal_pileups.table
-   rm -f ${tumorname}-pileups.table
-   rm -f ${tumorname}-segments.table
+   rm -f "${tumorname}-M2FilteringStats.tsv"
+   rm -f "${tumorname}-F1R2Counts.tar.gz"
+   rm -f "${tumorname}-artifact-prior-table.tar.gz"
+   rm -f "${tumorname}-normal_pileups.table"
+   rm -f "${tumorname}-pileups.table"
+   rm -f "${tumorname}-segments.table"
 fi
 
 echo "-------------------------------------------------"

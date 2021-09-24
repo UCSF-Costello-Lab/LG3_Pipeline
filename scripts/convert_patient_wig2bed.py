@@ -53,7 +53,7 @@ def convert_patient_wig2bed(patient_ID, projectname, conversionfile):
     task=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     (stdout,stderr)=task.communicate()
   else:
-    command = ["/opt/BEDTools/BEDTools-2.16.2/bin/multiIntersectBed", "-i"] + allbed
+    command = [os.environ["LG3_HOME"] + "/tools/BEDTools-2.16.2/bin/multiIntersectBed", "-i"] + allbed
     print command
     task=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     (stdout,stderr)=task.communicate()

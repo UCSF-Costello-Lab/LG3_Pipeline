@@ -4,7 +4,7 @@
 
 ##### This file replaces original 1-5.submit_all.pbs
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 
 change_dir "$PBS_O_WORKDIR"

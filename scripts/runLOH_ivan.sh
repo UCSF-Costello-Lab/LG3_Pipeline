@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -17,21 +17,20 @@ PROJECT=${PROJECT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+if $LG3_DEBUG ; then
+  echo "Debug info:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
+  echo "- SLURM_NTASKS: ${SLURM_NTASKS}"
+  ${RSCRIPT} --version || error "No Rscript"
 fi
 
 
-#
-##
-#
 PROG=$(basename "$0")
 OK() {
         echo "OK: line ${BASH_LINENO[0]} in $PROG"

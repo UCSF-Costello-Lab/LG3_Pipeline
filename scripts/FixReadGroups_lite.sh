@@ -1,12 +1,11 @@
 #!/bin/bash
 
-LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
-# shellcheck source=scripts/utils.sh
+
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 
+LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 ### /path/to/FixReadGroups.sh <bam_in> <bam_out>  <new_prefix>
-##
-#
 
 if [ $# -lt 2 ]; then
     error "\\nUsage: $0 in.bam prefix [out.bam]"
@@ -41,7 +40,7 @@ echo "New Group Name: $prefix"
 echo "-------------------------------------------------"
 
 echo "Read group before"
-bamhead ${bamin} | grep RG
+bamhead "${bamin}" | grep RG
 
 if [ ! -f "$bamout" ]; then
         #SORT_ORDER=coordinate \
@@ -65,10 +64,10 @@ $SAMTOOLS index "${bamout}" || error "BAM indexing failed"
 
 echo "Read group after "
 if [ $# -eq 2 ]; then
-	mv tmp.bam ${bamin}
-	mv tmp.bam.bai ${bamin}.bai
-	touch ${bamin} ${bamin}.bai
-	bamhead ${bamin} | grep RG
+	mv tmp.bam "${bamin}"
+	mv tmp.bam.bai "${bamin}.bai"
+	touch "${bamin}" "${bamin}.bai"
+	bamhead "${bamin}" | grep RG
 else
 	bamhead ${bamout} | grep RG
 fi

@@ -190,7 +190,7 @@ function assert_patient_name {
 function assert_pwd {
     [[ $# -ne 0 ]] && error "${FUNCNAME[0]}() must not be called with arguments: $#"
     ## Don't allow running the pipeline from within LG3_HOME
-    #equal_dirs "${PWD}" "${LG3_HOME}" && error "The LG3 Pipeline must not be run from the folder where it is installed (LG3_HOME): ${PWD}"
+    equal_dirs "${PWD}" "${LG3_HOME}" && error "The LG3 Pipeline must not be run from the folder where it is installed (LG3_HOME): ${PWD}"
 }
 
 
@@ -278,10 +278,13 @@ assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
 ## R scripting front-end version 3.2.0 (2015-04-16)
-RSCRIPT=/opt/R/R-latest/bin/Rscript
-assert_file_executable "$RSCRIPT"
+#RSCRIPT=/opt/R/R-latest/bin/Rscript
+#assert_file_executable "$RSCRIPT"
 ## Workaround: 'Rscript' called somewhere in the Recal script(s)
-PATH="$(dirname "$RSCRIPT"):$PATH"
+#PATH="$(dirname "$RSCRIPT"):$PATH"
+
+# shellcheck disable=SC2034
+RSCRIPT=Rscript
 
 ## samtools 0.1.18 (r982:295
 SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
@@ -300,7 +303,8 @@ GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
 assert_file_executable "$GATK"
 
 # bedtools 2.16.2
-BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
+#BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
+BEDTOOLS="${LG3_HOME}/tools/BEDTools-2.16.2/bin/bedtools"
 assert_file_executable "$BEDTOOLS"
 
 # muTect
@@ -312,5 +316,5 @@ ANNOVAR_HOME=${LG3_HOME}/AnnoVar
 assert_directory_exists "$ANNOVAR_HOME"
 
 # cutadapt 1.2.1
-CUTADAPT=/opt/Python/Python-2.7.3/bin/cutadapt
-assert_file_executable "$CUTADAPT"
+#CUTADAPT=/opt/Python/Python-2.7.3/bin/cutadapt
+#assert_file_executable "$CUTADAPT"

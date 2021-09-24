@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 XMX=${XMX:-Xmx32G} 
@@ -15,21 +15,20 @@ CLEAN=true
 ### Configuration
 LG3_HOME=${LG3_HOME}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+ncores=${SLURM_NTASKS:-1}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 assert_file_exists "${INTERVAL:?}"
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
+if $LG3_DEBUG ; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
   echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-?}"
@@ -54,7 +53,7 @@ echo "- THOUSAND=${THOUSAND}"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
-module load jdk/1.8.0 python/2.7.15 htslib/1.7 bwa/0.7.17 samtools/1.7
+module load jdk/1.8.0 python/2.7.18 htslib/1.7 bwa/0.7.17 samtools/1.7
 
 assert_file_executable "${GATK4}"
 PYTHON_REMOVEQC_GZ=${LG3_HOME}/scripts/removeQCgz.py

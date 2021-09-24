@@ -1,11 +1,6 @@
 #!/bin/bash
-#PBS -N ${PATIENT}.fac
-#PBS -e _Fac_${PATIENT}.err
-#PBS -o _Fac_${PATIENT}.out
-#PBS -l nodes=1:ppn=6,vmem=20gb
-#PBS -m ae
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -21,21 +16,22 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}/facets/${PATIENT:?}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT}/facets/${PATIENT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+ncores=${SLURM_NTASKS:-1}
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+if $LG3_DEBUG ; then
+  echo "Debug info:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
   echo "- ncores=$ncores"
 fi
 
@@ -52,12 +48,7 @@ assert_patient_name "${PATIENT}"
 assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV}") ## Absolute path
 
-echo "Patient: ${PATIENT}"
-echo "Project: ${PROJECT}"
-echo "Conversion File: ${CONV}"
-echo "----------------------------------"
-
-SNP_PILEUP_SETUP=${LG3_HOME}/scripts/create_input_snp_pileup.py
+SNP_PILEUP_SETUP=${LG3_HOME}/scripts/create_input_snp_pileup.py3
 assert_file_exists "${SNP_PILEUP_SETUP}"
 FACETS_RUN=${LG3_HOME}/scripts/runFACETS.R
 assert_file_exists "${FACETS_RUN}"
@@ -110,7 +101,8 @@ do
 			"${tumorbamARRAY[i]}"
 done
 
-module load r/3.4.4
+module load CBI r/3.6.3
+Rscript --version
 
 # PART 3: Runs FACETS by patient, and creates a final output summary file, FACETS.txt, for each patient, which includes the purity for each sample
 #patientARRAY=(Patient469 Patient486) # can use this to override PART 1 if ever just want to rerun facets post-PART2 (comment both parts out) for specific patients

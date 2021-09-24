@@ -6,6 +6,8 @@
 ### FUNCTION:
 ## annotates mutation list with whether or not MuTect considered that site covered in ALL tumors
 
+lg3_home <- Sys.getenv("LG3_HOME")
+
 assertFile <- function(pathname) {
   if (!utils::file_test("-f", pathname)) {
     pathnameX <- normalizePath(pathname, mustWork = FALSE)
@@ -45,7 +47,7 @@ write.table(covered.in.all, file = paste0(tmp.file.header, "coveredinall.bed"), 
 write.table(dat.overlaps[which(dat.overlaps$algorithm == "MuTect"), c(2, 3, 3)], file = paste0(tmp.file.header, "muts.bed"), col.names = FALSE, row.names = FALSE, quote = FALSE, sep = "\t")
 
 ## run bedtools intersect
-system(paste0("/opt/BEDTools/BEDTools-2.16.2/bin/intersectBed -wa -a ", tmp.file.header, "muts.bed -b ", tmp.file.header, "coveredinall.bed > ", tmp.file.header, "intersect.bed"), wait = TRUE)
+system(paste0(lg3_home,"/tools/BEDTools-2.16.2/bin/intersectBed -wa -a ", tmp.file.header, "muts.bed -b ", tmp.file.header, "coveredinall.bed > ", tmp.file.header, "intersect.bed"), wait = TRUE)
 bedfile2 <- paste0(tmp.file.header, "intersect.bed")
 assertFile(bedfile2)
 intersect.bed <- read.table(bedfile2, header = FALSE, as.is = TRUE)

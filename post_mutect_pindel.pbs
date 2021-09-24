@@ -1,13 +1,6 @@
 #!/bin/bash
 
-### Usage: qsub -v PATIENT=PatientXX,PROJ=LG3orGBM,CONV=${LG3_OUTPUT_ROOT}/${PROJECT}/exome/patient_ID_conversions.tsv /path/to/pindel_all.pbs
-#PBS -N ${PATIENT}.comb
-#PBS -e _PostMut_${PATIENT}.err
-#PBS -o _PostMut_${PATIENT}.out
-#PBS -l nodes=1:ppn=1,vmem=64gb
-#PBS -m ae
-
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -25,7 +18,7 @@ CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157}
 EMAIL=${EMAIL:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -33,8 +26,8 @@ LG3_INPUT_ROOT=$(readlink -e "$LG3_INPUT_ROOT")
 LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+if $LG3_DEBUG ; then
+  echo "Debug info:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
@@ -46,8 +39,11 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PATIENT=${PATIENT:?}"
   echo "- PROJECT=${PROJECT:?}"
   echo "- CONV=${CONV:?}"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
+  echo "- SLURM_NTASKS: ${SLURM_NTASKS}"
+  ${RSCRIPT} --version ||  error "No Rscript found"
+  ${PYTHON} --version 
 fi
 
 assert_file_exists "${CONV}"
@@ -62,7 +58,7 @@ OK() {
 echo -n "Mutation filtering & combining "
 date
 echo "Patient: ${PATIENT:?}"
-# shellcheck disable=SC2153
+
 echo "Project: ${PROJECT:?}"
 echo "Conversion file: ${CONV:?}"
 echo "----------------------------------"
@@ -88,8 +84,8 @@ assert_file_executable "${SH_MUTECT_COV_INTER_MUT}"
 assert_file_executable "${SH_RUNLOH}"
 
 
-#SCRATCH=${LG3_SCRATCH_ROOT}/MutInDel
-SCRATCH=${LG3_HOME}/scratch/MZ/MutInDel
+SCRATCH=${LG3_SCRATCH_ROOT}/MutInDel
+#SCRATCH=${LG3_HOME}/scratch/MZ/MutInDel
 make_dir "${SCRATCH}"
 change_dir "${SCRATCH}"
 

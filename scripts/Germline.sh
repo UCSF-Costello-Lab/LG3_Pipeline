@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 PROGRAM=${BASH_SOURCE[0]}
-PROG=$(basename "$PROGRAM")
+#PROG=$(basename "$PROGRAM")
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
 echo "Call: ${BASH_SOURCE[*]}"
 echo "Script: $PROGRAM"
@@ -14,21 +14,21 @@ echo "Arguments: $*"
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+ncores=${SLURM_NTASKS:-1}
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "$PROG Settings:"
+if $LG3_DEBUG ; then
+  echo "Debug info:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
 fi
 
 
@@ -152,6 +152,8 @@ fi
 
 if [ ! -e "${PATIENT}.UG.snps.vcf" ]; then
         echo "[Germline] Filtering Unified Genotyper SNPs..."
+        ##--filterExpression "ReadPosRankSum < -8.0" \
+        ##--filterExpression "MQRankSum < -12.5" \
         { time $JAVA -Xmx64g \
                 -jar "$GATK" \
                 --analysis_type VariantFiltration \
@@ -169,9 +171,7 @@ if [ ! -e "${PATIENT}.UG.snps.vcf" ]; then
                 --filterName FSFilter \
                 --filterExpression "HaplotypeScore > 13.0" \
                 --filterName HaplotypeScoreFilter \
-                --filterExpression "MQRankSum < -12.5" \
                 --filterName MQRankSumFilter \
-                --filterExpression "ReadPosRankSum < -8.0" \
                 --filterName ReadPosFilter        \
                 --out "${PATIENT}.UG.snps.vcf"; } 2>&1 || error "Unified Genotyper SNP filtration failed"
 		  assert_file_exists "${PATIENT}.UG.snps.vcf"

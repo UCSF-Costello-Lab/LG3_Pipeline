@@ -1,11 +1,6 @@
 #!/bin/bash
-### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
-#PBS -e _Recal_${PATIENT}.err
-#PBS -o _Recal_${PATIENT}.out
-#PBS -l nodes=1:ppn=12,vmem=200gb
-#PBS -m ae
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -20,11 +15,11 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
+if ${LG3_DEBUG} ; then
   echo "Settings:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
@@ -32,8 +27,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
+  echo "- Using node(s): ${SLURM_JOB_NODELIST}"
 fi
 
 
@@ -55,9 +50,9 @@ echo -n "Checking R: "
 "$RSCRIPT" --version || error "No Rscript is available!"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 echo "Started $PROG on $DATE"
-echo "Using node(s): $NODES"
+echo "Using node(s): ${SLURM_JOB_NODELIST}"
+echo "SLURM_NTASKS: ${SLURM_NTASKS}"
 
 ## Assert existance of software
 SH_RECAL=${LG3_HOME}/scripts/Recal.sh

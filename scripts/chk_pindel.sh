@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
 ### Configuration
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
+if $LG3_DEBUG ; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
@@ -41,10 +41,10 @@ do
         ## Expected output:
         OUT=$WORKDIR/${PATIENT}.indels.filtered.anno.txt
         if [ -s "$OUT" ]; then
-                echo -e "${PATIENT}" "$OK"
+            echo -e "${PATIENT}" "$OK"
         else
-                echo -e "${PATIENT}" "$ERR"
-		error "${PATIENT} failed"
+            echo -e "${PATIENT}" "$ERR"
+		      error "${PATIENT} failed"
         fi
 done
 

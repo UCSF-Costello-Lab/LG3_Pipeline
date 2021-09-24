@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -15,14 +15,14 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
-#LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+#LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 XMX=Xmx160g
 
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "Settings:"
+if $LG3_DEBUG ; then
+  echo "Debug info:"
   echo "- LG3_HOME=$LG3_HOME"
   echo "- LG3_INPUT_ROOT=$LG3_INPUT_ROOT"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
@@ -31,21 +31,9 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PWD=$PWD"
   echo "- USER=$USER"
   echo "- XMX=$XMX"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
+  echo "- SLURM_NTASKS: ${SLURM_NTASKS}"
 fi
-
-
-QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
-
-## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
-
-echo "Qsub extras:"
-echo "- QSUB_OPTS=${QSUB_OPTS}"
-echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
-
 
 ### Input
 PATIENT=$1
@@ -123,9 +111,23 @@ do
         if [ -s "$OUT" ]; then
                 warn "File $OUT exists, skipping this job ..."
         else
-                # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "M2_${ID}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
-        fi
+                #qsub ${QSUB_OPTS} -N "M2_${ID}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+
+	## Short PatientID
+	#PAT=${PATIENT/atient/}
+	## Submit
+	sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+   	--job-name="M2_${ID}" \
+   	--output="M2_${ID}.out" \
+   	--error="M2_${ID}.err" \
+   	--export=ALL,LG3_HOME="${LG3_HOME}",LG3_INPUT_ROOT="${LG3_INPUT_ROOT}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",PROJECT="${PROJECT}",PATIENT="${PATIENT}",NORMAL="${normid}",TUMOR="${ID}",TYPE="${samp_label}",INTERVAL="$INTERVAL",WORKDIR="$WORKDIR",XMX="$XMX",LG3_DEBUG="${LG3_DEBUG}" \
+   	--nodes=1 \
+   	--ntasks=1 \
+   	--mem=200G \
+   	--time=9-06:00:00 \
+   	"${PBS}"
+
+     fi
 
 done < "${PATIENT}.temp.conversions.txt"
 

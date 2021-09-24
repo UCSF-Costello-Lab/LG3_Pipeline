@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -8,26 +8,25 @@ source_lg3_conf
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:?}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
-  echo "LG3_HOME=$LG3_HOME"
-  echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
-  echo "LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
-  echo "PWD=$PWD"
-  echo "USER=$USER"
+if $LG3_DEBUG ; then
+  echo "Debug info:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
+  echo "- SLURM_NTASKS: ${SLURM_NTASKS}"
 fi
 
 
-#
-##
 ### Find the mutation contexts and rates
 ###
 ### path/to/MutContext.sh </path/to/example.mutations> </path/to/example.mutect.wig> <Output Prefix>
-##
-#
 
 mutsfile=$1
 wigfile=$2

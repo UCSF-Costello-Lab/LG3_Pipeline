@@ -7,7 +7,7 @@
 #PBS -l nodes=1:bigmem:ppn=4,vmem=200gb
 #PBS -m ae
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME}/scripts/utils.sh"
 assert_file_exists "${LG3_HOME}/lg3.conf"
 source "${LG3_HOME}/lg3.conf"
@@ -23,19 +23,20 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+#LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
-NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
 XMX=${XMX:-Xmx160G} ## Default 160gb
 
 ### Debug
-if [[ $LG3_DEBUG ]]; then
+if $LG3_DEBUG ; then
   echo "LG3_HOME=$LG3_HOME"
   echo "LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "EMAIL=${EMAIL}"
   echo "PWD=$PWD"
   echo "USER=$USER"
   echo "XMX=${XMX:?}"
+  echo "- node(s): ${SLURM_JOB_NODELIST}"
+  echo "- SLURM_NTASKS: ${SLURM_NTASKS}"
 fi
 
 
@@ -58,7 +59,6 @@ change_dir "${WDIR}"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "Started $PROG on $DATE"
-echo "Using node(s): $NODES"
 
 assert_file_exists "${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}"
 

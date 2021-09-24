@@ -53,7 +53,7 @@ def combine_snvs(patient_ID, projectname, conversionfile, outfile):
   print tomerge
 
   ## call R code to merge these files
-  command = ["/opt/R/R-latest/bin/Rscript", os.environ["LG3_HOME"] + "/scripts/combine_snvs.R"] + tomerge + [outfile]
+  command = ["Rscript", os.environ["LG3_HOME"] + "/scripts/combine_snvs.R"] + tomerge + [outfile]
   print command
   task=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (stdout,stderr)=task.communicate()
