@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# shellcheck disable=SC1072,SC1073
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:?}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+PROJECT=${PROJECT:-LG3}
+PATIENT=${PATIENT:-Patient157t10}
+EMAIL=${EMAIL:?}
+LG3_DEBUG=true
+
+## Requires absolute path
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- EMAIL=${EMAIL}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- LG3_DEBUG=${LG3_DEBUG}"
+
+assert_patient_name "${PATIENT}"
+
+PBS=${LG3_HOME}/AVF.pbs
+assert_file_exists "${PBS}"
+
+## Short PatientID
+PAT=${PATIENT/atient/}
+## Submit
+sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+   --job-name="avf_${PAT}" \
+   --output="avf_${PAT}.out" \
+   --error="avf_${PAT}.err" \
+   --export=ALL,LG3_HOME="${LG3_HOME}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",PROJECT="${PROJECT}",PATIENT="${PATIENT}",LG3_DEBUG="${LG3_DEBUG}" \
+   --nodes=1 \
+   --ntasks=1 \
+   --mem=20G \
+   --time=1-06:00:00 \
+   "${PBS}"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
