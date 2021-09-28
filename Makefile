@@ -41,11 +41,11 @@ check_hardcoded:
 	@echo "  - Assert no hardcoded email address"
 	@ ! grep -qE "[a-zA-Z]@[a-zA-Z]"  *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} bin/lg3*
 	@echo "  - Assert no hardcoded /LG3/ project paths"
-	@ ! grep -qE "/LG3/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} 
+	@ ! grep -qE "^[^#]*/LG3/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} 
 	@echo "  - Assert no /data/.. paths"
 	@ ! grep -qE "[^a-zA-Z]/data/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} bin/lg3*
 	@echo "  - Assert no /costellolab/.. paths"
-	@ ! grep -qE "/costellolab/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} 
+	@ ! grep -qE "^[^#]*/costellolab/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} 
 	@echo "  - Assert no /home/jocostello/shared/LG3_Pipeline"
 	@ ! grep -qE "/home/jocostello/shared/LG3_Pipeline" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} bin/lg3*
 	@echo "  - Assert no /home/jocostello/.. paths"

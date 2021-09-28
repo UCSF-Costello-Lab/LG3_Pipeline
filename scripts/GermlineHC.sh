@@ -72,13 +72,13 @@ echo "- GATK4=${GATK4:?}"
 python --version 2>&1
 java -version 2>&1
 Rscript --version 2>&1
-Rscript "${LG3_HOME}/scripts/chk_r_pkg.R" || exit 1
+Rscript "${LG3_HOME}/scripts/chk_r_pkg.R" || error "chk_r_pkg.R failed"
 
 ## Assert existence of software
 assert_file_exists "${GATK4}"
 assert_file_exists "${PYTHON_VCF_GERMLINE}"
 
-mkdir -p "${TMPDIR}" || { echo "ERROR: Can't create ${TMPDIR}"; exit 1; }
+make_dir "${TMPDIR}"
 
 echo "-------------------------------------------------"
 echo "[Germline] Call Germline SNPs using HaplotypeCaller"
@@ -300,7 +300,7 @@ echo -e "\\n[Germline] Running GATK4::CollectVariantCallingMetrics ..."
       --VERBOSITY ERROR \
       --QUIET false; } 2>&1 || error " CollectVariantCallingMetrics FAILED"
 
-exit 2
+EXIT_VALUE=2 error "Exiting"
 
 if [ ! -e "${PATIENT}.UG.var.annotated.vcf" ]; then
         echo "[Germline] Annotating Unified Genotyper SNPs..."

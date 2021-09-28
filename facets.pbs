@@ -102,7 +102,7 @@ echo "Found ${#patientARRAY[*]} Patient(s)"
 # PART 2: Loops through arrays above and runs snp-pileup, a piece of c++ code that prepares FACETS input from bam files
 for ((i=0; i<${#patientARRAY[*]}; i++));
 do
-    mkdir -p "${patientARRAY[i]}"
+    make_dir "${patientARRAY[i]}"
     ${SNP_PILEUP} -g -q15 -Q20 -P100 -r25,0 -d1000 \
 			"${COMMONSNPS}" \
 			"${patientARRAY[i]}"/"${patientARRAY[i]}"_"${sampleARRAY[i]}"_"${normalidARRAY[i]}"_vs_"${tumoridARRAY[i]}" \
