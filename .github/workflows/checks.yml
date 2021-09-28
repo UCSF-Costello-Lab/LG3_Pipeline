@@ -17,7 +17,6 @@ jobs:
         config:
           - {test: check_use_utils_instead }
           - {test: check_hardcoded }
-          - {test: check_shellcheck }
           - {test: check_r }
           - {test: check_pbs }
           - {test: check_sh }
@@ -33,8 +32,12 @@ jobs:
       run: |
         sudo apt-get install -y shellcheck
         shellcheck --version
+        curl -L -O https://github.com/koalaman/shellcheck/releases/download/v0.7.2/shellcheck-v0.7.2.linux.x86_64.tar.xz
+        tar Jxf shellcheck-v0.7.2.linux.x86_64.tar.xz
+        mv shellcheck-v0.7.2/shellcheck .
+        PATH=".:$PATH" shellcheck --version
 
     - name: ${{ matrix.config.test }}
       run: |
-        make ${{ matrix.config.test }}
+        PATH=".:$PATH" make ${{ matrix.config.test }}
 
