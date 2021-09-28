@@ -1,6 +1,6 @@
 # LG3_Pipeline
 
-[![Build Status](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline.svg?branch=develop)](https://travis-ci.org/UCSF-Costello-Lab/LG3_Pipeline)
+[![checks](https://github.com/UCSF-Costello-Lab/LG3_Pipeline/actions/workflows/checks.yml/badge.svg)](https://github.com/UCSF-Costello-Lab/LG3_Pipeline/actions/workflows/checks.yml)
 
 _Warning: Because of hardcoded paths and software dependencies, this software currently only runs on the UCSF [TIPCC] compute cluster.  It is our long-term goal to make it run anywhere._
 
