@@ -1,6 +1,5 @@
 #!/bin/bash
 
-LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
 
