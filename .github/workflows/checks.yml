@@ -1,0 +1,40 @@
+on: [push, pull_request]
+
+name: checks
+
+jobs:
+  checks:
+    if: "! contains(github.event.head_commit.message, '[ci skip]')"
+    
+    runs-on: ubuntu-18.04
+    
+    name: checks
+
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        config:
+          - {test: check_use_utils_instead }
+          - {test: check_hardcoded }
+          - {test: check_shellcheck }
+          - {test: check_r }
+          - {test: check_pbs }
+          - {test: check_sh }
+          - {test: check_demo }
+          - {test: check_tests }
+          - {test: check_conf }
+
+    steps:
+    - name: Checkout git repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y shellcheck
+        shellcheck --version
+
+    - name: ${{ matrix.config.test }}
+      run: |
+        make ${{ matrix.config.test }}
+
