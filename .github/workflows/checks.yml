@@ -6,7 +6,7 @@ jobs:
   checks:
     if: "! contains(github.event.head_commit.message, '[ci skip]')"
     
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     
     name: checks
 
@@ -40,4 +40,3 @@ jobs:
     - name: ${{ matrix.config.test }}
       run: |
         PATH=".:$PATH" make ${{ matrix.config.test }}
-
