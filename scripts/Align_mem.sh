@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC1072,SC1073
+# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 XMX=${XMX:-Xmx32G} 
@@ -13,7 +13,6 @@ echo "Arguments: $*"
 CLEAN=true
 
 ### Configuration
-LG3_HOME=${LG3_HOME}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -24,7 +23,7 @@ assert_file_exists "${INTERVAL:?}"
 ### Debug
 if $LG3_DEBUG ; then
   echo "Settings:"
-  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_HOME=${LG3_HOME:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"

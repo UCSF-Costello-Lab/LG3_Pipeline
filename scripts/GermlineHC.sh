@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC1072,SC1073
+# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 assert_file_exists "${LG3_HOME}/lg3.conf"
 source "${LG3_HOME}/lg3.conf"
@@ -366,7 +366,7 @@ else
    echo "[Germline] Found output ${PATIENT}.UG.var.vcf -- Skipping..."
 fi
 
-for i in ${bamdir}/*.bam
+for i in "${bamdir}"/*.bam
 do
         tumorname=${i##*/}
         tumorname=${tumorname%%.bwa*}

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-# shellcheck disable=SC1072,SC1073
+# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 
 LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
