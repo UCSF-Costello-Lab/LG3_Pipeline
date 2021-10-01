@@ -1,6 +1,5 @@
 #!/bin/bash
-
-# shellcheck disable=SC1072,SC1073
+# shellcheck disable=SC2207
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -11,7 +10,6 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
@@ -24,7 +22,7 @@ ncores=${SLURM_NTASKS:-1}
 ### Debug
 if $LG3_DEBUG ; then
   echo "Debug info:"
-  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_HOME=${LG3_HOME:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
@@ -55,8 +53,8 @@ assert_file_exists "${FACETS_RUN}"
 
 echo "Software:"
 echo "- SNP_PILEUP_SETUP=${SNP_PILEUP_SETUP:?}"
-echo "- SNP_PILEUP=${SNP_PILEUP:?}"
-assert_file_executable "${SNP_PILEUP}"
+#echo "- SNP_PILEUP=${SNP_PILEUP:?}"
+#assert_file_executable "${SNP_PILEUP}"
 echo "- COMMONSNPS=${COMMONSNPS:?}"
 assert_file_exists "${COMMONSNPS:?}"
 echo "- FACETS_RUN=${FACETS_RUN:?}"
@@ -67,8 +65,14 @@ change_dir "${LG3_SCRATCH_ROOT}"
 
 BAMPATH=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal
 
+echo "Pre-filter ${CONV} file"
+head -n 1 "${CONV}" > "${CONV}.${PATIENT}"
+grep -w "${PATIENT}" "${CONV}" >> "${CONV}.${PATIENT}" 
+wc -l "${CONV}.${PATIENT}"
+
 echo -e "\\n========= Create config file for ${SNP_PILEUP_SETUP}"
-python "${SNP_PILEUP_SETUP}" "${CONV}" "${BAMPATH}" || error "${SNP_PILEUP_SETUP} failed"
+python3 "${SNP_PILEUP_SETUP}" "${CONV}.${PATIENT}" "${BAMPATH}" || error "${SNP_PILEUP_SETUP} failed"
+rm "${CONV}.${PATIENT}"
 
 CNF=${PATIENT}.snp_pileup_input.txt
 grep -w "${PATIENT}" snp_pileup_input.txt > "${CNF}"
@@ -77,8 +81,9 @@ assert_file_exists "${CNF}"
 echo "========= Final config file:"
 cat "${CNF}"
 
-echo -e "\\n========= Run ${SNP_PILEUP} "
+echo -e "============== Run ${SNP_PILEUP} "
 # PART 1: creates input arrays from a samples file (snp_pileup_input.txt) that we will loop through - only things in this file will be run through the pipeline
+
 patientARRAY=($(cut -f 1 "${CNF}"))
 normalidARRAY=($(cut -f 2 "${CNF}"))
 tumoridARRAY=($(cut -f 3 "${CNF}"))
@@ -88,7 +93,10 @@ sampleARRAY=($(cut -f 6 "${CNF}"))
 
 rm "${CNF}"
 
-echo "Found ${#patientARRAY[*]} Patient(s)"
+echo "Found ${#patientARRAY[*]} sample(s)"
+echo "P0 --${sampleARRAY[0]}--"
+echo "P1 --${sampleARRAY[1]}--"
+
 
 # PART 2: Loops through arrays above and runs snp-pileup, a piece of c++ code that prepares FACETS input from bam files
 for ((i=0; i<${#patientARRAY[*]}; i++));
@@ -101,15 +109,14 @@ do
 			"${tumorbamARRAY[i]}"
 done
 
-module load CBI r/3.6.3
-Rscript --version
-
 # PART 3: Runs FACETS by patient, and creates a final output summary file, FACETS.txt, for each patient, which includes the purity for each sample
 #patientARRAY=(Patient469 Patient486) # can use this to override PART 1 if ever just want to rerun facets post-PART2 (comment both parts out) for specific patients
-patientuniqARRAY=($(echo "${patientARRAY[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+patientuniqARRAY=("$(echo "${patientARRAY[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')")
 for patient in "${patientuniqARRAY[@]}"
 do
-    echo "======== Running FACETS for ${patient}"
+    ## Trim spaces 
+	 patient=$(echo "${patient}" | xargs echo -n)
+    echo "======== Running FACETS for ${patient}===="
     Rscript "${FACETS_RUN}" "${patient}"/
 done
 
