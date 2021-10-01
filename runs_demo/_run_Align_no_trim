@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC1072,SC1073
+# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
