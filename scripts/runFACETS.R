@@ -8,6 +8,7 @@ library(facets)
 # User supplied variables
 args = commandArgs(trailingOnly=TRUE)
 dirPath <- args[1] 
+cat("Input ==",dirPath,"==\n",sep='')
 
 out = c('sample', 'dipLogR', 'purity', 'ploidy')
 
