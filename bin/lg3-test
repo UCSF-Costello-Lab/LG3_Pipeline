@@ -13,7 +13,7 @@
 ###  lg3 test validate Patient157t10
 ###
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
