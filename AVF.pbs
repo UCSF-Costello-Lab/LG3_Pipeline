@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -13,7 +12,6 @@ echo "Script: $PROGRAM"
 echo "Arguments: $*"
 
 ### Configuration
-LG3_HOME=${LG3_HOME}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
@@ -25,7 +23,7 @@ ${PYTHON} --version
 ### Debug
 if ${LG3_DEBUG} ; then
   echo "Debug info:"
-  echo "- LG3_HOME=${LG3_HOME}"
+  echo "- LG3_HOME=${LG3_HOME:?}"
   echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
   echo "- EMAIL=${EMAIL}"
   echo "- PWD=$PWD"
@@ -46,54 +44,54 @@ echo "- PROJECT=${PROJECT:?}"
 assert_patient_name "${PATIENT}"
 
 REPO=${LG3_HOME}/exomeAdvancedVariantFiltering
-assert_link_exists ${REPO}
+assert_link_exists "${REPO}"
 
-PY_AVF=${REPO}/advanced_variant_filtering.py ## Main script
-assert_file_exists ${PY_AVF}
+PY_AVF="${REPO}/advanced_variant_filtering.py" ## Main script
+assert_file_exists "${PY_AVF}"
 
-MUTINDEL=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel ## Location of *.R.mutations file
-assert_directory_exists ${MUTINDEL}
+MUTINDEL="${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel" ## Location of *.R.mutations file
+assert_directory_exists "${MUTINDEL}"
 
-MUTFILE=${MUTINDEL}/${PATIENT}.R.mutations
-assert_file_exists ${MUTFILE}
+MUTFILE="${MUTINDEL}/${PATIENT}.R.mutations"
+assert_file_exists "${MUTFILE}"
 
-AVF=${MUTFILE}.avf
-   if [ -f ${AVF} ]; then
+AVF="${MUTFILE}.avf"
+   if [ -f "${AVF}" ]; then
       echo -n "Already done, found AVF output: "
-      wc -l ${AVF}
+      wc -l "${AVF}"
       exit 1
    fi
 
-QCPLOTS=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots ## Location of *.qualitystats.txt files
-assert_directory_exists ${QCPLOTS}
+QCPLOTS="${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots" ## Location of *.qualitystats.txt files
+assert_directory_exists "${QCPLOTS}"
 
-QSTAT=${QCPLOTS}/${PATIENT}/${PATIENT}.qualitystats.txt
-assert_file_exists ${QSTAT}
+QSTAT="${QCPLOTS}/${PATIENT}/${PATIENT}.qualitystats.txt"
+assert_file_exists "${QSTAT}"
 echo -n "Found: "
-wc -l ${QSTAT}
+wc -l "${QSTAT}"
 
-WC_QSTAT=$(wc -l ${QSTAT} | tr -s ' ' | cut -d' ' -f1)
+WC_QSTAT=$(wc -l "${QSTAT}" | tr -s ' ' | cut -d' ' -f1)
 if [ "${WC_QSTAT}" -eq 11 ]; then
    echo "WARNING: qualitystats are empty, hyper mutator?"
    exit 1
 fi
 
-change_dir ${MUTINDEL}
+change_dir "${MUTINDEL}"
 
 echo "Making sym link for qualitystats"
-ln -s ${QSTAT} ${PATIENT}.qualitystats.txt
-ls -l ${PATIENT}.qualitystats.txt
+ln -s "${QSTAT}" "${PATIENT}.qualitystats.txt"
+ls -l "${PATIENT}.qualitystats.txt"
 
-change_dir ${REPO}
+change_dir "${REPO}"
 
 echo "Starting exomeAdvancedVariantFiltering"
 
-time ${PYTHON} ${PY_AVF} ${MUTFILE}
+time ${PYTHON} "${PY_AVF}" "${MUTFILE}"
 
 echo -n "OUTPUT: "
-wc -l ${AVF}
+wc -l "${AVF}"
 
 echo "Removing sym link"
-rm_if_link ${MUTINDEL}/${PATIENT}.qualitystats.txt
+rm_if_link "${MUTINDEL}/${PATIENT}.qualitystats.txt"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
