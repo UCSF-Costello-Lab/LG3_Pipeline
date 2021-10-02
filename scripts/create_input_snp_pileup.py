@@ -8,7 +8,7 @@
 # Version: v1 (2018.03.28)
 
 # Input:
-#   1. path to patient_ID_conversions.txt - currently located at /costellolab/mazort/LG3/exome/
+#   1. path to patient_ID_conversions.txt - must be located in runs_demo directory
 #
 # Output:
 #   1. snp_pileup_input.txt
@@ -19,8 +19,6 @@
 import sys, os
 
 def create_input_snp_pileup(conversion_path, bampath):
-
-    #bampath = "/costellolab/data1/jocostello/LG3/exomes_recal/"
 
     print("Reading in conversion file")
 

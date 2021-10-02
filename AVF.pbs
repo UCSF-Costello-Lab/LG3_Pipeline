@@ -71,7 +71,7 @@ wc -l "${QSTAT}"
 
 WC_QSTAT=$(wc -l "${QSTAT}" | tr -s ' ' | cut -d' ' -f1)
 if [ "${WC_QSTAT}" -eq 11 ]; then
-   error "WARNING: qualitystats are empty, hyper mutator?"
+   error "qualitystats are empty, hyper mutator?"
 fi
 
 change_dir "${MUTINDEL}"

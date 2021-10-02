@@ -4,7 +4,6 @@
 # shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 
-LG3_HOME=${LG3_HOME:-/home/jocostello/shared/LG3_Pipeline}
 ### /path/to/FixReadGroups.sh <bam_in> <bam_out>  <new_prefix>
 
 if [ $# -lt 2 ]; then

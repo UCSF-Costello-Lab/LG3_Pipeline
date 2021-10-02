@@ -78,7 +78,7 @@ Rscript "${LG3_HOME}/scripts/chk_r_pkg.R" || error "chk_r_pkg.R failed"
 assert_file_exists "${GATK4}"
 assert_file_exists "${PYTHON_VCF_GERMLINE}"
 
-mkdir -p "${TMPDIR}" || error "ERROR: Can't create ${TMPDIR}"
+make_dir "${TMPDIR}" || error "Can't create ${TMPDIR}"
 
 echo "-------------------------------------------------"
 echo "[Germline] Call Germline SNPs using HaplotypeCaller"
