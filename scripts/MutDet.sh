@@ -133,7 +133,7 @@ echo "-------------------------------------------------"
 
 if [ ! -e "${prefix}.snvs.raw.mutect.txt" ]; then
         echo "[MutDet] Running $MUTECT --analysis_type MuTect ..."
-		  VER=$(basename ${MUTECT} .jar)
+		  VER=$(basename "${MUTECT}" .jar)
 		  echo "${VER}" > muTect.ver
         { time $JAVA -"$XMX" -Djava.io.tmpdir="${TMP}" \
                 -jar "$MUTECT" \
