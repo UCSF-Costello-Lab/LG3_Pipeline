@@ -308,8 +308,8 @@ BEDTOOLS="${LG3_HOME}/tools/BEDTools-2.16.2/bin/bedtools"
 assert_file_executable "$BEDTOOLS"
 
 # muTect
-MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
-#MUTECT="${LG3_HOME}/tools/muTect-1.1.4.jar"
+#MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
+MUTECT="${LG3_HOME}/tools/muTect-1.1.4.jar"
 assert_file_executable "$MUTECT"
 
 # AnnoVar
