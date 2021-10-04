@@ -1,5 +1,4 @@
 #! /usr/bin/env bash
-# shellcheck disable=SC1091,SC2012
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 ### Check Status of Running LG3 Pipeline
