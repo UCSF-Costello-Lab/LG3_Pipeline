@@ -88,12 +88,28 @@ cat "${CNF}"
 
 echo -e "\\n========= Run ${SNP_PILEUP} "
 # PART 1: creates input arrays from a samples file (snp_pileup_input.txt) that we will loop through - only things in this file will be run through the pipeline
-patientARRAY=($(cut -f 1 "${CNF}"))
-normalidARRAY=($(cut -f 2 "${CNF}"))
-tumoridARRAY=($(cut -f 3 "${CNF}"))
-normalbamARRAY=($(cut -f 4 "${CNF}"))
-tumorbamARRAY=($(cut -f 5 "${CNF}"))
-sampleARRAY=($(cut -f 6 "${CNF}"))
+
+## The below are SC2207 issues:
+# patientARRAY=($(cut -f 1 "${CNF}"))
+# normalidARRAY=($(cut -f 2 "${CNF}"))
+# tumoridARRAY=($(cut -f 3 "${CNF}"))
+# normalbamARRAY=($(cut -f 4 "${CNF}"))
+# tumorbamARRAY=($(cut -f 5 "${CNF}"))
+# sampleARRAY=($(cut -f 6 "${CNF}"))
+
+## Better to use:
+patientARRAY=()
+while IFS='' read -r line; do patientARRAY+=("$line"); done < <(cut -f 1 "${CNF}")
+normalidARRAY=()
+while IFS='' read -r line; do normalidARRAY+=("$line"); done < <(cut -f 2 "${CNF}")
+tumoridARRAY=()
+while IFS='' read -r line; do tumoridARRAY+=("$line"); done < <(cut -f 3 "${CNF}")
+normalbamARRAY=()
+while IFS='' read -r line; do normalbamARRAY+=("$line"); done < <(cut -f 4 "${CNF}")
+tumorbamARRAY=()
+while IFS='' read -r line; do tumorbamARRAY+=("$line"); done < <(cut -f 5 "${CNF}")
+sampleARRAY=()
+while IFS='' read -r line; do sampleARRAY+=("$line"); done < <(cut -f 6 "${CNF}")
 
 rm "${CNF}"
 
@@ -114,7 +130,12 @@ module load r/3.4.4
 
 # PART 3: Runs FACETS by patient, and creates a final output summary file, FACETS.txt, for each patient, which includes the purity for each sample
 #patientARRAY=(Patient469 Patient486) # can use this to override PART 1 if ever just want to rerun facets post-PART2 (comment both parts out) for specific patients
-patientuniqARRAY=($(echo "${patientARRAY[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+## The below is an SC2207 issue:
+# patientuniqARRAY=($(echo "${patientARRAY[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+## Better to use:
+patientuniqARRAY=()
+while IFS='' read -r line; do patientuniqARRAY+=("$line"); done < <(echo "${patientARRAY[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
 for patient in "${patientuniqARRAY[@]}"
 do
     echo "======== Running FACETS for ${patient}"
