@@ -487,8 +487,8 @@ do
 	if $PSCN ; then
 	 	WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/copynumber/${PATIENT}
         	## Expected output:
-        	NPDF=$(ls -1 ${WORKDIR}/${PATIENT},*.pdf 2> /dev/null | wc -l)
-        	NRDS=$(ls -1 ${WORKDIR}/${PATIENT},*.rds 2> /dev/null | wc -l)
+        	NPDF=$(find . -type f -name "${WORKDIR}/${PATIENT},*.pdf" | wc -l)
+        	NRDS=$(find . -type f -name "${WORKDIR}/${PATIENT},*.rds" | wc -l)
 			if [ "${NPDF}" -gt 0 ]; then
 				echo -e "PSCN *.PDF ${NPDF} $OK"
 			else
