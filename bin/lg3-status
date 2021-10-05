@@ -209,7 +209,7 @@ do
     	while IFS=$'\t' read -r ID _ _ SAMP
     	do
         	### Expected output
-		  	for _file in ${WORKDIR}/${ID}.${RECAL_BAM_EXT}.*insert_size_metrics
+		  	for _file in "${WORKDIR}/${ID}.${RECAL_BAM_EXT}".*insert_size_metrics
 		  	do
 					if [ -s "${_file}" ]; then
 						echo -e "Recal $ID $OK"
@@ -226,7 +226,7 @@ do
     	while IFS=$'\t' read -r ID _ _ SAMP
     	do
         	### Expected output
-        	for _file in ${WORKDIR}/${ID}.${RECAL_BAM_EXT}.*insert_size_metrics
+        	for _file in "${WORKDIR}/${ID}.${RECAL_BAM_EXT}".*insert_size_metrics
         	do
             	if [ -s "${_file}" ]; then
                	echo -e "Recal $ID $OK"
