@@ -176,8 +176,8 @@ do
         	OUT=${WORKDIR}/${ID}-trim/${ID}-trim_R1.fastq.gz
         	OUT2=${WORKDIR}/${ID}-trim/${ID}-trim_R2.fastq.gz
         	if [ -r "$OUT" ]; then
-		  			MESS=$(ls -sh "${OUT}" | cut -d' ' -f1)
-		  			MESS2=$(ls -sh "${OUT}" | cut -d' ' -f1)
+		  			MESS=$(stat --printf="%s" "${OUT}")
+		  			MESS2=$(stat --printf="%s" "${OUT}")
             	echo -e "Trim $ID ${GRN} ${MESS} / ${MESS2} ${NOC}"
             	#echo -e "Trim $ID $OK"
         	else
