@@ -1,13 +1,5 @@
 #!/bin/bash
 
-### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Germline.pbs
-### Output files
-#PBS -e _HC_${PATIENT}.err
-#PBS -o _HC_${PATIENT}.out
-#PBS -l nodes=1:bigmem:ppn=4,vmem=200gb
-#PBS -m ae
-
-# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME}/scripts/utils.sh"
 assert_file_exists "${LG3_HOME}/lg3.conf"
 source "${LG3_HOME}/lg3.conf"

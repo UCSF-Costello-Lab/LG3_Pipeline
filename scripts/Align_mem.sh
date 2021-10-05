@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 XMX=${XMX:-Xmx32G} 

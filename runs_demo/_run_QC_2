@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -61,12 +60,11 @@ assert_file_executable "${SH_GET_COV}"
 ## Short PatientID
 PAT=${PATIENT/atient/}
 ## Submit
-# shellcheck disable=SC2140
 sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
    --job-name="QC2_${PAT}" \
    --output="QC2_${PAT}.out" \
    --error="QC2_${PAT}.err" \
-   --export=ALL,patient="${PATIENT}",bedpath="${BEDPATH}",bampath="${BAMPATH}/${PATIENT}",LG3_DEBUG="${LG3_DEBUG}" \
+   --export=ALL,patient="${PATIENT}",bedpath="${BEDPATH}",bampath="${BAMPATH}"/"${PATIENT}",LG3_DEBUG="${LG3_DEBUG}" \
    --nodes=1 \
    --ntasks=1 \
    --mem=300G \

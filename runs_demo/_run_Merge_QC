@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -73,5 +72,5 @@ BAMS=$(echo "$BAMS" | cut -c2-)
 echo "Total BAMS: $CNT"
 echo "$BAMS"
 
-# shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+##qsub ${QSUB_OPTS} -N MergeQC_${SAMPLE} -v "${QSUB_ENVVARS},BAMS=${BAMS},SAMPLE=${SAMPLE},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+## TODO!

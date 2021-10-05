@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 
 ### /path/to/FixReadGroups.sh <bam_in> <bam_out>  <new_prefix>

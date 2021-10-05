@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
-# shellcheck disable=SC2119
 assert_pwd
 
 PROGRAM=${BASH_SOURCE[0]}

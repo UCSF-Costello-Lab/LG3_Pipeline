@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 
 rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }

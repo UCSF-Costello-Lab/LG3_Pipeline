@@ -1,13 +1,8 @@
 #!/bin/bash
 
 ### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,SAMPLE=sampleXX /path/to/Merge.pbs
-### Output files
-#PBS -e _Merge_${SAMPLE}.err
-#PBS -o _Merge_${SAMPLE}.out
 #PBS -l nodes=1:ppn=6,vmem=32gb
-#PBS -m ae
 
-# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 

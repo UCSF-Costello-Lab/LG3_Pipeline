@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 assert_file_exists "${LG3_HOME}/lg3.conf"
 source "${LG3_HOME}/lg3.conf"
@@ -141,7 +140,6 @@ echo "Total raw variants in ${PATIENT}.HC.var.raw.g.vcf.gz : "
 zgrep -vc '^#' "${PATIENT}.HC.var.raw.g.vcf.gz"  
 
 ${CLEAN} && echo "Deleting ${OUT2} ${OUT2IND}"
-# shellcheck disable=SC2086
 ${CLEAN} && rm -f "${OUT2[@]}"
 ${CLEAN} && rm -f "${OUT2IND[@]}"
 

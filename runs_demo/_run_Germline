@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -49,8 +48,7 @@ ILIST=$(readlink -e "$ILIST")
 PBS=${LG3_HOME}/Germline.pbs
 assert_file_exists "${PBS}"
 
-# shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N GL_$PATIENT -v "${QSUB_ENVVARS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+##qsub ${QSUB_OPTS} -N GL_$PATIENT -v "${QSUB_ENVVARS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
 
    sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
       --job-name="GL-${PATIENT}" \

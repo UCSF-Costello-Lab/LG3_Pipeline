@@ -1,7 +1,4 @@
 #! /usr/bin/env bash
-# shellcheck disable=SC1091,SC2012
-source "${LG3_HOME:?}/scripts/utils.sh"
-source_lg3_conf
 ### Check Status of Running LG3 Pipeline
 ###
 ### Usage:
@@ -33,7 +30,7 @@ source_lg3_conf
 ###  lg3 status --all Patient157t10
 ###
 
-# shellcheck source=scripts/utils.sh
+# shellcheck disable=SC2012
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -490,8 +487,11 @@ do
 	if $PSCN ; then
 	 	WORKDIR="${LG3_OUTPUT_ROOT}/${PROJECT}/copynumber/${PATIENT}"
         	## Expected output:
-        	NPDF=$(ls -1 "${WORKDIR}"/"${PATIENT}",*.pdf 2> /dev/null | wc -l)
-        	NRDS=$(ls -1 "${WORKDIR}"/"${PATIENT}",*.rds 2> /dev/null | wc -l)
+        	#NPDF=$(ls -1 "${WORKDIR}"/"${PATIENT}",*.pdf 2> /dev/null | wc -l)
+        	#NRDS=$(ls -1 "${WORKDIR}"/"${PATIENT}",*.rds 2> /dev/null | wc -l)
+			NPDF=$(find . -type f -name "${WORKDIR}/${PATIENT},*.pdf" | wc -l)
+        	NRDS=$(find . -type f -name "${WORKDIR}/${PATIENT},*.rds" | wc -l)
+
 			if [ "${NPDF}" -gt 0 ]; then
 				echo -e "PSCN *.PDF ${NPDF} $OK"
 			else

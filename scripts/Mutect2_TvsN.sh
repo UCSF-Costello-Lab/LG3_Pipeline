@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 bCLEAN=true
@@ -103,7 +102,6 @@ assert_file_exists "${REF:?}"
 echo "- reference=${REF}"
 
 if ${bGNOMAD}; then
-	# shellcheck disable=SC2153
    echo "- GNOMAD AF =${GNOMAD}"
    assert_file_exists "${GNOMAD}"
    assert_file_exists "${GNOMAD}.tbi"

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC1091
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
@@ -46,8 +45,8 @@ fi
 
 ## References
 CONFIG=${LG3_HOME}/FilterMutations/mutationConfig.cfg
-#INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
-INTERVAL=${LG3_HOME}/resources/All_exome_XgenPanel_merged.extended_200bp.interval_list
+INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
+#INTERVAL=${LG3_HOME}/resources/All_exome_XgenPanel_merged.extended_200bp.interval_list
 echo "- CONFIG=${CONFIG:?}"
 echo "- INTERVAL=${INTERVAL:?}"
 assert_file_exists "${CONFIG}"

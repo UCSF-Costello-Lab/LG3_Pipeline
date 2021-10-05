@@ -1,10 +1,8 @@
 #!/bin/bash
 #PBS -N 1-4.all
-#PBS -j oe
 
 ##### This file replaces original 1-4.submit_all.pbs
 
-# shellcheck disable=SC1072,SC1073
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
 
