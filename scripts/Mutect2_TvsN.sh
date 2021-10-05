@@ -175,7 +175,7 @@ extra_args=""
 echo "[Mutect2] extra_args: ${extra_args[*]}"
 
 echo -e "\\n[Mutect2] Running GATK4::MuTect2 ..."
-      { time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_gnomAD[@]}" ${XARG_OBMM[@]}\
+      { time ${GATK4} --java-options -"${XMX}" Mutect2 "${extra_args[@]}" "${XARG_gnomAD[@]}" "${XARG_OBMM[@]}" \
             --verbosity "${VERBOSITY}" \
             --reference "${REF}" \
             --input "${nbamfile}" \
