@@ -188,9 +188,9 @@ function assert_patient_name {
 
 ## Usage: assert_pwd
 function assert_pwd {
-    [[ $# -ne 0 ]] && error "${FUNCNAME[0]}() must not be called with arguments: $#"
+#    [[ $# -ne 0 ]] && error "${FUNCNAME[0]}() must not be called with arguments: $#"
     ## Don't allow running the pipeline from within LG3_HOME
-    #equal_dirs "${PWD}" "${LG3_HOME}" && error "The LG3 Pipeline must not be run from the folder where it is installed (LG3_HOME): ${PWD}"
+    equal_dirs "${PWD}" "${LG3_HOME}" && error "The LG3 Pipeline must not be run from the folder where it is installed (LG3_HOME): ${PWD}"
 }
 
 
