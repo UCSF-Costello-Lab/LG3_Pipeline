@@ -350,12 +350,12 @@ echo "[Mutect2] Extracting selected Funcotator annotations in .tsv format"
 
 if ${bCLEAN}; then
    echo "Cleaning intermediate files"
-   rm -f ${tumorname}-M2FilteringStats.tsv
-   rm -f ${tumorname}-F1R2Counts.tar.gz
-   rm -f ${tumorname}-artifact-prior-table.tar.gz
-   rm -f ${tumorname}-normal_pileups.table
-   rm -f ${tumorname}-pileups.table
-   rm -f ${tumorname}-segments.table
+   rm -f "${tumorname}-M2FilteringStats.tsv"
+   rm -f "${tumorname}-F1R2Counts.tar.gz"
+   rm -f "${tumorname}-artifact-prior-table.tar.gz"
+   rm -f "${tumorname}-normal_pileups.table"
+   rm -f "${tumorname}-pileups.table"
+   rm -f "${tumorname}-segments.table"
 fi
 
 echo "-------------------------------------------------"

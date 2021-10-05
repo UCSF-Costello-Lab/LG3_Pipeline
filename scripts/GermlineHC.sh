@@ -366,7 +366,7 @@ else
    echo "[Germline] Found output ${PATIENT}.UG.var.vcf -- Skipping..."
 fi
 
-for i in ${bamdir}/*.bam
+for i in "${bamdir}"/*.bam
 do
         tumorname=${i##*/}
         tumorname=${tumorname%%.bwa*}

@@ -40,7 +40,7 @@ echo "New Group Name: $prefix"
 echo "-------------------------------------------------"
 
 echo "Read group before"
-bamhead ${bamin} | grep RG
+bamhead "${bamin}" | grep RG
 
 if [ ! -f "$bamout" ]; then
         #SORT_ORDER=coordinate \
@@ -64,12 +64,12 @@ $SAMTOOLS index "${bamout}" || error "BAM indexing failed"
 
 echo "Read group after "
 if [ $# -eq 2 ]; then
-	mv tmp.bam ${bamin}
-	mv tmp.bam.bai ${bamin}.bai
-	touch ${bamin} ${bamin}.bai
-	bamhead ${bamin} | grep RG
+	mv tmp.bam "${bamin}"
+	mv tmp.bam.bai "${bamin}.bai"
+	touch "${bamin}" "${bamin}.bai"
+	bamhead "${bamin}" | grep RG
 else
-	bamhead ${bamout} | grep RG
+	bamhead "${bamout}" | grep RG
 fi
 
 echo "All Done!"
