@@ -20,10 +20,10 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PSCN_HOME=${PSCN_HOME:-Costello-PSCN-Seq}
 
 echo "************** Run once 0.setup.R ********************"
-cat ${PSCN_HOME}/0.setup.R
+cat "${PSCN_HOME}/0.setup.R"
 
 echo "************** Check config.yml ********************"
-cat ${PSCN_HOME}/config.yml
+cat "${PSCN_HOME}/config.yml"
 echo "****************************************************"
 
 rm_if_link "${PSCN_HOME}/seqzData" 
