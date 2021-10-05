@@ -1,4 +1,9 @@
 #! /usr/bin/env bash
+<<<<<<< HEAD
+=======
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+>>>>>>> 444d9f958df38399788e577e494c6ff3d477238a
 ### Check Status of Running LG3 Pipeline
 ###
 ### Usage:
