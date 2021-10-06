@@ -1,6 +1,15 @@
 # LG3_Pipeline
 
-## Version 2020-05-16-9000 (develop version)
+## Version 2020-05-26-9000 (develop version)
+
+### NEW FEATURES
+
+ * Now it's possible to override the _internal_ environment variables that
+   the LG3 pipeline uses, e.g. `export MUTECT=/path/to/muTect-99.jar`.
+   Note that this should only be used for troubleshooting and development.
+
+
+## Version 2020-05-26
 
 ### NEW FEATURES
 

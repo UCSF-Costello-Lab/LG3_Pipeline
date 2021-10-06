@@ -269,50 +269,50 @@ function source_lg3_conf {
 # SOFTWARE
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-## java version "1.6.0_27"
-JAVA=${LG3_HOME}/tools/java/jre1.6.0_27/bin/java
+## Java version "1.6.0_27"
+JAVA=${JAVA:-${LG3_HOME}/tools/java/jre1.6.0_27/bin/java}
 assert_file_executable "$JAVA"
 
 ## Python 2.6.6
-PYTHON=/usr/bin/python
+PYTHON=${PYTHON:-/usr/bin/python}
 assert_file_executable "$PYTHON"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
 ## R scripting front-end version 3.2.0 (2015-04-16)
-RSCRIPT=/opt/R/R-latest/bin/Rscript
+RSCRIPT=${RSCRIPT:-/opt/R/R-latest/bin/Rscript}
 assert_file_executable "$RSCRIPT"
 ## Workaround: 'Rscript' called somewhere in the Recal script(s)
 PATH="$(dirname "$RSCRIPT"):$PATH"
 
 ## samtools 0.1.18 (r982:295
-SAMTOOLS=${LG3_HOME}/tools/samtools-0.1.18/samtools
+SAMTOOLS=${SAMTOOLS:-${LG3_HOME}/tools/samtools-0.1.18/samtools}
 assert_file_executable "$SAMTOOLS"
 
 ## bwa 0.5.9-r26-dev
-BWA=${LG3_HOME}/tools/bwa-0.5.10/bwa
+BWA=${BWA:-${LG3_HOME}/tools/bwa-0.5.10/bwa}
 assert_file_executable "$BWA"
 
 # Picard
-PICARD_HOME=${LG3_HOME}/tools/picard-tools-1.64
+PICARD_HOME=${PICARD_HOME:-${LG3_HOME}/tools/picard-tools-1.64}
 assert_directory_exists "$PICARD_HOME"
 
 # GATK 1.6-5-g557da77
-GATK=${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar
+GATK=${GATK:-${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar}
 assert_file_executable "$GATK"
 
 # bedtools 2.16.2
-BEDTOOLS="/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"
+BEDTOOLS=${BEDTOOLS:-"/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"}
 assert_file_executable "$BEDTOOLS"
 
 # muTect
-MUTECT="${LG3_HOME}/tools/muTect-1.0.27783.jar"
+MUTECT=${MUTECT:-"${LG3_HOME}/tools/muTect-1.0.27783.jar"}
 assert_file_executable "$MUTECT"
 
 # AnnoVar
-ANNOVAR_HOME=${LG3_HOME}/AnnoVar
+ANNOVAR_HOME=${ANNOVAR_HOME:-${LG3_HOME}/AnnoVar}
 assert_directory_exists "$ANNOVAR_HOME"
 
 # cutadapt 1.2.1
-CUTADAPT=/opt/Python/Python-2.7.3/bin/cutadapt
+CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
 assert_file_executable "$CUTADAPT"
