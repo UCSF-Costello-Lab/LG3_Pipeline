@@ -205,9 +205,9 @@ function assert_python {
     bin=$1
     
     if [[ -n "$bin" ]]; then
-	assert_file_executable "$bin"
-    else	
-	bin=$(command -v python) || error "Python executable not found on PATH: ${PATH}"
+        assert_file_executable "$bin"
+    else
+        bin=$(command -v python) || error "Python executable not found on PATH: ${PATH}"
     fi
     
     ## Assert correct version
@@ -264,70 +264,86 @@ function source_lg3_conf {
 
 
 
+function lg3_list_software {
+    echo "LG3 software dependencies used:"
+    names="JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS"
+    for name in ${names}; do
+        value=${!name}
+        echo "- ${name}='${value}'"
+    done
+}
+
+function lg3_assert_software {
+    assert_file_executable  "$JAVA"
+    assert_file_executable  "$PYTHON"
+    assert_python           "$PYTHON"
+    assert_file_executable  "$RSCRIPT"
+    assert_directory_exists "$ANNOVAR_HOME"
+    assert_file_executable  "$BEDTOOLS"
+    assert_file_executable  "$BWA"
+    assert_file_executable  "$CUTADAPT"
+    assert_file_executable  "$GATK"
+    assert_file_exists      "$MUTECT"
+    assert_directory_exists "$PICARD_HOME"
+    assert_file_executable  "$SAMTOOLS"
+}
+
 function lg3_qsub_envvar_append_software {
-  assert_file_executable "$JAVA"
-  assert_file_executable "$PYTHON"
-  assert_file_executable "$RSCRIPT"
-  assert_file_executable "$SAMTOOLS"
-  assert_file_executable "$BWA"
-  assert_directory_exists "$PICARD_HOME"
-  assert_file_executable "$GATK"
-  assert_file_executable "$BEDTOOLS"
-  assert_file_exists "$MUTECT"
-  assert_directory_exists "$ANNOVAR_HOME"
-  assert_file_executable "$CUTADAPT"
-  echo "${QSUB_ENVVARS},JAVA=${JAVA},PYTHON=${PYTHON},RSCRIPT=${RSCRIPT},SAMTOOLS=${SAMTOOLS},BWA=${BWA},PICARD_HOME=${PICARD_HOME},GATK=${GATK},BEDTOOLS=${BEDTOOLS},MUTECT=${MUTECT},ANNOVAR_HOME=${ANNOVAR_HOME},CUTADAPT=${CUTADAPT}"
+    lg3_assert_software
+    names="JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS"
+    for name in ${names}; do
+        value=${!name}
+        QSUB_ENVVARS="${QSUB_ENVVARS},${name}=${value}"
+    done
+    echo "${QSUB_ENVVARS}"
 }
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# SOFTWARE
+# MAIN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Load any custom LG3 settings
+source_lg3_conf
 
-## Java version "1.6.0_27"
+## Setup software paths, if not already done
+
+### Java version "1.6.0_27"
 JAVA=${JAVA:-${LG3_HOME}/tools/java/jre1.6.0_27/bin/java}
-assert_file_executable "$JAVA"
 
-## Python 2.6.6
+### Python 2.6.6
 PYTHON=${PYTHON:-/usr/bin/python}
-assert_file_executable "$PYTHON"
-assert_python "$PYTHON"
-unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
+unset PYTHONPATH  ### ADHOC: In case it is set by user. /HB 2018-09-07
 
-## R scripting front-end version 3.2.0 (2015-04-16)
+### R scripting front-end version 3.2.0 (2015-04-16)
 RSCRIPT=${RSCRIPT:-/opt/R/R-latest/bin/Rscript}
-assert_file_executable "$RSCRIPT"
-## Workaround: 'Rscript' called somewhere in the Recal script(s)
+### Workaround: 'Rscript' called somewhere in the Recal script(s)
 PATH="$(dirname "$RSCRIPT"):$PATH"
 
-## samtools 0.1.18 (r982:295
+### samtools 0.1.18 (r982:295
 SAMTOOLS=${SAMTOOLS:-${LG3_HOME}/tools/samtools-0.1.18/samtools}
-assert_file_executable "$SAMTOOLS"
 
-## bwa 0.5.9-r26-dev
+### bwa 0.5.9-r26-dev
 BWA=${BWA:-${LG3_HOME}/tools/bwa-0.5.10/bwa}
-assert_file_executable "$BWA"
 
-# Picard
+### Picard
 PICARD_HOME=${PICARD_HOME:-${LG3_HOME}/tools/picard-tools-1.64}
-assert_directory_exists "$PICARD_HOME"
 
-# GATK 1.6-5-g557da77
+### GATK 1.6-5-g557da77
 GATK=${GATK:-${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar}
-assert_file_executable "$GATK"
 
-# bedtools 2.16.2
+### bedtools 2.16.2
 BEDTOOLS=${BEDTOOLS:-"/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"}
-assert_file_executable "$BEDTOOLS"
 
-# muTect
+### muTect
 MUTECT=${MUTECT:-"${LG3_HOME}/tools/muTect-1.0.27783.jar"}
-assert_file_exists "$MUTECT"
 
-# AnnoVar
+### AnnoVar
 ANNOVAR_HOME=${ANNOVAR_HOME:-${LG3_HOME}/AnnoVar}
-assert_directory_exists "$ANNOVAR_HOME"
 
-# cutadapt 1.2.1
+### cutadapt 1.2.1
 CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
-assert_file_executable "$CUTADAPT"
+
+
+## Validate software setup
+lg3_list_software
+lg3_assert_software
