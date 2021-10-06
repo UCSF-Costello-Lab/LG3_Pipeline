@@ -4,6 +4,10 @@
 
 ### NEW FEATURES
 
+ * Now all `runs_demo/run_*` scripts pass also environment variables
+   specifying software tools to the submitted job scripts.  This makes it
+   possible to override the default software tools.
+
  * Now it's possible to override the _internal_ environment variables that
    the LG3 pipeline uses, e.g. `export MUTECT=/path/to/muTect-99.jar`.
    Note that this should only be used for troubleshooting and development.

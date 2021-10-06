@@ -39,6 +39,7 @@ echo "- TG=${TG}"             ## optional
 assert_patient_name "${PATIENT}"
 
 QSUB_ENVVARS="JUNK=junk,LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS=$(lg3_qsub_envvar_append_software)
 if [[ -n ${TG} ]]; then QSUB_ENVVARS="${QSUB_ENVVARS},TG=${TG}"; fi
 QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
 
