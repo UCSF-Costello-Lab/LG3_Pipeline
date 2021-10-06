@@ -269,7 +269,12 @@ function lg3_list_software {
     names="JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS"
     for name in ${names}; do
         value=${!name}
-        echo "- ${name}='${value}'"
+	if [[ -z "${value}" ]]; then
+            value="<empty>"
+	else
+            value="'${value}'"
+	fi
+        echo "- ${name}=${value}"
     done
 }
 
@@ -293,7 +298,9 @@ function lg3_qsub_envvar_append_software {
     names="JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS"
     for name in ${names}; do
         value=${!name}
-        QSUB_ENVVARS="${QSUB_ENVVARS},${name}=${value}"
+	if [[ -n "${value}" ]]; then
+            QSUB_ENVVARS="${QSUB_ENVVARS},${name}=${value}"
+	fi
     done
     echo "${QSUB_ENVVARS}"
 }
