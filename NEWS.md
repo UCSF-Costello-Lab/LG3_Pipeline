@@ -8,6 +8,11 @@
    the LG3 pipeline uses, e.g. `export MUTECT=/path/to/muTect-99.jar`.
    Note that this should only be used for troubleshooting and development.
 
+### BUG FIXES
+
+ * Internal assertions incorrectly required that the MUTECT JAR file should
+   be executable, but that is not true for all versions.
+
 
 ## Version 2020-05-26
 

@@ -264,6 +264,21 @@ function source_lg3_conf {
 
 
 
+function lg3_qsub_envvar_append_software {
+  assert_file_executable "$JAVA"
+  assert_file_executable "$PYTHON"
+  assert_file_executable "$RSCRIPT"
+  assert_file_executable "$SAMTOOLS"
+  assert_file_executable "$BWA"
+  assert_directory_exists "$PICARD_HOME"
+  assert_file_executable "$GATK"
+  assert_file_executable "$BEDTOOLS"
+  assert_file_exists "$MUTECT"
+  assert_directory_exists "$ANNOVAR_HOME"
+  assert_file_executable "$CUTADAPT"
+  echo "${QSUB_ENVVARS},JAVA=${JAVA},PYTHON=${PYTHON},RSCRIPT=${RSCRIPT},SAMTOOLS=${SAMTOOLS},BWA=${BWA},PICARD_HOME=${PICARD_HOME},GATK=${GATK},BEDTOOLS=${BEDTOOLS},MUTECT=${MUTECT},ANNOVAR_HOME=${ANNOVAR_HOME},CUTADAPT=${CUTADAPT}"
+}
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # SOFTWARE
@@ -307,7 +322,7 @@ assert_file_executable "$BEDTOOLS"
 
 # muTect
 MUTECT=${MUTECT:-"${LG3_HOME}/tools/muTect-1.0.27783.jar"}
-assert_file_executable "$MUTECT"
+assert_file_exists "$MUTECT"
 
 # AnnoVar
 ANNOVAR_HOME=${ANNOVAR_HOME:-${LG3_HOME}/AnnoVar}
