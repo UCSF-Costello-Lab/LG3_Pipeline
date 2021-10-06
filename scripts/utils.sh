@@ -248,6 +248,12 @@ function equal_dirs {
 # LG3 specific
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function source_lg3_conf {
+    ## Already sourced?
+    if [[ -n ${LG3_CONF_SOURCED} ]]; then
+	echo "All lg3.conf files have already been sourced. Skipping."
+	return 0;
+    fi
+	
     ## The default settings
     assert_file_exists "${LG3_HOME}/lg3.conf"
     # shellcheck disable=1090
@@ -260,6 +266,8 @@ function source_lg3_conf {
         source "lg3.conf"
         echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
+
+    LG3_CONF_SOURCED=true
 }
 
 
@@ -352,5 +360,5 @@ CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
 
 
 ## Validate software setup
-lg3_list_software
+## lg3_list_software
 lg3_assert_software
