@@ -127,9 +127,9 @@ $ ./_run_Pindel && ./_run_MutDet ## ~20 minutes & ~1.0 hour
 $ ./_run_PostMut                 ## ~5 minutes
 ```
 
-Optionally we can run exomeQualityPlots pipeline developped by Stephanie Hilz (UCSF).
+Optionally we can run the [exomeQualityPlots](https://github.com/SRHilz/exomeQualityPlots) pipeline developed by Stephanie Hilz (UCSF).
 The pipeline generates quality plots of exome libraries and quality stats for mutation calling.
-First we need to clone original exomeQualityPlots pipeline somewhere, e.g.:
+First we need to clone original exomeQualityPlots pipeline somewhere, e.g.
 ``` sh
 $ mkdir -p ~/pipelines/exomeQualityPlots 
 $ cd ~/pipelines/exomeQualityPlots 
@@ -144,8 +144,8 @@ $ ./_run_QC_1 && ./_run_QC_2
 $ ./_run_QC_3
 ```
 
-Another option is to run Costello-PSCN-Seq pipeline created by Henrik Bengtsson. The pipline implements Parent-specific copy number (PSCN) analysis on paired tumor-normal samples.
-First we need to clone Costello-PSCN-Seq pipeline somewhere, e.g.:
+Another option is to run [Costello-PSCN-Seq](https://github.com/HenrikBengtsson/Costello-PSCN-Seq) pipeline created by Henrik Bengtsson. The pipline implements Parent-specific copy number (PSCN) analysis on paired tumor-normal samples.
+First we need to clone Costello-PSCN-Seq pipeline somewhere, e.g.
 ``` sh
 $ mkdir -p ~/pipelines/Costello-PSCN-Seq
 $ cd ~/pipelines/Costello-PSCN-Seq
