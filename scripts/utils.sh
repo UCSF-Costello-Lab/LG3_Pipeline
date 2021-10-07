@@ -272,10 +272,13 @@ function source_lg3_conf {
 
 
 
+function lg3_software_envvars {
+    echo "JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS PINDEL PINDELVCF TG"
+}
+
 function lg3_list_software {
     echo "LG3 software dependencies used:"
-    names="JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS"
-    for name in ${names}; do
+    for name in $(lg3_software_envvars); do
         value=${!name}
 	if [[ -z "${value}" ]]; then
             value="<empty>"
@@ -299,12 +302,14 @@ function lg3_assert_software {
     assert_file_exists      "$MUTECT"
     assert_directory_exists "$PICARD_HOME"
     assert_file_executable  "$SAMTOOLS"
+    assert_file_executable  "${PINDEL}"
+    assert_file_executable  "${PINDEL2VCF}"
+    assert_file_executable  "${TG}"
 }
 
 function lg3_qsub_envvar_append_software {
     lg3_assert_software
-    names="JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS"
-    for name in ${names}; do
+    for name in $(lg3_software_envvars); do
         value=${!name}
 	if [[ -n "${value}" ]]; then
             QSUB_ENVVARS="${QSUB_ENVVARS},${name}=${value}"
@@ -358,6 +363,12 @@ ANNOVAR_HOME=${ANNOVAR_HOME:-${LG3_HOME}/AnnoVar}
 ### cutadapt 1.2.1
 CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
 
+### pindel 0.2.4t
+PINDEL=${PINDEL:-${LG3_HOME}/tools/pindel024t/pindel}
+PINDEL2VCF=${PINDEL2VCF:-${LG3_HOME}/tools/pindel024t/pindel2vcf}
+
+### TrimGalore 0.4.4
+TG=${TG:-${LG3_HOME}/tools/TrimGalore-0.4.4/trim_galore}
 
 ## Validate software setup
 ## lg3_list_software
