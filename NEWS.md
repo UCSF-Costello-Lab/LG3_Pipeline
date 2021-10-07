@@ -4,6 +4,8 @@
 
 ### NEW FEATURES
 
+ * Now `pindel_all.pbs` reports also on the `ANNOVAR_HOME` software.
+
  * Now all `runs_demo/run_*` scripts pass also environment variables
    specifying software tools to the submitted job scripts.  This makes it
    possible to override the default software tools.
@@ -14,8 +16,8 @@
 
 ### BUG FIXES
 
- * Internal assertions incorrectly required that the MUTECT JAR file should
-   be executable, but that is not true for all versions.
+ * Internal assertions incorrectly required that the GATK and the MUTECT JAR
+   files should be executable, but that is not required.
 
 
 ## Version 2020-05-26

@@ -298,7 +298,7 @@ function lg3_assert_software {
     assert_file_executable  "$BEDTOOLS"
     assert_file_executable  "$BWA"
     assert_file_executable  "$CUTADAPT"
-    assert_file_executable  "$GATK"
+    assert_file_exists      "$GATK"
     assert_file_exists      "$MUTECT"
     assert_directory_exists "$PICARD_HOME"
     assert_file_executable  "$SAMTOOLS"
