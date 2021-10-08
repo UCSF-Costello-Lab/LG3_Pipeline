@@ -1,6 +1,6 @@
 # LG3_Pipeline
 
-## Version 2020-05-26-9000 (develop version)
+## Version 2021-10-08
 
 ### NEW FEATURES
 
