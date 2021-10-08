@@ -3,7 +3,6 @@
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
-source_lg3_conf
 CLEAN=true
 
 add2fname() {

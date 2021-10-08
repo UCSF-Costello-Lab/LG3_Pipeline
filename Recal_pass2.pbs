@@ -43,9 +43,8 @@ echo "- ILIST=${ILIST:?}"
 assert_file_exists "${ILIST}"
 ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 
-module load CBC r/3.4.4
 echo -n "Checking R: "
-Rscript --version || error "Rscript executable is not available"
+"$RSCRIPT" --version || error "Rscript executable is not available"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")

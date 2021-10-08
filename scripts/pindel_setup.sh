@@ -38,7 +38,7 @@ fi
 ##
 #
 
-assert_python ""
+assert_python "$PYTHON"
 
 PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
 assert_file_exists "${PYTHON_PINDEL_SETUP}"
@@ -54,6 +54,6 @@ echo "- patIDs=${patIDs:?}"
 assert_patient_name "${patient_ID}"
 assert_file_exists "${patIDs}"
 
-python "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
+$PYTHON "${PYTHON_PINDEL_SETUP}" "${patient_ID}" "${proj}" "${patIDs}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

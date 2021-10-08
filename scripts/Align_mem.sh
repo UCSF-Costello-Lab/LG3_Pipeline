@@ -13,7 +13,7 @@ echo "Arguments: $*"
 CLEAN=true
 
 ### Configuration
-LG3_HOME=${LG3_HOME}
+LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
 LG3_DEBUG=${LG3_DEBUG:-true}
@@ -51,15 +51,11 @@ echo "- THOUSAND=${THOUSAND}"
 
 ## Software
 
-PYTHON=/usr/bin/python
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
 module load jdk/1.8.0 python/2.7.15 htslib/1.7 bwa/0.7.17 samtools/1.7
 
-JAVA=java
-BWA=bwa
-SAMTOOLS=samtools
 assert_file_executable "${GATK4}"
 PYTHON_REMOVEQC_GZ=${LG3_HOME}/scripts/removeQCgz.py
 
@@ -71,7 +67,7 @@ echo "- SAMTOOLS=${SAMTOOLS:?}"
 
 ## Assert existance of software
 assert_file_executable "${PYTHON}"
-assert_file_executable "$(command -v ${BWA})"
+assert_file_executable "${BWA}"
 assert_file_exists "${PYTHON_REMOVEQC_GZ}"
 
 ### Input

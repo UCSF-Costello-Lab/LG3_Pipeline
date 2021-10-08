@@ -28,7 +28,7 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
-assert_python ""
+assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
 ### Input
@@ -41,7 +41,7 @@ echo " - PROJECT=${PROJECT:?}"
 echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 
-python "${LG3_HOME}/scripts/combine_snvs.py" "${PATIENT}" "${PROJECT}" "${CONV}" "${PATIENT}.snvs" || error "combine_snvs.py failed"
+$PYTHON "${LG3_HOME}/scripts/combine_snvs.py" "${PATIENT}" "${PROJECT}" "${CONV}" "${PATIENT}.snvs" || error "combine_snvs.py failed"
 assert_file_exists "${PATIENT}.snvs"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

@@ -1,5 +1,43 @@
 # LG3_Pipeline
 
+## Version 2021-10-08
+
+### NEW FEATURES
+
+ * Now `pindel_all.pbs` reports also on the `ANNOVAR_HOME` software.
+
+ * Now all `runs_demo/run_*` scripts pass also environment variables
+   specifying software tools to the submitted job scripts.  This makes it
+   possible to override the default software tools.
+
+ * Now it's possible to override the _internal_ environment variables that
+   the LG3 pipeline uses, e.g. `export MUTECT=/path/to/muTect-99.jar`.
+   Note that this should only be used for troubleshooting and development.
+
+### BUG FIXES
+
+ * Internal assertions incorrectly required that the GATK and the MUTECT JAR
+   files should be executable, but that is not required.
+
+
+## Version 2020-05-26
+
+### NEW FEATURES
+
+ * `lg3 test validate` now compares the MD5 checksums of the content of the
+   trimmed FASTQ files, the BWA aligned BAM files and the corresponding BAM
+   index files. This requires that MD5 checksum files can be written.
+
+### SOFTWARE QUALITY
+
+ * The 'java', 'python' and 'Rscript' executables are now set in a central
+   location to guarantee that the same, expected versions are used everywhere.
+
+ * The AnnoVar, bedtools, cutadapt, BWA, GATK, MuTect, Picard, and Samtools
+   executables are now set in a central location to guarantee that the same,
+   expected versions are used everywhere.
+
+
 ## Version 2020-05-16
 
 ### NEW FEATURES

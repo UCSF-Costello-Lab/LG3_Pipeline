@@ -18,7 +18,7 @@ The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, 
 ```sh
 $ module load CBC lg3
 $ lg3 --version
-2020-05-16
+2021-10-08
 ```
 
 See `module avail` for alternative versions.
@@ -50,6 +50,7 @@ The remaining parts of the test setup can be either be created automatically usi
 ```sh
 $ export PATIENT=Patient157t10
 $ lg3 test setup
+Sourced: /path/to/LG3_Pipeline/lg3.conf
 *** Setup
 [OK] LG3_HOME: /path/to/LG3_Pipeline
 [OK] R packages: 'RColorBrewer'
@@ -127,9 +128,9 @@ $ ./_run_Pindel && ./_run_MutDet ## ~20 minutes & ~1.0 hour
 $ ./_run_PostMut                 ## ~5 minutes
 ```
 
-Optionally we can run exomeQualityPlots pipeline developped by Stephanie Hilz (UCSF).
+Optionally we can run the [exomeQualityPlots](https://github.com/SRHilz/exomeQualityPlots) pipeline developed by Stephanie Hilz (UCSF).
 The pipeline generates quality plots of exome libraries and quality stats for mutation calling.
-First we need to clone original exomeQualityPlots pipeline somewhere, e.g.:
+First we need to clone original exomeQualityPlots pipeline somewhere, e.g.
 ``` sh
 $ mkdir -p ~/pipelines/exomeQualityPlots 
 $ cd ~/pipelines/exomeQualityPlots 
@@ -144,8 +145,8 @@ $ ./_run_QC_1 && ./_run_QC_2
 $ ./_run_QC_3
 ```
 
-Another option is to run Costello-PSCN-Seq pipeline created by Henrik Bengtsson. The pipline implements Parent-specific copy number (PSCN) analysis on paired tumor-normal samples.
-First we need to clone Costello-PSCN-Seq pipeline somewhere, e.g.:
+Another option is to run [Costello-PSCN-Seq](https://github.com/HenrikBengtsson/Costello-PSCN-Seq) pipeline created by Henrik Bengtsson. The pipline implements Parent-specific copy number (PSCN) analysis on paired tumor-normal samples.
+First we need to clone Costello-PSCN-Seq pipeline somewhere, e.g.
 ``` sh
 $ mkdir -p ~/pipelines/Costello-PSCN-Seq
 $ cd ~/pipelines/Costello-PSCN-Seq
@@ -172,7 +173,8 @@ QSUB_OPTS="-l nodes=1:ppn=6 -l vmem=32gb" ./_run_Align_gz
 Throughout all steps, you can check the current status using the `lg3 status` command.  Here is what the output looks like when all steps are complete:
 ```sh
 $ export PATIENT=Patient157t10
-$ lg3 status $PATIENT
+$ lg3 status
+Sourced: /path/to/LG3_Pipeline/lg3.conf
 Checking output for project LG3
 Patient/samples table patient_ID_conversions.tsv
 BAM suffix bwa.realigned.rmDups.recal.insert_size_metrics
@@ -215,8 +217,7 @@ To validate that you get the expected results when running through the tests, ca
 ```
 $ export PATIENT=Patient157t10
 $ lg3 test validate $PATIENT
-
-lg3 test validate $PATIENT
+Sourced: /path/to/LG3_Pipeline/lg3.conf
 *** Configuration
 [OK] PROJECT=LG3
 [OK] PATIENT=Patient157-t10-underscore

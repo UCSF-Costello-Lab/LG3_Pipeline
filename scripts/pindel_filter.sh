@@ -35,9 +35,8 @@ fi
 ##
 #
 
-assert_python ""
+assert_python "$PYTHON"
 
-BEDTOOLS=/opt/BEDTools/BEDTools-2.16.2/bin/bedtools
 PYTHON_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.py
 assert_file_executable "${BEDTOOLS}"
 assert_file_exists "${PYTHON_PINDEL_FILTER}"
@@ -52,7 +51,7 @@ echo "- interval=${interval:?}"
 assert_file_exists "${datafile}"
 
 ### filter indels
-python "${PYTHON_PINDEL_FILTER}" "${datafile}"
+$PYTHON "${PYTHON_PINDEL_FILTER}" "${datafile}"
 assert_file_exists "${datafile}.filter"
 
 ### intersect with target sequence

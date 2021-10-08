@@ -188,7 +188,9 @@ function assert_patient_name {
 
 ## Usage: assert_pwd
 function assert_pwd {
-    [[ $# -ne 0 ]] && error "${FUNCNAME[0]}() must not be called with arguments: $#"
+    ## Need to disable this assertion to avoid triggering a false SC2119 ShellCheck warning
+    ## [[ $# -ne 0 ]] && error "${FUNCNAME[0]}() must not be called with arguments: $#"
+    
     ## Don't allow running the pipeline from within LG3_HOME
     equal_dirs "${PWD}" "${LG3_HOME}" && error "The LG3 Pipeline must not be run from the folder where it is installed (LG3_HOME): ${PWD}"
 }
@@ -203,9 +205,9 @@ function assert_python {
     bin=$1
     
     if [[ -n "$bin" ]]; then
-	assert_file_executable "$bin"
-    else	
-	bin=$(command -v python) || error "Python executable not found on PATH: ${PATH}"
+        assert_file_executable "$bin"
+    else
+        bin=$(command -v python) || error "Python executable not found on PATH: ${PATH}"
     fi
     
     ## Assert correct version
@@ -246,6 +248,12 @@ function equal_dirs {
 # LG3 specific
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function source_lg3_conf {
+    ## Already sourced?
+    if [[ -n ${LG3_CONF_SOURCED} ]]; then
+	echo "All lg3.conf files have already been sourced. Skipping."
+	return 0;
+    fi
+	
     ## The default settings
     assert_file_exists "${LG3_HOME}/lg3.conf"
     # shellcheck disable=1090
@@ -258,4 +266,110 @@ function source_lg3_conf {
         source "lg3.conf"
         echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
+
+    LG3_CONF_SOURCED=true
 }
+
+
+
+function lg3_software_envvars {
+    echo "JAVA PYTHON RSCRIPT ANNOVAR_HOME BEDTOOLS BWA CUTADAPT GATK MUTECT PICARD_HOME SAMTOOLS PINDEL PINDEL2VCF TG"
+}
+
+function lg3_list_software {
+    echo "LG3 software dependencies used:"
+    for name in $(lg3_software_envvars); do
+        value=${!name}
+	if [[ -z "${value}" ]]; then
+            value="<empty>"
+	else
+            value="'${value}'"
+	fi
+        echo "- ${name}=${value}"
+    done
+}
+
+function lg3_assert_software {
+    assert_file_executable  "$JAVA"
+    assert_file_executable  "$PYTHON"
+    assert_python           "$PYTHON"
+    assert_file_executable  "$RSCRIPT"
+    assert_directory_exists "$ANNOVAR_HOME"
+    assert_file_executable  "$BEDTOOLS"
+    assert_file_executable  "$BWA"
+    assert_file_executable  "$CUTADAPT"
+    assert_file_exists      "$GATK"
+    assert_file_exists      "$MUTECT"
+    assert_directory_exists "$PICARD_HOME"
+    assert_file_executable  "$SAMTOOLS"
+    assert_file_executable  "${PINDEL}"
+    assert_file_executable  "${PINDEL2VCF}"
+    assert_file_executable  "${TG}"
+}
+
+function lg3_qsub_envvar_append_software {
+    lg3_assert_software
+    for name in $(lg3_software_envvars); do
+        value=${!name}
+	if [[ -n "${value}" ]]; then
+            QSUB_ENVVARS="${QSUB_ENVVARS},${name}=${value}"
+	fi
+    done
+    echo "${QSUB_ENVVARS}"
+}
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# MAIN
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Load any custom LG3 settings
+source_lg3_conf
+
+## Setup software paths, if not already done
+
+### Java version "1.6.0_27"
+JAVA=${JAVA:-${LG3_HOME}/tools/java/jre1.6.0_27/bin/java}
+
+### Python 2.6.6
+PYTHON=${PYTHON:-/usr/bin/python}
+unset PYTHONPATH  ### ADHOC: In case it is set by user. /HB 2018-09-07
+
+### R scripting front-end version 3.2.0 (2015-04-16)
+RSCRIPT=${RSCRIPT:-/opt/R/R-latest/bin/Rscript}
+### Workaround: 'Rscript' called somewhere in the Recal script(s)
+PATH="$(dirname "$RSCRIPT"):$PATH"
+
+### samtools 0.1.18 (r982:295
+SAMTOOLS=${SAMTOOLS:-${LG3_HOME}/tools/samtools-0.1.18/samtools}
+
+### bwa 0.5.9-r26-dev
+BWA=${BWA:-${LG3_HOME}/tools/bwa-0.5.10/bwa}
+
+### Picard
+PICARD_HOME=${PICARD_HOME:-${LG3_HOME}/tools/picard-tools-1.64}
+
+### GATK 1.6-5-g557da77
+GATK=${GATK:-${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar}
+
+### bedtools 2.16.2
+BEDTOOLS=${BEDTOOLS:-"/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"}
+
+### muTect
+MUTECT=${MUTECT:-"${LG3_HOME}/tools/muTect-1.0.27783.jar"}
+
+### AnnoVar
+ANNOVAR_HOME=${ANNOVAR_HOME:-${LG3_HOME}/AnnoVar}
+
+### cutadapt 1.2.1
+CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
+
+### pindel 0.2.4t
+PINDEL=${PINDEL:-${LG3_HOME}/tools/pindel024t/pindel}
+PINDEL2VCF=${PINDEL2VCF:-${LG3_HOME}/tools/pindel024t/pindel2vcf}
+
+### TrimGalore 0.4.4
+TG=${TG:-${LG3_HOME}/tools/TrimGalore-0.4.4/trim_galore}
+
+## Validate software setup
+## lg3_list_software
+lg3_assert_software

@@ -1,0 +1,42 @@
+on: [push, pull_request]
+
+name: checks
+
+jobs:
+  checks:
+    if: "! contains(github.event.head_commit.message, '[ci skip]')"
+    
+    runs-on: ubuntu-20.04
+    
+    name: checks
+
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        config:
+          - {test: check_use_utils_instead }
+          - {test: check_hardcoded }
+          - {test: check_r }
+          - {test: check_pbs }
+          - {test: check_sh }
+          - {test: check_demo }
+          - {test: check_tests }
+          - {test: check_conf }
+
+    steps:
+    - name: Checkout git repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y shellcheck
+        shellcheck --version
+        curl -L -O https://github.com/koalaman/shellcheck/releases/download/v0.7.2/shellcheck-v0.7.2.linux.x86_64.tar.xz
+        tar Jxf shellcheck-v0.7.2.linux.x86_64.tar.xz
+        mv shellcheck-v0.7.2/shellcheck .
+        PATH=".:$PATH" shellcheck --version
+
+    - name: ${{ matrix.config.test }}
+      run: |
+        PATH=".:$PATH" make ${{ matrix.config.test }}
