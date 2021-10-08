@@ -2,7 +2,9 @@
 
 ## Version 2021-10-08-9000 (devel version)
 
- * ...
+### BUG FIXES
+
+ * lg3-test used a hardcoded path for the 'Rscript' executable.
 
 
 ## Version 2021-10-08

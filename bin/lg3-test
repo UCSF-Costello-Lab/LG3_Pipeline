@@ -390,10 +390,6 @@ if [ "$action" == "setup" ]; then
         report_note "Local configuration detected: ./lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
 
-    
-    RSCRIPT=/opt/R/R-latest/bin/Rscript   ## the version of R used by the pipeline!
-    assert_file_executable "${RSCRIPT}"
-    
     if "${RSCRIPT}" -e 'quit(status = require("RColorBrewer"))' &> /dev/null; then
 	## Create R user library folder
         "R_LIBS_USER=~/R/%p-library/%v ${RSCRIPT}" -e "dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)"
