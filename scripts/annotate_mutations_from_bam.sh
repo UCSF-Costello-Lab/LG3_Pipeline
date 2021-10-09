@@ -37,6 +37,8 @@ echo " - PATIENT=${PATIENT:?}"
 echo " - PROJECT=${PROJECT:?}"
 assert_file_exists "${CONV}"
 
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 

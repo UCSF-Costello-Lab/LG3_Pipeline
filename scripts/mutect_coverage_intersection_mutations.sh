@@ -39,7 +39,8 @@ echo " - PROJECT=${PROJECT:?}"
 echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 
-### Software
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 R_MUT_ANN_INTERSECTED_COV=${LG3_HOME}/scripts/mutations_annotate_intersected_coverage.R

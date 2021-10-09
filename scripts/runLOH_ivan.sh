@@ -48,7 +48,8 @@ echo " - CONV=${CONV:?}"
 assert_file_exists "${CONV}"
 
 
-### Software
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 PYTHON_RUNMAF=${LG3_HOME}/scripts/runMAF.py

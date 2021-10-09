@@ -38,6 +38,8 @@ fi
 ##
 #
 
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
 assert_python "$PYTHON"
 
 PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py

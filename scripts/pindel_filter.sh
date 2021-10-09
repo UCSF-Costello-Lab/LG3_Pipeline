@@ -35,6 +35,8 @@ fi
 ##
 #
 
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
 assert_python "$PYTHON"
 
 PYTHON_PINDEL_FILTER=${LG3_HOME}/scripts/pindel_filter.py

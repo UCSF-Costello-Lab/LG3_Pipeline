@@ -28,6 +28,8 @@ if [[ $LG3_DEBUG ]]; then
 fi
 
 
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 
