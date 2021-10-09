@@ -57,7 +57,8 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- EMAIL=${EMAIL}"
 
-QSUB_OPTS="${QSUB_OPTS} -d ${PSCN_HOME:?}"
+## FIXME: This will not work on systems where qsub does not support CLI option -d <path>
+QSUB_OPTS="${QSUB_OPTS} -d ${PSCN_HOME:?}";
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then

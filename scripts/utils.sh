@@ -319,6 +319,14 @@ function lg3_qsub_envvar_append_software {
 }
 
 
+## Does 'qsub' on the current system support CLI option -d <path>?
+qsub_can_set_pwd=false
+if [[ ${CLUSTER} == "tipcc" ]]; then
+    # shellcheck disable=2034
+    qsub_can_set_pwd=true
+fi
+
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # MAIN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
