@@ -15,6 +15,9 @@
 
 ### BUG FIXES
 
+ * Python script 'scripts/combine_snvs.py' used a hard-coded path
+   to the 'Rscript' executable.
+ 
  * lg3-test used a hardcoded path for the 'Rscript' executable.
 
 
