@@ -17,7 +17,10 @@
 
  * Python script 'scripts/combine_snvs.py' used a hard-coded path
    to the 'Rscript' executable.
- 
+
+ * One Python script and one Rscript used a hard-coded path to
+   bedtools executables.
+
  * lg3-test used a hardcoded path for the 'Rscript' executable.
 
 

@@ -45,7 +45,9 @@ write.table(covered.in.all, file = paste0(tmp.file.header, "coveredinall.bed"), 
 write.table(dat.overlaps[which(dat.overlaps$algorithm == "MuTect"), c(2, 3, 3)], file = paste0(tmp.file.header, "muts.bed"), col.names = FALSE, row.names = FALSE, quote = FALSE, sep = "\t")
 
 ## run bedtools intersect
-system(paste0("/opt/BEDTools/BEDTools-2.16.2/bin/intersectBed -wa -a ", tmp.file.header, "muts.bed -b ", tmp.file.header, "coveredinall.bed > ", tmp.file.header, "intersect.bed"), wait = TRUE)
+bin <- file.path(dirname(Sys.getenv("BEDTOOLS")), "intersectBed")
+stopifnot(file.exists(bin))
+system(paste0(bin, " -wa -a ", tmp.file.header, "muts.bed -b ", tmp.file.header, "coveredinall.bed > ", tmp.file.header, "intersect.bed"), wait = TRUE)
 bedfile2 <- paste0(tmp.file.header, "intersect.bed")
 assertFile(bedfile2)
 intersect.bed <- read.table(bedfile2, header = FALSE, as.is = TRUE)
