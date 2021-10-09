@@ -7,6 +7,9 @@
  * Now the internal `LG3_SCRATCH_ROOT` path is agile to type of
    scheduler, i.e. Torque/PBS or Slurm.
 
+ * Adding `-l walltime=hh:mm:ss` and `-l mem=<size>gb` declarations
+   to PBS scripts to handle schedulers with hard resource limits.
+
  * Now `qsub` calls are agile to whether the underlying scheduler
    supports command-line option `-d <path>` or not.
 
