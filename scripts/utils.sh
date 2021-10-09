@@ -331,7 +331,7 @@ fi
 
 
 if [[ -n "${PBS_JOBID}" ]]; then
-    LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+    LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 elif [[ -n "${SLURM_JOB_ID}" ]]; then
     LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${SLURM_JOB_ID}}
 elif [[ -n "${TMPDIR}" ]]; then
