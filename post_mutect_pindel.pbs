@@ -80,8 +80,23 @@ SH_MUT_OVERLAPS=${LG3_HOME}/scripts/mutation_overlaps.sh ## D
 SH_MUTECT_COV_INTER_MUT=${LG3_HOME}/scripts/mutect_coverage_intersection_mutations.sh ## E
 SH_RUNLOH=${LG3_HOME}/scripts/runLOH_ivan.sh ## F
 
-assert_file_exists "${R_MUTDET_FILTER}"
-assert_file_exists "${R_COMBINE_SNVS_PINDEL}"
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
+echo "- RSCRIPT=${RSCRIPT:?}"
+echo "- R_MUTDET_FILTER=${R_MUTDET_FILTER:?}"
+echo "- R_COMBINE_SNVS_PINDEL=${R_COMBINE_SNVS_PINDEL:?}"
+echo "- SH_COMBINE_SNVS=${SH_COMBINE_SNVS:?}"
+echo "- SH_ANN_MUT_FROM_BAM=${SH_ANN_MUT_FROM_BAM:?}"
+echo "- SH_LIB2PAT=${SH_LIB2PAT:?}"
+echo "- SH_MUT_OVERLAPS=${SH_MUT_OVERLAPS:?}"
+echo "- SH_MUTECT_COV_INTER_MUT=${SH_MUTECT_COV_INTER_MUT:?}"
+echo "- SH_RUNLOH=${SH_RUNLOH:?}"
+
+assert_python          "${PYTHON}"
+unset PYTHONPATH  ## ADHOC: In case it is set by user
+assert_file_executable "${RSCRIPT}"
+assert_file_exists     "${R_MUTDET_FILTER}"
+assert_file_exists     "${R_COMBINE_SNVS_PINDEL}"
 assert_file_executable "${SH_COMBINE_SNVS}"
 assert_file_executable "${SH_ANN_MUT_FROM_BAM}"
 assert_file_executable "${SH_LIB2PAT}"
