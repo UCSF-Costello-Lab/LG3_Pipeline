@@ -2,6 +2,14 @@
 
 ## Version 2021-10-08-9000 (devel version)
 
+### NEW FEATURES
+
+ * Now the internal `LG3_SCRATCH_ROOT` path is agile to type of
+   scheduler, i.e. Torque/PBS or Slurm.
+
+ * Now `qsub` calls are agile to whether the underlying scheduler
+   supports command-line option `-d <path>` or not.
+
 ### BUG FIXES
 
  * lg3-test used a hardcoded path for the 'Rscript' executable.
