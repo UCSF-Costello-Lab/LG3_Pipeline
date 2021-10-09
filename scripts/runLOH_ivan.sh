@@ -70,7 +70,7 @@ OK
 
 OUTDIR=${MAF}/${PATIENT}_plots
 make_dir "${OUTDIR}"
-"${RSCRIPT}" "${R_MAFPLOT}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${R_MAFPLOT} failed"
+"${RSCRIPT}" --vanilla "${R_MAFPLOT}" "${PATIENT}" "${PROJECT}" "${CONV}" || error "${R_MAFPLOT} failed"
 OK
 
 echo "Finished"

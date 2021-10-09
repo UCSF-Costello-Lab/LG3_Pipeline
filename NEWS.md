@@ -15,6 +15,10 @@
 
 ### BUG FIXES
 
+ * User's ~/.Rprofile could wreak havoc for some R scripts, e.g. by
+   outputting messages.  Now all Rscript calls use '--vanilla' to make
+   sure to run in an vanilla R session without user-specific settings.
+
  * Python script 'scripts/combine_snvs.py' used a hard-coded path
    to the 'Rscript' executable.
 
