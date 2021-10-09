@@ -50,6 +50,8 @@ check_hardcoded:
 	@ ! grep -qE "/home/jocostello/shared/LG3_Pipeline" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} bin/lg3*
 	@echo "  - Assert no /home/jocostello/.. paths"
 	@ ! grep -qE "[^a-zA-Z]/home/jocostello/" *.pbs runs_demo/_run_* scripts/*.{py,R,sh} FilterMutations/*.{py,sh} bin/lg3*
+	@echo "  - Assert no /opt/.. paths"
+	@ ! grep -qE "/opt/" *.pbs runs_demo/_run_* scripts/*.{py,R}
 
 check_use_utils_instead:
 	@echo "* Coding style"
