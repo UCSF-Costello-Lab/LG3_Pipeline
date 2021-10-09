@@ -57,6 +57,17 @@ echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- EMAIL=${EMAIL}"
 
+QSUB_OPTS="${QSUB_OPTS} -d ${PSCN_HOME:?}"
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+  QSUB_OPTS="${QSUB_OPTS} -m ae"
+fi
+
+echo "Qsub extras:"
+echo "- QSUB_OPTS=${QSUB_OPTS}"
+
 ## Assert that the conversion file exists
 assert_file_exists "${CONV}"
 CONV=$(readlink -e "${CONV}")
@@ -85,6 +96,7 @@ ln -sf "${PSCBS_OUT}" pscbsData || error "Failed to create a link to ${PSCBS_OUT
 
 ln -sf "${PSCN_OUT}" reports || error "Failed to create a link to ${PSCN_OUT}"
 
-qsub -d "${PSCN_HOME}" -M "${EMAIL}" -m ae "${LG3_HOME}/PSCN.submit_all.pbs"
+# shellcheck disable=SC2086
+qsub ${QSUB_OPTS} "${LG3_HOME}/PSCN.submit_all.pbs"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
