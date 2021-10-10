@@ -13,6 +13,13 @@
  * `lg3 test setup` no longer create symbolic links to run scripts,
    because we can now use `lg3 run <step>` instead.
 
+### BUG FIXES
+
+ * User's ~/.Rprofile could wreak havoc during `lg3 run Recal` when
+   calling Picard's CollectMultipleMetrics.jar, which calls `Rscript`.
+   We're now using `R_PROFILE_USER=NULL` when calling this substep
+   to emulate `Rscript --no-init-file`.
+
 
 ## Version 2021-10-09
 
