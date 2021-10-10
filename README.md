@@ -54,24 +54,12 @@ Sourced: /path/to/LG3_Pipeline/lg3.conf
 *** Setup
 [OK] LG3_HOME: /path/to/LG3_Pipeline
 [OK] R packages: 'RColorBrewer'
-[OK] Run scripts: _run_Align_gz
-[OK] Run scripts: _run_Merge
-[OK] Run scripts: _run_Merge_QC
-[OK] Run scripts: _run_MutDet
-[OK] Run scripts: _run_Pindel
-[OK] Run scripts: _run_PostMut
-[OK] Run scripts: _run_QC_1
-[OK] Run scripts: _run_QC_2
-[OK] Run scripts: _run_QC_3
-[OK] Run scripts: _run_Recal
-[OK] Run scripts: _run_Recal_pass2
-[OK] Run scripts: _run_Trim
 [OK] EMAIL: alice@example.org
 [OK] PROJECT: LG3
 [OK] PATIENT: Patient157t10 (required for 'lg3 test validate')
 [OK] CONV (patient TSV file): patient_ID_conversions.tsv
-[OK]   => SAMPLES: Z00599t10 Z00600t10 Z00601t10  (required by '_run_Recal')
-[OK]   => NORMAL: 'Z00599t10' (required by '_run_Recal')
+[OK]   => SAMPLES: Z00599t10 Z00600t10 Z00601t10  (required by 'Recal' step)
+[OK]   => NORMAL: 'Z00599t10' (required by 'Recal' step)
 [OK] Raw data folder: rawdata
 [OK] LG3_OUTPUT_ROOT: output
 ```
@@ -80,24 +68,6 @@ From the above, we should have a directory containing the following files and fo
 ```sh
 $ tree
 .
-|-- _run_Align_gz -> ~/lg3-demo/runs_demo/_run_Align_gz
-|-- _run_Align_mem -> ~/lg3-demo/runs_demo/_run_Align_mem
-|-- _run_Align_no_trim -> ~/lg3-demo/runs_demo/_run_Align_no_trim
-|-- _run_Germline -> ~/lg3-demo/runs_demo/_run_Germline
-|-- _run_Merge -> ~/lg3-demo/runs_demo/_run_Merge
-|-- _run_Merge_QC -> ~/lg3-demo/runs_demo/_run_Merge_QC
-|-- _run_MutDet -> ~/lg3-demo/runs_demo/_run_MutDet
-|-- _run_Mutect2 -> ~/lg3-demo/runs_demo/_run_Mutect2
-|-- _run_PSCN -> ~/lg3-demo/runs_demo/_run_PSCN
-|-- _run_Pindel -> ~/lg3-demo/runs_demo/_run_Pindel
-|-- _run_PostMut -> ~/lg3-demo/runs_demo/_run_PostMut
-|-- _run_QC_1 -> ~/lg3-demo/runs_demo/_run_QC_1
-|-- _run_QC_2 -> ~/lg3-demo/runs_demo/_run_QC_2
-|-- _run_QC_3 -> ~/lg3-demo/runs_demo/_run_QC_3
-|-- _run_Recal -> ~/lg3-demo/runs_demo/_run_Recal
-|-- _run_Recal_pass2 -> ~/lg3-demo/runs_demo/_run_Recal_pass2
-|-- _run_Recal_step -> ~/lg3-demo/runs_demo/_run_Recal_step
-|-- _run_Trim -> ~/lg3-demo/runs_demo/_run_Trim
 |-- output
 |-- patient_ID_conversions.tsv -> ~/lg3-demo/runs_demo/patient_ID_conversions.tsv
 `-- rawdata -> /costellolab/data1/shared/LG3_Pipeline/example_data/rawdata
@@ -121,11 +91,11 @@ Now, we are ready to launch the pipeline (step by step):
 $ cd ~/lg3-demo
 $ module load CBI lg3
 $ export PATIENT=Patient157t10
-$ ./_run_Trim                    ## ~5 minutes
-$ ./_run_Align_gz                ## ~5-10 minutes
-$ ./_run_Recal                   ## ~2.5 hours
-$ ./_run_Pindel && ./_run_MutDet ## ~20 minutes & ~1.0 hour
-$ ./_run_PostMut                 ## ~5 minutes
+$ lg3 run Trim                      ## ~5 minutes
+$ lg3 run Align_gz                  ## ~5-10 minutes
+$ lg3 run Recal                     ## ~2.5 hours
+$ lg3 run Pindel && lg3 run MutDet  ## ~20 minutes & ~1.0 hour
+$ lg3 run PostMut                   ## ~5 minutes
 ```
 
 Optionally we can run the [exomeQualityPlots](https://github.com/SRHilz/exomeQualityPlots) pipeline developed by Stephanie Hilz (UCSF).
@@ -141,8 +111,8 @@ $ ln -s ~/pipelines/exomeQualityPlots exomeQualityPlots
 
 Now we are ready to roll:
 ``` sh
-$ ./_run_QC_1 && ./_run_QC_2
-$ ./_run_QC_3
+$ lg3 run QC_1 && lg3 run QC_2
+$ lg3 run QC_3
 ```
 
 Another option is to run [Costello-PSCN-Seq](https://github.com/HenrikBengtsson/Costello-PSCN-Seq) pipeline created by Henrik Bengtsson. The pipline implements Parent-specific copy number (PSCN) analysis on paired tumor-normal samples.
@@ -157,14 +127,14 @@ $ ln -s ~/pipelines/Costello-PSCN-Seq Costello-PSCN-Seq
 
 Now we are ready to run:
 ``` sh
-$ ./_run_PSCN
+$ lg3 run PSCN
 ```
 
-_Note_, all steps should be ran sequentially, except `_run_Pindel` and `_run_MutDet`, which can be ran in parallel (as soon as `_run_Recal` has finished).
+_Note_, all steps should be ran sequentially, except steps `Pindel` and `MutDet`, which can be run in parallel (as soon as the `Recal` step has finished).
 
 _Tip:_ Each step of the pipeline is submitted to the Torque/PBS scheduler requesting a default number of cores (`nodes=1:ppn=...`) and amount of memory (`vmem=...`).  For now, you need to follow the source code to see what these defaults are.  You can override the defaults via environment variable `QSUB_OPTS`, e.g.
 ```sh
-QSUB_OPTS="-l nodes=1:ppn=6 -l vmem=32gb" ./_run_Align_gz
+QSUB_OPTS="-l nodes=1:ppn=6 -l vmem=32gb" lg3 run Align_gz
 ```
 
 

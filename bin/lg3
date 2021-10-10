@@ -11,6 +11,8 @@
 ###  lg3 --help
 ###  lg3 --version
 ###  lg3 --news
+###  lg3 run Trim Patient157t10
+###  lg3 run --help
 ###  lg3 status --help
 ###  lg3 status --all Patient157t10
 ###  lg3 cleanup --help

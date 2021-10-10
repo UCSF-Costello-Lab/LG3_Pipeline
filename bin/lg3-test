@@ -402,22 +402,6 @@ if [ "$action" == "setup" ]; then
         report_ok "R packages: 'RColorBrewer'"
     fi
 
-    path=${LG3_HOME}/runs_demo
-    targets=$(ls -1 "${path}"/_run_* 2> /dev/null)
-    if [ -z "${targets}" ]; then
-        report_error "Run scripts: ${path}/_run_* (no such files)"
-    else
-        for target in ${targets}; do
-        file=$(basename "${target}")
-            ln -fs "${target}" .
-            if [ -f "${file}" ]; then
-                report_ok "Run scripts: ${file}"
-            else
-                report_error "Run scripts: ${file} (failed to link to '${target}')"
-            fi
-        done
-    fi
-    
     if [[ -n "${EMAIL}" ]]; then
         report_ok "EMAIL: ${EMAIL}"
     else
@@ -448,9 +432,9 @@ if [ "$action" == "setup" ]; then
 	grep -qw "${PATIENT}" "${CONV}" || report_error "CONV: No entry with 'patient_ID' of value '${PATIENT}'"
     fi
     SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f 1 | tr '\n' ' ')}
-    report_ok "  => SAMPLES: ${SAMPLES} (required by '_run_Recal')"
+    report_ok "  => SAMPLES: ${SAMPLES} (required by 'Recal' step)"
     NORMAL=${NORMAL:-$(grep -w "${PATIENT}" "${CONV}" | grep -w "Normal" | cut -f 1)}
-    report_ok "  => NORMAL: '${NORMAL}' (required by '_run_Recal')"
+    report_ok "  => NORMAL: '${NORMAL}' (required by 'Recal' step)"
     dir=rawdata
     target=${LG3_TEST_TRUTH}/${dir}
     ln -fs "${target}" .

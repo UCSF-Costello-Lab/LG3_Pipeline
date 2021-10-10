@@ -4,8 +4,14 @@
 
 ### SIGNFICANT CHANGES
 
+ * Add `lg3 run <step>` command for launching the different LG3
+   steps, e.g. `lg3 run Trim` and `lg3 run Align_gz`.
+
  * All software dependencies are now obtained from the CBI software
    stack available via `module load CBI`.
+
+ * `lg3 test setup` no longer create symbolic links to run scripts,
+   because we can now use `lg3 run <step>` instead.
 
 
 ## Version 2021-10-09
