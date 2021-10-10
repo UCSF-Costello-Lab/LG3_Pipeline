@@ -344,53 +344,12 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # MAIN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Load any custom LG3 settings
+## Load any default lg3.conf (which sets up software)
+## and any custom lg3.conf
 source_lg3_conf
 
-## Setup software paths, if not already done
-
-### Java version "1.6.0_27"
-JAVA=${JAVA:-${LG3_HOME}/tools/java/jre1.6.0_27/bin/java}
-
-### Python 2.6.6
-PYTHON=${PYTHON:-/usr/bin/python}
+## FIXME: Can we remove this?
 unset PYTHONPATH  ### ADHOC: In case it is set by user. /HB 2018-09-07
-
-### R scripting front-end version 3.2.0 (2015-04-16)
-RSCRIPT=${RSCRIPT:-/opt/R/R-latest/bin/Rscript}
-### Workaround: 'Rscript' called somewhere in the Recal script(s)
-PATH="$(dirname "$RSCRIPT"):$PATH"
-
-### samtools 0.1.18 (r982:295
-SAMTOOLS=${SAMTOOLS:-${LG3_HOME}/tools/samtools-0.1.18/samtools}
-
-### bwa 0.5.9-r26-dev
-BWA=${BWA:-${LG3_HOME}/tools/bwa-0.5.10/bwa}
-
-### Picard
-PICARD_HOME=${PICARD_HOME:-${LG3_HOME}/tools/picard-tools-1.64}
-
-### GATK 1.6-5-g557da77
-GATK=${GATK:-${LG3_HOME}/tools/GenomeAnalysisTK-1.6-5-g557da77/GenomeAnalysisTK.jar}
-
-### bedtools 2.16.2
-BEDTOOLS=${BEDTOOLS:-"/opt/BEDTools/BEDTools-2.16.2/bin/bedtools"}
-
-### muTect
-MUTECT=${MUTECT:-"${LG3_HOME}/tools/muTect-1.0.27783.jar"}
-
-### AnnoVar
-ANNOVAR_HOME=${ANNOVAR_HOME:-${LG3_HOME}/AnnoVar}
-
-### cutadapt 1.2.1
-CUTADAPT=${CUTADAPT:-/opt/Python/Python-2.7.3/bin/cutadapt}
-
-### pindel 0.2.4t
-PINDEL=${PINDEL:-${LG3_HOME}/tools/pindel024t/pindel}
-PINDEL2VCF=${PINDEL2VCF:-${LG3_HOME}/tools/pindel024t/pindel2vcf}
-
-### TrimGalore 0.4.4
-TG=${TG:-${LG3_HOME}/tools/TrimGalore-0.4.4/trim_galore}
 
 ## Validate software setup
 ## lg3_list_software

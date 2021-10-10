@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-### Run An LG3 Pipeline Step
+### Run an LG3 Pipeline Step
 ###
 ### Usage:
 ###  lg3 run [options] <step> <patient> <patient2> ...
