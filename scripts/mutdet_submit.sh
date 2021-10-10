@@ -15,7 +15,7 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
-#LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+#LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -33,7 +33,9 @@ fi
 
 QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_INPUT_ROOT=${LG3_INPUT_ROOT},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_ENVVARS=$(lg3_qsub_envvar_append_software)
-QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}"
+if $qsub_can_set_pwd; then
+  QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}";
+fi
 
 ## Override the qsub email address?
 if [[ -n ${EMAIL} ]]; then

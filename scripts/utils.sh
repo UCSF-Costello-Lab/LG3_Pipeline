@@ -320,6 +320,28 @@ function lg3_qsub_envvar_append_software {
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Job scheduler specifics
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Does 'qsub' on the current system support CLI option -d <path>?
+qsub_can_set_pwd=false
+if [[ ${CLUSTER} == "tipcc" ]]; then
+    # shellcheck disable=2034
+    qsub_can_set_pwd=true
+fi
+
+
+if [[ -n "${PBS_JOBID}" ]]; then
+    LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+elif [[ -n "${SLURM_JOB_ID}" ]]; then
+    LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${SLURM_JOB_ID}}
+elif [[ -n "${TMPDIR}" ]]; then
+    LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-${TMPDIR}}
+else
+    error "Cannot set LG3_SCRATCH_ROOT"
+fi
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # MAIN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Load any custom LG3 settings

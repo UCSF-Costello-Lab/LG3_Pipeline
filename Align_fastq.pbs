@@ -4,6 +4,8 @@
 #PBS -e _Align_${SAMPLE}.err
 #PBS -o _Align_${SAMPLE}.out
 #PBS -l nodes=1:ppn=12,vmem=64gb
+#PBS -l walltime=00:30:00
+#PBS -l mem=64gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -21,7 +23,7 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:-LG3}
 EMAIL=${EMAIL:?}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
 

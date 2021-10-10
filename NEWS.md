@@ -1,5 +1,38 @@
 # LG3_Pipeline
 
+## Version 2021-10-09
+
+### SIGNFICANT CHANGES
+
+ * This is the first release that we managed to run on both TIPCC
+   and C4.
+
+### NEW FEATURES
+
+ * Now the internal `LG3_SCRATCH_ROOT` path is agile to type of
+   scheduler, i.e. Torque/PBS or Slurm.
+
+ * Adding `-l walltime=hh:mm:ss` and `-l mem=<size>gb` declarations
+   to PBS scripts to handle schedulers with hard resource limits.
+
+ * Now `qsub` calls are agile to whether the underlying scheduler
+   supports command-line option `-d <path>` or not.
+
+### BUG FIXES
+
+ * User's ~/.Rprofile could wreak havoc for some R scripts, e.g. by
+   outputting messages.  Now all Rscript calls use '--vanilla' to make
+   sure to run in an vanilla R session without user-specific settings.
+
+ * Python script 'scripts/combine_snvs.py' used a hard-coded path
+   to the 'Rscript' executable.
+
+ * One Python script and one Rscript used a hard-coded path to
+   bedtools executables.
+
+ * lg3-test used a hardcoded path for the 'Rscript' executable.
+
+
 ## Version 2021-10-08
 
 ### NEW FEATURES

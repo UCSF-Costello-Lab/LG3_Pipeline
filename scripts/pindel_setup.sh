@@ -15,7 +15,7 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 PROJECT=${PROJECT:?}
-LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:-/scratch/${USER:?}/${PBS_JOBID}}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 
 ### Debug
@@ -38,6 +38,8 @@ fi
 ##
 #
 
+echo "Software:"
+echo "- PYTHON=${PYTHON:?}"
 assert_python "$PYTHON"
 
 PYTHON_PINDEL_SETUP=${LG3_HOME}/scripts/pindel_setup.py
