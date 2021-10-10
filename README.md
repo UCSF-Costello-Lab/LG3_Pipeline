@@ -2,7 +2,7 @@
 
 # LG3_Pipeline
 
-_Warning: Because of hardcoded paths and software dependencies, this software currently only runs on the UCSF [TIPCC] compute cluster.  It is our long-term goal to make it run anywhere._
+_Warning: Because of hardcoded paths to annotation data files, and software dependencies on the [CBI] software stack, this software tool runs only on the UCSF [TIPCC] and [C4] compute clusters.  It is our long-term goal to make it run anywhere._
 
 
 ## What's new?
@@ -13,12 +13,12 @@ See [NEWS](NEWS.md) for the changlog.
 
 ## Instructions
 
-The LG3 Pipeline is pre-installed on the [TIPCC] cluster.  To get access to it, load the following module:
+The LG3 Pipeline is pre-installed on the [TIPCC] and the [C4] clusters.  To get access to it, load the following module:
 
 ```sh
-$ module load CBC lg3
+$ module load CBI lg3
 $ lg3 --version
-2021-10-08
+2021-10-09
 ```
 
 See `module avail` for alternative versions.
@@ -119,7 +119,7 @@ Now, we are ready to launch the pipeline (step by step):
 
 ``` sh
 $ cd ~/lg3-demo
-$ module load CBC lg3
+$ module load CBI lg3
 $ export PATIENT=Patient157t10
 $ ./_run_Trim                    ## ~5 minutes
 $ ./_run_Align_gz                ## ~5-10 minutes
@@ -312,5 +312,5 @@ The following people (in reverse chronological order) have contributed to the LG
 
 
 [LG3_Pipeline]: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
+[C4]: https://www.c4.ucsf.edu/
 [TIPCC]: https://ucsf-ti.github.io/tipcc-web/
-[RColorBrewer]: https://cran.r-project.org/package=RColorBrewer
