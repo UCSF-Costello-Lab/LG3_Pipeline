@@ -287,7 +287,7 @@ do
 		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
-        { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        { time R_PROFILE_USER=NULL $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups.recal" \
