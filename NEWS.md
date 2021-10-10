@@ -2,7 +2,10 @@
 
 ## Version 2021-10-09-9000 (develop version)
 
- * ...
+### SIGNFICANT CHANGES
+
+ * All software dependencies are now obtained from the CBI software
+   stack available via `module load CBI`.
 
 
 ## Version 2021-10-09
