@@ -1,6 +1,11 @@
 # LG3_Pipeline
 
-## Version 2021-10-08-9000 (devel version)
+## Version 2021-10-09
+
+### SIGNFICANT CHANGES
+
+ * This is the first release that we managed to run on both TIPCC
+   and C4.
 
 ### NEW FEATURES
 
