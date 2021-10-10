@@ -2,7 +2,7 @@
 
 # LG3_Pipeline
 
-_Warning: Because of hardcoded paths to annotation data files, and software dependencies on the [CBI] software stack, this software tool runs only on the UCSF [TIPCC] and [C4] compute clusters.  It is our long-term goal to make it run anywhere._
+_Warning: Because of hardcoded paths to annotation data files, and software dependencies on the [CBI software stack](https://www.c4.ucsf.edu/software/software-repositories.html), this software tool runs only on the UCSF [TIPCC] and [C4] compute clusters.  It is our long-term goal to make it run anywhere._
 
 
 ## What's new?
