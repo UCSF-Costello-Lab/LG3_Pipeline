@@ -1,6 +1,6 @@
 # LG3_Pipeline
 
-## Version 2021-10-10-9000
+## Version 2021-10-10-9000 (develop version)
 
 ## BUG FIXES
 
