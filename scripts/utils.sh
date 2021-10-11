@@ -307,7 +307,7 @@ function equal_dirs {
 function source_lg3_conf {
     ## Already sourced?
     if [[ -n ${LG3_CONF_SOURCED} ]]; then
-	echo "All lg3.conf files have already been sourced. Skipping."
+	echo "All lg3.conf files have already been sourced and validates. Skipping."
 	return 0;
     fi
 	
@@ -324,6 +324,9 @@ function source_lg3_conf {
         echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
     fi
 
+    ## Assert that all LG3 software dependencies are valid
+    lg3_assert_software
+    
     LG3_CONF_SOURCED=true
 }
 
@@ -408,8 +411,7 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # MAIN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Load any default lg3.conf (which sets up software)
-## and any custom lg3.conf
+## Source ${LG3_HOME}/lg3.conf and ./lg3.conf, if it exists
 source_lg3_conf
 
 ## FIXME: Can we remove this?
@@ -417,4 +419,3 @@ unset PYTHONPATH  ### ADHOC: In case it is set by user. /HB 2018-09-07
 
 ## Validate software setup
 ## lg3_list_software
-lg3_assert_software
