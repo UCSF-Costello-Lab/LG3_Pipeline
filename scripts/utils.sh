@@ -152,6 +152,10 @@ function warn {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Usage: assert_file_exists /path/to/file
 function assert_file_exists {
+    local file
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     file=$1
     prefix=""
@@ -165,6 +169,10 @@ function assert_file_exists {
 }
 
 function assert_link_exists {
+    local file
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     [[ -n "$1" ]] || error "File name must be non-empty: '$1'"
     file=$1
@@ -180,6 +188,10 @@ function assert_link_exists {
 
 ## Usage: assert_file_executable /path/to/file
 function assert_file_executable {
+    local file
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     assert_file_exists "$1"
     file=$1
@@ -194,6 +206,10 @@ function assert_file_executable {
 
 ## Usage: assert_directory_exists /path/to/folder
 function assert_directory_exists {
+    local dir
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     dir=$1
     prefix=""
@@ -226,9 +242,12 @@ function assert_pwd {
 
 ## Usage: assert_python "" or assert_python "<python-binary>"
 function assert_python {
-    local version version_x_y
+    local version
+    local version_x_y
     local bin
-
+    local name
+    local prefix
+    
     ## Arguments are optional
     bin=$1
 
@@ -256,6 +275,8 @@ function assert_python {
 # NAVIGATION
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function change_dir {
+    local opwd
+    
     opwd=${PWD}
     assert_directory_exists "$1"
     cd "$1" || error "Failed to set working directory to $1"
@@ -313,6 +334,9 @@ function lg3_software_envvars {
 }
 
 function lg3_list_software {
+    local name
+    local value
+    
     echo "LG3 software dependencies used:"
     for name in $(lg3_software_envvars); do
         value=${!name}
@@ -345,6 +369,9 @@ function lg3_assert_software {
 }
 
 function lg3_qsub_envvar_append_software {
+    local name
+    local value
+    
     lg3_assert_software
     for name in $(lg3_software_envvars); do
         value=${!name}

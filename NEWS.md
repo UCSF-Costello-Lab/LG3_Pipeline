@@ -1,5 +1,14 @@
 # LG3_Pipeline
 
+## Version 2021-10-10-9000
+
+## BUG FIXES
+
+ * `lg3 run MutDet` broke in version 2021-10-10 because the internal
+   `assert_*()` functions overwrote global variables. Now all
+   internal Bash functions declare local variables explicitly.
+
+
 ## Version 2021-10-10
 
 ### SIGNFICANT CHANGES
