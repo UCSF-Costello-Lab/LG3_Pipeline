@@ -30,6 +30,7 @@ fi
 
 echo "Software:"
 echo "- PYTHON=${PYTHON:?}"
+echo "- RSCRIPT=${RSCRIPT:?}"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user
 assert_file_exists "${LG3_HOME}/scripts/combine_snvs.py"
