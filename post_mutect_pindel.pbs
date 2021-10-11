@@ -104,7 +104,6 @@ assert_file_executable "${SH_MUT_OVERLAPS}"
 assert_file_executable "${SH_MUTECT_COV_INTER_MUT}"
 assert_file_executable "${SH_RUNLOH}"
 
-
 SCRATCH=${LG3_SCRATCH_ROOT}/MutInDel
 make_dir "${SCRATCH}"
 change_dir "${SCRATCH}"

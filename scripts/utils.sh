@@ -375,7 +375,7 @@ function lg3_assert_software {
 function lg3_qsub_envvar_append_software {
     local name
     local value
-    loval res
+    local res
 
     lg3_assert_software
     
