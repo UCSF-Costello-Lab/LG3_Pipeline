@@ -411,11 +411,5 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # MAIN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Source ${LG3_HOME}/lg3.conf and ./lg3.conf, if it exists
-source_lg3_conf
-
 ## FIXME: Can we remove this?
 unset PYTHONPATH  ### ADHOC: In case it is set by user. /HB 2018-09-07
-
-## Validate software setup
-## lg3_list_software
