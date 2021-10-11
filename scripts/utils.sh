@@ -72,9 +72,9 @@ function test_context_end {
 # CONDITIONS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function error {
-    local red
-    local gray
     local bold
+    local gray
+    local red
     local reset
     
     ON_ERROR=${ON_ERROR:-on_error}
@@ -122,7 +122,8 @@ function error {
     printf "%s" "${reset}"
 }
 
-function warn {
+function warn {  
+    local bold
     local yellow
     local reset
     
@@ -242,11 +243,11 @@ function assert_pwd {
 
 ## Usage: assert_python "" or assert_python "<python-binary>"
 function assert_python {
-    local version
-    local version_x_y
     local bin
     local name
     local prefix
+    local version
+    local version_x_y
     
     ## Arguments are optional
     bin=$1
@@ -374,15 +375,19 @@ function lg3_assert_software {
 function lg3_qsub_envvar_append_software {
     local name
     local value
-    
+    loval res
+
     lg3_assert_software
+    
+    res="${QSUB_ENVVARS}"
     for name in $(lg3_software_envvars); do
         value=${!name}
 	if [[ -n "${value}" ]]; then
-            QSUB_ENVVARS="${QSUB_ENVVARS},${name}=${value}"
+            res="${res},${name}=${value}"
 	fi
     done
-    echo "${QSUB_ENVVARS}"
+    
+    echo "${res}"
 }
 
 
