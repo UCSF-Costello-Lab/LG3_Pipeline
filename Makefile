@@ -34,7 +34,7 @@ check_demo:
 
 check_r:
 	@echo "* Validating R syntax"
-	@!(which Rscript &> /dev/null) || Rscript -e "for (f in dir('scripts', pattern = '[.]R$$', full.names = TRUE)) { tryCatch(parse(f), error = function(ex) stop('Failed to parse R file: ', f, call. = FALSE)) }"
+	@!(which Rscript &> /dev/null) || Rscript --vanilla -e "for (f in dir('scripts', pattern = '[.]R$$', full.names = TRUE)) { tryCatch(parse(f), error = function(ex) stop('Failed to parse R file: ', f, call. = FALSE)) }"
 
 check_hardcoded:
 	@echo "* Miscellaneous code inspections"

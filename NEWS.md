@@ -1,5 +1,32 @@
 # LG3_Pipeline
 
+## Version 2021-10-10
+
+### SIGNFICANT CHANGES
+
+ * Add `lg3 run <step>` command for launching the different LG3
+   steps, e.g. `lg3 run Trim` and `lg3 run Align_gz`.
+
+ * All software dependencies are now obtained from the CBI software
+   stack available via `module load CBI`.
+
+ * `lg3 test setup` no longer create symbolic links to run scripts,
+   because we can now use `lg3 run <step>` instead.
+
+### NEW FEATURES
+
+ * Assert errors on software tools are now much more informative,
+   e.g. the error message includes also the name of the environment
+   variable that specifies the tool.
+
+### BUG FIXES
+
+ * User's ~/.Rprofile could wreak havoc during `lg3 run Recal` when
+   calling Picard's CollectMultipleMetrics.jar, which calls `Rscript`.
+   We're now using `R_PROFILE_USER=NULL` when calling this substep
+   to emulate `Rscript --no-init-file`.
+
+
 ## Version 2021-10-09
 
 ### SIGNFICANT CHANGES
