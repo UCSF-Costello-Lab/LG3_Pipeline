@@ -308,7 +308,7 @@ function equal_dirs {
 function source_lg3_conf {
     ## Already sourced?
     if [[ -n ${LG3_CONF_SOURCED} ]]; then
-	echo "All lg3.conf files have already been sourced and validates. Skipping."
+	echo "All lg3.conf files have already been sourced and validates. Skipping. [LG3_CONF_USER='${LG3_CONF_USER}']"
 	return 0;
     fi
 	
@@ -318,17 +318,29 @@ function source_lg3_conf {
     source "${LG3_HOME}/lg3.conf"
     echo "Sourced: ${LG3_HOME}/lg3.conf"
 
-    ## Settings specific to the project folder?
-    if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
+    ## lg3.conf per LG3_CONF_USER?
+    if [[ -z ${LG3_CONF_USER} ]]; then
+        if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
+            echo "Located: ./lg3.conf [PWD=${PWD}]"
+            LG3_CONF_USER=${PWD}/lg3.conf
+	fi
+    else
+        echo "Using: LG3_CONF_USER='${LG3_CONF_USER}'"
+    fi
+    
+    if [[ -n ${LG3_CONF_USER} ]]; then
+	assert_file_exists "${LG3_CONF_USER}"
+	
         # shellcheck disable=1090
-        source "lg3.conf"
-        echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
+        source "${LG3_CONF_USER}"
+        echo "Sourced: ${LG3_CONF_USER} ($(stat --printf='%s' "${LG3_CONF_USER}") bytes)"
     fi
 
     ## Assert that all LG3 software dependencies are valid
     lg3_assert_software
     
     LG3_CONF_SOURCED=true
+    export LG3_CONF_USER
 }
 
 
