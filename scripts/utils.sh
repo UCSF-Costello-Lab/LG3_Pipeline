@@ -153,29 +153,57 @@ function warn {
 ## Usage: assert_file_exists /path/to/file
 function assert_file_exists {
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
-    [[ -n "$1" ]] || error "File name must be non-empty: '$1'"
-    [[ -f "$1" ]] || error "No such file: '$1' (working directory '${PWD}')"
+    file=$1
+    prefix=""
+    if [[ $file == --by-env=* ]]; then
+	name=${file##--by-env=}
+	file=${!name}
+	prefix="$name="
+    fi
+    [[ -n "$file" ]] || error "File name must be non-empty: $prefix'$file'"
+    [[ -f "$file" ]] || error "No such file: $prefix'$file' (working directory '${PWD}')"
 }
 
 function assert_link_exists {
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     [[ -n "$1" ]] || error "File name must be non-empty: '$1'"
-    [[ -L "$1" ]] || error "File is not a link: '$1' (working directory '${PWD}')"
-    [[ -e "$1" ]] || error "[File] link is broken: '$1' (working directory '${PWD}')"
+    file=$1
+    prefix=""
+    if [[ $file == --by-env=* ]]; then
+	name=${file##--by-env=}
+	file=${!name}
+	prefix="$name="
+    fi
+    [[ -L "$file" ]] || error "File is not a link: $prefix'$file' (working directory '${PWD}')"
+    [[ -e "$file" ]] || error "[File] link is broken: $prefix'$file' (working directory '${PWD}')"
 }
 
 ## Usage: assert_file_executable /path/to/file
 function assert_file_executable {
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     assert_file_exists "$1"
-    [[ -x "$1" ]] || error "File exists but is not executable: '$1' (working directory '${PWD}')"
+    file=$1
+    prefix=""
+    if [[ $file == --by-env=* ]]; then
+	name=${file##--by-env=}
+	file=${!name}
+	prefix="$name="
+    fi
+    [[ -x "$file" ]] || error "File exists but is not executable: $prefix'$file' (working directory '${PWD}')"
 }
 
 ## Usage: assert_directory_exists /path/to/folder
 function assert_directory_exists {
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
-    [[ -n "$1" ]] || error "Directory name must be non-empty: '$1'"
-    [[ -d "$1" ]] || error "No such directory: '$1' (working directory '${PWD}')"
+    dir=$1
+    prefix=""
+    if [[ $dir == --by-env=* ]]; then
+	name=${dir##--by-env=}
+	dir=${!name}
+	prefix="$name="
+    fi
+    [[ -n "$dir" ]] || error "Directory name must be non-empty: $prefix='$dir'"
+    [[ -d "$dir" ]] || error "No such directory: $prefix='$dir' (working directory '${PWD}')"
 }
 
 ## Usage: assert_patient_name "${PATIENT}"
@@ -203,9 +231,17 @@ function assert_python {
 
     ## Arguments are optional
     bin=$1
+
+    prefix=""
+    if [[ $bin == --by-env=* ]]; then
+	name=${bin##--by-env=}
+	bin=${!name}
+	prefix="$name="
+    fi
+    
     
     if [[ -n "$bin" ]]; then
-        assert_file_executable "$bin"
+        assert_file_executable "$1"
     else
         bin=$(command -v python) || error "Python executable not found on PATH: ${PATH}"
     fi
@@ -290,21 +326,22 @@ function lg3_list_software {
 }
 
 function lg3_assert_software {
-    assert_file_executable  "$JAVA"
-    assert_file_executable  "$PYTHON"
-    assert_python           "$PYTHON"
-    assert_file_executable  "$RSCRIPT"
-    assert_directory_exists "$ANNOVAR_HOME"
-    assert_file_executable  "$BEDTOOLS"
-    assert_file_executable  "$BWA"
-    assert_file_executable  "$CUTADAPT"
-    assert_file_exists      "$GATK"
-    assert_file_exists      "$MUTECT"
-    assert_directory_exists "$PICARD_HOME"
-    assert_file_executable  "$SAMTOOLS"
-    assert_file_executable  "${PINDEL}"
-    assert_file_executable  "${PINDEL2VCF}"
-    assert_file_executable  "${TG}"
+    assert_file_executable  --by-env=JAVA
+    assert_file_executable  --by-env=PYTHON
+    assert_file_executable  --by-env=PYTHON
+    assert_python           --by-env=PYTHON
+    assert_file_executable  --by-env=RSCRIPT
+    assert_directory_exists --by-env=ANNOVAR_HOME
+    assert_file_executable  --by-env=BEDTOOLS
+    assert_file_executable  --by-env=BWA
+    assert_file_executable  --by-env=CUTADAPT
+    assert_file_exists      --by-env=GATK
+    assert_file_exists      --by-env=MUTECT
+    assert_directory_exists --by-env=PICARD_HOME
+    assert_file_executable  --by-env=SAMTOOLS
+    assert_file_executable  --by-env=PINDEL
+    assert_file_executable  --by-env=PINDEL2VCF
+    assert_file_executable  --by-env=TG
 }
 
 function lg3_qsub_envvar_append_software {

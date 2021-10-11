@@ -13,6 +13,12 @@
  * `lg3 test setup` no longer create symbolic links to run scripts,
    because we can now use `lg3 run <step>` instead.
 
+### NEW FEATURES
+
+ * Assert errors on software tools are now much more informative,
+   e.g. the error message includes also the name of the environment
+   variable that specifies the tool.
+
 ### BUG FIXES
 
  * User's ~/.Rprofile could wreak havoc during `lg3 run Recal` when
