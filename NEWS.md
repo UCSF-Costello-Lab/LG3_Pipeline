@@ -1,5 +1,18 @@
 # LG3_Pipeline
 
+## Version 2021-10-11
+
+## BUG FIXES
+
+ * `./lg3.conf` would not found shell scripts if the working
+   directory was changed before calling the script.  This would
+   happen with for instance `lg3 run PostMut`.
+
+ * `lg3 run MutDet` broke in version 2021-10-10 because the internal
+   `assert_*()` functions overwrote global variables. Now all
+   internal Bash functions declare local variables explicitly.
+
+
 ## Version 2021-10-10
 
 ### SIGNFICANT CHANGES

@@ -72,9 +72,9 @@ function test_context_end {
 # CONDITIONS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function error {
-    local red
-    local gray
     local bold
+    local gray
+    local red
     local reset
     
     ON_ERROR=${ON_ERROR:-on_error}
@@ -122,7 +122,8 @@ function error {
     printf "%s" "${reset}"
 }
 
-function warn {
+function warn {  
+    local bold
     local yellow
     local reset
     
@@ -152,6 +153,10 @@ function warn {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Usage: assert_file_exists /path/to/file
 function assert_file_exists {
+    local file
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     file=$1
     prefix=""
@@ -165,6 +170,10 @@ function assert_file_exists {
 }
 
 function assert_link_exists {
+    local file
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     [[ -n "$1" ]] || error "File name must be non-empty: '$1'"
     file=$1
@@ -180,6 +189,10 @@ function assert_link_exists {
 
 ## Usage: assert_file_executable /path/to/file
 function assert_file_executable {
+    local file
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     assert_file_exists "$1"
     file=$1
@@ -194,6 +207,10 @@ function assert_file_executable {
 
 ## Usage: assert_directory_exists /path/to/folder
 function assert_directory_exists {
+    local dir
+    local name
+    local prefix
+    
     [[ $# -ne 1 ]] && error "${FUNCNAME[0]}() requires a single argument: $#"
     dir=$1
     prefix=""
@@ -226,9 +243,12 @@ function assert_pwd {
 
 ## Usage: assert_python "" or assert_python "<python-binary>"
 function assert_python {
-    local version version_x_y
     local bin
-
+    local name
+    local prefix
+    local version
+    local version_x_y
+    
     ## Arguments are optional
     bin=$1
 
@@ -256,6 +276,8 @@ function assert_python {
 # NAVIGATION
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function change_dir {
+    local opwd
+    
     opwd=${PWD}
     assert_directory_exists "$1"
     cd "$1" || error "Failed to set working directory to $1"
@@ -286,7 +308,7 @@ function equal_dirs {
 function source_lg3_conf {
     ## Already sourced?
     if [[ -n ${LG3_CONF_SOURCED} ]]; then
-	echo "All lg3.conf files have already been sourced. Skipping."
+	echo "All lg3.conf files have already been sourced and validates. Skipping. [LG3_CONF_USER='${LG3_CONF_USER}']"
 	return 0;
     fi
 	
@@ -296,14 +318,29 @@ function source_lg3_conf {
     source "${LG3_HOME}/lg3.conf"
     echo "Sourced: ${LG3_HOME}/lg3.conf"
 
-    ## Settings specific to the project folder?
-    if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
+    ## lg3.conf per LG3_CONF_USER?
+    if [[ -z ${LG3_CONF_USER} ]]; then
+        if [ -f "lg3.conf" ] && ! equal_dirs "." "${LG3_HOME}"; then
+            echo "Located: ./lg3.conf [PWD=${PWD}]"
+            LG3_CONF_USER=${PWD}/lg3.conf
+	fi
+    else
+        echo "Using: LG3_CONF_USER='${LG3_CONF_USER}'"
+    fi
+    
+    if [[ -n ${LG3_CONF_USER} ]]; then
+	assert_file_exists "${LG3_CONF_USER}"
+	
         # shellcheck disable=1090
-        source "lg3.conf"
-        echo "Sourced: ${PWD}/lg3.conf ($(stat --printf='%s' lg3.conf) bytes)"
+        source "${LG3_CONF_USER}"
+        echo "Sourced: ${LG3_CONF_USER} ($(stat --printf='%s' "${LG3_CONF_USER}") bytes)"
     fi
 
+    ## Assert that all LG3 software dependencies are valid
+    lg3_assert_software
+    
     LG3_CONF_SOURCED=true
+    export LG3_CONF_USER
 }
 
 
@@ -313,6 +350,9 @@ function lg3_software_envvars {
 }
 
 function lg3_list_software {
+    local name
+    local value
+    
     echo "LG3 software dependencies used:"
     for name in $(lg3_software_envvars); do
         value=${!name}
@@ -345,14 +385,21 @@ function lg3_assert_software {
 }
 
 function lg3_qsub_envvar_append_software {
+    local name
+    local value
+    local res
+
     lg3_assert_software
+    
+    res="${QSUB_ENVVARS}"
     for name in $(lg3_software_envvars); do
         value=${!name}
 	if [[ -n "${value}" ]]; then
-            QSUB_ENVVARS="${QSUB_ENVVARS},${name}=${value}"
+            res="${res},${name}=${value}"
 	fi
     done
-    echo "${QSUB_ENVVARS}"
+    
+    echo "${res}"
 }
 
 
@@ -381,13 +428,5 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # MAIN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Load any default lg3.conf (which sets up software)
-## and any custom lg3.conf
-source_lg3_conf
-
 ## FIXME: Can we remove this?
 unset PYTHONPATH  ### ADHOC: In case it is set by user. /HB 2018-09-07
-
-## Validate software setup
-## lg3_list_software
-lg3_assert_software

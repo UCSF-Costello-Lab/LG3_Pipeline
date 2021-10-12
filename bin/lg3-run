@@ -77,12 +77,14 @@ if $list; then
     exit 0;
 fi
 
-PATIENT=${PATIENT:-Patient157t10}
-
 ## Validate 'step'
 step_script=${LG3_HOME}/runs_demo/_run_${step}
 [[ -f "${step_script}" ]] || error "Unknown lg3 run step: '${step}' (not one of: $(lg3_list_run_steps | tr '\n' ' ' | sed -E 's/[[:space:]]$//' | sed 's/ /, /g'))"
 assert_file_executable "${step_script}"
+
+source_lg3_conf
+
+PATIENT=${PATIENT:-Patient157t10}
 
 echo "Launching the LG3 pipeline:"
 echo "- Step   : ${step:?}"
