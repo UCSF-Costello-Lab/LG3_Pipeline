@@ -23,7 +23,7 @@
 ###  LG3_HOME={{LG3_HOME}}
 ###  EMAIL={{EMAIL}}
 ###
-### Version: 2021-10-11
+### Version: 2021-10-11-9000
 ### Source: https://github.com/UCSF-Costello-Lab/LG3_Pipeline
 
 LG3_DIR=$(dirname "$(readlink -e "$0")")
