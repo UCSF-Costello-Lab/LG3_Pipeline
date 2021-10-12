@@ -18,7 +18,7 @@ The LG3 Pipeline is pre-installed on the [TIPCC] and the [C4] clusters.  To get 
 ```sh
 $ module load CBI lg3
 $ lg3 --version
-2021-10-09
+2021-10-11
 ```
 
 See `module avail` for alternative versions.
