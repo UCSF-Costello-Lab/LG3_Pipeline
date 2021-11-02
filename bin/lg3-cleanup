@@ -17,6 +17,10 @@
 ###  --pindel              Pindel files
 ###  --comb                combo output
 ###  --maf                 MAF files
+###  --qc1                 QC1 files
+###  --qc2                 QC2 files
+###  --qc3                 QC3 files
+###  --qc                  All QC files
 ###  --all                 everything
 ###
 ###  --hot                 Delete the files (otherwise only a dry run)
@@ -41,6 +45,10 @@ MUT=false
 PINDEL=false
 COMB=false
 MAF=false
+QC=false
+QC1=false
+QC2=false
+QC3=false
 ALL=false
 
 CONV=${CONV:-patient_ID_conversions.tsv}
@@ -63,6 +71,10 @@ help() {
     echo -e "\\t\\t--pindel"
     echo -e "\\t\\t--comb"
     echo -e "\\t\\t--maf"
+    echo -e "\\t\\t--qc1"
+    echo -e "\\t\\t--qc2"
+    echo -e "\\t\\t--qc3"
+    echo -e "\\t\\t--qc"
     echo -e "\\t\\t--all\\tRemove all"
     exit 1
 }
@@ -85,6 +97,10 @@ case $1 in
     --pindel) PINDEL=true;shift 1;;
     --comb) COMB=true;shift 1;;
     --maf) MAF=true;shift 1;;
+    --qc) QC=true;shift 1;;
+    --qc1) QC1=true;shift 1;;
+    --qc2) QC2=true;shift 1;;
+    --qc3) QC3=true;shift 1;;
     --all) ALL=true;shift 1;;
     -*) echo "error: no such option $1";exit 1;;
     *)  break;;
@@ -99,6 +115,7 @@ if $ALL ; then
     PINDEL=true
     COMB=true
     MAF=true
+    QC=true
 fi
 
 SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
@@ -116,6 +133,7 @@ MUTDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/mutations
 PINDELDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
 COMBDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
 MAFDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MAF
+QCDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots
 
 if ! ${HOT} ; then
     echo "WARNING: Dry run! Use --hot to actually delete data"    
@@ -180,10 +198,48 @@ if ${PINDEL} ; then
 fi
 
 if ${COMB} ; then
-    echo "========== Removing combined data for ${PATIENT:?} ..."
+    echo "========== Removing combined data for ${PATIENT} ..."
     echo -e "\\trm -f ${COMBDATA}/${PATIENT}.[sR]*"
     du -hc "${COMBDATA}/${PATIENT}."[sR]*
     ${HOT} && rm -f "${COMBDATA}/${PATIENT}."[sR]*
+fi
+
+if ${QC} ; then
+    echo "========== Removing QC data for ${PATIENT} ..."
+    echo -e "\\trm -f ${QCDATA}/${PATIENT}/*"
+    du -hc "${QCDATA}/${PATIENT}"
+    ${HOT} && rm -rf "${QCDATA}/${PATIENT}/"*
+fi
+
+if ${QC1} ; then
+    echo "========== Removing QC1 data for ${PATIENT} ..."
+    echo -e "\\trm -f ${QCDATA}/${PATIENT}/*"
+    du -hc "${QCDATA}/${PATIENT}"
+	 if ${HOT} ; then
+		 rm -f "${QCDATA}/${PATIENT}/_QC1_${PATIENT}".*
+		 rm -f "${QCDATA}/${PATIENT}/${PATIENT}".qualityinfo.tmp
+		 rm -f "${QCDATA}/${PATIENT}/${PATIENT}".snvs.anno.txt
+	 fi
+fi
+
+if ${QC2} ; then
+    echo "========== Removing QC2 data for ${PATIENT} ..."
+    echo -e "\\trm -f ${QCDATA}/${PATIENT}/*.bam.hist"
+    du -hc "${QCDATA}/${PATIENT}"/*.bam.hist
+	 if ${HOT} ; then
+		 rm -f "${QCDATA}/${PATIENT}/_QC2_${PATIENT}".*
+		 rm -f "${QCDATA}/${PATIENT}"/*.bam.hist
+	 fi
+fi
+
+if ${QC3} ; then
+    echo "========== Removing QC3 data for ${PATIENT} ..."
+    echo -e "\\trm -fr ${QCDATA}/${PATIENT}/${PATIENT}_qualplots"
+    du -hc "${QCDATA}/${PATIENT}/${PATIENT}_qualplots"
+	 if ${HOT} ; then
+		 rm -f "${QCDATA}/${PATIENT}/_QC3_${PATIENT}".*
+		 rm -fr "${QCDATA}/${PATIENT}/${PATIENT}_qualplots"
+	 fi
 fi
 
 if ${MAF} ; then

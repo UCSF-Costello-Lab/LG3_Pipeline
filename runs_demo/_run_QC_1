@@ -15,7 +15,7 @@ echo "Arguments: $*"
 LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
-QC_PLOT_HOME=${QC_PLOT_HOME:-exomeQualityPlots}
+#QC_PLOT_HOME=${QC_PLOT_HOME:-exomeQualityPlots}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
@@ -27,7 +27,8 @@ WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
 ## Requires absolute path
 LG3_HOME=$(readlink -e "${LG3_HOME}")
 LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}")
-QC_PLOT_HOME=$(readlink -e "${QC_PLOT_HOME}")
+#QC_PLOT_HOME=$(readlink -e "${QC_PLOT_HOME}")
+QC_PLOT_HOME=${LG3_HOME}/exomeQualityPlots
 
 echo "Input: "
 echo "- LG3_HOME=${LG3_HOME:?}"
@@ -59,10 +60,31 @@ echo "- WORKDIR=${WORKDIR}"
 
 ls -1 "${BAMPATH}/${PATIENT}/"*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
 
+
+### Prep ENVVARS
+QSUB_ENVVARS="JUNK=junk,LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL},RECAL_BAM_EXT=${RECAL_BAM_EXT}"
+QSUB_ENVVARS=$(lg3_qsub_envvar_append_software)
+if $qsub_can_set_pwd; then
+  QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}";
+fi
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
+echo "Qsub extras:"
+echo "- QSUB_OPTS=${QSUB_OPTS}"
+echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
+
+### End of ENVVARS
+
+
+
 PBS=${QC_PLOT_HOME}/annotate_mutations_from_bam_vSH.sh
 assert_file_executable "${PBS}"
 
 PN=${PATIENT/Patient/Pat}
-qsub -l vmem=96gb -e "_QC1_${PATIENT}.err" -o "_QC1_${PATIENT}.out" -N "QC1_${PN}" -M "${EMAIL}" -m ae -v "mutationfile=${MUTATIONFILE},conversionfile=${CONV},patient=${PATIENT},project=${PROJECT},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME}" "${PBS}"
+qsub ${QSUB_OPTS} -l vmem=96gb -e "_QC1_${PATIENT}.err" -o "_QC1_${PATIENT}.out" -N "QC1_${PN}" -m ae -v "${QSUB_ENVVARS},mutationfile=${MUTATIONFILE},conversionfile=${CONV},patient=${PATIENT},project=${PROJECT},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME}" "${PBS}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

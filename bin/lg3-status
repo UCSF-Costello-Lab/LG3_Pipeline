@@ -20,6 +20,7 @@
 ###  --qc1             Check QC1 outputs
 ###  --qc2             Check QC2 outputs
 ###  --qc3             Check QC3 outputs
+###  --qc             Check all QC outputs
 ###
 ### Examples:
 ###  lg3 status --all Patient157t10
@@ -58,6 +59,7 @@ COMB=false
 QC1=false
 QC2=false
 QC3=false
+QC=false
 
 wcl() {
     grep -vc "^#" "$1" 
@@ -82,6 +84,7 @@ case $1 in
     --qc1) QC1=true;ALL=false;shift 1;;
     --qc2) QC2=true;ALL=false;shift 1;;
     --qc3) QC3=true;ALL=false;shift 1;;
+	 --qc) QC=true;ALL=false;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -97,6 +100,12 @@ if $ALL ; then
     PINDEL=true
     MUT=true
     COMB=true
+fi
+
+if $QC ; then
+   QC1=true
+   QC2=true
+   QC3=true
 fi
 
 PATIENTS=${*:-Patient157t10}
@@ -317,12 +326,13 @@ fi
 if $QC1 ; then
     WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
     ## Expected output:
-    OUT=${WORKDIR}/${PATIENT}.qualityinfo.tmp
+    #OUT=${WORKDIR}/${PATIENT}.qualityinfo.tmp
+    OUT=${WORKDIR}/${PATIENT}.snvs.anno.txt
     if [ -s "$OUT" ]; then
         LCNT=$(wcl "$OUT")
-        echo -e "QC1.tmp $OK ${YEL}${LCNT}${NOC}"
+        echo -e "QC1 *.snvs.anno.txt $OK ${YEL}${LCNT} genes${NOC}"
     else
-        echo -e "QC1.tmp $ERR"
+        echo -e "QC1 *.snvs.anno.txt $ERR"
     fi
 fi
 
@@ -378,6 +388,13 @@ if $QC3 ; then
     fi
 	done
 
+    OUT3=${WORKDIR}/${PATIENT}_qualplots/VAFPatterns/TERTp.pdf
+    if [ -s "$OUT3" ]; then
+        #LCNT=$(wcl "$OUT2")
+        echo -e "QC3 VAFPatterns/TERTp.pdf $OK ${YEL}${NOC}"
+    else
+        echo -e "QC3 VAFPatterns/TERTp.pdf $ERR"
+    fi
 
 fi
 
