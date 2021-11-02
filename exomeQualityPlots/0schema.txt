@@ -1,0 +1,37 @@
+exomeQualityPlots Pipeline schema
+
+
+QC_1:
+
+	annotate_mutations_from_bam_vSH.sh
+
+		annotate_mutations_from_bam_vSH_withstrand.py
+			Hardcoded samtools-0.1.12a
+
+QC_2:
+
+	get_coverage.sh Out: .hist
+		Hardcoded: BEDTOOLS=home/shared/cbc/software_cbc/bedtools2-2.26.0/bin/bedtools
+		GENOME=/home/jocostello/shared/LG3_Pipeline/resources/UCSC_HG19_Feb_2009/hg19.chrom.sizes
+
+
+QC_3:
+
+	exome_quality.sh
+
+		plot_qualinfo.py Out: .qualityinfo.txt
+
+		plot_qualinfo.R
+			   install.packages("dplyr", repos="http://cran.rstudio.com/")
+  				install.packages("plyr", repos="http://cran.rstudio.com/")
+  				install.packages("scales", repos="http://cran.rstudio.com/")
+  				install.packages("ggplot2", repos="http://cran.rstudio.com/")
+  				install.packages("RColorBrewer", repos="http://cran.rstudio.com/")
+  				install.packages("gtools", repos="http://cran.rstudio.com/")
+  				install.packages("reshape2", repos="http://cran.rstudio.com/")
+
+		coveragePlots.R
+
+		afTERThought.py Out: *./TERTp.pdf
+
+END
