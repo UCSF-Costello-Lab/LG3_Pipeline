@@ -85,6 +85,6 @@ PBS=${QC_PLOT_HOME}/annotate_mutations_from_bam_vSH.sh
 assert_file_executable "${PBS}"
 
 PN=${PATIENT/Patient/Pat}
-qsub ${QSUB_OPTS} -l vmem=96gb -e "_QC1_${PATIENT}.err" -o "_QC1_${PATIENT}.out" -N "QC1_${PN}" -m ae -v "${QSUB_ENVVARS},mutationfile=${MUTATIONFILE},conversionfile=${CONV},patient=${PATIENT},project=${PROJECT},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME}" "${PBS}"
+qsub "${QSUB_OPTS}" -l vmem=96gb -e "_QC1_${PATIENT}.err" -o "_QC1_${PATIENT}.out" -N "QC1_${PN}" -m ae -v "${QSUB_ENVVARS},mutationfile=${MUTATIONFILE},conversionfile=${CONV},patient=${PATIENT},project=${PROJECT},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME}" "${PBS}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

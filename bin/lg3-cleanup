@@ -208,7 +208,7 @@ if ${QC} ; then
     echo "========== Removing QC data for ${PATIENT} ..."
     echo -e "\\trm -f ${QCDATA}/${PATIENT}/*"
     du -hc "${QCDATA}/${PATIENT}"
-    ${HOT} && rm -rf "${QCDATA}/${PATIENT}/"*
+    ${HOT} && rm -rf "${QCDATA:?}/${PATIENT}/"*
 fi
 
 if ${QC1} ; then

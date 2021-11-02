@@ -93,6 +93,6 @@ SH_EXOME_QC=${QC_PLOT_HOME}/exome_quality.sh
 assert_file_executable "${SH_EXOME_QC}"
 
 PN=${PATIENT/Patient/Pat} ## Abbreviated PatientID
-qsub ${QSUB_OPTS} -l vmem=96gb -e "_QC3_${PATIENT}.err" -o "_QC3_${PATIENT}.out" -N "QC3_${PN}" -m ae -v "${QSUB_ENVVARS},mutationfile=${MUTATIONFILE},reffasta=$REF,patient=${PATIENT},conversionfile=${CONV},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME}" "${SH_EXOME_QC}"
+qsub "${QSUB_OPTS}" -l vmem=96gb -e "_QC3_${PATIENT}.err" -o "_QC3_${PATIENT}.out" -N "QC3_${PN}" -m ae -v "${QSUB_ENVVARS},mutationfile=${MUTATIONFILE},reffasta=$REF,patient=${PATIENT},conversionfile=${CONV},bampath=${BAMPATH},scriptpath=${QC_PLOT_HOME}" "${SH_EXOME_QC}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

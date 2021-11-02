@@ -74,6 +74,6 @@ SH_GET_COV=${QC_PLOT_HOME}/get_coverage.sh
 assert_file_executable "${SH_GET_COV}"
 
 PN=${PATIENT/Patient/Pat}
-qsub ${QSUB_OPTS} -l vmem=300gb -e "_QC2_${PATIENT}.err" -o "_QC2_${PATIENT}.out" -N "QC2_${PN}" -m ae -v "${QSUB_ENVVARS},patient=${PATIENT},bedpath=${BEDPATH},bampath=${BAMPATH}/${PATIENT}" "${SH_GET_COV}"
+qsub "${QSUB_OPTS}" -l vmem=300gb -e "_QC2_${PATIENT}.err" -o "_QC2_${PATIENT}.out" -N "QC2_${PN}" -m ae -v "${QSUB_ENVVARS},patient=${PATIENT},bedpath=${BEDPATH},bampath=${BAMPATH}/${PATIENT}" "${SH_GET_COV}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
