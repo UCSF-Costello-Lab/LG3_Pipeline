@@ -64,7 +64,9 @@ assert_file_executable "${SH_CHK_MUTDET}"
 "${SH_CHK_PINDEL}" "${PROJECT}" "${PATIENT}" || error "${SH_CHK_PINDEL} failed"
 "${SH_CHK_MUTDET}" "${PROJECT}" "${PATIENT}" || error "${SH_CHK_MUTDET} failed"
 
+## Short PatientID
+PAT=${PATIENT/atient/}
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
+qsub ${QSUB_OPTS} -N ${PAT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

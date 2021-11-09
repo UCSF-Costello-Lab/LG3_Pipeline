@@ -87,8 +87,6 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 ### End of ENVVARS
 
-
-
 SH_EXOME_QC=${QC_PLOT_HOME}/exome_quality.sh
 assert_file_executable "${SH_EXOME_QC}"
 

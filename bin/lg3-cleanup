@@ -21,6 +21,7 @@
 ###  --qc2                 QC2 files
 ###  --qc3                 QC3 files
 ###  --qc                  All QC files
+###  --fac                 All FACETS files
 ###  --all                 everything
 ###
 ###  --hot                 Delete the files (otherwise only a dry run)
@@ -49,6 +50,7 @@ QC=false
 QC1=false
 QC2=false
 QC3=false
+FAC=false
 ALL=false
 
 CONV=${CONV:-patient_ID_conversions.tsv}
@@ -75,6 +77,7 @@ help() {
     echo -e "\\t\\t--qc2"
     echo -e "\\t\\t--qc3"
     echo -e "\\t\\t--qc"
+    echo -e "\\t\\t--fac"
     echo -e "\\t\\t--all\\tRemove all"
     exit 1
 }
@@ -101,6 +104,7 @@ case $1 in
     --qc1) QC1=true;shift 1;;
     --qc2) QC2=true;shift 1;;
     --qc3) QC3=true;shift 1;;
+    --fac) FAC=true;shift 1;;
     --all) ALL=true;shift 1;;
     -*) echo "error: no such option $1";exit 1;;
     *)  break;;
@@ -116,6 +120,7 @@ if $ALL ; then
     COMB=true
     MAF=true
     QC=true
+    FAC=true
 fi
 
 SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
@@ -133,6 +138,7 @@ MUTDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/mutations
 PINDELDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/pindel
 COMBDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
 MAFDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/MAF
+FACDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/facets
 QCDATA=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots
 
 if ! ${HOT} ; then
@@ -254,6 +260,18 @@ if ${MAF} ; then
     du -h "${D}" || { echo "STOP"; exit 1; }
     echo -e "\\trm -rf ${D}"
     ${HOT} && rm -rf "${D}"
+fi
+
+if ${FAC} ; then
+    echo "========== Removing FACETS data for ${PATIENT} ..."
+    echo -e "\\trm -f ${FACDATA}/${PATIENT}/*"
+    du -hc "${FACDATA}/${PATIENT}"/
+    if ${HOT} ; then
+       rm -f "${FACDATA}/${PATIENT}"/*_cncf.txt
+       rm -f "${FACDATA}/${PATIENT}"/*.gz
+       rm -f "${FACDATA}/${PATIENT}"/*.pdf
+       rm -f "${FACDATA}/${PATIENT}"/FACETS.txt
+    fi
 fi
 
 echo "Finished!"

@@ -7,7 +7,7 @@
 ### Options:
 ###  --conv=<pathame>  The path to the tab-delimited patient file
 ###  --bam=(<string>)  Raw BAM files suffix
-###  --fastq           Check raw FASTQ files
+###  --fq              Check raw FASTQ files
 ###  --trim            Check trimmed FASTQ files
 ###  --bwa             Check aligned BAM files
 ###  --recal           Check recalibrated output
@@ -20,7 +20,8 @@
 ###  --qc1             Check QC1 outputs
 ###  --qc2             Check QC2 outputs
 ###  --qc3             Check QC3 outputs
-###  --qc             Check all QC outputs
+###  --qc              Check all QC outputs
+###  --fac             Check FACETS outputs
 ###
 ### Examples:
 ###  lg3 status --all Patient157t10
@@ -60,6 +61,7 @@ QC1=false
 QC2=false
 QC3=false
 QC=false
+FAC=false
 
 wcl() {
     grep -vc "^#" "$1" 
@@ -72,7 +74,7 @@ case $1 in
     --bam*=*) BAM_SUFF=${1#*=};shift 1;;
     --all) ALL=true;shift 1;;
 
-    --f*) FQ=true;ALL=false;shift 1;;
+    --fq) FQ=true;ALL=false;shift 1;;
     --trim) TRIM=true;ALL=false;shift 1;;
     --bwa) BWA=true;ALL=false;shift 1;;
     --recal) REC=true;ALL=false;shift 1;;
@@ -85,6 +87,7 @@ case $1 in
     --qc2) QC2=true;ALL=false;shift 1;;
     --qc3) QC3=true;ALL=false;shift 1;;
 	 --qc) QC=true;ALL=false;shift 1;;
+    --fac) FAC=true;ALL=false;shift 1;;
     --*) echo "error: no such option $1";exit 1;;
     *)  break;;
 esac
@@ -395,8 +398,21 @@ if $QC3 ; then
     else
         echo -e "QC3 VAFPatterns/TERTp.pdf $ERR"
     fi
-
 fi
+
+
+   if $FAC ; then
+      WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/facets/${PATIENT}
+      ## Expected output:
+      OUT=${WORKDIR}/FACETS.txt
+      if [ -s "$OUT" ]; then
+         LCNT=$(wcl "$OUT")
+         echo -e "FACETS $OK ${YEL}${LCNT}${NOC}"
+      else
+         echo -e "FACETS $ERR"
+      fi
+   fi
+
 
 ## Delete PATIENT specific conversion file
 rm "${PATIENT}.temp.conversions.txt"

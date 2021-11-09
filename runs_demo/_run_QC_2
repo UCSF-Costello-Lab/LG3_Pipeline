@@ -68,8 +68,6 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 
 ### End of ENVVARS
 
-
-
 SH_GET_COV=${QC_PLOT_HOME}/get_coverage.sh
 assert_file_executable "${SH_GET_COV}"
 
