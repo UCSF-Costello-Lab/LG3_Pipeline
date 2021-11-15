@@ -36,15 +36,13 @@ assert_patient_name "${PATIENT}"
 echo -n "Checking if output file is available ... "
 OUT=output/${PROJECT}/MutInDel/"${PATIENT}".R.mutations.avf
 if [ -f "${OUT}" ]; then
-    echo "ERROR: ${OUT} already exists, nothing to do!"
-    exit 1
+    error "${OUT} already exists, nothing to do!"
 fi
 
 echo -n "Checking if mutation file is available ... "
 MUT=output/${PROJECT}/MutInDel/"${PATIENT}".R.mutations
 if [ ! -f "${MUT}" ]; then
-    echo "ERROR: Can't open ${MUT}"
-    exit 1
+    error "Can't open ${MUT}"
 else
 	echo " OK"
 fi
@@ -52,8 +50,7 @@ fi
 echo -n "Checking if quality stats file is available ... "
 QSTAT=output/${PROJECT}/exome_QC_plots/"${PATIENT}/${PATIENT}".qualitystats.txt
 if [ ! -f "${QSTAT}" ]; then
-   echo "ERROR: Can't open ${QSTAT}"
-   exit 1
+   error "Can't open ${QSTAT}"
 else
 	echo " OK"
 fi
@@ -80,8 +77,8 @@ assert_file_exists "${PBS}"
 ## Short PatientID
 PAT=${PATIENT/atient/}
 ## Submit
+# shellcheck disable=SC2086
 qsub ${QSUB_OPTS} -N "AVF_${PAT}" -v "${QSUB_ENVVARS},MUT=${MUT},QSTAT=${QSTAT},PATIENT=${PATIENT},PROJECT=${PROJECT}" "$PBS"
-#qsub ${QSUB_OPTS} -N "avf_${PAT}" -e "AVF_${PAT}.err" -o "AVF_${PAT}.out" -v "${QSUB_ENVVARS},MUT=${MUT},QSTAT=${QSTAT},PATIENT=${PATIENT},PROJECT=${PROJECT}" "$PBS"
 
 #sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
    #--job-name="avf_${PAT}" \

@@ -18,6 +18,7 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-rawdata}
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
 CONV=${CONV:-patient_ID_conversions.tsv}
+CONV=$(readlink -e "$CONV")
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 EMAIL=${EMAIL:?}
 
