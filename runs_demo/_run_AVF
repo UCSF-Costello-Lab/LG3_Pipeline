@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+assert_pwd
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:?}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+PROJECT=${PROJECT:-LG3}
+PATIENT=${PATIENT:-Patient157t10}
+EMAIL=${EMAIL:?}
+LG3_DEBUG=true
+
+## Requires absolute path
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- EMAIL=${EMAIL}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- LG3_DEBUG=${LG3_DEBUG}"
+
+assert_patient_name "${PATIENT}"
+
+echo -n "Checking if output file is available ... "
+OUT=output/${PROJECT}/MutInDel/"${PATIENT}".R.mutations.avf
+if [ -f "${OUT}" ]; then
+    echo "ERROR: ${OUT} already exists, nothing to do!"
+    exit 1
+fi
+
+echo -n "Checking if mutation file is available ... "
+MUT=output/${PROJECT}/MutInDel/"${PATIENT}".R.mutations
+if [ ! -f "${MUT}" ]; then
+    echo "ERROR: Can't open ${MUT}"
+    exit 1
+else
+	echo " OK"
+fi
+
+echo -n "Checking if quality stats file is available ... "
+QSTAT=output/${PROJECT}/exome_QC_plots/"${PATIENT}/${PATIENT}".qualitystats.txt
+if [ ! -f "${QSTAT}" ]; then
+   echo "ERROR: Can't open ${QSTAT}"
+   exit 1
+else
+	echo " OK"
+fi
+QSTAT=$(readlink -e "$QSTAT")
+
+QSUB_ENVVARS="JUNK=junk,LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS=$(lg3_qsub_envvar_append_software)
+if $qsub_can_set_pwd; then
+  QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}";
+fi
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
+echo "Qsub extras:"
+echo "- QSUB_OPTS=${QSUB_OPTS}"
+echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
+
+PBS=${LG3_HOME}/AVF.pbs
+assert_file_exists "${PBS}"
+
+## Short PatientID
+PAT=${PATIENT/atient/}
+## Submit
+qsub ${QSUB_OPTS} -N "AVF_${PAT}" -v "${QSUB_ENVVARS},MUT=${MUT},QSTAT=${QSTAT},PATIENT=${PATIENT},PROJECT=${PROJECT}" "$PBS"
+#qsub ${QSUB_OPTS} -N "avf_${PAT}" -e "AVF_${PAT}.err" -o "AVF_${PAT}.out" -v "${QSUB_ENVVARS},MUT=${MUT},QSTAT=${QSTAT},PATIENT=${PATIENT},PROJECT=${PROJECT}" "$PBS"
+
+#sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
+   #--job-name="avf_${PAT}" \
+   #--output="avf_${PAT}.out" \
+   #--error="avf_${PAT}.err" \
+   #--export=ALL,LG3_HOME="${LG3_HOME}",LG3_OUTPUT_ROOT="${LG3_OUTPUT_ROOT}",PROJECT="${PROJECT}",PATIENT="${PATIENT}",LG3_DEBUG="${LG3_DEBUG}" \
+   #--nodes=1 \
+   #--ntasks=1 \
+   #--mem=20G \
+   #--time=1-06:00:00 \
+   #"${PBS}"
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

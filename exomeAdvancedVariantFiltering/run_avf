@@ -1,0 +1,38 @@
+#!/bin/bash
+
+python --version
+
+cd /home/jocostello/repositories/exomeAdvancedVariantFiltering || { echo "ERROR: cd failed"; exit 1; }
+
+if [ $# -eq 0 ]; then
+	echo "Usage: $0 PatientXXX"
+	exit 1
+fi
+
+
+for P in "$@"
+do
+	echo "Processing ${P}..."
+	MUT=/costellolab/data1/jocostello/LG3/MutInDel/"${P}".R.mutations
+	if [ ! -f "${MUT}" ]; then
+		echo "ERROR: Can't open ${MUT}"
+		exit 1
+	fi
+
+	QSTAT=/costellolab/data1/jocostello/LG3/exome_QC_plots/"${P}/${P}".qualitystats.txt
+	if [ ! -f "${QSTAT}" ]; then
+		echo "ERROR: Can't open ${QSTAT}"
+		exit 1
+	fi
+
+	ln -s "${MUT}" "${P}".R.mutations
+	ln -s "${QSTAT}" "${P}".qualitystats.txt
+	ls -l "${P}".*
+
+	time python advanced_variant_filtering.py "${P}.R.mutations"
+
+	cp "${P}".R.mutations.avf "${MUT}".avf || { echo "ERROR: Can't save results!"; exit 1; }
+
+	wc -l "${MUT}".avf
+done
+

@@ -1,0 +1,94 @@
+#!/bin/bash
+
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+#rm_if_link(){ [ ! -L "$1" ] || rm -f "$1"; }
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+### Configuration
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
+LG3_DEBUG=${LG3_DEBUG:-true}
+#ncores=${SLURM_NTASKS:-1}
+python --version
+
+### Debug
+if ${LG3_DEBUG} ; then
+  echo "Debug info:"
+  echo "- LG3_HOME=${LG3_HOME:?}"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- EMAIL=${EMAIL}"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  #echo "- hostname=$(hostname)"
+  #echo "- node(s): ${SLURM_JOB_NODELIST}"
+  #echo "- ncores=$ncores"
+fi
+
+LG3_OUTPUT_ROOT=$(readlink -e "${LG3_OUTPUT_ROOT}") ## Absolute path
+assert_directory_exists "${LG3_OUTPUT_ROOT}"
+
+### Input
+echo "Input:"
+echo "- PATIENT=${PATIENT:?}"
+echo "- PROJECT=${PROJECT:?}"
+
+assert_patient_name "${PATIENT}"
+
+REPO=${LG3_HOME}/exomeAdvancedVariantFiltering
+assert_directory_exists "${REPO}"
+
+PY_AVF="${REPO}/advanced_variant_filtering.py" ## Main script
+assert_file_exists "${PY_AVF}"
+
+MUTINDEL="${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel" ## Location of *.R.mutations file
+assert_directory_exists "${MUTINDEL}"
+
+MUTFILE="${MUTINDEL}/${PATIENT}.R.mutations"
+assert_file_exists "${MUTFILE}"
+
+AVF="${MUTFILE}.avf"
+if [ -f "${AVF}" ]; then
+    wc -l "${AVF}"
+    error "Already done, found AVF output: "
+fi
+
+#QCPLOTS="${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots" ## Location of *.qualitystats.txt files
+#assert_directory_exists "${QCPLOTS}"
+
+#QSTAT="${QCPLOTS}/${PATIENT}/${PATIENT}.qualitystats.txt"
+assert_file_exists "${QSTAT}"
+echo -n "Found: "
+wc -l "${QSTAT}"
+
+WC_QSTAT=$(wc -l "${QSTAT}" | tr -s ' ' | cut -d' ' -f1)
+if [ "${WC_QSTAT}" -eq 11 ]; then
+   error "qualitystats are empty, hyper mutator?"
+fi
+
+change_dir "${MUTINDEL}"
+
+#echo "Making sym link for qualitystats"
+#ln -s "${QSTAT}" "${PATIENT}.qualitystats.txt"
+#ls -l "${PATIENT}.qualitystats.txt"
+
+#change_dir "${REPO}"
+
+echo "Starting exomeAdvancedVariantFiltering"
+
+time python "${PY_AVF}" "${MUTFILE}" "${QSTAT}" ||  error "${PY_AVF}" 
+
+echo -n "Final OUTPUT: "
+wc -l "${AVF}"
+
+#echo "Removing sym link"
+#rm_if_link "${MUTINDEL}/${PATIENT}.qualitystats.txt"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

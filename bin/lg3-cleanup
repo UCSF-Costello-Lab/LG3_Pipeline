@@ -22,6 +22,7 @@
 ###  --qc3                 QC3 files
 ###  --qc                  All QC files
 ###  --fac                 All FACETS files
+###  --avf                 Delete AVF file
 ###  --all                 everything
 ###
 ###  --hot                 Delete the files (otherwise only a dry run)
@@ -51,6 +52,7 @@ QC1=false
 QC2=false
 QC3=false
 FAC=false
+AVF=false
 ALL=false
 
 CONV=${CONV:-patient_ID_conversions.tsv}
@@ -78,6 +80,7 @@ help() {
     echo -e "\\t\\t--qc3"
     echo -e "\\t\\t--qc"
     echo -e "\\t\\t--fac"
+    echo -e "\\t\\t--awf"
     echo -e "\\t\\t--all\\tRemove all"
     exit 1
 }
@@ -105,6 +108,7 @@ case $1 in
     --qc2) QC2=true;shift 1;;
     --qc3) QC3=true;shift 1;;
     --fac) FAC=true;shift 1;;
+    --avf) AVF=true;shift 1;;
     --all) ALL=true;shift 1;;
     -*) echo "error: no such option $1";exit 1;;
     *)  break;;
@@ -121,6 +125,7 @@ if $ALL ; then
     MAF=true
     QC=true
     FAC=true
+    AVF=true
 fi
 
 SAMPLES=${SAMPLES:-$(grep -w "${PATIENT}" "${CONV}" | cut -f1 | tr '\n' ' ')}
@@ -272,6 +277,14 @@ if ${FAC} ; then
        rm -f "${FACDATA}/${PATIENT}"/*.pdf
        rm -f "${FACDATA}/${PATIENT}"/FACETS.txt
     fi
+fi
+
+if ${AVF} ; then
+    echo "========== Removing AVF file for ${PATIENT} ..."
+	 OUT="${COMBDATA}/${PATIENT}.R.mutations.avf"
+	 echo -ne "\\t"
+	 wc -l "${OUT}"
+    ${HOT} && rm -f "${OUT}"
 fi
 
 echo "Finished!"
