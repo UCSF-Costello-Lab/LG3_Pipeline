@@ -56,7 +56,7 @@ else
 fi
 QSTAT=$(readlink -e "$QSTAT")
 
-QSUB_ENVVARS="JUNK=junk,LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
 QSUB_ENVVARS=$(lg3_qsub_envvar_append_software)
 if $qsub_can_set_pwd; then
   QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}";

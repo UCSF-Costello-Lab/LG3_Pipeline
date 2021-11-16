@@ -71,8 +71,8 @@ assert_file_exists "${FQ2}"
 
 echo "Software:"
 echo "- TG=${TG:?}"
-echo "- CUTADAPT=${CUTADAPT:?}"
 assert_file_executable "${TG}"
+echo "- CUTADAPT=${CUTADAPT:?}"
 
 [[ -r "${FQ1}" ]] || error "[trim_galore] Can't open ${FQ1}"
 [[ -r "${FQ2}" ]] || error "[trim_galore] Can't open ${FQ2}"
