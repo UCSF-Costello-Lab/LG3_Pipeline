@@ -1,0 +1,93 @@
+#!/bin/bash
+###### bwa aln step2
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+assert_pwd
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+LG3_HOME=${LG3_HOME:?}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
+PROJECT=${PROJECT:-LG3}
+PATIENT=${PATIENT:-Patient157t10}
+CONV=${CONV:-patient_ID_conversions.tsv}
+LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-false}
+EMAIL=${EMAIL:?}
+
+## Requires absolute path 
+LG3_HOME=$(readlink -e "$LG3_HOME")
+LG3_OUTPUT_ROOT=$(readlink -e "$LG3_OUTPUT_ROOT")
+
+echo "Input:"
+echo "- LG3_HOME=${LG3_HOME:?}"
+echo "- LG3_INPUT_ROOT=${LG3_INPUT_ROOT:?}"
+#echo "- LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:?}"
+echo "- EMAIL=${EMAIL}"
+echo "- PROJECT=${PROJECT:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- CONV=${CONV:?}"
+echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
+
+assert_patient_name "${PATIENT}"
+
+SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
+echo "- SAMPLES=${SAMPLES:?}"
+
+
+QSUB_ENVVARS="LG3_HOME=${LG3_HOME},LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT},EMAIL=${EMAIL}"
+QSUB_ENVVARS=$(lg3_qsub_envvar_append_software)
+if $qsub_can_set_pwd; then
+  QSUB_OPTS="${QSUB_OPTS} -d ${PWD:?}";
+fi
+
+## Override the qsub email address?
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
+
+echo "Qsub extras:"
+echo "- QSUB_OPTS=${QSUB_OPTS}"
+echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
+
+PBS=${LG3_HOME}/Align2_fastq.pbs
+assert_file_exists "${PBS}"
+
+
+for SAMPLE in ${SAMPLES}
+do
+  FASTQ1=${LG3_INPUT_ROOT}/${PROJECT}/exomes/${SAMPLE}/${SAMPLE}.read1.QC.fastq
+  FASTQ2=${LG3_INPUT_ROOT}/${PROJECT}/exomes/${SAMPLE}/${SAMPLE}.read2.QC.fastq
+  SAI1=${LG3_INPUT_ROOT}/${PROJECT}/exomes/${SAMPLE}/${SAMPLE}.read1.sai
+  SAI2=${LG3_INPUT_ROOT}/${PROJECT}/exomes/${SAMPLE}/${SAMPLE}.read2.sai
+
+  ## Requires absolute path 
+  FASTQ1=$(readlink -e "$FASTQ1")
+  FASTQ2=$(readlink -e "$FASTQ2")
+  SAI1=$(readlink -e "$SAI1")
+  SAI2=$(readlink -e "$SAI2")
+  
+  ## Expected Location of aligned BAMs
+  ALIGNED=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes/${SAMPLE}
+
+  if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
+    warn "Can't open fastq files from ${LG3_INPUT_ROOT}/"
+  else
+    if [ -f "${ALIGNED}/${SAMPLE}.trim.bwa.sorted.bam" ]; then
+      warn "${SAMPLE} is aligned (${ALIGNED}/${SAMPLE}.trim.bwa.sorted.bam). Skipping ..."
+    else
+      echo "Submitting $SAMPLE ..."
+      # shellcheck disable=SC2086
+      qsub ${QSUB_OPTS} -N Align2_$SAMPLE -v "${QSUB_ENVVARS},FASTQ1=${FASTQ1},FASTQ2=${FASTQ2},SAMPLE=${SAMPLE},SAI1=${SAI1},SAI2=${SAI2},PROJECT=${PROJECT}" "${PBS}"
+    fi
+  fi
+done
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
