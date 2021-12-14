@@ -2,8 +2,8 @@
 
 #PBS -e _fac_${PATIENT}.err
 #PBS -o _fac_${PATIENT}.out
-#PBS -l nodes=1:ppn=6,vmem=20gb
-#PBS -l walltime=30:00:00
+#PBS -l nodes=1:ppn=8,vmem=20gb
+#PBS -l walltime=14-00:00:00
 #PBS -l mem=20gb
 #PBS -m ae
 
@@ -22,7 +22,6 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
-LG3_SCRATCH_ROOT=${TMPDIR:-/scratch/${SLURM_JOB_USER}/${SLURM_JOB_ID}}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT}/facets/${PATIENT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${SLURM_NTASKS:-1}

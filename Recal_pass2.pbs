@@ -47,7 +47,7 @@ echo -n "Checking R: "
 "$RSCRIPT" --version || error "Rscript executable is not available"
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-NODES=$(tr '\n' ' ' < "$PBS_NODEFILE")
+NODES=$(hostname)
 echo "Started $PROG on $DATE"
 echo "Using node(s): $NODES"
 

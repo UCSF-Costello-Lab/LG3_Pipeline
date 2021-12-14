@@ -65,7 +65,7 @@ assert_directory_exists "${D}"
 PAT=${PATIENT/atient/}
 # shellcheck disable=SC2086
 #qsub "${QSUB_OPTS}" -l "ppn=6,vmem=20G,walltime=1-00:00:00" -e "fac_${PAT}.err" -o "fac_${PAT}.out" -N ${PAT}.fac -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
-qsub ${QSUB_OPTS} -l "ppn=6,vmem=20G,time=1-00:00:00" -N "${PAT}".fac -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
+qsub ${QSUB_OPTS} -l "ppn=10,vmem=20G,time=1-00:00:00" -N "${PAT}".fac -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
 
 #sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
    #--job-name="fac_${PAT}" \

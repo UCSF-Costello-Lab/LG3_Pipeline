@@ -1,4 +1,5 @@
 #!/bin/bash
+#PBS -l walltime=14-00:00:00
 
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
