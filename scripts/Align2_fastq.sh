@@ -146,7 +146,7 @@ $BWA sampe "{$BWA_INDEX}" "${sai1}" "${sai2}" \
   "${fastq1}" "${fastq2}" > "${SAMPLE}.bwa.sam" 2>> "__${SAMPLE}.sampe.log" || error "BWA sampe failed"
 assert_file_exists "${SAMPLE}.bwa.sam"
 
-rm -f "${fastq1}" ${fastq2}" ${sai1}" ${sai2}" 
+rm -f "${fastq1}" "${fastq2}" "${sai1}" "${sai2}" 
 
 echo "[Align] Verify mate information..."
 $JAVA -Xmx2g -Djava.io.tmpdir="${TMP}" \

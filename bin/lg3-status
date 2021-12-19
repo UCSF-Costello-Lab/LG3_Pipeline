@@ -118,7 +118,7 @@ echo "Patient/samples table ${CONV}"
 echo "BAM suffix ${BAM_SUFF}"
 echo "Patients ${PATIENTS:?}"
 
-for PATIENT in ${PATIENTS[*]}
+for PATIENT in "${PATIENTS[@]}"
 do
     [[ "${PATIENT}" == *[_]* ]] && { echo "ERROR: 'PATIENT' must not contain underscores: ${PATIENT}"; exit 1; }
     normid="$ERR"
