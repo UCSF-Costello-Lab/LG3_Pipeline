@@ -34,8 +34,6 @@ echo "- EMAIL=${EMAIL}"
 echo "- PROJECT=${PROJECT:?}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- CONV=${CONV:?}"
-echo "- INTERVAL=${INTERVAL:?}"
-echo "- PADDING=${PADDING:?}"
 echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING}"
 
 assert_patient_name "${PATIENT}"

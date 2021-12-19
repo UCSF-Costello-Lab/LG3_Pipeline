@@ -19,7 +19,7 @@ LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${SLURM_NTASKS:-1}
 LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-true}
-assert_file_exists "${INTERVAL:?}"
+assert_file_exists "${ILIST:?}"
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -33,7 +33,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- ncores=$ncores"
   echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-?}"
   echo "- CLEAN=${CLEAN}"
-  echo "- INTERVAL=${INTERVAL:?}"
+  echo "- ILIST=${ILIST:?}"
   echo "- PADDING=${PADDING:?}"
 fi
 
@@ -185,7 +185,7 @@ echo "[BQSR] GATK4::BaseRecalibrator "
 	--use-original-qualities true \
 	--known-sites "${DBSNP}" \
 	--known-sites "${THOUSAND}" \
-	--intervals "${INTERVAL:?}" \
+	--intervals "${ILIST:?}" \
 	--interval-padding "${PADDING:?}" \
 	--create-output-bam-index true \
    --QUIET true \
@@ -202,7 +202,7 @@ echo "[BQSR] GATK4::ApplyBQSR "
 	--static-quantized-quals 10 --static-quantized-quals 20 --static-quantized-quals 30 \
 	--add-output-sam-program-record \
 	--use-original-qualities \
-   --intervals "${INTERVAL:?}" \
+   --intervals "${ILIST:?}" \
    --interval-padding "${PADDING:?}" \
 	--create-output-bam-index true \
    --QUIET true \
@@ -215,8 +215,8 @@ echo "[QC] GATK4::CollectHsMetrics "
 { time ${GATK4} --java-options -"${XMX}" CollectHsMetrics \
 	--INPUT "${SAMPLE}.mem.sorted.mrkDups.recal.bam" \
 	--OUTPUT "${SAMPLE}.mem.sorted.mrkDups.recal.HS_metrics" \
-   --BAIT_INTERVALS "${INTERVAL:?}" \
-   --TARGET_INTERVALS "${INTERVAL:?}" \
+   --BAIT_INTERVALS "${ILIST:?}" \
+   --TARGET_INTERVALS "${ILIST:?}" \
    --QUIET true \
    --VERBOSITY ERROR; } 2>&1 || error "FAILED"
 

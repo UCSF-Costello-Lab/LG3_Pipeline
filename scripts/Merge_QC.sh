@@ -47,7 +47,7 @@ REF=${LG3_HOME}/resources/UCSC_HG19_Feb_2009/hg19.fa
 #Input variables
 bamfiles=$1
 prefix=$2
-ilist=$3
+ILIST=$3
 
 TMP="${LG3_SCRATCH_ROOT}/${prefix}_tmp"
 make_dir "$TMP"
@@ -57,7 +57,7 @@ echo "[Merge] Merge technical replicates"
 echo "------------------------------------------------------"
 echo "[Merge] Merge Group: $prefix"
 echo "$bamfiles" | awk -F ":" '{for (i=1; i<=NF; i++) print "[Merge] Exome:"$i}'
-echo "[Merge] Intervals: $ilist"
+echo "[Merge] Intervals: $ILIST"
 echo "------------------------------------------------------"
 
 ## Construct string with one or more '-I "<bam>"' elements
@@ -122,8 +122,8 @@ assert_file_exists "${prefix}.merged.sorted.flagstat"
 echo "[QC] Calculate hybrid selection metrics..."
 $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "${LG3_HOME}/tools/picard-tools-1.64/CalculateHsMetrics.jar" \
-        BAIT_INTERVALS="${ilist}" \
-        TARGET_INTERVALS="${ilist}" \
+        BAIT_INTERVALS="${ILIST}" \
+        TARGET_INTERVALS="${ILIST}" \
         INPUT="${prefix}.merged.sorted.bam" \
         OUTPUT="${prefix}.merged.hybrid_selection_metrics" \
         TMP_DIR="${TMP}" \

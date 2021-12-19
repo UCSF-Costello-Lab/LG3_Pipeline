@@ -64,9 +64,9 @@ if [ $# -ne 3 ]; then
     error "Please specify patient, CONV file and project!"
 fi
 
-#INTERVAL=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
-echo "- INTERVAL=${INTERVAL:?}"
-assert_file_exists "${INTERVAL}"
+#ILIST=${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list
+echo "- ILIST=${ILIST:?}"
+assert_file_exists "${ILIST}"
 
 ## Software
 PBS=${LG3_HOME}/Mutect2_TvsN.pbs
@@ -126,7 +126,7 @@ do
                 warn "File $OUT exists, skipping this job ..."
         else
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "Mut2_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},INTERVAL=$INTERVAL,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "Mut2_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},ILIST=$ILIST,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${PATIENT}.temp.conversions.txt"

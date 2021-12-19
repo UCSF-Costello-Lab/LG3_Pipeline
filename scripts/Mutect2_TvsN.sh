@@ -49,7 +49,7 @@ nbamfile=$1
 tbamfile=$2
 prefix=$3
 patientID=$4
-ILIST=${INTERVAL:?}
+ILIST=${ILIST:?}
 XMX=$6
 DEST=$7 ## Destination directory
 assert_directory_exists "${DEST}"
