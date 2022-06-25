@@ -1,0 +1,111 @@
+#!/bin/bash
+### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
+#PBS -e _Recal_${PATIENT}.err
+#PBS -o _Recal_${PATIENT}.out
+#PBS -l nodes=1:ppn=12,vmem=200gb
+#PBS -l walltime=14-00:00:00
+#PBS -l mem=200gb
+#PBS -m ae
+
+# shellcheck source=scripts/utils.sh
+source "${LG3_HOME:?}/scripts/utils.sh"
+source_lg3_conf
+
+PROGRAM=${BASH_SOURCE[0]}
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
+echo "Call: ${BASH_SOURCE[*]}"
+echo "Script: $PROGRAM"
+echo "Arguments: $*"
+
+### Configuration
+LG3_HOME=${LG3_HOME:?}
+LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
+EMAIL=${EMAIL:?}
+PROJECT=${PROJECT:-LG3}
+LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
+LG3_DEBUG=${LG3_DEBUG:-true}
+
+### Debug
+if [[ $LG3_DEBUG ]]; then
+  echo "Settings:"
+  echo "- LG3_HOME=$LG3_HOME"
+  echo "- LG3_OUTPUT_ROOT=$LG3_OUTPUT_ROOT"
+  echo "- EMAIL=${EMAIL}"
+  echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
+  echo "- PWD=$PWD"
+  echo "- USER=$USER"
+  echo "- SLURM_NTASKS=$SLURM_NTASKS"
+  echo "- hostname=$(hostname)"
+fi
+
+
+### Input
+echo "Input:"
+echo "- PROJECT=${PROJECT:?}"
+echo "- BAMS=${BAMS:?}"
+echo "- PATIENT=${PATIENT:?}"
+echo "- NORMAL=${NORMAL:?}"
+echo "- ILIST=${ILIST:?}"
+
+assert_patient_name "${PATIENT}"
+
+## Assert existance of input files
+assert_file_exists "${ILIST}"
+ILIST=$(readlink -e "${ILIST}") ## Absolute path
+
+echo -n "Checking R: "
+"$RSCRIPT" --version || error "No Rscript is available!"
+
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+NODES=$(hostname)
+echo "Started $PROG on $DATE"
+echo "Using node(s): $NODES"
+
+## Assert existance of software
+SH_RECAL=${LG3_HOME}/scripts/Recal.sh
+assert_file_executable "${SH_RECAL}"
+
+SH_GERMLINE=${LG3_HOME}/scripts/Germline.sh
+assert_file_executable "${SH_GERMLINE}"
+
+DESTDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
+make_dir "${DESTDIR}"
+
+DESTDIR2=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}/germline
+make_dir "${DESTDIR2}"
+
+WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
+make_dir "${WDIR}"
+change_dir "${WDIR}"
+
+echo -n "Open file limit: "
+ulimit -n
+
+"${SH_RECAL}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL} failed"
+
+rm -f "${PATIENT}.merged.bam"
+rm -f "${PATIENT}.merged.bam.bai"
+
+change_dir "${LG3_SCRATCH_ROOT}"
+
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp 1"
+
+echo "Starting germline analysis ..."
+WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
+
+make_dir "${WDIR2}"
+
+change_dir "${WDIR2}"
+
+assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+
+{ time "${SH_GERMLINE}" \
+      "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SH_GERMLINE} failed"
+
+cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
+
+echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+rm -rf "${LG3_SCRATCH_ROOT}"
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"
