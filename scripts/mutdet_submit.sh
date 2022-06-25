@@ -97,6 +97,9 @@ done < "${PATIENT}.temp.conversions.txt"
 
 echo "- normid='${normid:?}'"
 
+## Short PatientID
+PAT=${PATIENT/atient/}
+
 ## Cycle through tumors and submit MUTECT jobs
 while IFS=$'\t' read -r ID _ _ SAMP
 do
@@ -131,7 +134,7 @@ do
                 warn "File $OUT exists, skipping this job ..."
         else
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "Mut_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},CONFIG=$CONFIG,ILIST=$ILIST,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "Mut_${PAT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},CONFIG=$CONFIG,ILIST=$ILIST,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${PATIENT}.temp.conversions.txt"

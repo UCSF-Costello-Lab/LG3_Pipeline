@@ -76,9 +76,8 @@ assert_file_exists "${PBS}"
 
 ## Short PatientID
 PAT=${PATIENT/atient/}
-## Submit
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N "AVF_${PAT}" -v "${QSUB_ENVVARS},MUT=${MUT},QSTAT=${QSTAT},PATIENT=${PATIENT},PROJECT=${PROJECT}" "$PBS"
+qsub ${QSUB_OPTS} -N "A${PAT}" -v "${QSUB_ENVVARS},MUT=${MUT},QSTAT=${QSTAT},PATIENT=${PATIENT},PROJECT=${PROJECT}" "$PBS"
 
 #sbatch --mail-user="${EMAIL}" --mail-type=END,FAIL \
    #--job-name="avf_${PAT}" \

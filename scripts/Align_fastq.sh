@@ -15,7 +15,7 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
-#ncores=${PBS_NUM_PPN:-1}
+
 ncores=${SLURM_NTASKS:-1}
 mem=${SLURM_MEM:-1}
 time=${SLURM_TIME:-1}
@@ -29,7 +29,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  #echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
   echo "- mem=$mem"

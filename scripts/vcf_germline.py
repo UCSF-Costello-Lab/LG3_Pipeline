@@ -88,3 +88,4 @@ if (len(sys.argv) != 4):
 	usage()
 else:
 	parsing(sys.argv[1], sys.argv[2], sys.argv[3])
+

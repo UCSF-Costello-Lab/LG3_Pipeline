@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l walltime=14-00:00:00
+#PBS -l walltime=7-00:00:00
 
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
@@ -69,9 +69,13 @@ assert_file_exists "${QSTAT}"
 echo -n "Found: "
 wc -l "${QSTAT}"
 
-WC_QSTAT=$(wc -l "${QSTAT}" | tr -s ' ' | cut -d' ' -f1)
-if [ "${WC_QSTAT}" -eq 11 ]; then
+#WC_QSTAT=$(wc -l "${QSTAT}" | tr -s ' ' | cut -d' ' -f1)
+WC_QSTAT=$(tail -n +2 "${QSTAT}" | grep chr | wc -l)
+
+if [ "${WC_QSTAT}" -eq 0 ]; then
    error "qualitystats are empty, hyper mutator?"
+else
+	echo "qualitystats found ${WC_QSTAT}"	
 fi
 
 change_dir "${MUTINDEL}"

@@ -17,6 +17,8 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${SLURM_NTASKS:-1}
+ulimit -n 64000
+DEBUG=true
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -28,6 +30,11 @@ if [[ $LG3_DEBUG ]]; then
   echo "- USER=$USER"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
+  echo -n "- initial open file limit="
+  ulimit -n
+  DEBUG_RECAL=${DEBUG_RECAL:-${LG3_OUTPUT_ROOT}/${PROJECT}/exome_recal_debug}
+  echo "DEBUG_RECAL=${DEBUG_RECAL}"
+  mkdir -p "${DEBUG_RECAL}/${PATIENT}"
 fi
 
 
@@ -104,7 +111,7 @@ echo -e "\\n[Recal] Merge BAM files..."
 # shellcheck disable=SC2086
 
 # Comment: Because how 'inputs' is created and used below
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_MERGESAMFILES}" \
         ${inputs} \
         OUTPUT="${PATIENT}.merged.bam" \
@@ -116,13 +123,17 @@ echo -e "\\n[Recal] Merge BAM files..."
 
 assert_file_exists "${PATIENT}.merged.bam"
 
+${DEBUG} && { cp -p "${PATIENT}.merged.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step1] Saved ${PATIENT}.merged.bam" ; }
+
 echo -e "\\n[Recal] Index new BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
 
 assert_file_exists "${PATIENT}.merged.bam.bai"
 
+${DEBUG} && { cp -p "${PATIENT}.merged.bam.bai" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step2] Saved ${PATIENT}.merged.bam.bai" ; }
+
 echo -e "\\n[Recal] Create intervals for indel detection..."
-{ time $JAVA -Xmx8g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type RealignerTargetCreator \
         --reference_sequence "$REF" \
@@ -135,8 +146,10 @@ echo -e "\\n[Recal] Create intervals for indel detection..."
 
 assert_file_exists "${PATIENT}.merged.intervals"
 
+${DEBUG} && { cp -p "${PATIENT}.merged.intervals" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step3] Saved ${PATIENT}.merged.intervals" ; }
+
 echo -e "\\n[Recal] Indel realignment..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type IndelRealigner \
         --reference_sequence "$REF" \
@@ -149,12 +162,22 @@ echo -e "\\n[Recal] Indel realignment..."
 
 assert_file_exists "${PATIENT}.merged.realigned.bam"
 
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step4a] Saved ${PATIENT}.merged.realigned.bam" ; }
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.bai" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step4b] Saved ${PATIENT}.merged.realigned.bai" ; }
+
 rm -f "${PATIENT}.merged.bam"
 rm -f "${PATIENT}.merged.bam.bai"
 rm -f "${PATIENT}.merged.intervals"
 
+  echo -n "- open file limit before Fix mate ="
+  ulimit -n
+
 echo -e "\\n[Recal] Fix mate information..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+### SEE: http://seqanswers.com/forums/showthread.php?t=7525
+## java ... MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=[some lower than `ulimit -n`] 
+		  ##MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=50000 \
+### VALIDATION_STRINGENCY=SILENT MAX_RECORDS_IN_RAM=5000000 MAX_OPEN_TEMP_FILES=1573028 ??
+{ time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_FIXMATEINFO}" \
         INPUT="${PATIENT}.merged.realigned.bam" \
         OUTPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
@@ -162,15 +185,19 @@ echo -e "\\n[Recal] Fix mate information..."
         TMP_DIR="${TMP}" \
         VERBOSITY=WARNING \
         QUIET=true \
+			MAX_RECORDS_IN_RAM=5000000 \
         VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Verify mate information failed"
 
+
 assert_file_exists "${PATIENT}.merged.realigned.mateFixed.bam"
+
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.mateFixed.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo " [DEBUG step5] Saved ${PATIENT}.merged.realigned.mateFixed.bam" ; }
 
 rm -f "${PATIENT}.merged.realigned.bam"
 rm -f "${PATIENT}.merged.realigned.bai"
 
 echo -e "\\n[Recal] Mark duplicates..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+{ time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_MARKDUPS}" \
         INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         OUTPUT="${PATIENT}.merged.realigned.rmDups.bam" \
@@ -182,6 +209,10 @@ echo -e "\\n[Recal] Mark duplicates..."
         VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
 
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
+assert_file_exists "${PATIENT}.merged.realigned.mateFixed.metrics"
+
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.rmDups.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step6] Saved ${PATIENT}.merged.realigned.rmDups.bam" ; }
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.mateFixed.metrics" "${DEBUG_RECAL}/${PATIENT}" ; echo " [DEBUG step5] Saved ${PATIENT}.merged.realigned.mateFixed.metrics" ; }
 
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
@@ -189,6 +220,8 @@ echo -e "\\n[Recal] Index BAM file..."
 { time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
 
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
+
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.rmDups.bam.bai" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step7] Saved ${PATIENT}.merged.realigned.rmDups.bam.bai" ; }
 
 ### Job crushed at -Xmx8g, increase!
 echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
@@ -209,8 +242,10 @@ echo -e "\\n[Recal] Base-quality recalibration: Count covariates..."
 
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.csv"
 
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.rmDups.csv" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step8] Saved ${PATIENT}.merged.realigned.rmDups.csv" ; }
+
 echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
+{ time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type TableRecalibration \
         --reference_sequence "$REF" \
         --logging_level WARN \
@@ -222,12 +257,15 @@ echo -e "\\n[Recal] Base-quality recalibration: Table Recalibration..."
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bam"
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bai"
 
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.rmDups.recal.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step9a] Saved ${PATIENT}.merged.realigned.rmDups.recal.bam" ; }
+${DEBUG} && { cp -p "${PATIENT}.merged.realigned.rmDups.recal.bai" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step9b] Saved ${PATIENT}.merged.realigned.rmDups.recal.bai" ; }
+
 rm -f "${PATIENT}.merged.realigned.rmDups.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.bam.bai"
 rm -f "${PATIENT}.merged.realigned.rmDups.csv"
 
 echo -e "\\n[Recal] Split BAM files..."
-{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
+{ time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
         --logging_level WARN \
@@ -237,6 +275,8 @@ echo -e "\\n[Recal] Split BAM files..."
 
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bam"
 rm -f "${PATIENT}.merged.realigned.rmDups.recal.bai"
+
+${DEBUG} && { cp -p temp_* "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step10] Saved temp_*" ; }
 
 for i in temp_*.bam
 do
@@ -248,9 +288,14 @@ do
         { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || error "Sorting $base failed"
 		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam"
 
+			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step11] Saved ${base}.bwa.realigned.rmDups.recal.bam" ; }
+
 		  echo "[Recal] indexing ${base}.bwa.realigned.rmDups.recal.bam"
         { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || error "Indexing $base failed"
 		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam.bai"
+
+			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.bam.bai" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step12] Saved ${base}.bwa.realigned.rmDups.recal.bam.bai" ; }
+
         rm -f "$i"
 done
 
@@ -271,8 +316,10 @@ do
 
 		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.flagstat"
 
+			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.flagstat" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step13] Saved ${base}.bwa.realigned.rmDups.recal.flagstat" ;}
+
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
-        { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_HSMETRICS}" \
                 BAIT_INTERVALS="${ILIST}" \
                 TARGET_INTERVALS="${ILIST}" \
@@ -285,8 +332,10 @@ do
 
 		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics"
 
+			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step14] Saved ${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" ; }
+
         echo -e "\\n[QC] Collect multiple QC metrics..."
-        { time R_PROFILE_USER=NULL $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        { time R_PROFILE_USER=NULL $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups.recal" \
@@ -298,6 +347,9 @@ do
 		  for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
 		  do
 		      assert_file_exists  "${base}.bwa.realigned.rmDups.recal.${EXT}"
+			
+				${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.${EXT}" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step15] Saved ${base}.bwa.realigned.rmDups.recal.${EXT}" ; }
+
 		  done
         echo "------------------------------------------------------"
 done

@@ -16,7 +16,7 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:?}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+ncores=${SLURM_NTASKS:-1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -26,7 +26,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
   echo "- ncores=${ncores}"
 fi
@@ -63,10 +62,19 @@ assert_file_exists "${tbamfile}"
 assert_file_exists "${CONFIG}"
 assert_file_exists "${ILIST}"
 
+if [ "${RECAL_BAM_EXT:?}" == "mem.sorted.mrkDups.recal" ]; then
+   F1=mem
+elif [ "${RECAL_BAM_EXT}" == "bwa.realigned.rmDups.recal" ]; then
+   F1=bwa
+else
+   echo "ERROR: Unknown RECAL_BAM_EXT: ${RECAL_BAM_EXT}"
+	exit 1
+fi
+
 normalname=${nbamfile##*/}
-normalname=${normalname%%.bwa*}
+normalname=${normalname%%.${F1}*}
 tumorname=${tbamfile##*/}
-tumorname=${tumorname%%.bwa*}
+tumorname=${tumorname%%.${F1}*}
 
 ### Software
 assert_python "$PYTHON"

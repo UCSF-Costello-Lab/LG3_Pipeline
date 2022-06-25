@@ -16,6 +16,7 @@
 ###  --mutect          Check MutDet output
 ###  --pindel          Check Pindel output
 ###  --combined        Check mutation output
+###  --avf             Check AVF filtered output
 ###  --all             Check all outputs (default)
 ###  --qc1             Check QC1 outputs
 ###  --qc2             Check QC2 outputs
@@ -35,8 +36,8 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 PROJECT=${PROJECT:-LG3}
 CONV=${CONV:-patient_ID_conversions.tsv}
 
-#BAM_SUFF=bwa.realigned.rmDups.recal.bam
-BAM_SUFF=bwa.realigned.rmDups.recal.insert_size_metrics
+BAM_SUFF=${RECAL_BAM_EXT}.bam
+#BAM_SUFF=${RECAL_BAM_EXT}.insert_size_metrics
 
 ## Colors and colored messages
 RED='\033[0;31m'
@@ -57,6 +58,7 @@ GL=false
 PINDEL=false
 MUT=false
 COMB=false
+AVF=false
 QC1=false
 QC2=false
 QC3=false
@@ -83,6 +85,7 @@ case $1 in
     --p*) PINDEL=true;ALL=false;shift 1;;
     --mut*) MUT=true;ALL=false;shift 1;;
     --comb*) COMB=true;ALL=false;shift 1;;
+    --avf) AVF=true;ALL=false;shift 1;;
     --qc1) QC1=true;ALL=false;shift 1;;
     --qc2) QC2=true;ALL=false;shift 1;;
     --qc3) QC3=true;ALL=false;shift 1;;
@@ -103,6 +106,8 @@ if $ALL ; then
     PINDEL=true
     MUT=true
     COMB=true
+	 AVF=true
+	 FAC=true
 fi
 
 if $QC ; then
@@ -231,7 +236,8 @@ if $GL ; then
         ### Expected output
         OUT=${WORKDIR}/NOR-${normid}_vs_${ID}.germline
         if [ -s "$OUT" ]; then
-            echo -e "Germline $ID $OK"
+				RET=$(cut -f3 -d\( "$OUT" | tail -n +2 | sed 's/)//')
+            echo -e "Germline $ID $OK ${YEL}${RET}${NOC}"
         else
             echo -e "Germline $ID $ERR"
         fi
@@ -326,6 +332,22 @@ if $COMB ; then
     fi
 fi
 
+if $AVF ; then
+    WORKDIR1=${LG3_OUTPUT_ROOT}/${PROJECT}/MutInDel
+    ## Expected output: 
+    OUT=${WORKDIR1}/${PATIENT}.R.mutations.avf
+    if [ -s "$OUT" ]; then
+        #LCNT=$(wcl "$OUT")
+		  LCNT=$(grep -v retain "$OUT" | wc -l)
+        echo -e "AVF $OK ${YEL}${LCNT}${NOC}"
+    else
+        echo -e "AVF $ERR"
+    fi
+fi    
+
+
+
+
 if $QC1 ; then
     WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
     ## Expected output:
@@ -345,7 +367,8 @@ if $QC2 ; then
     while IFS=$'\t' read -r ID _ _ SAMP
     do
         ### Expected output
-        OUT=${WORKDIR}/${ID}.bwa.realigned.rmDups.recal.bam.hist
+        #OUT=${WORKDIR}/${ID}.bwa.realigned.rmDups.recal.bam.hist
+        OUT=${WORKDIR}/${ID}.${RECAL_BAM_EXT}.bam.hist
         if [ -r "$OUT" ]; then
 				LCNT=$(wcl "$OUT")
             echo -e "QC2 hist $ID $OK ${YEL}${LCNT}${NOC}"

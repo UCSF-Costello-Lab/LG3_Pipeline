@@ -3,6 +3,8 @@
 #PBS -e _Rec${START}_${PATIENT}.err
 #PBS -o _Rec${START}_${PATIENT}.out
 #PBS -l nodes=1:ppn=12,vmem=200gb
+#PBS -l walltime=14-00:00:00
+#PBS -l mem=200gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -88,22 +90,22 @@ change_dir "${LG3_SCRATCH_ROOT}"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp 1"
 
-echo "Starting germline analysis ..."
-WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline 
+#echo "Starting germline analysis ..."
+#WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline 
 
-make_dir "${WDIR2}"
+#make_dir "${WDIR2}"
 
-change_dir "${WDIR2}"
+#change_dir "${WDIR2}"
 
-assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+#assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
-{ time "${SCRIPT_B}" \
-      "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SCRIPT_B} failed"
+#{ time "${SCRIPT_B}" \
+      #"../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      #"${PATIENT}" "$ILIST"; } 2>&1 || error "${SCRIPT_B} failed"
+#
+#cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2" 
 
-cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2" 
-
-echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
-rm -rf "${LG3_SCRATCH_ROOT}"
+#echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+#rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

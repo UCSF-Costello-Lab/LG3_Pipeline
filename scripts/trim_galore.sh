@@ -26,7 +26,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
+  echo "  ncores=${SLURM_NTASKS}"
   echo "- hostname=$(hostname)"
   echo "- TG=${TG:?}"
   echo "- CUTADAPT=${CUTADAPT:?}"

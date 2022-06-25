@@ -5,7 +5,7 @@
 #PBS -e _PostMut_${PATIENT}.err
 #PBS -o _PostMut_${PATIENT}.out
 #PBS -l nodes=1:ppn=1,vmem=64gb
-#PBS -l walltime=14-00:00:00
+#PBS -l walltime=7-00:00:00
 #PBS -l mem=64gb
 #PBS -m ae
 
@@ -47,7 +47,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- PATIENT=${PATIENT:?}"
   echo "- PROJECT=${PROJECT:?}"
   echo "- CONV=${CONV:?}"
-  echo "- SLURM_NTASKS=$SLURM_NTASKS"
+  echo "- SLURM_NTASKS=${SLURM_NTASKS}"
   echo "- hostname=$(hostname)"
 fi
 

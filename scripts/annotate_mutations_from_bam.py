@@ -17,21 +17,38 @@ def get_samples_from_patient(mutfile, conversionfile, patient_ID, projectname):
   data_pat = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID, data)
   print data_pat
 
+  recal_bam_ext = os.environ["RECAL_BAM_EXT"]
+  print 'RECAL_BAM_EXT = ' + recal_bam_ext
+
+  #fileheader1 = ".bwa.realigned.rmDups.recal"
+  #fileheader2 = ".mem.sorted.mrkDups.recal"
   ## determine where files are stored
   testID = data_pat[0].strip().split('\t')[col_lib]
   if "norm" in patient_ID:
     patient_ID_folder = patient_ID.split("norm")[0]
   else:
     patient_ID_folder = patient_ID
+
   fullpath = os.environ["LG3_INPUT_ROOT"] + "/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
-  #fileheader = ".bwa.realigned.rmDups"
-  fileheader = ".bwa.realigned.rmDups.recal"
-  if not os.path.isfile(fullpath + testID + fileheader + ".bam"):
-    fullpath = fullpath.replace("data", "home", 1)
-    if not os.path.isfile(fullpath + testID + fileheader + ".bam"):
-      print "ERROR: files can not be found"
-      print fullpath + testID + fileheader + ".bam"
-      sys.exit(1)
+
+  if not os.path.isfile(fullpath + testID + '.' + recal_bam_ext + ".bam"):
+    print "ERROR: bam file can not be found. Tried:"
+    print fullpath + testID + '.' + recal_bam_ext + ".bam"
+    sys.exit(1) 
+  #else:
+    #print "ERROR: bam file can not be found. Tried:"
+    #print fullpath + testID + fileheader1 + ".bam"
+    #print fullpath + testID + fileheader2 + ".bam"
+    #sys.exit(1)
+
+  #print "Final fileheader " + fileheader
+
+  #if not os.path.isfile(fullpath + testID + fileheader + ".bam"):
+    #fullpath = fullpath.replace("data", "home", 1)
+    #if not os.path.isfile(fullpath + testID + fileheader + ".bam"):
+      #print "ERROR: files can not be found"
+      #print fullpath + testID + fileheader + ".bam"
+      #sys.exit(1)
 
   ## for each sample, call annotate_mutations_from_bam
   sn=0

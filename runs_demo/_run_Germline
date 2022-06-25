@@ -21,7 +21,7 @@ CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157t10}
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 NORMAL=${NORMAL:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | grep -w "Normal" | cut -f 1)}
-ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+#ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
 
 ## Requires absolute path 
 LG3_HOME=$(readlink -e "$LG3_HOME")
@@ -63,7 +63,9 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 PBS=${LG3_HOME}/Germline.pbs
 assert_file_exists "${PBS}"
 
+## Short PatientID
+PAT=${PATIENT/atient/}
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N GL_$PATIENT -v "${QSUB_ENVVARS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
+qsub ${QSUB_OPTS} -N Gl${PAT} -v "${QSUB_ENVVARS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

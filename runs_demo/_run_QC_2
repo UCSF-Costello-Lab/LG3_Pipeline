@@ -19,7 +19,8 @@ LG3_INPUT_ROOT=${LG3_INPUT_ROOT:-${LG3_OUTPUT_ROOT}}
 EMAIL=${EMAIL:?}
 PROJECT=${PROJECT:-LG3}
 PATIENT=${PATIENT:-Patient157t10}
-BEDPATH=${BEDPATH:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.bed}
+#BEDPATH=${BEDPATH:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.bed}
+BEDPATH=${BEDPATH:-${LG3_HOME}/resources/xgen-exome-research-panel-targets_6bpexpanded.bed}
 BAMPATH=${LG3_INPUT_ROOT}/${PROJECT}/exomes_recal
 WORKDIR=${LG3_OUTPUT_ROOT}/${PROJECT}/exome_QC_plots/${PATIENT}
 
@@ -43,7 +44,8 @@ echo "- BEDPATH=${BEDPATH:?}"
 assert_directory_exists "${BAMPATH}"
 BAMPATH=$(readlink -e "${BAMPATH}") 
 echo "- BAMPATH=${BAMPATH}"
-ls -1 "${BAMPATH}/${PATIENT}"/*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
+#ls -1 "${BAMPATH}/${PATIENT}"/*.bwa.realigned.rmDups.recal.bam || error "No bam files found in ${BAMPATH}"
+ls -1 "${BAMPATH}/${PATIENT}"/*."${RECAL_BAM_EXT}".bam || error "No bam files found in ${BAMPATH}"
 
 make_dir "${WORKDIR}"
 WORKDIR=$(readlink -e "${WORKDIR}")
@@ -58,9 +60,9 @@ if $qsub_can_set_pwd; then
 fi
 
 ## Override the qsub email address?
-if [[ -n ${EMAIL} ]]; then
-  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-fi
+#if [[ -n ${EMAIL} ]]; then
+#  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+#fi
 
 echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"
@@ -71,7 +73,9 @@ echo "- QSUB_ENVVARS=${QSUB_ENVVARS}"
 SH_GET_COV=${QC_PLOT_HOME}/get_coverage.sh
 assert_file_executable "${SH_GET_COV}"
 
-PN=${PATIENT/Patient/Pat}
-qsub "${QSUB_OPTS}" -l vmem=300gb -e "_QC2_${PATIENT}.err" -o "_QC2_${PATIENT}.out" -N "QC2_${PN}" -m ae -v "${QSUB_ENVVARS},patient=${PATIENT},bedpath=${BEDPATH},bampath=${BAMPATH}/${PATIENT}" "${SH_GET_COV}"
+## Short PatientID
+PN=${PATIENT/atient/}
+# shellcheck disable=SC2086
+qsub ${QSUB_OPTS} -N QC2_${PN} -v "${QSUB_ENVVARS},patient=${PATIENT},bedpath=${BEDPATH},bampath=${BAMPATH}/${PATIENT}" "${SH_GET_COV}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

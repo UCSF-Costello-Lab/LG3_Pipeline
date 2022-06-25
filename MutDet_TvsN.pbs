@@ -71,8 +71,10 @@ ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 SH_MUTDET=${LG3_HOME}/scripts/MutDet.sh
 assert_file_executable "${SH_MUTDET}"
 
-BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
-BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
+#BAMN=$BAMDIR/${PATIENT}/${NORMAL}.bwa.realigned.rmDups.recal.bam
+#BAMT=$BAMDIR/${PATIENT}/${TUMOR}.bwa.realigned.rmDups.recal.bam
+BAMN=$BAMDIR/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}.bam
+BAMT=$BAMDIR/${PATIENT}/${TUMOR}.${RECAL_BAM_EXT}.bam
 
 assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"
@@ -106,8 +108,8 @@ make_dir "${WORKDIR}"
 echo "Copy results from ${SCRATCH} to ${WORKDIR}"
 cp -p "${SCRATCH}"/* "${WORKDIR}" || error "Fail to copy results to ${WORKDIR}"
 
-echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
-rm -rf "${LG3_SCRATCH_ROOT}"
+#echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+#rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "End of PBS script!"
 date

@@ -1,4 +1,10 @@
 #!/bin/bash
+#PBS -e _QC1_${PATIENT}.err
+#PBS -o _QC1_${PATIENT}.out
+#PBS -l nodes=1:ppn=2,vmem=96gb
+#PBS -l walltime=7-00:00:00
+#PBS -l mem=96gb
+#PBS -m ae
 
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"

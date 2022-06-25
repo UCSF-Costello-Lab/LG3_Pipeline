@@ -15,17 +15,11 @@ def pindel_setup(patient_ID, projectname, patIDs):
   ## pull out patient specific info
   data_pat = filter(lambda x:x.strip().split('\t')[col_pat] == patient_ID, data)
 
-  ## determine where files are stored
-  #if col_file != "":
-  #  fileheader = col_file
-  #  print fileheader
-  #else:
-
-  ### After Recal2 use this:
-  #fileheader = ".bwa.realigned.rmDups"
-
   ### After Recal use this:
-  fileheader = ".bwa.realigned.rmDups.recal"
+  fileheader1 = ".bwa.realigned.rmDups.recal"
+  bamheader1 = ".bwa.realigned.rmDups.recal"
+  fileheader2 = ".mem.sorted.mrkDups.recal.multi_metrics"
+  bamheader2 = ".mem.sorted.mrkDups.recal"
   #fileheader = "-trim.bwa.realigned.rmDups.recal"
 
   testID = data_pat[0].strip().split('\t')[col_lib]
@@ -33,13 +27,22 @@ def pindel_setup(patient_ID, projectname, patIDs):
     patient_ID_folder = patient_ID.split("norm")[0]
   else:
     patient_ID_folder = patient_ID
+
   fullpath = os.environ["LG3_INPUT_ROOT"] + "/" + projectname + "/exomes_recal/" + patient_ID_folder + "/"
-  if not os.path.isfile(fullpath + testID + fileheader + ".insert_size_metrics"):
-    fullpath = fullpath.replace("data", "home", 1)
-    if not os.path.isfile(fullpath + testID + fileheader + ".insert_size_metrics"):
-      print "ERROR: files can not be found"
-      print fullpath + testID + fileheader + ".insert_size_metrics"
-      sys.exit(1)
+
+  if os.path.isfile(fullpath + testID + fileheader1 + ".insert_size_metrics"):
+    fileheader = fileheader1
+    bamheader = bamheader1
+  elif os.path.isfile(fullpath + testID + fileheader2 + ".insert_size_metrics"):
+    fileheader = fileheader2
+    bamheader = bamheader2
+  else:
+    print "ERROR: insert_size_metrics file can not be found. Tried:"
+    print fullpath + testID + fileheader1 + ".insert_size_metrics"
+    print fullpath + testID + fileheader2 + ".insert_size_metrics"
+    sys.exit(1)
+
+  print "Final fileheader " + fileheader 
 
   ## prepare outfile
   cfg = open(patient_ID + '.pindel.cfg', 'w')
@@ -66,12 +69,11 @@ def pindel_setup(patient_ID, projectname, patIDs):
       if i.split('\t')[0] == "MEDIAN_INSERT_SIZE": foundit = True
     print sample_type, lib_ID, med
 
-
-    #if patient_ID == "Patient126" and  sample_type != "Normal":
     if fileheader == ".merged":
       cfg.write(fullpath + lib_ID + fileheader + ".sorted.bam" + "\t" + med + "\t" + patient_ID + "_" + sample_type + "\n")
     else:
-      cfg.write(fullpath + lib_ID + fileheader + ".bam" + "\t" + med + "\t" + patient_ID + "_" + sample_type + "\n")
+      cfg.write(fullpath + lib_ID + bamheader + ".bam" + "\t" + med + "\t" + patient_ID + "_" + sample_type + "\n")
+      #cfg.write(fullpath + lib_ID + fileheader + ".bam" + "\t" + med + "\t" + patient_ID + "_" + sample_type + "\n")
 
   cfg.close()
     

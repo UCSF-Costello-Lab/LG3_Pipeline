@@ -16,7 +16,7 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+ncores=${SLURM_NTASKS:-1}
 
 ### Debug
 if [[ $LG3_DEBUG ]]; then
@@ -26,11 +26,18 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
 fi
 
+if [ "${RECAL_BAM_EXT:?}" == "mem.sorted.mrkDups.recal" ]; then
+   F1=mem
+elif [ "${RECAL_BAM_EXT}" == "bwa.realigned.rmDups.recal" ]; then
+   F1=bwa
+else
+   echo "ERROR: Unknown RECAL_BAM_EXT: ${RECAL_BAM_EXT}"
+	exit 1
+fi
 
 ## Input
 nbamfile=$1
@@ -38,6 +45,7 @@ PATIENT=$2
 ILIST=$3
 echo "Input:"
 echo "- nbamfile=${nbamfile:?}"
+echo "_ flag=${F1}"
 echo "- PATIENT=${PATIENT:?}"
 echo "- ILIST=${ILIST:?}"
 
@@ -46,7 +54,7 @@ assert_file_exists "${nbamfile}"
 assert_file_exists "${ILIST}"
 
 normalname=${nbamfile##*/}
-normalname=${normalname%%.bwa*}
+normalname=${normalname%%.${F1}*}
 bamdir=${nbamfile%/*}
 
 ## References
@@ -82,7 +90,7 @@ echo "[Germline] Normal Sample: $normalname"
 echo "-------------------------------------------------"
 
 ## Construct string with one or more '-I <bam>' elements
-INPUTS=$(for i in "${bamdir}"/*.bwa.realigned.rmDups.recal.bam
+INPUTS=$(for i in "${bamdir}"/*."${RECAL_BAM_EXT}.bam"
 do
         assert_file_exists "${i}"
         echo -n "-I $i "
@@ -185,7 +193,7 @@ fi
 for i in "${bamdir}"/*.bam
 do
         tumorname=${i##*/}
-        tumorname=${tumorname%%.bwa*}
+        tumorname=${tumorname%%.${F1}*}
         prefix="NOR-${normalname}_vs_${tumorname}"
 
         if [ ! -e "${prefix}.germline" ]; then

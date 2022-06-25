@@ -21,9 +21,11 @@ CONV=${CONV:-patient_ID_conversions.tsv}
 PATIENT=${PATIENT:-Patient157t10}
 SAMPLES=${SAMPLES:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | cut -f1 | tr '\n' ' ')}
 NORMAL=${NORMAL:-$(grep -P "\\t${PATIENT}\\t" "${CONV}" | grep -w "Normal" | cut -f 1)}
-ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+#ILIST=${ILIST:-${LG3_HOME}/resources/SeqCap_EZ_Exome_v3_capture.interval_list}
+#ILIST=${ILIST:-${LG3_HOME}/resources/xgen-exome-research-panel-targets_6bpexpanded.interval_list}
 START=${START:-1}
-RECOVER_DIR=output/${PROJECT}/exomes_recal/${PATIENT}.recover
+#RECOVER_DIR=output/${PROJECT}/exomes_recal/${PATIENT}.recover
+RECOVER_DIR=output/${PROJECT}/exome_recal_debug/${PATIENT}
 assert_directory_exists "${RECOVER_DIR}"
 RECOVER_DIR=$(readlink -e "${RECOVER_DIR}") ## requires absolute path
 
@@ -94,7 +96,9 @@ BAMS=$(echo "$BAMS" | cut -c2-)
 echo "Total BAMS: $CNT"
 echo "$BAMS"
 
+## Short PatientID
+PAT=${PATIENT/atient/}
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N Rec${START}_$PATIENT -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT},START=${START},RECOVER_DIR=${RECOVER_DIR}" "$PBS"
+qsub ${QSUB_OPTS} -N R${START}${PAT} -v "${QSUB_ENVVARS},BAMS=${BAMS},NORMAL=${NORMAL},PATIENT=${PATIENT},ILIST=${ILIST},PROJECT=${PROJECT},START=${START},RECOVER_DIR=${RECOVER_DIR}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

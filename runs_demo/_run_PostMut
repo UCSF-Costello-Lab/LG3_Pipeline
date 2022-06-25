@@ -67,6 +67,6 @@ assert_file_executable "${SH_CHK_MUTDET}"
 ## Short PatientID
 PAT=${PATIENT/atient/}
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PAT}_comb -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
+qsub ${QSUB_OPTS} -N Co${PAT} -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

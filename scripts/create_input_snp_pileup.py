@@ -83,6 +83,8 @@ def create_input_snp_pileup(conversion_path, bampath):
     ## for each patient, run snp-pileup
     print("Creating final SNP pileup input file...")
 
+    recal_bam_ext = os.environ["RECAL_BAM_EXT"]
+
     outfile = open('snp_pileup_input.txt', 'w')# header = patient, nlibID, tlibID, nbampath, tbampath
     for patientID in dic_paired:
         print(patientID)
@@ -90,19 +92,19 @@ def create_input_snp_pileup(conversion_path, bampath):
             normal_libID = pair[0]
             tumor_libID = pair[1]
             # tries to get a normal bam
-            print(bampath+'/'+patientID+'/'+normal_libID+'.bwa.realigned.rmDups.recal.bam')
-            if os.path.isfile(bampath+'/'+patientID+'/'+normal_libID+'.bwa.realigned.rmDups.recal.bam'):
-                normal_bam = bampath+'/'+patientID+'/'+normal_libID+'.bwa.realigned.rmDups.recal.bam'
-            elif os.path.isfile(bampath+'/'+patientID+'/'+normal_libID+'-trim.bwa.realigned.rmDups.recal.bam'):
-                normal_bam = bampath+'/'+patientID+'/'+normal_libID+'-trim.bwa.realigned.rmDups.recal.bam'
+            print(bampath+'/'+patientID+'/'+normal_libID+'.'+recal_bam_ext+'.bam')
+            if os.path.isfile(bampath+'/'+patientID+'/'+normal_libID+'.'+recal_bam_ext+'.bam'):
+                normal_bam = bampath+'/'+patientID+'/'+normal_libID+'.'+recal_bam_ext+'.bam'
+            elif os.path.isfile(bampath+'/'+patientID+'/'+normal_libID+'-trim.'+recal_bam_ext+'.bam'):
+                normal_bam = bampath+'/'+patientID+'/'+normal_libID+'-trim.'+recal_bam_ext+'.bam'
             else:
                 print("Warning(4): Normal bam path for patient cannot be determined...skipping.")
                 continue
             # tries to get a tumor bam
-            if os.path.isfile(bampath+'/'+patientID+'/'+tumor_libID+'.bwa.realigned.rmDups.recal.bam'):
-                tumor_bam = bampath+'/'+patientID+'/'+tumor_libID+'.bwa.realigned.rmDups.recal.bam'
-            elif os.path.isfile(bampath+'/'+patientID+'/'+tumor_libID+'-trim.bwa.realigned.rmDups.recal.bam'):
-                tumor_bam = bampath+'/'+patientID+'/'+tumor_libID+'-trim.bwa.realigned.rmDups.recal.bam'
+            if os.path.isfile(bampath+'/'+patientID+'/'+tumor_libID+'.'+recal_bam_ext+'.bam'):
+                tumor_bam = bampath+'/'+patientID+'/'+tumor_libID+'.'+recal_bam_ext+'.bam'
+            elif os.path.isfile(bampath+'/'+patientID+'/'+tumor_libID+'-trim.'+recal_bam_ext+'.bam'):
+                tumor_bam = bampath+'/'+patientID+'/'+tumor_libID+'-trim.'+recal_bam_ext+'.bam'
             else:
                 print("Warning(5): Tumor bam path for patient cannot be determined...skipping.")
                 continue

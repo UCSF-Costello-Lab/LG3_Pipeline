@@ -3,9 +3,9 @@
 #PBS -N ${PATIENT}.pindel
 #PBS -e _Pindel_${PATIENT}.err
 #PBS -o _Pindel_${PATIENT}.out
-#PBS -l nodes=1:ppn=6,vmem=12gb
+#PBS -l nodes=1:ppn=12,vmem=32gb
 #PBS -l walltime=14-00:00:00
-#PBS -l mem=12gb
+#PBS -l mem=32gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -103,6 +103,9 @@ echo -e "\\n========= [Setup] Make pindel cfg file in ${LG3_SCRATCH_ROOT}"
 
 "${SH_PINDEL_SETUP}" "${PATIENT}" "${PROJECT}" "${CONV}"  || error "${SH_PINDEL_SETUP} failed"
 assert_file_exists "${PATIENT}.pindel.cfg"
+
+echo "Pindel config: "
+cat "${PATIENT}.pindel.cfg"
 
 ## run pindel
 

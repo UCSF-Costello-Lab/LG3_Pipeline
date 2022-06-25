@@ -16,7 +16,7 @@ LG3_HOME=${LG3_HOME:?}
 LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
-ncores=${PBS_NUM_PPN:-1}
+ncores=${SLURM_NTASKS:-1}
 declare -i START
 START=${START:-1}
 
@@ -28,7 +28,6 @@ if [[ $LG3_DEBUG ]]; then
   echo "- LG3_SCRATCH_ROOT=$LG3_SCRATCH_ROOT"
   echo "- PWD=$PWD"
   echo "- USER=$USER"
-  echo "- PBS_NUM_PPN=$PBS_NUM_PPN"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
 fi
@@ -112,7 +111,7 @@ if [ ${STEP} -ge "${START}" ]; then
 	inputs=$(echo "$bamfiles" | awk -F ":" '{OFS=" "} {for (i=1; i<=NF; i++) printf "INPUT="$i" "}')
 	# shellcheck disable=SC2086
 	# Comment: Because how 'inputs' is created and used below
-	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+	{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_MERGESAMFILES}" \
         ${inputs} \
         OUTPUT="${PATIENT}.merged.bam" \
@@ -153,7 +152,7 @@ if [ ${STEP} -ge "${START}" ]; then
 	assert_file_exists "${PATIENT}.merged.bam"
 	assert_file_exists "${PATIENT}.merged.bam.bai"
 	assert_file_exists "${PATIENT}.merged.intervals"
-	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+	{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
         -jar "$GATK" \
         --analysis_type IndelRealigner \
         --reference_sequence "$REF" \
@@ -172,7 +171,7 @@ STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Fix mate information..."
 	assert_file_exists "${PATIENT}.merged.realigned.bam"
-	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+	{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_FIXMATEINFO}" \
         INPUT="${PATIENT}.merged.realigned.bam" \
         OUTPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
@@ -189,7 +188,7 @@ STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Mark duplicates..."
 	assert_file_exists "${PATIENT}.merged.realigned.mateFixed.bam"
-	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+	{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
         -jar "${PICARD_MARKDUPS}" \
         INPUT="${PATIENT}.merged.realigned.mateFixed.bam" \
         OUTPUT="${PATIENT}.merged.realigned.rmDups.bam" \
@@ -200,6 +199,7 @@ if [ ${STEP} -ge "${START}" ]; then
         QUIET=true \
         VALIDATION_STRINGENCY=LENIENT; } 2>&1 || error "Mark duplicates failed"
 	rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
+	assert_file_exists "${PATIENT}.merged.realigned.mateFixed.metrics"
 fi
 
 STEP+=1
@@ -236,7 +236,7 @@ if [ ${STEP} -ge "${START}" ]; then
 	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
 	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 	assert_file_exists "${PATIENT}.merged.realigned.rmDups.csv"
-	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
+	{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type TableRecalibration \
         --reference_sequence "$REF" \
         --logging_level WARN \
@@ -254,7 +254,7 @@ if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Split BAM files..."
 	assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bam"
 	assert_file_exists "${PATIENT}.merged.realigned.rmDups.recal.bai"
-	{ time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
+	{ time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" -jar "$GATK" \
         --analysis_type SplitSamFile \
         --reference_sequence "$REF" \
         --logging_level WARN \
@@ -299,7 +299,7 @@ if [ ${STEP} -ge "${START}" ]; then
         { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat"; } 2>&1
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
-        { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_HSMETRICS}" \
                 BAIT_INTERVALS="${ILIST}" \
                 TARGET_INTERVALS="${ILIST}" \
@@ -311,7 +311,7 @@ if [ ${STEP} -ge "${START}" ]; then
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
-        { time $JAVA -Xmx16g -Djava.io.tmpdir="${TMP}" \
+        { time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
                 OUTPUT="${base}.bwa.realigned.rmDups.recal" \

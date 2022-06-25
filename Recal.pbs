@@ -2,9 +2,9 @@
 ### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
 #PBS -e _Recal_${PATIENT}.err
 #PBS -o _Recal_${PATIENT}.out
-#PBS -l nodes=1:ppn=12,vmem=200gb
+#PBS -l nodes=1:ppn=12,vmem=128gb
 #PBS -l walltime=14-00:00:00
-#PBS -l mem=200gb
+#PBS -l mem=128gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -78,28 +78,34 @@ WDIR=${LG3_SCRATCH_ROOT}/${PATIENT}
 make_dir "${WDIR}"
 change_dir "${WDIR}"
 
+echo -n "Open file limit: "
+ulimit -n
+
 "${SH_RECAL}" "$BAMS" "$PATIENT" "$ILIST" || error "${SH_RECAL} failed"
+
+rm -f "${PATIENT}.merged.bam"
+rm -f "${PATIENT}.merged.bam.bai"
 
 change_dir "${LG3_SCRATCH_ROOT}"
 
 cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/* "${DESTDIR}" || error "cp 1"
 
-echo "Starting germline analysis ..."
-WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
+#echo "Starting germline analysis ..."
+#WDIR2=${LG3_SCRATCH_ROOT}/${PATIENT}/germline
 
-make_dir "${WDIR2}"
+#make_dir "${WDIR2}"
 
-change_dir "${WDIR2}"
+#change_dir "${WDIR2}"
 
-assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
+#assert_file_exists "../${NORMAL}.bwa.realigned.rmDups.recal.bam"
 
-{ time "${SH_GERMLINE}" \
-      "../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
-      "${PATIENT}" "$ILIST"; } 2>&1 || error "${SH_GERMLINE} failed"
+#{ time "${SH_GERMLINE}" \
+      #"../${NORMAL}.bwa.realigned.rmDups.recal.bam" \
+      #"${PATIENT}" "$ILIST"; } 2>&1 || error "${SH_GERMLINE} failed"
 
-cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
+#cp -p "${LG3_SCRATCH_ROOT}/${PATIENT}"/germline/* "${DESTDIR2}" || error "cp 2"
 
-echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
-rm -rf "${LG3_SCRATCH_ROOT}"
+#echo "Cleaning: rm ${LG3_SCRATCH_ROOT} ..."
+#rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

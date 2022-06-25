@@ -61,7 +61,9 @@ assert_file_exists "${PBS}"
 D=${LG3_OUTPUT_ROOT}/${PROJECT}/exomes_recal/${PATIENT}
 assert_directory_exists "${D}"
 
+## Short PatientID
+PAT=${PATIENT/atient/}
 # shellcheck disable=SC2086
-qsub ${QSUB_OPTS} -N ${PATIENT}.pindel -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
+qsub ${QSUB_OPTS} -N Pi${PAT} -v "${QSUB_ENVVARS},PATIENT=${PATIENT},PROJECT=${PROJECT},CONV=${CONV}" "$PBS"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] END: $PROGRAM"

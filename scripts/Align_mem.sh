@@ -3,7 +3,7 @@
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
-XMX=${XMX:-Xmx32G} 
+XMX=${XMX:-Xmx64G} 
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -53,10 +53,15 @@ echo "- THOUSAND=${THOUSAND}"
 assert_python "$PYTHON"
 unset PYTHONPATH  ## ADHOC: In case it is set by user. /HB 2018-09-07
 
-module load jdk/1.8.0 python/2.7.15 htslib/1.7 bwa/0.7.17 samtools/1.7
+#module load jdk/1.8.0 python/2.7.15 htslib/1.7 bwa/0.7.17 samtools/1.7
+module load htslib/1.15.1 samtools/1.15.1 openjdk/1.8.0
+JAVA=java
+SAMTOOLS=samtools
 
 assert_file_executable "${GATK4}"
 PYTHON_REMOVEQC_GZ=${LG3_HOME}/scripts/removeQCgz.py
+
+BWA=/home/ismirnov/install/bwa/bwa-0.7.15/bwa
 
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
@@ -122,7 +127,7 @@ fi
 ### -M for Picard compatibility
 echo "[Align] bwa mem ... "
 ## bwa mem -K 100000000 -p -v 3 -t 16 -Y ref_fasta
-{ time $BWA mem -M -t "${ncores}" -R "@RG\\tID:${SAMPLE}\\tSM:${SAMPLE}\\tPL:$pl\\tLB:${SAMPLE}\\tPU:$pu" "$BWA_INDEX" "${SAMPLE}.read1.QC.fastq" "${SAMPLE}.read2.QC.fastq" > "${SAMPLE}.mem.sam" 2>> __"${SAMPLE}.mem.log"; } 2>&1 || { cat __"${SAMPLE}.mem.log";  error "FAILED"; }
+{ time $BWA mem -v 3 -Y -M -t "${ncores}" -R "@RG\\tID:${SAMPLE}\\tSM:${SAMPLE}\\tPL:$pl\\tLB:${SAMPLE}\\tPU:$pu" "$BWA_INDEX" "${SAMPLE}.read1.QC.fastq" "${SAMPLE}.read2.QC.fastq" > "${SAMPLE}.mem.sam" 2>> __"${SAMPLE}.mem.log"; } 2>&1 || { cat __"${SAMPLE}.mem.log";  error "FAILED"; }
 
 assert_file_exists "${SAMPLE}.mem.sam"
 ${CLEAN} && rm -f "${SAMPLE}"_R?.fastq
@@ -152,6 +157,10 @@ assert_file_exists "${SAMPLE}.mem.sorted.tagged.bam"
 echo "Renaming ${SAMPLE}.mem.sorted.tagged.bam --> ${SAMPLE}.mem.sorted.bam"
 mv "${SAMPLE}.mem.sorted.tagged.bam" "${SAMPLE}.mem.sorted.bam"
 
+echo "[QC] Flagstat before MarkDuplicates"
+{ time ${SAMTOOLS} flagstat -@ "${ncores}" "${SAMPLE}.mem.sorted.bam" > "${SAMPLE}.mem.sorted.flagstat"; } 2>&1 || error "FAILED"
+cat "${SAMPLE}.mem.sorted.flagstat"
+
 echo "[Align] GATK4::MarkDuplicates "
 ##--OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 - for patterned flowcell models [default 100 for unpatterned]
 { time ${GATK4} --java-options -"${XMX}" MarkDuplicates \
@@ -160,8 +169,8 @@ echo "[Align] GATK4::MarkDuplicates "
 	--METRICS_FILE "${SAMPLE}.mem.sorted.mrkDups.metrics" \
 	--VALIDATION_STRINGENCY SILENT \
 	--OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \
-	--REMOVE_DUPLICATES false \
-	--REMOVE_SEQUENCING_DUPLICATES false \
+	--REMOVE_DUPLICATES true \
+	--REMOVE_SEQUENCING_DUPLICATES true \
 	--ASSUME_SORT_ORDER "queryname" \
 	--CREATE_INDEX true \
 	--QUIET true \
@@ -172,10 +181,10 @@ echo "[Align] Index ${SAMPLE}.mem.sorted.mrkDups.bam"
 { time ${SAMTOOLS} index "${SAMPLE}.mem.sorted.mrkDups.bam"; } 2>&1 || error "FAILED"
 
 echo "[QC] Flagstat after MarkDuplicates"
-{ time ${SAMTOOLS} flagstat "${SAMPLE}.mem.sorted.mrkDups.bam" > "${SAMPLE}.mem.sorted.mrkDups.flagstat"; } 2>&1 || error "FAILED"
+{ time ${SAMTOOLS} flagstat -@ "${ncores}" "${SAMPLE}.mem.sorted.mrkDups.bam" > "${SAMPLE}.mem.sorted.mrkDups.flagstat2"; } 2>&1 || error "FAILED"
 
-assert_file_exists "${SAMPLE}.mem.sorted.mrkDups.flagstat"
-cat "${SAMPLE}.mem.sorted.mrkDups.flagstat"
+assert_file_exists "${SAMPLE}.mem.sorted.mrkDups.flagstat2"
+cat "${SAMPLE}.mem.sorted.mrkDups.flagstat2"
 
 echo "[BQSR] GATK4::BaseRecalibrator "
 { time ${GATK4} --java-options -"${XMX}" BaseRecalibrator \
@@ -207,9 +216,14 @@ echo "[BQSR] GATK4::ApplyBQSR "
 	--create-output-bam-index true \
    --QUIET true \
    --verbosity ERROR; } 2>&1 || error "FAILED"
-		
+
+OUT_TMP=${SAMPLE}.tmp.bam		
+echo "[Align] Additional Sort of ${SAMPLE}.mem.sorted.mrkDups.recal.bam"
+{ time ${SAMTOOLS} sort -o "${OUT_TMP}" -@ "${ncores}" "${SAMPLE}.mem.sorted.mrkDups.recal.bam"; } 2>&1 || error "FAILED"
+mv "${OUT_TMP}" "${SAMPLE}.mem.sorted.mrkDups.recal.bam"
+
 echo "[Align] Index ${SAMPLE}.mem.sorted.mrkDups.recal.bam"
-{ time ${SAMTOOLS} index "${SAMPLE}.mem.sorted.mrkDups.recal.bam"; } 2>&1 || error "FAILED"
+{ time ${SAMTOOLS} index -b -@ "${ncores}" "${SAMPLE}.mem.sorted.mrkDups.recal.bam"; } 2>&1 || error "FAILED"
 
 echo "[QC] GATK4::CollectHsMetrics "
 { time ${GATK4} --java-options -"${XMX}" CollectHsMetrics \
