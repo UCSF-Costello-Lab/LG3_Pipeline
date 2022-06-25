@@ -54,7 +54,7 @@ assert_file_exists "${nbamfile}"
 assert_file_exists "${ILIST}"
 
 normalname=${nbamfile##*/}
-normalname=${normalname%%.${F1}*}
+normalname=${normalname%%."${F1}"*}
 bamdir=${nbamfile%/*}
 
 ## References
@@ -193,7 +193,7 @@ fi
 for i in "${bamdir}"/*.bam
 do
         tumorname=${i##*/}
-        tumorname=${tumorname%%.${F1}*}
+        tumorname=${tumorname%%."${F1}"*}
         prefix="NOR-${normalname}_vs_${tumorname}"
 
         if [ ! -e "${prefix}.germline" ]; then

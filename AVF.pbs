@@ -70,7 +70,7 @@ echo -n "Found: "
 wc -l "${QSTAT}"
 
 #WC_QSTAT=$(wc -l "${QSTAT}" | tr -s ' ' | cut -d' ' -f1)
-WC_QSTAT=$(tail -n +2 "${QSTAT}" | grep chr | wc -l)
+WC_QSTAT=$(tail -n +2 "${QSTAT}" | grep -c chr)
 
 if [ "${WC_QSTAT}" -eq 0 ]; then
    error "qualitystats are empty, hyper mutator?"

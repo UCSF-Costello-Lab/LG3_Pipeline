@@ -72,9 +72,9 @@ else
 fi
 
 normalname=${nbamfile##*/}
-normalname=${normalname%%.${F1}*}
+normalname=${normalname%%."${F1}"*}
 tumorname=${tbamfile##*/}
-tumorname=${tumorname%%.${F1}*}
+tumorname=${tumorname%%."${F1}"*}
 
 ### Software
 assert_python "$PYTHON"

@@ -337,8 +337,7 @@ if $AVF ; then
     ## Expected output: 
     OUT=${WORKDIR1}/${PATIENT}.R.mutations.avf
     if [ -s "$OUT" ]; then
-        #LCNT=$(wcl "$OUT")
-		  LCNT=$(grep -v retain "$OUT" | wc -l)
+		  LCNT=$(grep -v retain -c "$OUT")
         echo -e "AVF $OK ${YEL}${LCNT}${NOC}"
     else
         echo -e "AVF $ERR"
