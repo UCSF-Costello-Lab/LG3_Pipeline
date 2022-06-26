@@ -4,10 +4,12 @@
 ### Use Config: ${LG3_HOME}/FilterMutations/mutationConfig.cfg
 ### Use Interval: ${LG3_HOME}/resources/All_exome_targets.extended_200bp.interval_list 
 ### Output files
-#PBS -e _Mut2_${TUMOR}.err
-#PBS -o _Mut2_${TUMOR}.out
-#PBS -N Mut2
-#PBS -l nodes=1:ppn=1,vmem=200g
+#PBS -e _M2_${TUMOR}.err
+#PBS -o _M2_${TUMOR}.out
+#PBS -N M2
+#PBS -l nodes=1:ppn=1,vmem=128g
+#PBS -l walltime=14-00:00:00
+#PBS -l mem=128gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
