@@ -20,6 +20,7 @@ def get_samples_from_patient(mutfile, conversionfile, patient_ID, projectname):
   recal_bam_ext = os.environ["RECAL_BAM_EXT"]
   print 'RECAL_BAM_EXT = ' + recal_bam_ext
 
+  fileheader = '.' + recal_bam_ext 
   #fileheader1 = ".bwa.realigned.rmDups.recal"
   #fileheader2 = ".mem.sorted.mrkDups.recal"
   ## determine where files are stored
