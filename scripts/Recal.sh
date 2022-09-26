@@ -34,7 +34,7 @@ if [[ $LG3_DEBUG ]]; then
   ulimit -n
   DEBUG_RECAL=${DEBUG_RECAL:-${LG3_OUTPUT_ROOT}/${PROJECT}/exome_recal_debug}
   echo "DEBUG_RECAL=${DEBUG_RECAL}"
-  mkdir -p "${DEBUG_RECAL}/${PATIENT}"
+  make_dir -p "${DEBUG_RECAL}/${PATIENT}"
 fi
 
 

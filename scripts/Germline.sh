@@ -35,7 +35,7 @@ if [ "${RECAL_BAM_EXT:?}" == "mem.sorted.mrkDups.recal" ]; then
 elif [ "${RECAL_BAM_EXT}" == "bwa.realigned.rmDups.recal" ]; then
    F1=bwa
 else
-   error "ERROR: Unknown RECAL_BAM_EXT: ${RECAL_BAM_EXT}"
+   error "Unknown RECAL_BAM_EXT: ${RECAL_BAM_EXT}"
 fi
 
 ## Input
