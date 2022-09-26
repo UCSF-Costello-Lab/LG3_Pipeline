@@ -125,8 +125,9 @@ do
         if [ -s "$OUT" ]; then
                 warn "File $OUT exists, skipping this job ..."
         else
+				PAT=${PATIENT/atient/}
                 # shellcheck disable=SC2086
-                qsub ${QSUB_OPTS} -N "Mut2_${PATIENT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},ILIST=$ILIST,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
+                qsub ${QSUB_OPTS} -N "M2_${PAT}" -v "${QSUB_ENVVARS},PROJECT=${PROJECT},NORMAL=${normid},TUMOR=${ID},TYPE=${samp_label},PATIENT=${PATIENT},ILIST=$ILIST,WORKDIR=$WORKDIR,XMX=$XMX" "$PBS"
         fi
 
 done < "${PATIENT}.temp.conversions.txt"

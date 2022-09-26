@@ -2,8 +2,9 @@
 ### Usage: qsub -N Job_Name -v BAMS=/path/to/file1.bam:/path/to/file2.bam:...,NORMAL=AXXXXXX,PATIENT=PatientXX,ILIST=/path/to/exome_kit.interval_list /path/to/Recal.pbs
 #PBS -e _Rec${START}_${PATIENT}.err
 #PBS -o _Rec${START}_${PATIENT}.out
-#PBS -l nodes=1:ppn=12,vmem=200gb
+#PBS -l nodes=1:ppn=16,vmem=200gb
 #PBS -l walltime=14-00:00:00
+#PBS -l nodelist=c4-n11
 #PBS -l mem=200gb
 #PBS -m ae
 
@@ -82,7 +83,7 @@ make_dir "${WDIR}"
 change_dir "${WDIR}"
 
 echo "Copying recovered data from ${RECOVER_DIR} ..."
-cp -p "${RECOVER_DIR}/"* . || error "cp!"
+cp -p "${RECOVER_DIR}"/* . || error "cp from ${RECOVER_DIR} !"
 
 "${SCRIPT_A}" "$BAMS" "$PATIENT" "$ILIST" "$START" "$RECOVER_DIR" || error "${SCRIPT_A} failed"
 

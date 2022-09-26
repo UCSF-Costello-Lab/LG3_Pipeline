@@ -7,9 +7,9 @@
 #PBS -e _M2_${TUMOR}.err
 #PBS -o _M2_${TUMOR}.out
 #PBS -N M2
-#PBS -l nodes=1:ppn=1,vmem=128g
+#PBS -l nodes=1:ppn=1,vmem=256g
 #PBS -l walltime=14-00:00:00
-#PBS -l mem=128gb
+#PBS -l mem=256gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -72,8 +72,8 @@ ILIST=$(readlink -e "${ILIST:?}") ## Absolute path
 SH_MUTECT2=${LG3_HOME}/scripts/Mutect2_TvsN.sh
 assert_file_executable "${SH_MUTECT2}"
 
-BAMN=$BAMDIR/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}
-BAMT=$BAMDIR/${PATIENT}/${TUMOR}.${RECAL_BAM_EXT}
+BAMN=$BAMDIR/${PATIENT}/${NORMAL}.${RECAL_BAM_EXT}.bam
+BAMT=$BAMDIR/${PATIENT}/${TUMOR}.${RECAL_BAM_EXT}.bam
 
 assert_file_exists "${BAMN}"
 assert_file_exists "${BAMT}"

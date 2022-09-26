@@ -17,6 +17,7 @@ LG3_OUTPUT_ROOT=${LG3_OUTPUT_ROOT:-output}
 LG3_SCRATCH_ROOT=${LG3_SCRATCH_ROOT:?}
 LG3_DEBUG=${LG3_DEBUG:-true}
 ncores=${SLURM_NTASKS:-1}
+ulimit -n 64000
 declare -i START
 START=${START:-1}
 
@@ -30,6 +31,8 @@ if [[ $LG3_DEBUG ]]; then
   echo "- USER=$USER"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
+  echo -n "- open file limit="
+  ulimit -n
 fi
 
 
@@ -59,11 +62,14 @@ PICARD_MARKDUPS=${PICARD_HOME}/MarkDuplicates.jar
 PICARD_HSMETRICS=${PICARD_HOME}/CalculateHsMetrics.jar
 PICARD_MULTIMETRICS=${PICARD_HOME}/CollectMultipleMetrics.jar
 
+module load samtools/1.15.1 2> /dev/null && SAMTOOLS=$(which samtools)
+
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
 echo "- SAMTOOLS=${SAMTOOLS:?}"
 echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
+echo "- RECAL_BAM_EXT=${RECAL_BAM_EXT}"
 
 ## Assert existance of software
 assert_file_executable "${JAVA}"
@@ -126,7 +132,7 @@ STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Index merged BAM file..."
 	assert_file_exists "${PATIENT}.merged.bam"
-	{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
+	{ time $SAMTOOLS index index -@ "${ncores}" "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
 fi
 
 STEP+=1
@@ -206,7 +212,8 @@ STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo -e "\\n[Recal step ${STEP}] Index BAM file..."
 	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam"
-	{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+	{ time $SAMTOOLS index -@ "${ncores}" "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+	assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 fi
 
 STEP+=1
@@ -275,8 +282,8 @@ if [ ${STEP} -ge "${START}" ]; then
         base=${i##temp_}
         base=${base%%.bam}
         echo -e "\\n[Recal] processing $base..."
-        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || error "Sorting $base failed"
-        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || error "Indexing $base failed"
+        { time $SAMTOOLS sort -@ "${ncores}" -o "${base}.${RECAL_BAM_EXT}.bam" "$i"; } 2>&1 || error "Sorting $base failed"
+        { time $SAMTOOLS index -@ "${ncores}" "${base}.${RECAL_BAM_EXT}.bam"; } 2>&1 || error "Indexing $base failed"
         rm -f "$i"
 done
 fi
@@ -288,15 +295,15 @@ date
 STEP+=1
 if [ ${STEP} -ge "${START}" ]; then
 	echo "[Recal step ${STEP}] Quality Control"
-	for i in *.bwa.realigned.rmDups.recal.bam
+	for i in *."${RECAL_BAM_EXT}".bam
 	do
         echo "------------------------------------------------------"
-        base=${i%%.bwa.realigned.rmDups.recal.bam}
+        base=${i%%."${RECAL_BAM_EXT}".bam}
         echo "[QC] Processing $base..."
 		  echo "------------------------------------------------------"
 
         echo -e "\\n[QC] Calculate flag statistics..."
-        { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat"; } 2>&1
+        { time $SAMTOOLS flagstat -@ "${ncores}" "$i" > "${base}.${RECAL_BAM_EXT}.flagstat"; } 2>&1
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
@@ -304,7 +311,7 @@ if [ ${STEP} -ge "${START}" ]; then
                 BAIT_INTERVALS="${ILIST}" \
                 TARGET_INTERVALS="${ILIST}" \
                 INPUT="$i" \
-                OUTPUT="${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" \
+                OUTPUT="${base}.${RECAL_BAM_EXT}.hybrid_selection_metrics" \
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
@@ -314,7 +321,7 @@ if [ ${STEP} -ge "${START}" ]; then
         { time $JAVA -Xmx64g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
-                OUTPUT="${base}.bwa.realigned.rmDups.recal" \
+                OUTPUT="${base}.${RECAL_BAM_EXT}" \
                 REFERENCE_SEQUENCE="${REF}" \
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \

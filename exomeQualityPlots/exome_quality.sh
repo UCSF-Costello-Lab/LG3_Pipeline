@@ -18,7 +18,7 @@ echo "mutationfile = ${mutationfile:?}"
 echo "conversionfile = ${conversionfile:?}"
 echo -e "bampath = ${bampath:?}\n-----------\n\n"
 
-module load r/3.6.3
+module load r/3.6.0
 python --version
 ${RSCRIPT} --version
 

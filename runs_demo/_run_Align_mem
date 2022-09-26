@@ -76,8 +76,8 @@ do
   if [ ! -r "${FASTQ1}" ] || [ ! -r "${FASTQ2}" ]; then
     warn "Can't open FastQ file for $SAMPLE from ${LG3_INPUT_ROOT}/"
   else
-    if [ -f "${ALIGNED}/${SAMPLE}.*.recal.bam" ]; then
-      warn "${SAMPLE} is aligned (${ALIGNED}/${SAMPLE}.*.recal.bam). Skipping ..."
+    if [ -f "${ALIGNED}/${SAMPLE}.${RECAL_BAM_EXT}.bam" ]; then
+      warn "${SAMPLE} is aligned (${ALIGNED}/${SAMPLE}.${RECAL_BAM_EXT}.bam). Skipping ..."
     else
       echo "Submitting $SAMPLE ..."
       # shellcheck disable=SC2086

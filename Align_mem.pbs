@@ -3,9 +3,9 @@
 ### Output files
 #PBS -e _Align_${SAMPLE}.err
 #PBS -o _Align_${SAMPLE}.out
-#PBS -l nodes=1:ppn=12,vmem=64gb
+#PBS -l nodes=1:ppn=16,vmem=256gb
 #PBS -l walltime=14-00:00:00
-#PBS -l mem=64gb
+#PBS -l mem=256gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh

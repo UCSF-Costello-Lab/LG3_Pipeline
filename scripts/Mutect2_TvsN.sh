@@ -86,7 +86,7 @@ assert_file_exists "${tbamfile}"
 assert_file_exists "${ILIST}"
 
 ### Software
-module load jdk/1.8.0 python/2.7.15 htslib/1.7
+module load openjdk/1.8.0 htslib/1.15.1
 
 #GATK4="${LG3_HOME}/tools/gatk-4.1.0.0/gatk"
 assert_file_executable "${GATK4:?}"
@@ -441,7 +441,9 @@ if ${bFUNC}; then
 	### A GATK functional annotation tool.
 	if [ ! -e "${DEST}/${OUT}" ]; then
       echo -e "\\n[Mutect2] Running Funcotator ..."
+### https://github.com/broadinstitute/gatk/issues/6182 
       { time ${GATK4} Funcotator "${extra_args[@]}" \
+			--disable-sequence-dictionary-validation \
 			--verbosity ERROR \
          --variant "${IN}" \
          --output "${OUT}" \

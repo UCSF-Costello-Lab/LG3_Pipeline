@@ -70,9 +70,9 @@ if $qsub_can_set_pwd; then
 fi
 
 ## Override the qsub email address?
-#if [[ -n ${EMAIL} ]]; then
-  #QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
-#fi
+if [[ -n ${EMAIL} ]]; then
+  QSUB_OPTS="${QSUB_OPTS} -M ${EMAIL}"
+fi
 
 echo "Qsub extras:"
 echo "- QSUB_OPTS=${QSUB_OPTS}"

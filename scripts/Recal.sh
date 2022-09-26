@@ -64,12 +64,14 @@ PICARD_MARKDUPS=${PICARD_HOME}/MarkDuplicates.jar
 PICARD_HSMETRICS=${PICARD_HOME}/CalculateHsMetrics.jar
 PICARD_MULTIMETRICS=${PICARD_HOME}/CollectMultipleMetrics.jar
 
+module load samtools/1.15.1 2> /dev/null && SAMTOOLS=$(which samtools)
+
 echo "Software:"
 echo "- JAVA=${JAVA:?}"
 echo "- SAMTOOLS=${SAMTOOLS:?}"
 echo "- GATK=${GATK:?}"
 echo "- PICARD_HOME=${PICARD_HOME:?}"
-
+echo "- RECAL_BAM_EXT=${RECAL_BAM_EXT}"
 ## Assert existance of software
 assert_file_executable "${JAVA}"
 assert_file_executable "${SAMTOOLS}"
@@ -126,7 +128,7 @@ assert_file_exists "${PATIENT}.merged.bam"
 ${DEBUG} && { cp -p "${PATIENT}.merged.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step1] Saved ${PATIENT}.merged.bam" ; }
 
 echo -e "\\n[Recal] Index new BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
+{ time $SAMTOOLS index -@ "${ncores}" "${PATIENT}.merged.bam"; } 2>&1 || error "First indexing failed"
 
 assert_file_exists "${PATIENT}.merged.bam.bai"
 
@@ -217,7 +219,7 @@ ${DEBUG} && { cp -p "${PATIENT}.merged.realigned.mateFixed.metrics" "${DEBUG_REC
 rm -f "${PATIENT}.merged.realigned.mateFixed.bam"
 
 echo -e "\\n[Recal] Index BAM file..."
-{ time $SAMTOOLS index "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
+{ time $SAMTOOLS index -@ "${ncores}" "${PATIENT}.merged.realigned.rmDups.bam"; } 2>&1 || error "Second indexing failed"
 
 assert_file_exists "${PATIENT}.merged.realigned.rmDups.bam.bai"
 
@@ -284,17 +286,17 @@ do
         base=${base%%.bam}
         echo -e "\\n[Recal] Splitting off $base..."
 
-		  echo "[Recal] sorting ${base}.bwa.realigned.rmDups.recal.bam"
-        { time $SAMTOOLS sort "$i" "${base}.bwa.realigned.rmDups.recal"; } 2>&1 || error "Sorting $base failed"
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam"
+		  echo "[Recal] sorting ${base}.${RECAL_BAM_EXT}.bam"
+        { time $SAMTOOLS sort -@ "${ncores}" -o "${base}.${RECAL_BAM_EXT}.bam" "$i"; } 2>&1 || error "Sorting $base failed"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.bam"
 
-			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step11] Saved ${base}.bwa.realigned.rmDups.recal.bam" ; }
+			${DEBUG} && { cp -p "${base}.${RECAL_BAM_EXT}.bam" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step11] Saved ${base}.${RECAL_BAM_EXT}.bam" ; }
 
-		  echo "[Recal] indexing ${base}.bwa.realigned.rmDups.recal.bam"
-        { time $SAMTOOLS index "${base}.bwa.realigned.rmDups.recal.bam"; } 2>&1 || error "Indexing $base failed"
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.bam.bai"
+		  echo "[Recal] indexing ${base}.${RECAL_BAM_EXT}.bam"
+        { time $SAMTOOLS index -@ "${ncores}" "${base}.${RECAL_BAM_EXT}.bam"; } 2>&1 || error "Indexing $base failed"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.bam.bai"
 
-			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.bam.bai" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step12] Saved ${base}.bwa.realigned.rmDups.recal.bam.bai" ; }
+			${DEBUG} && { cp -p "${base}.${RECAL_BAM_EXT}.bam.bai" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step12] Saved ${base}.${RECAL_BAM_EXT}.bam.bai" ; }
 
         rm -f "$i"
 done
@@ -305,18 +307,18 @@ date
 echo "------------------------------------------------------"
 
 echo "[QC] Quality Control"
-for i in *.bwa.realigned.rmDups.recal.bam
+for i in *."${RECAL_BAM_EXT}".bam
 do
         echo "------------------------------------------------------"
-        base=${i%%.bwa.realigned.rmDups.recal.bam}
+        base=${i%%."${RECAL_BAM_EXT}".bam}
         echo "[QC] $base"
 
         echo -e "\\n[QC] Calculate flag statistics..."
-        { time $SAMTOOLS flagstat "$i" > "${base}.bwa.realigned.rmDups.recal.flagstat"; } 2>&1
+        { time $SAMTOOLS flagstat -@ "${ncores}" "$i" > "${base}.${RECAL_BAM_EXT}.flagstat"; } 2>&1
 
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.flagstat"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.flagstat"
 
-			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.flagstat" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step13] Saved ${base}.bwa.realigned.rmDups.recal.flagstat" ;}
+			${DEBUG} && { cp -p "${base}.${RECAL_BAM_EXT}.flagstat" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step13] Saved ${base}.${RECAL_BAM_EXT}.flagstat" ;}
 
         echo -e "\\n[QC] Calculate hybrid selection metrics..."
         { time $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
@@ -324,21 +326,21 @@ do
                 BAIT_INTERVALS="${ILIST}" \
                 TARGET_INTERVALS="${ILIST}" \
                 INPUT="$i" \
-                OUTPUT="${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" \
+                OUTPUT="${base}.${RECAL_BAM_EXT}.hybrid_selection_metrics" \
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
                 QUIET=true \
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Calculate hybrid selection metrics failed"
 
-		  assert_file_exists "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics"
+		  assert_file_exists "${base}.${RECAL_BAM_EXT}.hybrid_selection_metrics"
 
-			${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step14] Saved ${base}.bwa.realigned.rmDups.recal.hybrid_selection_metrics" ; }
+			${DEBUG} && { cp -p "${base}.${RECAL_BAM_EXT}.hybrid_selection_metrics" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step14] Saved ${base}.${RECAL_BAM_EXT}.hybrid_selection_metrics" ; }
 
         echo -e "\\n[QC] Collect multiple QC metrics..."
         { time R_PROFILE_USER=NULL $JAVA -Xmx32g -Djava.io.tmpdir="${TMP}" \
                 -jar "${PICARD_MULTIMETRICS}" \
                 INPUT="$i" \
-                OUTPUT="${base}.bwa.realigned.rmDups.recal" \
+                OUTPUT="${base}.${RECAL_BAM_EXT}" \
                 REFERENCE_SEQUENCE="${REF}" \
                 TMP_DIR="${TMP}" \
                 VERBOSITY=WARNING \
@@ -346,9 +348,9 @@ do
                 VALIDATION_STRINGENCY=SILENT; } 2>&1 || error "Collect multiple QC metrics failed"
 		  for EXT in alignment_summary_metrics insert_size_metrics quality_by_cycle_metrics quality_distribution_metrics
 		  do
-		      assert_file_exists  "${base}.bwa.realigned.rmDups.recal.${EXT}"
+		      assert_file_exists  "${base}.${RECAL_BAM_EXT}.${EXT}"
 			
-				${DEBUG} && { cp -p "${base}.bwa.realigned.rmDups.recal.${EXT}" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step15] Saved ${base}.bwa.realigned.rmDups.recal.${EXT}" ; }
+				${DEBUG} && { cp -p "${base}.${RECAL_BAM_EXT}.${EXT}" "${DEBUG_RECAL}/${PATIENT}" ; echo "[DEBUG step15] Saved ${base}.${RECAL_BAM_EXT}.${EXT}" ; }
 
 		  done
         echo "------------------------------------------------------"

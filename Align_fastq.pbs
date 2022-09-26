@@ -3,9 +3,9 @@
 ### Output files
 #PBS -e _Align_${SAMPLE}.err
 #PBS -o _Align_${SAMPLE}.out
-#PBS -l nodes=1:ppn=24,vmem=256gb
+#PBS -l nodes=1:ppn=24,vmem=128gb
 #PBS -l walltime=14-00:00:00
-#PBS -l mem=256gb
+#PBS -l mem=128gb
 #PBS -m ae
 
 # shellcheck source=scripts/utils.sh
@@ -99,8 +99,8 @@ cp -r -p "${WDIR}" "${DEST}/"
 echo "Content of ${DEST}:"
 ls -lrt "${DEST}/${SAMPLE}"*
 
-echo "Cleanup: rm ${LG3_SCRATCH_ROOT}"
-rm -rf "${LG3_SCRATCH_ROOT}"
+#echo "Cleanup: rm ${LG3_SCRATCH_ROOT}"
+#rm -rf "${LG3_SCRATCH_ROOT}"
 
 echo "End of script!"
 date

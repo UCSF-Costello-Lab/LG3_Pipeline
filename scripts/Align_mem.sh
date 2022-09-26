@@ -3,7 +3,7 @@
 # shellcheck source=scripts/utils.sh
 source "${LG3_HOME:?}/scripts/utils.sh"
 source_lg3_conf
-XMX=${XMX:-Xmx64G} 
+XMX=${XMX:-Xmx250G} 
 
 PROGRAM=${BASH_SOURCE[0]}
 echo "[$(date +'%Y-%m-%d %H:%M:%S %Z')] BEGIN: $PROGRAM"
@@ -31,6 +31,7 @@ if [[ $LG3_DEBUG ]]; then
   echo "- USER=$USER"
   echo "- hostname=$(hostname)"
   echo "- ncores=$ncores"
+  echo "- XMX=${XMX}"
   echo "- LG3_CHASTITY_FILTERING=${LG3_CHASTITY_FILTERING:-?}"
   echo "- CLEAN=${CLEAN}"
   echo "- ILIST=${ILIST:?}"
@@ -124,10 +125,10 @@ else
 fi
 
 ### BWA mem Alignment
-### -M for Picard compatibility
+### -M for Picard compatibility; -Y soft clipping
 echo "[Align] bwa mem ... "
 ## bwa mem -K 100000000 -p -v 3 -t 16 -Y ref_fasta
-{ time $BWA mem -v 3 -Y -M -t "${ncores}" -R "@RG\\tID:${SAMPLE}\\tSM:${SAMPLE}\\tPL:$pl\\tLB:${SAMPLE}\\tPU:$pu" "$BWA_INDEX" "${SAMPLE}.read1.QC.fastq" "${SAMPLE}.read2.QC.fastq" > "${SAMPLE}.mem.sam" 2>> __"${SAMPLE}.mem.log"; } 2>&1 || { cat __"${SAMPLE}.mem.log";  error "FAILED"; }
+{ time $BWA mem -v 3 -M -t "${ncores}" -R "@RG\\tID:${SAMPLE}\\tSM:${SAMPLE}\\tPL:$pl\\tLB:${SAMPLE}\\tPU:$pu" "$BWA_INDEX" "${SAMPLE}.read1.QC.fastq" "${SAMPLE}.read2.QC.fastq" > "${SAMPLE}.mem.sam" 2>> __"${SAMPLE}.mem.log"; } 2>&1 || { cat __"${SAMPLE}.mem.log";  error "FAILED"; }
 
 assert_file_exists "${SAMPLE}.mem.sam"
 ${CLEAN} && rm -f "${SAMPLE}"_R?.fastq
@@ -178,7 +179,7 @@ echo "[Align] GATK4::MarkDuplicates "
 wc -l "${SAMPLE}.mem.sorted.mrkDups.metrics"
 
 echo "[Align] Index ${SAMPLE}.mem.sorted.mrkDups.bam"
-{ time ${SAMTOOLS} index "${SAMPLE}.mem.sorted.mrkDups.bam"; } 2>&1 || error "FAILED"
+{ time ${SAMTOOLS} index -@ "${ncores}" "${SAMPLE}.mem.sorted.mrkDups.bam"; } 2>&1 || error "FAILED"
 
 echo "[QC] Flagstat after MarkDuplicates"
 { time ${SAMTOOLS} flagstat -@ "${ncores}" "${SAMPLE}.mem.sorted.mrkDups.bam" > "${SAMPLE}.mem.sorted.mrkDups.flagstat2"; } 2>&1 || error "FAILED"
